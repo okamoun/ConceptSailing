@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Placeholder Images</title>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+        const images = [
+            { name: 'hero', text: 'Hero Image' },
+            { name: 'windsurfing', text: 'Windsurfing' },
+            { name: 'family-sailing', text: 'Family Sailing' },
+            { name: 'yoga', text: 'Yoga' },
+            { name: 'wellness', text: 'Wellness' },
+            { name: 'greek-history', text: 'Greek History' },
+            { name: 'greek-cooking', text: 'Greek Cooking' },
+            { name: 'family-adventure', text: 'Family Adventure' },
+            { name: 'island-nights', text: 'Island Nights' },
+            { name: 'gastronomy', text: 'Gastronomy' },
+            { name: 'cooking-class', text: 'Cooking Class' }
+        ];
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function generateImage(name, text) {
+            // Clear canvas
+            ctx.fillStyle = '#3B82F6'; // Blue background
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+            // Convert to image
+            const link = document.createElement('a');
+            link.download = name + '.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 0.8);
+            link.click();
+        }
+
+        // Generate all images
+        images.forEach(img => generateImage(img.name, img.text));
+    </script>
+</body>
+</html>
