@@ -9,14 +9,14 @@ export default function Home() {
           id: 1,
           name: "Wind Sports Adventure",
           description: "Master the winds with windsurfing, kitesurfing, and sailing in the best spots of Greece",
-          image: "https://images.unsplash.com/photo-1712167959870-0bf3d9cae41a?auto=format&fit=crop&w=800&q=80",
+          image: "/images/wind-sports-adventure.jpg",
           features: ["Windsurfing", "Kitesurfing", "Sailing lessons"]
         },
         {
           id: 2,
           name: "Family Sailing School",
           description: "Learn sailing together as a family with certified instructors in safe, beautiful waters",
-          image: "https://images.unsplash.com/photo-1542397284384-6010376c5337?auto=format&fit=crop&w=800&q=80",
+          image: "/images/Aura-51-Fountaine-Pajot-Sailing-Catamarans-Exterior-01.jpeg",
           features: ["Basic navigation", "Safety at sea", "Hands-on experience"]
         }
       ]
@@ -28,14 +28,14 @@ export default function Home() {
           id: 3,
           name: "Yoga & Wellness Retreat",
           description: "Combine sailing with daily yoga, meditation, and wellness activities for mind and body",
-          image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=800&q=80",
+          image: "/images/yoga-wellness-retreat.jpg",
           features: ["Daily yoga", "Meditation", "Healthy meals"]
         },
         {
           id: 4,
           name: "Cleansing & Renewal",
           description: "A transformative journey combining sailing, detox programs, and holistic wellness",
-          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+          image: "/images/cleansing-renewal.jpg",
           features: ["Detox program", "Spa treatments", "Mindfulness"]
         }
       ]
@@ -47,14 +47,14 @@ export default function Home() {
           id: 5,
           name: "Greek Heritage Explorer",
           description: "Journey through time visiting ancient sites and historical landmarks by sea",
-          image: "https://images.unsplash.com/photo-1603565816030-6b389eeb23cb?auto=format&fit=crop&w=800&q=80",
+          image: "/images/greek-heritage-explorer.jpg",
           features: ["Ancient ruins", "Archaeological sites", "Expert guides"]
         },
         {
           id: 6,
           name: "Culinary Traditions",
           description: "Master Greek cooking while sailing through different regions and their unique flavors",
-          image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
+          image: "/images/culinary-traditions.jpg",
           features: ["Cooking classes", "Market visits", "Wine tasting"]
         }
       ]
@@ -66,14 +66,14 @@ export default function Home() {
           id: 7,
           name: "Family Bonding Adventure",
           description: "Create lasting memories with activities designed for the whole family",
-          image: "https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?auto=format&fit=crop&w=800&q=80",
+          image: "/images/family-bonding-adventure.jpg",
           features: ["Kid-friendly activities", "Beach games", "Family challenges"]
         },
         {
           id: 8,
           name: "Island Nightlife",
           description: "Experience the vibrant nightlife of Greek islands with friends",
-          image: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=800&q=80",
+          image: "/images/island-nightlife.jpg",
           features: ["Beach parties", "Island hopping", "Sunset events"]
         }
       ]
@@ -85,14 +85,14 @@ export default function Home() {
           id: 9,
           name: "Mediterranean Flavors",
           description: "A gastronomic journey through Greece's finest cuisines and wine regions",
-          image: "https://images.unsplash.com/photo-1523294587484-bae6cc870010?auto=format&fit=crop&w=800&q=80",
+          image: "/images/mediterranean-flavors.jpg",
           features: ["Food tours", "Wine tasting", "Local restaurants"]
         },
         {
           id: 10,
           name: "Greek Cooking Masters",
           description: "Learn authentic Greek recipes from local chefs while sailing the islands",
-          image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=800&q=80",
+          image: "/images/greek-cooking-masters.jpg",
           features: ["Cooking workshops", "Local ingredients", "Traditional recipes"]
         }
       ]
@@ -105,7 +105,7 @@ export default function Home() {
       <section className="relative h-[80vh] flex items-center justify-center">
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80"
+            src="/images/hero.jpg"
             alt="Sailing in Greece"
             fill
             className="object-cover"
