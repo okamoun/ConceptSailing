@@ -9,14 +9,14 @@ export default function Home() {
           id: 1,
           name: "Wind Sports Adventure",
           description: "Master the winds with windsurfing, kitesurfing, and sailing in the best spots of Greece",
-          image: "https://images.unsplash.com/photo-1576697920988-aaeb0c4d4c78?auto=format&fit=crop&w=800&q=80",
+          image: "https://images.unsplash.com/photo-1712167959870-0bf3d9cae41a?auto=format&fit=crop&w=800&q=80",
           features: ["Windsurfing", "Kitesurfing", "Sailing lessons"]
         },
         {
           id: 2,
           name: "Family Sailing School",
           description: "Learn sailing together as a family with certified instructors in safe, beautiful waters",
-          image: "https://images.unsplash.com/photo-1542397284385-6010376c5337?auto=format&fit=crop&w=800&q=80",
+          image: "https://images.unsplash.com/photo-1542397284384-6010376c5337?auto=format&fit=crop&w=800&q=80",
           features: ["Basic navigation", "Safety at sea", "Hands-on experience"]
         }
       ]
@@ -127,7 +127,10 @@ export default function Home() {
       {adventureCategories.map((category, index) => (
         <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">{category.category}</h2>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-blue-500 via-cyan-400 to-green-400 bg-clip-text text-transparent drop-shadow-lg tracking-tight flex items-center justify-center gap-3 animate-fade-in-up">
+              <svg className="w-8 h-8 text-blue-400 inline-block animate-bounce" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" /></svg>
+              {category.category}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {category.themes.map((theme) => (
                 <div key={theme.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-transform duration-300 hover:scale-[1.02]">
