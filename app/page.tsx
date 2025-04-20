@@ -172,7 +172,7 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
                   </div>
                   <div className="p-6 flex-grow">
-                    <h3 className="text-xl font-bold mb-2">{theme.name}</h3>
+                    <h3 className="text-xl font-bold mb-2 text-blue-600">{theme.name}</h3>
                     <p className="text-gray-600 mb-4">{theme.description}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {theme.features.map((feature, index) => (
@@ -195,7 +195,7 @@ export default function Home() {
       {/* Why Choose Us */}
       <section className="py-16 bg-blue-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose Our Themed Adventures?</h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">Why Choose Our Themed Adventures?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -203,7 +203,7 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Tailored Experience</h3>
+              <h3 className="text-xl font-bold mb-2 text-blue-600">Tailored Experience</h3>
               <p className="text-gray-600">Choose the adventure that perfectly matches your interests</p>
             </div>
             <div className="text-center">
@@ -212,7 +212,7 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Expert Guides</h3>
+              <h3 className="text-xl font-bold mb-2 text-blue-600">Expert Guides</h3>
               <p className="text-gray-600">Skilled skippers and specialized activity instructors</p>
             </div>
             <div className="text-center">
@@ -221,7 +221,7 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Unique Experiences</h3>
+              <h3 className="text-xl font-bold mb-2 text-blue-600">Unique Experiences</h3>
               <p className="text-gray-600">Carefully curated activities for each theme</p>
             </div>
           </div>
@@ -231,7 +231,7 @@ export default function Home() {
       {/* Call to Action */}
       <section className="py-16 bg-blue-600 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Your Greek Adventure?</h2>
+          <h2 className="text-3xl font-bold mb-4 text-blue-600">Ready to Start Your Greek Adventure?</h2>
           <p className="text-xl mb-8">Choose your perfect themed sailing experience today</p>
           <a href="/themes" className="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
             View All Themes
