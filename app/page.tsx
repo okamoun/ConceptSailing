@@ -7,28 +7,28 @@ export default function Home() {
       category: "Active & Sports",
       themes: [
         {
-          id: 1,
+          id: "1",
           name: "Wind Sports Adventure",
           description: "Master the winds with windsurfing, kitesurfing, and sailing in the best spots of Greece",
           image: "/images/wind-sports-adventure.jpg",
           features: ["Windsurfing", "Kitesurfing", "Sailing lessons"]
         },
         {
-          id: 2,
+          id: "2",
           name: "Family Sailing School",
           description: "Learn sailing together as a family with certified instructors in safe, beautiful waters",
           image: "/images/Aura-51-Fountaine-Pajot-Sailing-Catamarans-Exterior-01.jpeg",
           features: ["Basic navigation", "Safety at sea", "Hands-on experience"]
         },
         {
-          id: 3,
+          id: "3",
           name: "Bike Adventure in the Islands",
           description: "Explore the Greek islands by bike, discovering hidden trails and breathtaking coastal views.",
           image: "/images/bike-adventure.jpg",
           features: ["Guided bike tours", "Mountain and road biking", "Scenic routes"]
         },
         {
-          id: 4,
+          id: "4",
           name: "Trekking Adventure",
           description: "Hike through stunning landscapes, from lush hills to dramatic cliffs, across the Greek islands.",
           image: "/images/trekking-adventure.jpg",
@@ -40,14 +40,14 @@ export default function Home() {
       category: "Wellness & Relaxation",
       themes: [
         {
-          id: 5,
+          id: "5",
           name: "Yoga & Wellness Retreat",
           description: "Combine sailing with daily yoga, meditation, and wellness activities for mind and body",
           image: "/images/yoga-wellness-retreat.jpg",
           features: ["Daily yoga", "Meditation", "Healthy meals"]
         },
         {
-          id: 6,
+          id: "6",
           name: "Cleansing & Renewal",
           description: "A transformative journey combining sailing, detox programs, and holistic wellness",
           image: "/images/cleansing-renewal.jpg",
@@ -59,14 +59,14 @@ export default function Home() {
       category: "Culture & History",
       themes: [
         {
-          id: 7,
+          id: "7",
           name: "Greek Heritage Explorer",
           description: "Journey through time visiting ancient sites and historical landmarks by sea",
           image: "/images/greek-heritage-explorer.jpg",
           features: ["Ancient ruins", "Archaeological sites", "Expert guides"]
         },
         {
-          id: 8,
+          id: "8",
           name: "Culinary Traditions",
           description: "Master Greek cooking while sailing through different regions and their unique flavors",
           image: "/images/culinary-traditions.jpg",
@@ -78,14 +78,14 @@ export default function Home() {
       category: "Social & Family",
       themes: [
         {
-          id: 9,
+          id: "9",
           name: "Family Bonding Adventure",
           description: "Create lasting memories with activities designed for the whole family",
           image: "/images/family-bonding-adventure.jpg",
           features: ["Kid-friendly activities", "Beach games", "Family challenges"]
         },
         {
-          id: 10,
+          id: "10",
           name: "Island Nightlife",
           description: "Experience the vibrant nightlife of Greek islands with friends",
           image: "/images/island-nightlife.jpg",
@@ -97,14 +97,14 @@ export default function Home() {
       category: "Gastronomy",
       themes: [
         {
-          id: 11,
+          id: "11",
           name: "Mediterranean Flavors",
           description: "A gastronomic journey through Greece's finest cuisines and wine regions",
           image: "/images/mediterranean-flavors.jpg",
           features: ["Food tours", "Wine tasting", "Local restaurants"]
         },
         {
-          id: 12,
+          id: "12",
           name: "Greek Cooking Masters",
           description: "Learn authentic Greek recipes from local chefs while sailing the islands",
           image: "/images/greek-cooking-masters.jpg",
