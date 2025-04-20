@@ -2,11 +2,15 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import adventures from '../../adventures-data';
 
+type PageProps = {
+  params: { id: string };
+};
+
 export async function generateStaticParams() {
   return adventures.map((adv) => ({ id: adv.id.toString() }));
 }
 
-export default function AdventureThemePage({ params }: { params: { id: string } }) {
+export default function AdventureThemePage({ params }: PageProps) {
   const adventure = adventures.find((a) => a.id.toString() === params.id);
   if (!adventure) return notFound();
 
