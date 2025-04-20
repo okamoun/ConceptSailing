@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Windsurf Cruises | Greek Sailing Holidays",
+  title: "Concept Mediterranean Sailing | Greek Sailing Holidays",
   description: "Discover amazing sailing holidays in Greece. Choose from various themed cruises and create your perfect sailing adventure.",
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <nav className="bg-blue-600 text-white">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/" className="text-2xl font-bold">Windsurf Cruises</a>
+            <a href="/" className="text-2xl font-bold">Concept Mediterranean Sailing</a>
             <div className="space-x-6">
               <a href="/themes" className="hover:text-blue-200">Adventure Themes</a>
               <a href="/destinations" className="hover:text-blue-200">Destinations</a>
@@ -33,7 +33,7 @@ export default function RootLayout({
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <h3 className="text-xl font-bold mb-4">Windsurf Cruises</h3>
+                <h3 className="text-xl font-bold mb-4">Concept Mediterranean Sailing</h3>
                 <p>Your gateway to unforgettable sailing adventures in Greece</p>
               </div>
               <div>
