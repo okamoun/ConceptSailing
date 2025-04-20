@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import adventures from '../../adventures-data';
 
 export async function generateStaticParams() {
@@ -24,7 +25,7 @@ export default function AdventureThemePage({ params }: { params: { id: string } 
           ))}
         </ol>
       </div>
-      <a href="/themes" className="text-blue-600 hover:underline">← Back to all adventures</a>
+      <Link href="/themes" className="text-blue-600 hover:underline">← Back to all adventures</Link>
     </div>
   );
 }
