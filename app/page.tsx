@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from "next/link";
 
 export default function Home() {
   const adventureCategories = [
@@ -144,9 +145,9 @@ export default function Home() {
         <div className="relative text-center text-white z-10 px-4">
           <h1 className="text-5xl font-bold mb-6">Choose Your Perfect Sailing Experience</h1>
           <p className="text-xl mb-8">From active adventures to cultural journeys - find your ideal Greek sailing holiday</p>
-          <a href="/themes" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+          <Link href="/themes" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors">
             Explore Themes
-          </a>
+          </Link>
         </div>
       </section>
 
@@ -181,9 +182,9 @@ export default function Home() {
                         </span>
                       ))}
                     </div>
-                    <a href={`/themes/${theme.id}`} className="text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center">
-                      Discover More <span className="ml-2">→</span>
-                    </a>
+                    <Link href={`/themes/${theme.id}`} className="text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center">
+                      Learn More
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -233,9 +234,9 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4 text-blue-600">Ready to Start Your Greek Adventure?</h2>
           <p className="text-xl mb-8">Choose your perfect themed sailing experience today</p>
-          <a href="/themes" className="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+          <Link href="/themes" className="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
             View All Themes
-          </a>
+          </Link>
         </div>
       </section>
     </div>
