@@ -18,6 +18,20 @@ export default function Home() {
           description: "Learn sailing together as a family with certified instructors in safe, beautiful waters",
           image: "/images/Aura-51-Fountaine-Pajot-Sailing-Catamarans-Exterior-01.jpeg",
           features: ["Basic navigation", "Safety at sea", "Hands-on experience"]
+        },
+        {
+          id: 3,
+          name: "Bike Adventure in the Islands",
+          description: "Explore the Greek islands by bike, discovering hidden trails and breathtaking coastal views.",
+          image: "/images/bike-adventure.jpg",
+          features: ["Guided bike tours", "Mountain and road biking", "Scenic routes"]
+        },
+        {
+          id: 4,
+          name: "Trekking Adventure",
+          description: "Hike through stunning landscapes, from lush hills to dramatic cliffs, across the Greek islands.",
+          image: "/images/trekking-adventure.jpg",
+          features: ["Guided hikes", "Nature walks", "Wildlife spotting"]
         }
       ]
     },
@@ -25,14 +39,14 @@ export default function Home() {
       category: "Wellness & Relaxation",
       themes: [
         {
-          id: 3,
+          id: 5,
           name: "Yoga & Wellness Retreat",
           description: "Combine sailing with daily yoga, meditation, and wellness activities for mind and body",
           image: "/images/yoga-wellness-retreat.jpg",
           features: ["Daily yoga", "Meditation", "Healthy meals"]
         },
         {
-          id: 4,
+          id: 6,
           name: "Cleansing & Renewal",
           description: "A transformative journey combining sailing, detox programs, and holistic wellness",
           image: "/images/cleansing-renewal.jpg",
@@ -44,14 +58,14 @@ export default function Home() {
       category: "Culture & History",
       themes: [
         {
-          id: 5,
+          id: 7,
           name: "Greek Heritage Explorer",
           description: "Journey through time visiting ancient sites and historical landmarks by sea",
           image: "/images/greek-heritage-explorer.jpg",
           features: ["Ancient ruins", "Archaeological sites", "Expert guides"]
         },
         {
-          id: 6,
+          id: 8,
           name: "Culinary Traditions",
           description: "Master Greek cooking while sailing through different regions and their unique flavors",
           image: "/images/culinary-traditions.jpg",
@@ -63,14 +77,14 @@ export default function Home() {
       category: "Social & Family",
       themes: [
         {
-          id: 7,
+          id: 9,
           name: "Family Bonding Adventure",
           description: "Create lasting memories with activities designed for the whole family",
           image: "/images/family-bonding-adventure.jpg",
           features: ["Kid-friendly activities", "Beach games", "Family challenges"]
         },
         {
-          id: 8,
+          id: 10,
           name: "Island Nightlife",
           description: "Experience the vibrant nightlife of Greek islands with friends",
           image: "/images/island-nightlife.jpg",
@@ -82,14 +96,14 @@ export default function Home() {
       category: "Gastronomy",
       themes: [
         {
-          id: 9,
+          id: 11,
           name: "Mediterranean Flavors",
           description: "A gastronomic journey through Greece's finest cuisines and wine regions",
           image: "/images/mediterranean-flavors.jpg",
           features: ["Food tours", "Wine tasting", "Local restaurants"]
         },
         {
-          id: 10,
+          id: 12,
           name: "Greek Cooking Masters",
           description: "Learn authentic Greek recipes from local chefs while sailing the islands",
           image: "/images/greek-cooking-masters.jpg",
@@ -98,6 +112,19 @@ export default function Home() {
       ]
     }
   ];
+
+  // Map category names to custom heading styles
+  const categoryHeadingStyles: Record<string, string> = {
+    "Active & Sports": "text-cyan-700 drop-shadow-md font-extrabold italic", // energetic blue
+    "Wellness & Relaxation": "text-purple-600 font-bold italic", // calming
+    "Culture & History": "text-yellow-700 font-serif font-bold drop-shadow", // classic
+    "Social & Family": "text-blue-700 font-bold rounded bg-blue-50 px-2 py-1", // family
+    "Gastronomy": "text-red-700 font-serif font-bold", // gastronomy
+  };
+
+  function getCategoryHeadingClass(categoryName: string): string {
+    return categoryHeadingStyles[categoryName] || "text-blue-800 font-bold";
+  }
 
   return (
     <div>
@@ -127,8 +154,8 @@ export default function Home() {
       {adventureCategories.map((category, index) => (
         <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-center mb-12 bg-gradient-to-r from-blue-500 via-cyan-400 to-green-400 bg-clip-text text-transparent drop-shadow-lg tracking-tight flex items-center justify-center gap-3 animate-fade-in-up">
-              <svg className="w-8 h-8 text-blue-400 inline-block animate-bounce" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" /></svg>
+            <h2 className={`text-4xl md:text-5xl font-extrabold text-center mb-12 drop-shadow-lg tracking-tight flex items-center justify-center gap-3 animate-fade-in-up ${getCategoryHeadingClass(category.category)}`}>
+              <svg className="w-8 h-8 text-blue-400 inline-block animate-bounce" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
               {category.category}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -214,3 +241,6 @@ export default function Home() {
     </div>
   );
 }
+
+// Add neon-glow utility for nightlife (optional, if not in Tailwind config)
+// .neon-glow { text-shadow: 0 0 8px #a5b4fc, 0 0 16px #6366f1; }
