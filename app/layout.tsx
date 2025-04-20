@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,12 +20,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <nav className="bg-blue-600 text-white">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/" className="text-2xl font-bold">Concept Mediterranean Sailing</a>
+            <Link href="/" className="text-2xl font-bold">Concept Mediterranean Sailing</Link>
             <div className="space-x-6">
-              <a href="/themes" className="hover:text-blue-200">Adventure Themes</a>
-              <a href="/destinations" className="hover:text-blue-200">Destinations</a>
-              <a href="/about" className="hover:text-blue-200">About</a>
-              <a href="/contact" className="hover:text-blue-200">Contact</a>
+              <Link href="/themes" className="hover:text-blue-200">Adventure Themes</Link>
+              <Link href="/destinations" className="hover:text-blue-200">Destinations</Link>
+              <Link href="/about" className="hover:text-blue-200">About</Link>
+              <Link href="/contact" className="hover:text-blue-200">Contact</Link>
             </div>
           </div>
         </nav>
@@ -39,10 +40,10 @@ export default function RootLayout({
               <div>
                 <h3 className="text-xl font-bold mb-4">Quick Links</h3>
                 <ul className="space-y-2">
-                  <li><a href="/destinations" className="hover:text-blue-300">Destinations</a></li>
-                  <li><a href="/itineraries" className="hover:text-blue-300">Itineraries</a></li>
-                  <li><a href="/about" className="hover:text-blue-300">About Us</a></li>
-                  <li><a href="/contact" className="hover:text-blue-300">Contact</a></li>
+                  <li><Link href="/destinations" className="hover:text-blue-300">Destinations</Link></li>
+                  <li><Link href="/itineraries" className="hover:text-blue-300">Itineraries</Link></li>
+                  <li><Link href="/about" className="hover:text-blue-300">About Us</Link></li>
+                  <li><Link href="/contact" className="hover:text-blue-300">Contact</Link></li>
                 </ul>
               </div>
               <div>
