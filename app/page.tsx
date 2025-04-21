@@ -23,36 +23,34 @@ export default function Home() {
       themes: [
         adventures.find(a => a.id === "1"), // Wind Sports Adventure
         adventures.find(a => a.id === "2"), // Family Sailing School
-        adventures.find(a => a.id === "3"), // Bike Adventure in the Islands
-        adventures.find(a => a.id === "4"), // Trekking Adventure
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {
       category: "Wellness & Relaxation",
       themes: [
-        adventures.find(a => a.id === "5"), // Yoga & Wellness Retreat
-        adventures.find(a => a.id === "6"), // Cleansing & Renewal
+        adventures.find(a => a.id === "3"), // Yoga & Wellness Retreat
+        adventures.find(a => a.id === "4"), // Cleansing & Renewal
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {
       category: "Culture & History",
       themes: [
-        adventures.find(a => a.id === "7"), // Greek Heritage Explorer
-        adventures.find(a => a.id === "8"), // Culinary Traditions
+        adventures.find(a => a.id === "5"), // Greek Heritage Explorer
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    },
+    {
+      category: "Food",
+      themes: [
+        adventures.find(a => a.id === "6"), // Culinary Traditions
+        adventures.find(a => a.id === "9"), // Mediterranean Natural Flavors
+        adventures.find(a => a.id === "10"), // Greek Cooking Masters
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {
       category: "Social & Family",
       themes: [
-        adventures.find(a => a.id === "9"), // Family Bonding Adventure
-        adventures.find(a => a.id === "10"), // Island Nightlife
-      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
-    },
-    {
-      category: "Gastronomy",
-      themes: [
-        adventures.find(a => a.id === "11"), // Mediterranean Flavors
-        adventures.find(a => a.id === "12"), // Greek Cooking Masters
+        adventures.find(a => a.id === "7"), // Family Bonding Adventure
+        adventures.find(a => a.id === "8"), // Island Nightlife
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     }
   ];
@@ -81,6 +79,16 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Introductory Text Section */}
+      <section className="w-full flex justify-center py-12 bg-white">
+        <div className="max-w-4xl mx-auto bg-white/80 rounded-lg p-10 shadow text-gray-900">
+          <h2 className="text-4xl font-extrabold mb-4 text-center">Discover Greece Like Never Before — With Concept Sailing</h2>
+          <p className="mb-3">Embark on a private luxury sailing experience tailored just for you. Concept Sailing offers exclusive catamaran cruises around the Greek islands, each designed around a unique theme — from culinary adventures and wellness retreats to cultural explorations and family fun.</p>
+          <p className="mb-3">Set sail with your loved ones and explore hidden coves, crystal-clear waters, and authentic Greek charm, all from the comfort of a premium catamaran. Whether you're dreaming of tranquil relaxation or active discovery, our themed journeys create unforgettable memories under the Aegean sun.</p>
+          <p className="font-semibold text-center">Your adventure starts here.</p>
+        </div>
+      </section>
+
       {/* Adventure Categories */}
       {adventureCategories.map((category, index) => (
         <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
@@ -92,18 +100,16 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {category.themes.map((theme) => (
                 <div key={theme.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-transform duration-300 hover:scale-[1.02]">
-                  <div className="relative h-48 overflow-hidden group">
+                  <Link href={`/themes/${theme.id}`} className="relative h-48 overflow-hidden group block">
                     <Image
                       src={theme.image}
                       alt={theme.name}
-                      width={800}
-                      height={224}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="object-cover transition-transform duration-300 group-hover:scale-110 cursor-pointer"
                       sizes="(max-width: 768px) 100vw, 50vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
-                  </div>
+                  </Link>
                   <div className="p-6 flex-grow">
                     <h3 className="text-xl font-bold mb-2 text-blue-600">{theme.name}</h3>
                     <p className="text-gray-600 mb-4">{theme.description}</p>
