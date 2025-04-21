@@ -2,7 +2,7 @@ const adventures = [
   {
     id: "1",
     name: "Wind Sports Adventure",
-    description: "Master the winds with windsurfing, kitesurfing, and sailing in the best spots of Greece.",
+    description: "Master the winds with windsurfing, kitesurfing, and sailing in the best sports of Greece.",
     image: "https://images.unsplash.com/photo-1712167959870-0bf3d9cae41a?auto=format&fit=crop&w=800&q=80",
     experience: "Embark on a 7-day journey designed for thrill-seekers and water sports lovers. Each day brings a new windsurfing or kitesurfing spot, with expert instructors guiding you through lessons and free rides. Enjoy island hopping, beach barbecues, and sunset sails.",
     itinerary: [
