@@ -84,7 +84,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto bg-white/80 rounded-lg p-10 shadow text-gray-900">
           <h2 className="text-4xl font-extrabold mb-4 text-center">Discover Greece Like Never Before — With Concept Sailing</h2>
           <p className="mb-3">Embark on a private luxury sailing experience tailored just for you. Concept Sailing offers exclusive catamaran cruises around the Greek islands, each designed around a unique theme — from culinary adventures and wellness retreats to cultural explorations and family fun.</p>
-          <p className="mb-3">Set sail with your loved ones and explore hidden coves, crystal-clear waters, and authentic Greek charm, all from the comfort of a premium catamaran. Whether you're dreaming of tranquil relaxation or active discovery, our themed journeys create unforgettable memories under the Aegean sun.</p>
+          <p className="mb-3">Set sail with your loved ones and explore hidden coves, crystal-clear waters, and authentic Greek charm, all from the comfort of a premium catamaran. Whether you&apos;re dreaming of tranquil relaxation or active discovery, our themed journeys create unforgettable memories under the Aegean sun.</p>
           <p className="font-semibold text-center">Your adventure starts here.</p>
         </div>
       </section>

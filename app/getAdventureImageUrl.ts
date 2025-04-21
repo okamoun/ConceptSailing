@@ -19,7 +19,7 @@ export async function getAdventureImageUrl(adventureId: string, prompt: string, 
   try {
     const data = await res.json();
     return data.url;
-  } catch (e) {
+  } catch {
     // If response is not JSON, fallback to placeholder
     return `/images/placeholder.png`;
   }

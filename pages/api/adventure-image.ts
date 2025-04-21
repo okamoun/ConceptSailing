@@ -53,7 +53,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     fs.writeFileSync(filePath, Buffer.from(imageData, 'base64'));
     return res.status(200).json({ url: `/adventures/OpenAI/${fileName}` });
-  } catch (error: any) {
-    return res.status(500).json({ error: 'Image generation failed', details: error.message });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({ error: 'Image generation failed', details: error.message });
+    }
+    return res.status(500).json({ error: 'Image generation failed', details: String(error) });
   }
 }
