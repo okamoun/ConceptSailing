@@ -7,11 +7,11 @@ type PageProps = {
 };
 
 export async function generateStaticParams() {
-  return adventures.map((adv) => ({ id: adv.id.toString() }));
+  return adventures.map((adv) => ({ id: adv.id }));
 }
 
 export default function AdventureThemePage({ params }: PageProps) {
-  const adventure = adventures.find((a) => a.id.toString() === params.id);
+  const adventure = adventures.find((a) => a.id === params.id);
   if (!adventure) return notFound();
 
   return (
