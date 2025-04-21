@@ -8,7 +8,7 @@ export async function generateStaticParams() {
   return adventures.map((adv) => ({ id: adv.id }));
 }
 
-function AdventureBackground({ adventureName, adventureId }: { adventureName: string, adventureId: string }) {
+function AdventureBackground({ adventureId }: { adventureId: string }) {
   switch (adventureId) {
     case "1": // Wind Sports Adventure
       return (
@@ -132,7 +132,7 @@ export default async function AdventureThemePage( props : { params: PageProps })
 
   return (
     <main className="relative min-h-screen w-full flex justify-center items-start bg-blue-100">
-      <AdventureBackground adventureName={adventure.name} adventureId={adventure.id} />
+      <AdventureBackground adventureId={adventure.id} />
       <div className="relative z-10 max-w-3xl mx-auto py-12 px-4 w-full">
         <h1 className="text-4xl font-extrabold mb-4 text-blue-900">{adventure.name}</h1>
         <p className="text-lg mb-6 text-gray-700">{adventure.description}</p>

@@ -96,6 +96,8 @@ export default function Home() {
                     <Image
                       src={theme.image}
                       alt={theme.name}
+                      width={800}
+                      height={224}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
                       sizes="(max-width: 768px) 100vw, 50vw"
