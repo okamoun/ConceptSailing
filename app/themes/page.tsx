@@ -1,5 +1,6 @@
 import adventures from '../adventures-data';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ThemesPage() {
   return (
@@ -8,7 +9,16 @@ export default function ThemesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {adventures.map((adv) => (
           <div key={adv.id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
-            <img src={adv.image} alt={adv.name} className="h-56 w-full object-cover" />
+            <div className="relative h-56 w-full">
+              <Image
+                src={adv.image}
+                alt={adv.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={true}
+              />
+            </div>
             <div className="p-6 flex flex-col flex-grow">
               <h2 className="text-2xl font-bold mb-2 text-blue-800">{adv.name}</h2>
               <p className="mb-4 text-gray-700">{adv.description}</p>
