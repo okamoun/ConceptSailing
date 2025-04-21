@@ -21,7 +21,7 @@ export default function Home() {
     {
       category: "Active & Sports",
       themes: [
-        adventures.find(a => a.id === "1"), // Wind Sports Adventure
+        adventures.find(a => a.id === "1"), // Wind Sports  Adventure
         adventures.find(a => a.id === "2"), // Family Sailing School
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
