@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import OpenAI from 'openai';
@@ -14,27 +14,31 @@ function sanitizeFilename(name: string): string {
   return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { adventureId, prompt, name } = req.query;
-  if (!adventureId || typeof adventureId !== 'string') {
-    return res.status(400).json({ error: 'Missing adventureId' });
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const adventureId = searchParams.get('adventureId');
+  const prompt = searchParams.get('prompt');
+  const name = searchParams.get('name');
+
+  if (!adventureId) {
+    return NextResponse.json({ error: 'Missing adventureId' }, { status: 400 });
   }
-  if (!prompt || typeof prompt !== 'string') {
-    return res.status(400).json({ error: 'Missing prompt' });
+  if (!prompt) {
+    return NextResponse.json({ error: 'Missing prompt' }, { status: 400 });
   }
-  if (!name || typeof name !== 'string') {
-    return res.status(400).json({ error: 'Missing adventure name' });
+  if (!name) {
+    return NextResponse.json({ error: 'Missing adventure name' }, { status: 400 });
   }
   const fileName_jpg = sanitizeFilename(name) + '.jpg';
   const filePath_jpg = path.join(IMAGE_DIR_JPG, fileName_jpg);
   if (fs.existsSync(filePath_jpg)) {
-    return res.status(200).json({ url: `/adventures/${fileName_jpg}` });
+    return NextResponse.json({ url: `/adventures/${fileName_jpg}` }, { status: 200 });
   }
 
   const fileName = sanitizeFilename(name) + '.png';
   const filePath = path.join(IMAGE_DIR_PNG, fileName);
   if (fs.existsSync(filePath)) {
-    return res.status(200).json({ url: `/adventures/OpenAI/${fileName}` });
+    return NextResponse.json({ url: `/adventures/OpenAI/${fileName}` }, { status: 200 });
   }
 
   try {
@@ -46,17 +50,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     const imageData = aiResponse.data[0].b64_json;
     if (!imageData) {
-      return res.status(500).json({ error: 'No image data returned from OpenAI' });
+      return NextResponse.json({ error: 'No image data returned from OpenAI' }, { status: 500 });
     }
     if (!fs.existsSync(IMAGE_DIR_PNG)) {
       fs.mkdirSync(IMAGE_DIR_PNG, { recursive: true });
     }
     fs.writeFileSync(filePath, Buffer.from(imageData, 'base64'));
-    return res.status(200).json({ url: `/adventures/OpenAI/${fileName}` });
+    return NextResponse.json({ url: `/adventures/OpenAI/${fileName}` }, { status: 200 });
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return res.status(500).json({ error: 'Image generation failed', details: error.message });
+      return NextResponse.json({ error: 'Image generation failed', details: error.message }, { status: 500 });
     }
-    return res.status(500).json({ error: 'Image generation failed', details: String(error) });
+    return NextResponse.json({ error: 'Image generation failed', details: String(error) }, { status: 500 });
   }
 }
