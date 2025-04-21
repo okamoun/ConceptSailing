@@ -6,8 +6,8 @@ type PageProps = {
   params: { id: string };
 };
 
-export async function generateStaticParams() {
-  return adventures.map((adv) => ({ id: adv.id }));
+export function generateStaticParams(): Promise<{ id: string }[]> {
+  return Promise.resolve(adventures.map((adv) => ({ id: adv.id })));
 }
 
 export default function AdventureThemePage({ params }: PageProps) {
