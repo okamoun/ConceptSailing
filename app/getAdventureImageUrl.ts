@@ -9,9 +9,8 @@ export async function getAdventureImageUrl(adventureId: string, prompt: string, 
   if (typeof window !== 'undefined') {
     return `/adventures/${sanitizeFilename(name)}.png`;
   }
-  // On server, always call the API route with an absolute URL
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const res = await fetch(`${baseUrl}/api/adventure-image?adventureId=${adventureId}&prompt=${encodeURIComponent(prompt)}&name=${encodeURIComponent(name)}`);
+  // On server, use a relative URL for internal API route
+  const res = await fetch(`/api/adventure-image?adventureId=${adventureId}&prompt=${encodeURIComponent(prompt)}&name=${encodeURIComponent(name)}`);
   if (!res.ok) {
     // If the API route is not found or returns an error, fallback to a placeholder image
     return `/images/placeholder.png`;
