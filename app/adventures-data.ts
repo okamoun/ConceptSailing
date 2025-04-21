@@ -1,4 +1,14 @@
-const adventures = [
+export type Adventure = {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  experience: string;
+  itinerary: string[];
+  features?: string[];
+};
+
+const adventures: Adventure[] = [
   {
     id: "1",
     name: "Wind Sports Adventure",
@@ -13,7 +23,8 @@ const adventures = [
       "Sifnos: Advanced windsurfing and beach games.",
       "Paros: Kitesurfing hotspots, local taverna evening.",
       "Return to Athens, farewell breakfast, and departure."
-    ]
+    ],
+    features: ["Windsurfing", "Kitesurfing", "Sailing lessons"]
   },
   {
     id: "2",
@@ -29,7 +40,8 @@ const adventures = [
       "Syros: Sail handling drills and snorkeling adventure.",
       "Kithnos: Family regatta and farewell party.",
       "Return to Lavrio, certificates and group photos."
-    ]
+    ],
+    features: ["Family sailing", "Navigation games", "Safe swimming"]
   },
   {
     id: "3",
@@ -45,7 +57,8 @@ const adventures = [
       "Aegina: Nutrition workshop and sunset meditation.",
       "Agistri: Forest bathing and wellness circle.",
       "Return to Athens, closing ceremony and reflection."
-    ]
+    ],
+    features: ["Yoga", "Meditation", "Wellness activities"]
   },
   {
     id: "4",
@@ -61,7 +74,8 @@ const adventures = [
       "Sifnos: Group coaching and healthy cooking class.",
       "Paros: Thalassotherapy and farewell wellness circle.",
       "Return to Athens, integration session and goodbyes."
-    ]
+    ],
+    features: ["Detox programs", "Holistic wellness", "Spa therapies"]
   },
   {
     id: "5",
@@ -77,7 +91,8 @@ const adventures = [
       "Spetses: Traditional shipyard and folk museum.",
       "Epidaurus: Ancient theater and healing sanctuary.",
       "Return to Athens, closing lecture and brunch."
-    ]
+    ],
+    features: ["Ancient sites", "Historical landmarks", "Archaeological museums"]
   },
   {
     id: "6",
@@ -93,7 +108,8 @@ const adventures = [
       "Paros: Olive oil workshop and village feast.",
       "Naxos: Farm-to-table experience and cooking contest.",
       "Return to Athens, recipe exchange and farewell brunch."
-    ]
+    ],
+    features: ["Greek cooking", "Market visits", "Wine tastings"]
   },
   {
     id: "7",
@@ -109,7 +125,8 @@ const adventures = [
       "Spetses: Family bike tour and picnic.",
       "Agistri: Snorkeling and sunset music night.",
       "Return to Athens, group slideshow and goodbyes."
-    ]
+    ],
+    features: ["Treasure hunts", "Beach games", "Island explorations"]
   },
   {
     id: "8",
@@ -125,7 +142,8 @@ const adventures = [
       "Santorini: Wine bar and night views.",
       "Naxos: Beach bonfire and DJ set.",
       "Return to Athens, farewell brunch and group photos."
-    ]
+    ],
+    features: ["Beach parties", "Hidden bars", "Sunset cocktails"]
   },
   {
     id: "9",
@@ -141,7 +159,8 @@ const adventures = [
       "Paros: Vineyard picnic and local delicacies.",
       "Naxos: Farm visit and chef's table experience.",
       "Return to Athens, farewell tasting and gift bag."
-    ]
+    ],
+    features: ["Greek cuisine", "Wine regions", "Gourmet meals"]
   },
   {
     id: "10",
@@ -157,7 +176,8 @@ const adventures = [
       "Paros: Cheese making and mezze night.",
       "Naxos: Farm visit and chef's challenge.",
       "Return to Athens, graduation lunch and certificates."
-    ]
+    ],
+    features: ["Greek recipes", "Local chefs", "Hands-on cooking"]
   }
 ];
 
