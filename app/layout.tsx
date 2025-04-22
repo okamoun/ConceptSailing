@@ -27,6 +27,7 @@ export default function RootLayout({
             <div className="space-x-8 text-lg font-semibold">
               <Link href="/themes" className="hover:text-accent transition-colors">Adventure Themes</Link>
               <Link href="/destinations" className="hover:text-accent transition-colors">Destinations</Link>
+              <Link href="/boats" className="hover:text-accent transition-colors">Boats</Link>
               <Link href="/about" className="hover:text-accent transition-colors">About</Link>
               <Link href="/contact" className="hover:text-accent transition-colors">Contact</Link>
             </div>
@@ -44,6 +45,7 @@ export default function RootLayout({
               <ul className="space-y-2 text-lg">
                 <li><Link href="/destinations" className="hover:text-accent">Destinations</Link></li>
                 <li><Link href="/itineraries" className="hover:text-accent">Itineraries</Link></li>
+                <li><Link href="/boats" className="hover:text-accent">Our Boats</Link></li>
                 <li><Link href="/about" className="hover:text-accent">About Us</Link></li>
                 <li><Link href="/contact" className="hover:text-accent">Contact</Link></li>
               </ul>

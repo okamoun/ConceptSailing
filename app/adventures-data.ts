@@ -180,6 +180,23 @@ const adventures: Adventure[] = await Promise.all([
       "Return to Athens, graduation lunch and certificates."
     ],
     features: ["Greek recipes", "Local chefs", "Hands-on cooking"]
+  },
+  {
+    id: "11",
+    name: "Greek Islands Family Bike Adventure",
+    description: "Cycle with your family through the beautiful Greek islands, combining sailing and biking for all ages.",
+    image: await getAdventureImageUrl("11", "Family biking, Greek islands, cycling, sailing, children, parents, scenic, adventure", "Greek Islands Family Bike Adventure"),
+    experience: "A unique 7-day adventure where you and your family explore the Greek islands by both sailboat and bicycle. Each day features gentle rides along scenic coastal paths, stops at picturesque villages, and plenty of time for swimming and local treats. All routes are family-friendly and supported by guides, with flexible options for all ages and abilities.",
+    itinerary: [
+      "Arrive in Athens, welcome dinner and bike fitting.",
+      "Sail to Poros, morning family bike ride along the pine coast, beach picnic.",
+      "Hydra: Guided cycling tour through car-free streets, donkey meet-and-greet, swimming.",
+      "Spetses: Island loop ride, visit to a local bakery, sunset games on the beach.",
+      "Aegina: Ride to ancient temple, pistachio tasting, family cooking class.",
+      "Agistri: Forest cycling, snorkeling stop, and ice cream in the village square.",
+      "Return to Athens, farewell group ride and family photo session."
+    ],
+    features: ["Family cycling", "Gentle routes", "Island exploration", "Local culture"]
   }
 ]);
 

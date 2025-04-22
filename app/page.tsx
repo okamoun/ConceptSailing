@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from "next/link";
 import adventures from "./adventures-data";
+import { boats } from "./boats-data";
 
 export default function Home() {
   // Map category names to custom heading styles
@@ -23,6 +24,7 @@ export default function Home() {
       themes: [
         adventures.find(a => a.id === "1"), // Wind Sports  Adventure
         adventures.find(a => a.id === "2"), // Family Sailing School
+        adventures.find(a => a.id === "11"), // Greek Islands Family Bike Adventure
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {
@@ -87,7 +89,7 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                 {category.themes.map((adv) => (
-                  <div key={adv.id} className="card-premium overflow-hidden flex flex-col animate-fade-in-up" style={{animationDelay:`${0.1 + adv.id * 0.07}s`,animationFillMode:'both'}}>
+                  <div key={adv.id} className="card-premium overflow-hidden flex flex-col animate-fade-in-up" style={{animationDelay:`${0.1 + Number(adv.id) * 0.07}s`,animationFillMode:'both'}}>
                     <div className="relative h-56 w-full">
                       <Image
                         src={adv.image}
