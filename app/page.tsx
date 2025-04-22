@@ -61,7 +61,7 @@ export default function Home() {
       <section className="relative h-[80vh] flex items-center justify-center">
         <div className="absolute inset-0">
           <Image
-            src="/images/hero.jpeg"
+            src="/adventures/wellness.jpg"
             alt="Sailing in Greece"
             fill
             className="object-cover"
