@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const adventureId = searchParams.get('adventureId');
   const prompt = searchParams.get('prompt');
   const name = searchParams.get('name');
-
+  console.log('Generating image for:', { adventureId, prompt, name });
   if (!adventureId) {
     return NextResponse.json({ error: 'Missing adventureId' }, { status: 400 });
   }
