@@ -12,10 +12,11 @@ export async function getAdventureImageUrl(adventureId: string, prompt: string, 
   // On server, use an absolute URL for fetch
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+    'http://localhost:3000';
   const res = await fetch(`${baseUrl}/api/adventure-image?adventureId=${adventureId}&prompt=${encodeURIComponent(prompt)}&name=${encodeURIComponent(name)}`);
   if (!res.ok) {
     // If the API route is not found or returns an error, fallback to a placeholder image
+    console.error('Failed to generate image:', res.status, res.statusText);
     return `/images/placeholder.png`;
   }
   try {
