@@ -125,29 +125,29 @@ function AdventureBackground({ adventureId }: { adventureId: string }) {
   }
 }
 
-export default async function AdventureThemePage( props : { params: PageProps }) {
+export default async function AdventureThemePage(props: { params: PageProps }) {
   const { id } = await props.params;
   const adventure = adventures.find((a) => a.id === id);
   if (!adventure) return notFound();
 
   return (
-    <main className="relative min-h-screen w-full flex justify-center items-start bg-blue-100">
+    <main className="relative min-h-screen w-full flex justify-center items-start bg-gradient-to-br from-[#101824] to-[#1f2937]">
       <AdventureBackground adventureId={adventure.id} />
-      <div className="relative z-10 max-w-3xl mx-auto py-12 px-4 w-full">
-        <h1 className="text-4xl font-extrabold mb-4 text-blue-900">{adventure.name}</h1>
-        <p className="text-lg mb-6 text-gray-700">{adventure.description}</p>
-        <div className="mb-8">
-          <img src={adventure.image} alt={adventure.name} className="rounded-lg shadow-lg w-full h-72 object-cover mb-4" />
-          <h2 className="text-2xl font-bold mb-2 text-blue-700">7-Day Experience</h2>
-          <p className="mb-4 text-gray-800">{adventure.experience}</p>
-          <h3 className="text-xl font-semibold mb-2 text-blue-600">Sample Itinerary</h3>
-          <ol className="list-decimal list-inside space-y-1 text-gray-700">
+      <div className="relative z-10 max-w-3xl mx-auto py-16 px-6 w-full glass shadow-2xl animate-fade-in-up" style={{ marginTop: '4rem' }}>
+        <img src={adventure.image} alt={adventure.name} className="rounded-2xl shadow-xl w-full h-80 object-cover mb-8 border-4 border-accent animate-fade-in-up" style={{ animationDelay: '0.08s', animationFillMode: 'both' }} />
+        <h1 className="text-5xl font-black mb-4 text-accent drop-shadow-lg tracking-tight animate-fade-in-up" style={{ animationDelay: '0.12s', animationFillMode: 'both' }}>{adventure.name}</h1>
+        <p className="text-2xl mb-8 text-gray-200 animate-fade-in-up" style={{ animationDelay: '0.18s', animationFillMode: 'both' }}>{adventure.description}</p>
+        <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '0.25s', animationFillMode: 'both' }}>
+          <h2 className="text-3xl font-bold mb-3 text-accent">7-Day Experience</h2>
+          <p className="mb-6 text-lg text-gray-100">{adventure.experience}</p>
+          <h3 className="text-2xl font-semibold mb-3 text-accent">Sample Itinerary</h3>
+          <ol className="list-decimal list-inside space-y-2 text-lg text-gray-200">
             {adventure.itinerary.map((day, i) => (
-              <li key={i}><span className="font-semibold">Day {i + 1}:</span> {day}</li>
+              <li key={i}><span className="font-bold text-accent">Day {i + 1}:</span> {day}</li>
             ))}
           </ol>
         </div>
-        <Link href="/themes" className="text-blue-600 hover:underline">← Back to all adventures</Link>
+        <Link href="/themes" className="button-premium text-lg inline-block animate-fade-in-up" style={{ animationDelay: '0.32s', animationFillMode: 'both' }}>← Back to all adventures</Link>
       </div>
     </main>
   );

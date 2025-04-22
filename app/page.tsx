@@ -58,25 +58,13 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center justify-center">
-        <div className="absolute inset-0">
-          <Image
-            src="/images/hero.jpeg"
-            alt="Sailing in Greece"
-            fill
-            className="object-cover"
-            priority
-            quality={85}
-          />
-          <div className="absolute inset-0 bg-black/40"></div>
+      <section className="relative h-[75vh] flex items-center justify-center mb-16">
+        <div className="glass px-12 py-16 flex flex-col items-center text-center shadow-xl border border-accent hero-glass-animate">
+          <h1 className="text-6xl font-black text-accent drop-shadow-lg mb-6 tracking-tight animate-fade-in-up" style={{letterSpacing:'0.03em'}}>Exclusive Greek Sailing Experiences</h1>
+          <p className="text-2xl text-gray-200 max-w-2xl mb-8 animate-fade-in-up" style={{animationDelay:'0.15s',animationFillMode:'both'}}>Sail the Aegean in style. Discover curated adventures, luxury yachts, and unforgettable moments on the water.</p>
+          <Link href="/themes" className="button-premium text-xl animate-fade-in-up" style={{animationDelay:'0.3s',animationFillMode:'both'}}>Explore Themes</Link>
         </div>
-        <div className="relative text-center text-white z-10 px-4">
-          <h1 className="text-5xl font-bold mb-6">Choose Your Perfect Sailing Experience</h1>
-          <p className="text-xl mb-8">From active adventures to cultural journeys - find your ideal Greek sailing holiday</p>
-          <Link href="/themes" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors">
-            Explore Themes
-          </Link>
-        </div>
+        <div className="absolute inset-0 z-[-1] bg-gradient-to-br from-[#101824] to-[#1f2937] opacity-80"></div>
       </section>
 
       {/* Introductory Text Section */}
@@ -90,48 +78,38 @@ export default function Home() {
       </section>
 
       {/* Adventure Categories */}
-      {adventureCategories.map((category, index) => (
-        <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
-          <div className="container mx-auto px-4">
-            <h2 className={`text-4xl md:text-5xl font-extrabold text-center mb-12 drop-shadow-lg tracking-tight flex items-center justify-center gap-3 animate-fade-in-up ${getCategoryHeadingClass(category.category)}`}>
-              <svg className="w-8 h-8 text-blue-400 inline-block animate-bounce" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-              {category.category}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {category.themes.map((theme) => (
-                <div key={theme.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-transform duration-300 hover:scale-[1.02]">
-                  <Link href={`/themes/${theme.id}`} className="relative h-48 overflow-hidden group block">
-                    <Image
-                      src={theme.image}
-                      alt={theme.name}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-110 cursor-pointer"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
-                  </Link>
-                  <div className="p-6 flex-grow">
-                    <h3 className="text-xl font-bold mb-2 text-blue-600">{theme.name}</h3>
-                    <p className="text-gray-600 mb-4">{theme.description}</p>
-                    {Array.isArray(theme.features) && theme.features.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {theme.features.map((feature: string, index: number) => (
-                          <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <Link href={`/themes/${theme.id}`} className="text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center">
-                      Learn More
-                    </Link>
+      <div className="max-w-6xl mx-auto">
+        {adventureCategories.map((category, index) => (
+          <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-transparent' : 'bg-[#151e2c]'}`}> 
+            <div className="container mx-auto px-4">
+              <h2 className={`text-4xl md:text-5xl font-extrabold text-center mb-12 drop-shadow-lg tracking-tight flex items-center justify-center gap-3 animate-fade-in-up text-accent`}>
+                {category.category}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                {category.themes.map((adv) => (
+                  <div key={adv.id} className="card-premium overflow-hidden flex flex-col animate-fade-in-up" style={{animationDelay:`${0.1 + adv.id * 0.07}s`,animationFillMode:'both'}}>
+                    <div className="relative h-56 w-full">
+                      <Image
+                        src={adv.image}
+                        alt={adv.name}
+                        fill
+                        className="object-cover rounded-t-xl"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        priority={true}
+                      />
+                    </div>
+                    <div className="p-8 flex flex-col flex-grow">
+                      <h3 className="text-2xl font-bold mb-3 text-accent drop-shadow animate-fade-in-up" style={{animationDelay:'0.2s',animationFillMode:'both'}}>{adv.name}</h3>
+                      <p className="mb-6 text-gray-200 text-lg animate-fade-in-up" style={{animationDelay:'0.28s',animationFillMode:'both'}}>{adv.description}</p>
+                      <Link href={`/themes/${adv.id}`} className="mt-auto button-premium text-center animate-fade-in-up" style={{animationDelay:'0.35s',animationFillMode:'both'}}>View Experience</Link>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      ))}
+          </section>
+        ))}
+      </div>
 
       {/* Why Choose Us */}
       <section className="py-16 bg-blue-50">

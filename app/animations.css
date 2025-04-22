@@ -1,0 +1,47 @@
+/* Fade-in and slide-up animation */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Card hover pop */
+@keyframes cardPop {
+  0% { transform: scale(1); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1.03); }
+}
+.card-premium:hover {
+  animation: cardPop 0.4s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Button shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.button-premium {
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, #c9a86b 0%, #ffe8b0 50%, #c9a86b 100%);
+}
+.button-premium:hover {
+  animation: shimmer 1.2s linear infinite;
+}
+
+/* Hero glass fade in */
+.hero-glass-animate {
+  animation: fadeInUp 1.2s 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
