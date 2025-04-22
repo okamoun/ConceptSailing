@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from "next/link";
 import adventures from "./adventures-data";
+import { featureIconMap } from "./feature-icons";
 
 export default function Home() {
   // Map adventure categories and themes using the correct IDs and names from adventures-data.ts
@@ -89,6 +90,24 @@ export default function Home() {
                     <div className="p-8 flex flex-col flex-grow">
                       <h3 className="text-2xl font-bold mb-3 text-accent drop-shadow animate-fade-in-up" style={{animationDelay:'0.2s',animationFillMode:'both'}}>{adv.name}</h3>
                       <p className="mb-6 text-gray-200 text-lg animate-fade-in-up" style={{animationDelay:'0.28s',animationFillMode:'both'}}>{adv.description}</p>
+                      {adv.features && adv.features.length > 0 && (
+                        <ul className="mb-4 flex flex-wrap gap-2 animate-fade-in-up" style={{animationDelay:'0.32s',animationFillMode:'both'}}>
+                          {adv.features.map((feature: string, idx: number) => (
+                            <li
+                              key={idx}
+                              className="inline-flex items-center gap-1 bg-accent text-white rounded-full px-3 py-1 text-sm font-semibold shadow relative group cursor-pointer"
+                            >
+                              <span>{featureIconMap[feature]}</span>
+                              <span
+                                className="absolute left-1/2 top-full mt-2 -translate-x-1/2 bg-accent text-white px-3 py-1 rounded shadow text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20"
+                                style={{minWidth:'max-content'}}
+                              >
+                                {feature}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                       <Link href={`/themes/${adv.id}`} className="mt-auto button-premium text-center animate-fade-in-up" style={{animationDelay:'0.35s',animationFillMode:'both'}}>View Experience</Link>
                     </div>
                   </div>
