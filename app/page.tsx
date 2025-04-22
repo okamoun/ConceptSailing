@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import Link from "next/link";
 import adventures from "./adventures-data";
-import { boats } from "./boats-data";
 
 export default function Home() {
   // Map category names to custom heading styles
@@ -12,10 +11,6 @@ export default function Home() {
     "Social & Family": "text-blue-700 font-bold rounded bg-blue-50 px-2 py-1", // family
     "Gastronomy": "text-red-700 font-serif font-bold", // gastronomy
   };
-
-  function getCategoryHeadingClass(categoryName: string): string {
-    return categoryHeadingStyles[categoryName] || "text-blue-800 font-bold";
-  }
 
   // Map adventure categories and themes using the correct IDs and names from adventures-data.ts
   const adventureCategories = [

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { boats } from '../boats-data';
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: 'Our Catamarans | Concept Sailing',
@@ -15,7 +16,7 @@ export default function BoatsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {boats.map((boat, i) => (
             <div key={boat.name} className="glass flex flex-col md:flex-row items-center p-6 gap-8 shadow-xl animate-fade-in-up" style={{animationDelay:`${0.14 + i*0.08}s`,animationFillMode:'both'}}>
-              <img src={boat.image} alt={boat.name} className="w-full md:w-64 h-56 object-cover rounded-xl border-4 border-accent shadow-lg bg-[#222]" loading="eager" draggable="false" tabIndex={-1} />
+              <Image src={boat.image} alt={boat.name} width={400} height={224} className="w-full md:w-64 h-56 object-cover rounded-xl border-4 border-accent shadow-lg bg-[#222]" priority draggable={false} tabIndex={-1} />
               <div className="flex-1">
                 <h2 className="text-3xl font-bold text-accent mb-2">{boat.name}</h2>
                 <p className="text-lg text-gray-300 mb-1"><span className="font-semibold">Brand:</span> {boat.brand}</p>
