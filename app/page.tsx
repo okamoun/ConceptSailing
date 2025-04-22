@@ -3,15 +3,6 @@ import Link from "next/link";
 import adventures from "./adventures-data";
 
 export default function Home() {
-  // Map category names to custom heading styles
-  const categoryHeadingStyles: Record<string, string> = {
-    "Active & Sports": "text-cyan-700 drop-shadow-md font-extrabold italic", // energetic blue
-    "Wellness & Relaxation": "text-purple-600 font-bold italic", // calming
-    "Culture & History": "text-yellow-700 font-serif font-bold drop-shadow", // classic
-    "Social & Family": "text-blue-700 font-bold rounded bg-blue-50 px-2 py-1", // family
-    "Gastronomy": "text-red-700 font-serif font-bold", // gastronomy
-  };
-
   // Map adventure categories and themes using the correct IDs and names from adventures-data.ts
   const adventureCategories = [
     {
