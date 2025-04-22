@@ -1,119 +1,8 @@
 import Image from 'next/image';
 import Link from "next/link";
+import adventures from "./adventures-data";
 
 export default function Home() {
-  const adventureCategories = [
-    {
-      category: "Active & Sports",
-      themes: [
-        {
-          id: "1",
-          name: "Wind Sports Adventure",
-          description: "Master the winds with windsurfing, kitesurfing, and sailing in the best spots of Greece",
-          image: "/images/wind-sports-adventure.jpg",
-          features: ["Windsurfing", "Kitesurfing", "Sailing lessons"]
-        },
-        {
-          id: "2",
-          name: "Family Sailing School",
-          description: "Learn sailing together as a family with certified instructors in safe, beautiful waters",
-          image: "/images/Aura-51-Fountaine-Pajot-Sailing-Catamarans-Exterior-01.jpeg",
-          features: ["Basic navigation", "Safety at sea", "Hands-on experience"]
-        },
-        {
-          id: "3",
-          name: "Bike Adventure in the Islands",
-          description: "Explore the Greek islands by bike, discovering hidden trails and breathtaking coastal views.",
-          image: "/images/bike-adventure.jpg",
-          features: ["Guided bike tours", "Mountain and road biking", "Scenic routes"]
-        },
-        {
-          id: "4",
-          name: "Trekking Adventure",
-          description: "Hike through stunning landscapes, from lush hills to dramatic cliffs, across the Greek islands.",
-          image: "/images/trekking-adventure.jpg",
-          features: ["Guided hikes", "Nature walks", "Wildlife spotting"]
-        }
-      ]
-    },
-    {
-      category: "Wellness & Relaxation",
-      themes: [
-        {
-          id: "5",
-          name: "Yoga & Wellness Retreat",
-          description: "Combine sailing with daily yoga, meditation, and wellness activities for mind and body",
-          image: "/images/yoga-wellness-retreat.jpg",
-          features: ["Daily yoga", "Meditation", "Healthy meals"]
-        },
-        {
-          id: "6",
-          name: "Cleansing & Renewal",
-          description: "A transformative journey combining sailing, detox programs, and holistic wellness",
-          image: "/images/cleansing-renewal.jpg",
-          features: ["Detox program", "Spa treatments", "Mindfulness"]
-        }
-      ]
-    },
-    {
-      category: "Culture & History",
-      themes: [
-        {
-          id: "7",
-          name: "Greek Heritage Explorer",
-          description: "Journey through time visiting ancient sites and historical landmarks by sea",
-          image: "/images/greek-heritage-explorer.jpg",
-          features: ["Ancient ruins", "Archaeological sites", "Expert guides"]
-        },
-        {
-          id: "8",
-          name: "Culinary Traditions",
-          description: "Master Greek cooking while sailing through different regions and their unique flavors",
-          image: "/images/culinary-traditions.jpg",
-          features: ["Cooking classes", "Market visits", "Wine tasting"]
-        }
-      ]
-    },
-    {
-      category: "Social & Family",
-      themes: [
-        {
-          id: "9",
-          name: "Family Bonding Adventure",
-          description: "Create lasting memories with activities designed for the whole family",
-          image: "/images/family-bonding-adventure.jpg",
-          features: ["Kid-friendly activities", "Beach games", "Family challenges"]
-        },
-        {
-          id: "10",
-          name: "Island Nightlife",
-          description: "Experience the vibrant nightlife of Greek islands with friends",
-          image: "/images/island-nightlife.jpg",
-          features: ["Beach parties", "Island hopping", "Sunset events"]
-        }
-      ]
-    },
-    {
-      category: "Gastronomy",
-      themes: [
-        {
-          id: "11",
-          name: "Mediterranean Flavors",
-          description: "A gastronomic journey through Greece's finest cuisines and wine regions",
-          image: "/images/mediterranean-flavors.jpg",
-          features: ["Food tours", "Wine tasting", "Local restaurants"]
-        },
-        {
-          id: "12",
-          name: "Greek Cooking Masters",
-          description: "Learn authentic Greek recipes from local chefs while sailing the islands",
-          image: "/images/greek-cooking-masters.jpg",
-          features: ["Cooking workshops", "Local ingredients", "Traditional recipes"]
-        }
-      ]
-    }
-  ];
-
   // Map category names to custom heading styles
   const categoryHeadingStyles: Record<string, string> = {
     "Active & Sports": "text-cyan-700 drop-shadow-md font-extrabold italic", // energetic blue
@@ -126,6 +15,45 @@ export default function Home() {
   function getCategoryHeadingClass(categoryName: string): string {
     return categoryHeadingStyles[categoryName] || "text-blue-800 font-bold";
   }
+
+  // Map adventure categories and themes using the correct IDs and names from adventures-data.ts
+  const adventureCategories = [
+    {
+      category: "Active & Sports",
+      themes: [
+        adventures.find(a => a.id === "1"), // Wind Sports  Adventure
+        adventures.find(a => a.id === "2"), // Family Sailing School
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    },
+    {
+      category: "Wellness & Relaxation",
+      themes: [
+        adventures.find(a => a.id === "3"), // Yoga & Wellness Retreat
+        adventures.find(a => a.id === "4"), // Cleansing & Renewal
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    },
+    {
+      category: "Culture & History",
+      themes: [
+        adventures.find(a => a.id === "5"), // Greek Heritage Explorer
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    },
+    {
+      category: "Food",
+      themes: [
+        adventures.find(a => a.id === "6"), // Culinary Traditions
+        adventures.find(a => a.id === "9"), // Mediterranean Natural Flavors
+        adventures.find(a => a.id === "10"), // Greek Cooking Masters
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    },
+    {
+      category: "Social & Family",
+      themes: [
+        adventures.find(a => a.id === "7"), // Family Bonding Adventure
+        adventures.find(a => a.id === "8"), // Island Nightlife
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    }
+  ];
 
   return (
     <div>
@@ -151,6 +79,16 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Introductory Text Section */}
+      <section className="w-full flex justify-center py-12 bg-white">
+        <div className="max-w-4xl mx-auto bg-white/80 rounded-lg p-10 shadow text-gray-900">
+          <h2 className="text-4xl font-extrabold mb-4 text-center">Discover Greece Like Never Before — With Concept Sailing</h2>
+          <p className="mb-3">Embark on a private luxury sailing experience tailored just for you. Concept Sailing offers exclusive catamaran cruises around the Greek islands, each designed around a unique theme — from culinary adventures and wellness retreats to cultural explorations and family fun.</p>
+          <p className="mb-3">Set sail with your loved ones and explore hidden coves, crystal-clear waters, and authentic Greek charm, all from the comfort of a premium catamaran. Whether you&apos;re dreaming of tranquil relaxation or active discovery, our themed journeys create unforgettable memories under the Aegean sun.</p>
+          <p className="font-semibold text-center">Your adventure starts here we take care of everything.</p>
+        </div>
+      </section>
+
       {/* Adventure Categories */}
       {adventureCategories.map((category, index) => (
         <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
@@ -162,26 +100,28 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {category.themes.map((theme) => (
                 <div key={theme.id} className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform transition-transform duration-300 hover:scale-[1.02]">
-                  <div className="relative h-48 overflow-hidden group">
+                  <Link href={`/themes/${theme.id}`} className="relative h-48 overflow-hidden group block">
                     <Image
                       src={theme.image}
                       alt={theme.name}
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="object-cover transition-transform duration-300 group-hover:scale-110 cursor-pointer"
                       sizes="(max-width: 768px) 100vw, 50vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
-                  </div>
+                  </Link>
                   <div className="p-6 flex-grow">
                     <h3 className="text-xl font-bold mb-2 text-blue-600">{theme.name}</h3>
                     <p className="text-gray-600 mb-4">{theme.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {theme.features.map((feature, index) => (
-                        <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
+                    {Array.isArray(theme.features) && theme.features.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {theme.features.map((feature: string, index: number) => (
+                          <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <Link href={`/themes/${theme.id}`} className="text-blue-600 hover:text-blue-800 font-semibold inline-flex items-center">
                       Learn More
                     </Link>
@@ -242,6 +182,3 @@ export default function Home() {
     </div>
   );
 }
-
-// Add neon-glow utility for nightlife (optional, if not in Tailwind config)
-// .neon-glow { text-shadow: 0 0 8px #a5b4fc, 0 0 16px #6366f1; }
