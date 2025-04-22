@@ -1,7 +1,7 @@
 /* Fade-in and slide-up animation */
 @keyframes fadeInUp {
   0% {
-    opacity: 0;
+    opacity: 0.4;
     transform: translateY(40px);
   }
   100% {
@@ -12,6 +12,8 @@
 
 .animate-fade-in-up {
   animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 /* Card hover pop */
