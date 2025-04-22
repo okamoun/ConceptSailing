@@ -134,7 +134,7 @@ export default async function AdventureThemePage(props: { params: PageProps }) {
     <main className="relative min-h-screen w-full flex justify-center items-start bg-gradient-to-br from-[#101824] to-[#1f2937]">
       <AdventureBackground adventureId={adventure.id} />
       <div className="relative z-10 max-w-3xl mx-auto py-16 px-6 w-full glass shadow-2xl animate-fade-in-up" style={{ marginTop: '4rem' }}>
-        <img src={adventure.image} alt={adventure.name} className="rounded-2xl shadow-xl w-full h-80 object-cover mb-8 border-4 border-accent animate-fade-in-up" style={{ animationDelay: '0.08s', animationFillMode: 'both' }} />
+        <img src={adventure.image} alt={adventure.name} className="rounded-2xl shadow-xl w-full h-80 object-cover mb-8 border-4 border-accent" loading="eager" draggable="false" tabIndex={-1} style={{ animationDelay: '0.08s', animationFillMode: 'both' }} />
         <h1 className="text-5xl font-black mb-4 text-accent drop-shadow-lg tracking-tight animate-fade-in-up" style={{ animationDelay: '0.12s', animationFillMode: 'both' }}>{adventure.name}</h1>
         <p className="text-2xl mb-8 text-gray-200 animate-fade-in-up" style={{ animationDelay: '0.18s', animationFillMode: 'both' }}>{adventure.description}</p>
         <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '0.25s', animationFillMode: 'both' }}>
