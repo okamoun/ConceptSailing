@@ -21,15 +21,15 @@ export default function RootLayout({
       <body className={inter.className + " bg-gradient-to-br from-[#101824] to-[#1f2937] min-h-screen"}>
         <nav className="glass shadow-lg">
           <div className="container mx-auto px-4 py-5 flex justify-between items-center">
-            <Link href="/" className="text-3xl font-black tracking-tight text-accent" style={{fontFamily:'Inter,Segoe UI,Helvetica Neue,Arial,sans-serif'}}>
-              Concept Mediterranean Sailing
-            </Link>
+            <Link href="/" className="flex items-center gap-3 group">
+              <img src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" className="h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105" style={{maxHeight:'160px'}} />
+              </Link>
             <div className="space-x-8 text-lg font-semibold">
               <Link href="/themes" className="hover:text-accent transition-colors">Adventure Themes</Link>
               <Link href="/destinations" className="hover:text-accent transition-colors">Destinations</Link>
               <Link href="/boats" className="hover:text-accent transition-colors">Boats</Link>
               <Link href="/about" className="hover:text-accent transition-colors">About</Link>
-              <Link href="/contact" className="hover:text-accent transition-colors">Contact</Link>
+              <Link href="/contact" className="hover:text-accent transition-colors"> Contact</Link>
             </div>
           </div>
         </nav>
@@ -37,7 +37,10 @@ export default function RootLayout({
         <footer className="mt-16 glass border-t border-accent py-10">
           <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
-              <h3 className="text-2xl font-extrabold mb-4 text-accent">Concept Mediterranean Sailing</h3>
+              <h3 className="flex items-center gap-2 text-2xl font-extrabold mb-4 text-accent">
+                <img src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" className="h-20 w-auto inline-block align-middle" style={{maxHeight:'80px'}} />
+                Concept Mediterranean Sailing
+              </h3>
               <p className="text-lg text-gray-200">Your gateway to exclusive, unforgettable sailing adventures in Greece.</p>
             </div>
             <div>
