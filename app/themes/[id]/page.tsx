@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import adventures from '../../adventures-data';
+import { featureIconMap } from '../../feature-icons';
 
 export type PageProps = Promise<{ id: string }>;
 
@@ -142,13 +143,52 @@ export default async function AdventureThemePage(props: { params: PageProps }) {
           <h2 className="text-3xl font-bold mb-3 text-accent">7-Day Experience</h2>
           <p className="mb-6 text-lg text-gray-100">{adventure.experience}</p>
           <h3 className="text-2xl font-semibold mb-3 text-accent">Sample Itinerary</h3>
-          <ol className="list-decimal list-inside space-y-2 text-lg text-gray-200">
+          <ol className="list-decimal list-inside space-y-6 text-lg text-gray-200">
             {adventure.itinerary.map((day, i) => (
-              <li key={i}><span className="font-bold text-accent">Day {i + 1}:</span> {day}</li>
+              <li key={i} className="mb-4">
+                <span className="font-bold text-accent">Day {i + 1}: {day.title}</span>
+                <div className="ml-4 mt-1">
+                  <div>{day.description}</div>
+                  {day.features && day.features.length > 0 && (
+                    <ul className="list-disc list-inside mt-2 ml-2 text-base text-accent">
+                      {day.features.map((feature, j) => (
+                        <li key={j} className="flex items-center gap-2">
+                          {featureIconMap[feature] && (
+                            <span className="inline-block align-middle">{featureIconMap[feature]}</span>
+                          )}
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
             ))}
           </ol>
         </div>
-        <Link href="/themes" className="button-premium text-lg inline-block animate-fade-in-up" style={{ animationDelay: '0.32s', animationFillMode: 'both' }}>← Back to all adventures</Link>
+        {adventure.features && adventure.features.length > 0 && (
+          <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '0.28s', animationFillMode: 'both' }}>
+            <h3 className="text-2xl font-semibold mb-3 text-accent">Adventure Features</h3>
+            <ul className="list-disc list-inside space-y-2 text-lg text-accent">
+              {adventure.features.map((feature, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  {featureIconMap[feature] && (
+                    <span className="inline-block align-middle">{featureIconMap[feature]}</span>
+                  )}
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="mt-8 text-center text-base text-gray-400 italic animate-fade-in-up" style={{ animationDelay: '0.35s', animationFillMode: 'both' }}>
+          <span>
+            <strong>Note:</strong> The itineraries provided above are for inspiration only. Your actual adventure will be tailored to your preferences, availability, and prevailing weather conditions.
+          </span>
+        </div>
+        <div className="flex justify-center w-full mt-8">
+          <Link href="/themes" className="button-premium text-lg inline-block animate-fade-in-up" style={{ animationDelay: '0.32s', animationFillMode: 'both' }}>← Back to all adventures</Link>
+        </div>
       </div>
     </main>
   );
