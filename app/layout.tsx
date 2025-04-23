@@ -38,8 +38,8 @@ export default function RootLayout({
           <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
               <h3 className="flex items-center gap-2 text-2xl font-extrabold mb-4 text-accent">
-                <img src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" className="h-20 w-auto inline-block align-middle" style={{maxHeight:'80px'}} />
-                Concept Mediterranean Sailing
+                <img src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" className="h-20 w-auto inline-block align-middle" style={{maxHeight:'100px'}} />
+             
               </h3>
               <p className="text-lg text-gray-200">Your gateway to exclusive, unforgettable sailing adventures in Greece.</p>
             </div>
