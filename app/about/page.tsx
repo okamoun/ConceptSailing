@@ -11,7 +11,7 @@ export default function AboutPage() {
     <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
       <div className="max-w-3xl mx-auto px-4 glass p-10 shadow-xl border border-accent animate-fade-in-up">
         <div className="flex flex-col items-center mb-8">
-          <Image src="/logo_white_no_bg.png" alt="Concept Mediterranean Sailing Logo" width={80} height={80} className="mb-4" />
+          <Image src="/logo_white_no_bg.png" alt="Concept Mediterranean Sailing Logo" width={140} height={140} className="mb-4" />
           <h1 className="text-4xl font-extrabold text-accent mb-2 text-center">About Us</h1>
         </div>
         <section className="text-lg text-gray-200 space-y-6">

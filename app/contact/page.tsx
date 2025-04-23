@@ -13,7 +13,7 @@ export default function ContactPage() {
         <div className="flex flex-col items-center mb-8">
           <Image src="/logo_white_no_bg.png" alt="Concept Mediterranean Sailing Logo" width={80} height={80} className="mb-4" />
           <h1 className="text-4xl font-extrabold text-accent mb-2 text-center">Contact Us</h1>
-          <p className="text-lg text-gray-200 text-center max-w-xl">We'd love to help you plan your perfect Greek sailing adventure. Reach out for bookings, questions, or custom requests!</p>
+          <p className="text-lg text-gray-200 text-center max-w-xl">We&apos;d love to help you plan your perfect Greek sailing adventure. Reach out for bookings, questions, or custom requests!</p>
         </div>
         <form className="space-y-6 mt-6">
           <div>
