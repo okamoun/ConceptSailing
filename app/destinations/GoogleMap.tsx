@@ -41,7 +41,7 @@ export default function CustomGoogleMap({ destinations, selectedId, onMarkerClic
       mapRef.current.panTo(DEFAULT_CENTER);
       mapRef.current.setZoom(DEFAULT_ZOOM);
     }
-  }, [selectedId]);
+  }, [selectedId, center, selected]);
 
   if (!isLoaded) return <div className="flex justify-center items-center h-[500px]">Loading map...</div>;
 

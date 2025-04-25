@@ -1,4 +1,4 @@
-import { getAdventureImageUrl } from './getAdventureImageUrl';
+// NOTE: For client compatibility, use static image URLs. Do not use getAdventureImageUrl or top-level await here.
 
 export type AdventureItineraryDay = {
   title: string;

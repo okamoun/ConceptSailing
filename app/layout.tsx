@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
+import Image from "next/image";
 import "./globals.css";
 import "./animations.css";
 
@@ -22,7 +23,7 @@ export default function RootLayout({
         <nav className="glass shadow-lg">
           <div className="container mx-auto px-4 py-5 flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3 group">
-              <img src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" className="h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105" style={{maxHeight:'160px'}} />
+              <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={200} height={128} className="h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105" style={{maxHeight:'160px'}} priority />
               </Link>
             <div className="space-x-8 text-lg font-semibold">
               <Link href="/themes" className="hover:text-accent transition-colors">Adventure Themes</Link>
@@ -38,7 +39,7 @@ export default function RootLayout({
           <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
               <h3 className="flex items-center gap-2 text-2xl font-extrabold mb-4 text-accent">
-                <img src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" className="h-20 w-auto inline-block align-middle" style={{maxHeight:'100px'}} />
+                <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={100} height={64} className="h-20 w-auto inline-block align-middle" style={{maxHeight:'100px'}} priority />
              
               </h3>
               <p className="text-lg text-gray-200">Your gateway to exclusive, unforgettable sailing adventures in Greece.</p>
