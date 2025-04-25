@@ -4,6 +4,8 @@ export type AdventureItineraryDay = {
   title: string;
   description: string;
   features?: string[];
+  lat?: number;
+  lng?: number;
 };
 
 export type Adventure = {
@@ -27,36 +29,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Arrival in Athens",
         description: "Arrive in Athens, meet your guides and fellow adventurers. Enjoy a welcome dinner, safety briefing, and get to know your crew and equipment.",
-        features: ["Welcome dinner", "Safety briefing"]
+        features: ["Welcome dinner", "Safety briefing"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Kea Island",
         description: "Set sail for Kea Island. Afternoon windsurfing session at a scenic bay. Evening at leisure exploring the island.",
-        features: ["Windsurfing", "Island exploration"]
+        features: ["Windsurfing", "Island exploration"],
+        lat: 37.6136, // Kea
+        lng: 24.3346
       },
       {
         title: "Kythnos Winds",
         description: "Morning kitesurfing in Kythnos, renowned for its thermal winds. Optional beach yoga and group lunch.",
-        features: ["Kitesurfing", "Beach yoga"]
+        features: ["Kitesurfing", "Beach yoga"],
+        lat: 37.3933, // Kythnos
+        lng: 24.3966
       },
       {
         title: "Serifos Adventure",
         description: "Full day sailing to Serifos. Try stand-up paddleboarding and enjoy a beach barbecue under the stars.",
-        features: ["Sailing", "Paddleboarding", "Beach BBQ"]
+        features: ["Sailing", "Paddleboarding", "Beach BBQ"],
+        lat: 37.1426, // Serifos
+        lng: 24.5027
       },
       {
         title: "Sifnos Challenge",
         description: "Advanced windsurfing session and friendly beach games. Explore Sifnos village in the evening.",
-        features: ["Windsurfing", "Beach games"]
+        features: ["Windsurfing", "Beach games"],
+        lat: 36.9800, // Sifnos
+        lng: 24.7136
       },
       {
         title: "Paros Hotspots",
         description: "Kitesurfing at Paros’ top spots. Evening at a local taverna with live music and dancing.",
-        features: ["Kitesurfing", "Local culture"]
+        features: ["Kitesurfing", "Local culture"],
+        lat: 37.0850, // Paros
+        lng: 25.1500
       },
       {
         title: "Return to Athens",
-        description: "Cruise back to Athens. Farewell breakfast, group photos, and departure."
+        description: "Cruise back to Athens. Farewell breakfast, group photos, and departure.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Windsurfing", "Kitesurfing", "Sailing lessons", "Beach yoga", "Paddleboarding", "Beach BBQ", "Local culture"]
@@ -71,36 +87,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Meet in Lavrio",
         description: "Meet in Lavrio, introductory sailing lesson and safety briefing.",
-        features: ["Sailing lesson", "Safety briefing"]
+        features: ["Sailing lesson", "Safety briefing"],
+        lat: 37.7147, // Lavrio
+        lng: 24.0567
       },
       {
         title: "Sail to Cape Sounion",
         description: "Sail to Cape Sounion, visit the Temple of Poseidon, and swim.",
-        features: ["Sailing", "Temple visit", "Swimming"]
+        features: ["Sailing", "Temple visit", "Swimming"],
+        lat: 37.6500, // Cape Sounion
+        lng: 24.0267
       },
       {
         title: "Kea Island",
         description: "Family navigation games and beach picnic.",
-        features: ["Navigation games", "Beach picnic"]
+        features: ["Navigation games", "Beach picnic"],
+        lat: 37.6136, // Kea
+        lng: 24.3346
       },
       {
         title: "Kythnos",
         description: "Docking practice and local village exploration.",
-        features: ["Docking practice", "Village exploration"]
+        features: ["Docking practice", "Village exploration"],
+        lat: 37.3933, // Kythnos
+        lng: 24.3966
       },
       {
         title: "Syros",
         description: "Sail handling drills and snorkeling adventure.",
-        features: ["Sail handling", "Snorkeling"]
+        features: ["Sail handling", "Snorkeling"],
+        lat: 37.4500, // Syros
+        lng: 24.9333
       },
       {
         title: "Kithnos",
         description: "Family regatta and farewell party.",
-        features: ["Regatta", "Farewell party"]
+        features: ["Regatta", "Farewell party"],
+        lat: 37.3933, // Kythnos (again)
+        lng: 24.3966
       },
       {
         title: "Return to Lavrio",
-        description: "Return to Lavrio, certificates and group photos."
+        description: "Return to Lavrio, certificates and group photos.",
+        lat: 37.7147, // Lavrio
+        lng: 24.0567
       }
     ],
     features: ["Family sailing", "Navigation games", "Safe swimming", "Sailing lessons", "Snorkeling", "Regatta"]
@@ -115,36 +145,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Welcome Aboard",
         description: "Welcome aboard in Athens, gentle yoga and group meditation.",
-        features: ["Yoga", "Meditation"]
+        features: ["Yoga", "Meditation"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Poros",
         description: "Sail to Poros, sunrise yoga, and healthy brunch.",
-        features: ["Sailing", "Yoga", "Healthy brunch"]
+        features: ["Sailing", "Yoga", "Healthy brunch"],
+        lat: 37.5000, // Poros
+        lng: 23.4500
       },
       {
         title: "Hydra",
         description: "Guided meditation and spa visit.",
-        features: ["Meditation", "Spa visit"]
+        features: ["Meditation", "Spa visit"],
+        lat: 37.3500, // Hydra
+        lng: 23.4667
       },
       {
         title: "Spetses",
         description: "Beach yoga and mindful hiking.",
-        features: ["Yoga", "Hiking"]
+        features: ["Yoga", "Hiking"],
+        lat: 37.2500, // Spetses
+        lng: 23.1500
       },
       {
         title: "Aegina",
         description: "Nutrition workshop and sunset meditation.",
-        features: ["Nutrition workshop", "Meditation"]
+        features: ["Nutrition workshop", "Meditation"],
+        lat: 37.7450, // Aegina
+        lng: 23.4275
       },
       {
         title: "Agistri",
         description: "Forest bathing and wellness circle.",
-        features: ["Forest bathing", "Wellness circle"]
+        features: ["Forest bathing", "Wellness circle"],
+        lat: 37.6981, // Agistri
+        lng: 23.3432
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, closing ceremony and reflection."
+        description: "Return to Athens, closing ceremony and reflection.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Yoga", "Meditation", "Wellness activities", "Spa treatments", "Healthy meals", "Forest bathing"]
@@ -159,36 +203,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Athens Embarkation",
         description: "Athens embarkation, detox welcome dinner.",
-        features: ["Detox dinner"]
+        features: ["Detox dinner"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Kea",
         description: "Sail to Kea, yoga and juice cleanse workshop.",
-        features: ["Sailing", "Yoga", "Juice cleanse"]
+        features: ["Sailing", "Yoga", "Juice cleanse"],
+        lat: 37.6136, // Kea
+        lng: 24.3346
       },
       {
         title: "Kythnos",
         description: "Herbal spa and guided journaling.",
-        features: ["Spa visit", "Journaling"]
+        features: ["Spa visit", "Journaling"],
+        lat: 37.3933, // Kythnos
+        lng: 24.3966
       },
       {
         title: "Serifos",
         description: "Mindful hiking and beach meditation.",
-        features: ["Hiking", "Meditation"]
+        features: ["Hiking", "Meditation"],
+        lat: 37.1426, // Serifos
+        lng: 24.5027
       },
       {
         title: "Sifnos",
         description: "Group coaching and healthy cooking class.",
-        features: ["Coaching", "Cooking class"]
+        features: ["Coaching", "Cooking class"],
+        lat: 36.9800, // Sifnos
+        lng: 24.7136
       },
       {
         title: "Paros",
         description: "Thalassotherapy and farewell wellness circle.",
-        features: ["Thalassotherapy", "Wellness circle"]
+        features: ["Thalassotherapy", "Wellness circle"],
+        lat: 37.0850, // Paros
+        lng: 25.1500
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, integration session and goodbyes."
+        description: "Return to Athens, integration session and goodbyes.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Detox programs", "Holistic wellness", "Spa therapies", "Yoga", "Meditation", "Healthy meals", "Thalassotherapy"]
@@ -203,36 +261,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Meet in Athens",
         description: "Meet in Athens, Acropolis tour and welcome dinner.",
-        features: ["Acropolis tour", "Welcome dinner"]
+        features: ["Acropolis tour", "Welcome dinner"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Aegina",
         description: "Sail to Aegina, ancient temple visit.",
-        features: ["Sailing", "Temple visit"]
+        features: ["Sailing", "Temple visit"],
+        lat: 37.7450, // Aegina
+        lng: 23.4275
       },
       {
         title: "Poros",
         description: "Archaeological museum and local myths.",
-        features: ["Museum visit", "Local myths"]
+        features: ["Museum visit", "Local myths"],
+        lat: 37.5000, // Poros
+        lng: 23.4500
       },
       {
         title: "Hydra",
         description: "Maritime history walk and castle ruins.",
-        features: ["History walk", "Castle ruins"]
+        features: ["History walk", "Castle ruins"],
+        lat: 37.3500, // Hydra
+        lng: 23.4667
       },
       {
         title: "Spetses",
         description: "Traditional shipyard and folk museum.",
-        features: ["Shipyard visit", "Museum visit"]
+        features: ["Shipyard visit", "Museum visit"],
+        lat: 37.2500, // Spetses
+        lng: 23.1500
       },
       {
         title: "Epidaurus",
         description: "Ancient theater and healing sanctuary.",
-        features: ["Theater visit", "Sanctuary visit"]
+        features: ["Theater visit", "Sanctuary visit"],
+        lat: 37.6370, // Epidaurus
+        lng: 23.1597
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, closing lecture and brunch."
+        description: "Return to Athens, closing lecture and brunch.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Ancient sites", "Historical landmarks", "Archaeological museums", "History walks", "Traditional shipyards"]
@@ -247,36 +319,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Athens Welcome",
         description: "Athens welcome dinner and Greek meze workshop.",
-        features: ["Welcome dinner", "Meze workshop"]
+        features: ["Welcome dinner", "Meze workshop"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Syros",
         description: "Sail to Syros, market tour and seafood cooking class.",
-        features: ["Sailing", "Market tour", "Cooking class"]
+        features: ["Sailing", "Market tour", "Cooking class"],
+        lat: 37.4500, // Syros
+        lng: 24.9333
       },
       {
         title: "Tinos",
         description: "Cheese tasting and traditional bakery visit.",
-        features: ["Cheese tasting", "Bakery visit"]
+        features: ["Cheese tasting", "Bakery visit"],
+        lat: 37.5400, // Tinos
+        lng: 25.1667
       },
       {
         title: "Mykonos",
         description: "Wine tasting and sunset dinner.",
-        features: ["Wine tasting", "Sunset dinner"]
+        features: ["Wine tasting", "Sunset dinner"],
+        lat: 37.4500, // Mykonos
+        lng: 25.3333
       },
       {
         title: "Paros",
         description: "Olive oil workshop and village feast.",
-        features: ["Olive oil workshop", "Village feast"]
+        features: ["Olive oil workshop", "Village feast"],
+        lat: 37.0850, // Paros
+        lng: 25.1500
       },
       {
         title: "Naxos",
         description: "Farm-to-table experience and cooking contest.",
-        features: ["Farm visit", "Cooking contest"]
+        features: ["Farm visit", "Cooking contest"],
+        lat: 37.1000, // Naxos
+        lng: 25.3833
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, recipe exchange and farewell brunch."
+        description: "Return to Athens, recipe exchange and farewell brunch.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Greek cooking", "Market visits", "Wine tastings", "Cheese tastings", "Olive oil workshops", "Farm-to-table experiences"]
@@ -291,36 +377,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Meet in Athens",
         description: "Meet in Athens, family welcome party.",
-        features: ["Welcome party"]
+        features: ["Welcome party"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Aegina",
         description: "Sail to Aegina, beach games and treasure hunt.",
-        features: ["Sailing", "Beach games", "Treasure hunt"]
+        features: ["Sailing", "Beach games", "Treasure hunt"],
+        lat: 37.7450, // Aegina
+        lng: 23.4275
       },
       {
         title: "Poros",
         description: "Kayaking and local sweets tasting.",
-        features: ["Kayaking", "Sweets tasting"]
+        features: ["Kayaking", "Sweets tasting"],
+        lat: 37.5000, // Poros
+        lng: 23.4500
       },
       {
         title: "Hydra",
         description: "Donkey ride and art workshop.",
-        features: ["Donkey ride", "Art workshop"]
+        features: ["Donkey ride", "Art workshop"],
+        lat: 37.3500, // Hydra
+        lng: 23.4667
       },
       {
         title: "Spetses",
         description: "Family bike tour and picnic.",
-        features: ["Bike tour", "Picnic"]
+        features: ["Bike tour", "Picnic"],
+        lat: 37.2500, // Spetses
+        lng: 23.1500
       },
       {
         title: "Agistri",
         description: "Snorkeling and sunset music night.",
-        features: ["Snorkeling", "Music night"]
+        features: ["Snorkeling", "Music night"],
+        lat: 37.6981, // Agistri
+        lng: 23.3432
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, group slideshow and goodbyes."
+        description: "Return to Athens, group slideshow and goodbyes.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Treasure hunts", "Beach games", "Island explorations", "Kayaking", "Donkey rides", "Art workshops", "Bike tours", "Snorkeling"]
@@ -335,36 +435,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Athens Welcome",
         description: "Athens welcome party and night tour.",
-        features: ["Welcome party", "Night tour"]
+        features: ["Welcome party", "Night tour"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Mykonos",
         description: "Sail to Mykonos, beach club night.",
-        features: ["Sailing", "Beach club"]
+        features: ["Sailing", "Beach club"],
+        lat: 37.4500, // Mykonos
+        lng: 25.3333
       },
       {
         title: "Paros",
         description: "Sunset bar and live music.",
-        features: ["Sunset bar", "Live music"]
+        features: ["Sunset bar", "Live music"],
+        lat: 37.0850, // Paros
+        lng: 25.1500
       },
       {
         title: "Ios",
         description: "Pool party and island hopping.",
-        features: ["Pool party", "Island hopping"]
+        features: ["Pool party", "Island hopping"],
+        lat: 36.7333, // Ios
+        lng: 25.2833
       },
       {
         title: "Santorini",
         description: "Wine bar and night views.",
-        features: ["Wine bar", "Night views"]
+        features: ["Wine bar", "Night views"],
+        lat: 36.4000, // Santorini
+        lng: 25.4333
       },
       {
         title: "Naxos",
         description: "Beach bonfire and DJ set.",
-        features: ["Beach bonfire", "DJ set"]
+        features: ["Beach bonfire", "DJ set"],
+        lat: 37.1000, // Naxos
+        lng: 25.3833
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, farewell brunch and group photos."
+        description: "Return to Athens, farewell brunch and group photos.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Beach parties", "Hidden bars", "Sunset cocktails", "Live music", "Pool parties", "Island hopping", "Wine bars", "Beach bonfires"]
@@ -379,36 +493,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Athens Gourmet",
         description: "Athens gourmet welcome dinner.",
-        features: ["Welcome dinner"]
+        features: ["Welcome dinner"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Syros",
         description: "Sail to Syros, wine tasting and cheese workshop.",
-        features: ["Sailing", "Wine tasting", "Cheese workshop"]
+        features: ["Sailing", "Wine tasting", "Cheese workshop"],
+        lat: 37.4500, // Syros
+        lng: 24.9333
       },
       {
         title: "Tinos",
         description: "Olive oil and honey tour.",
-        features: ["Olive oil tour", "Honey tour"]
+        features: ["Olive oil tour", "Honey tour"],
+        lat: 37.5400, // Tinos
+        lng: 25.1667
       },
       {
         title: "Mykonos",
         description: "Seafood feast and cooking demo.",
-        features: ["Seafood feast", "Cooking demo"]
+        features: ["Seafood feast", "Cooking demo"],
+        lat: 37.4500, // Mykonos
+        lng: 25.3333
       },
       {
         title: "Paros",
         description: "Vineyard picnic and local delicacies.",
-        features: ["Vineyard picnic", "Local delicacies"]
+        features: ["Vineyard picnic", "Local delicacies"],
+        lat: 37.0850, // Paros
+        lng: 25.1500
       },
       {
         title: "Naxos",
         description: "Farm visit and chef's table experience.",
-        features: ["Farm visit", "Chef's table"]
+        features: ["Farm visit", "Chef's table"],
+        lat: 37.1000, // Naxos
+        lng: 25.3833
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, farewell tasting and gift bag."
+        description: "Return to Athens, farewell tasting and gift bag.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Greek cuisine", "Wine regions", "Gourmet meals", "Vineyard visits", "Cheese workshops", "Olive oil tours", "Farm visits", "Chef's table experiences"]
@@ -423,36 +551,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Athens Chef's Welcome",
         description: "Athens chef's welcome dinner and orientation.",
-        features: ["Welcome dinner", "Orientation"]
+        features: ["Welcome dinner", "Orientation"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Syros",
         description: "Sail to Syros, hands-on cooking lesson.",
-        features: ["Sailing", "Cooking lesson"]
+        features: ["Sailing", "Cooking lesson"],
+        lat: 37.4500, // Syros
+        lng: 24.9333
       },
       {
         title: "Tinos",
         description: "Market tour and pastry class.",
-        features: ["Market tour", "Pastry class"]
+        features: ["Market tour", "Pastry class"],
+        lat: 37.5400, // Tinos
+        lng: 25.1667
       },
       {
         title: "Mykonos",
         description: "Seafood workshop and wine pairing.",
-        features: ["Seafood workshop", "Wine pairing"]
+        features: ["Seafood workshop", "Wine pairing"],
+        lat: 37.4500, // Mykonos
+        lng: 25.3333
       },
       {
         title: "Paros",
         description: "Cheese making and mezze night.",
-        features: ["Cheese making", "Mezze night"]
+        features: ["Cheese making", "Mezze night"],
+        lat: 37.0850, // Paros
+        lng: 25.1500
       },
       {
         title: "Naxos",
         description: "Farm visit and chef's challenge.",
-        features: ["Farm visit", "Chef's challenge"]
+        features: ["Farm visit", "Chef's challenge"],
+        lat: 37.1000, // Naxos
+        lng: 25.3833
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, graduation lunch and certificates."
+        description: "Return to Athens, graduation lunch and certificates.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Greek recipes", "Local chefs", "Hands-on cooking", "Market visits", "Pastry classes", "Seafood workshops", "Wine pairings", "Cheese making"]
@@ -467,36 +609,50 @@ const adventures: Adventure[] = await Promise.all([
       {
         title: "Arrive in Athens",
         description: "Arrive in Athens, welcome dinner and bike fitting.",
-        features: ["Welcome dinner", "Bike fitting"]
+        features: ["Welcome dinner", "Bike fitting"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
       },
       {
         title: "Sail to Poros",
         description: "Sail to Poros, morning family bike ride along the pine coast, beach picnic.",
-        features: ["Sailing", "Bike ride", "Beach picnic"]
+        features: ["Sailing", "Bike ride", "Beach picnic"],
+        lat: 37.5000, // Poros
+        lng: 23.4500
       },
       {
         title: "Hydra",
         description: "Guided cycling tour through car-free streets, donkey meet-and-greet, swimming.",
-        features: ["Cycling tour", "Donkey meet-and-greet", "Swimming"]
+        features: ["Cycling tour", "Donkey meet-and-greet", "Swimming"],
+        lat: 37.3500, // Hydra
+        lng: 23.4667
       },
       {
         title: "Spetses",
         description: "Island loop ride, visit to a local bakery, sunset games on the beach.",
-        features: ["Island loop ride", "Bakery visit", "Sunset games"]
+        features: ["Island loop ride", "Bakery visit", "Sunset games"],
+        lat: 37.2500, // Spetses
+        lng: 23.1500
       },
       {
         title: "Aegina",
         description: "Ride to ancient temple, pistachio tasting, family cooking class.",
-        features: ["Ride to temple", "Pistachio tasting", "Cooking class"]
+        features: ["Ride to temple", "Pistachio tasting", "Cooking class"],
+        lat: 37.7450, // Aegina
+        lng: 23.4275
       },
       {
         title: "Agistri",
         description: "Forest cycling, snorkeling stop, and ice cream in the village square.",
-        features: ["Forest cycling", "Snorkeling", "Ice cream"]
+        features: ["Forest cycling", "Snorkeling", "Ice cream"],
+        lat: 37.6981, // Agistri
+        lng: 23.3432
       },
       {
         title: "Return to Athens",
-        description: "Return to Athens, farewell group ride and family photo session."
+        description: "Return to Athens, farewell group ride and family photo session.",
+        lat: 37.9838, // Athens
+        lng: 23.7275
       }
     ],
     features: ["Family cycling", "Gentle routes", "Island exploration", "Local culture", "Bike rides", "Beach picnics", "Cycling tours", "Donkey meet-and-greets", "Swimming", "Island loop rides", "Bakery visits", "Sunset games", "Rides to temples", "Pistachio tastings", "Cooking classes", "Forest cycling", "Snorkeling", "Ice cream"]

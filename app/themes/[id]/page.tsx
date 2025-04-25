@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import adventures from '../../adventures-data';
+import type { AdventureItineraryDay } from '../../adventures-data';
 import { featureIconMap } from '../../feature-icons';
+import ItineraryMapWrapper from './ItineraryMapWrapper.client';
 
 export type PageProps = Promise<{ id: string }>;
 
@@ -132,6 +134,16 @@ export default async function AdventureThemePage(props: { params: PageProps }) {
   const adventure = adventures.find((a) => a.id === id);
   if (!adventure) return notFound();
 
+  // Extract itinerary points with lat/lng if available
+  const itineraryPoints = (adventure.itinerary as AdventureItineraryDay[])
+    .filter(day => day.lat !== undefined && day.lng !== undefined)
+    .map(day => ({
+      title: day.title,
+      description: day.description,
+      lat: day.lat as number,
+      lng: day.lng as number,
+    }));
+
   return (
     <main className="relative min-h-screen w-full flex justify-center items-start bg-gradient-to-br from-[#101824] to-[#1f2937]">
       <AdventureBackground adventureId={adventure.id} />
@@ -139,6 +151,10 @@ export default async function AdventureThemePage(props: { params: PageProps }) {
         <Image src={adventure.image} alt={adventure.name} width={800} height={320} className="rounded-2xl shadow-xl w-full h-80 object-cover mb-8 border-4 border-accent" priority draggable={false} tabIndex={-1} style={{ animationDelay: '0.08s', animationFillMode: 'both' }} />
         <h1 className="text-5xl font-black mb-4 text-accent drop-shadow-lg tracking-tight animate-fade-in-up" style={{ animationDelay: '0.12s', animationFillMode: 'both' }}>{adventure.name}</h1>
         <p className="text-2xl mb-8 text-gray-200 animate-fade-in-up" style={{ animationDelay: '0.18s', animationFillMode: 'both' }}>{adventure.description}</p>
+        {/* MAP: Only show if points exist */}
+        {itineraryPoints.length > 0 && (
+          <ItineraryMapWrapper points={itineraryPoints} />
+        )}
         <div className="mb-10 animate-fade-in-up" style={{ animationDelay: '0.25s', animationFillMode: 'both' }}>
           <h2 className="text-3xl font-bold mb-3 text-accent">7-Day Experience</h2>
           <p className="mb-6 text-lg text-gray-100">{adventure.experience}</p>
