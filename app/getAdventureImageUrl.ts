@@ -20,7 +20,12 @@ export async function getAdventureImageUrl(adventureId: string, prompt: string, 
   if (typeof window !== 'undefined') {
     return `/adventures/${sanitizeFilename(name)}.png`;
   }
-  // On server, use the same logic as the API route
+
+  // On server, dynamically import fs and path
+  const fs = await import('fs');
+  const path = await import('path');
+  const IMAGE_DIR_JPG = path.join(process.cwd(), 'public', 'adventures');
+  const IMAGE_DIR_PNG = path.join(process.cwd(), 'public', 'adventures/OpenAI');
   const fileName_jpg = sanitizeFilename(name) + '.jpg';
   const filePath_jpg = path.join(IMAGE_DIR_JPG, fileName_jpg);
   if (fs.existsSync(filePath_jpg)) {

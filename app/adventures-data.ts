@@ -18,12 +18,12 @@ export type Adventure = {
   features?: string[];
 };
 
-const adventures: Adventure[] = await Promise.all([
+const adventures: Adventure[] = [
   {
     id: "1",
     name: "Wind Sports Adventure",
     description: "Master the winds with windsurfing, kitesurfing, and sailing in the best sports of Greece.",
-    image: await getAdventureImageUrl("1", "Windsurfing, kitesurfing, sailing adventure in Greece, blue sea, sporty, dynamic, sunny", "Wind Sports Adventure"),
+    image: "/adventures/wind_sports_adventure.jpg",
     experience: "Embark on a 7-day journey designed for thrill-seekers and water sports lovers. Each day brings a new windsurfing or kitesurfing spot, with expert instructors guiding you through lessons and free rides. Enjoy island hopping, beach barbecues, and sunset sails.",
     itinerary: [
       {
@@ -75,13 +75,13 @@ const adventures: Adventure[] = await Promise.all([
         lng: 23.7275
       }
     ],
-    features: ["Windsurfing", "Kitesurfing", "Sailing lessons", "Beach yoga", "Paddleboarding", "Beach BBQ", "Local culture"]
+    features: ["Windsurfing", "Kitesurfing", "Sailing", "Island hopping", "Beach BBQ", "Sunset sails"]
   },
   {
     id: "2",
     name: "Family Sailing School",
     description: "Learn sailing together as a family with certified instructors in safe, beautiful waters.",
-    image: await getAdventureImageUrl("2", "Family sailing, children, parents, learning together, calm sea, sunny, Greece", "Family Sailing School"),
+    image: "/adventures/OpenAI/family_sailing_school.png",
     experience: "A week-long adventure for families eager to learn the ropes of sailing. Each day features hands-on lessons, fun challenges, and safe swimming spots for all ages. Evenings are spent anchored in quiet bays, enjoying family meals and stargazing.",
     itinerary: [
       {
@@ -139,7 +139,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "3",
     name: "Yoga & Wellness Retreat",
     description: "Combine sailing with daily yoga, meditation, and wellness activities for mind and body.",
-    image: await getAdventureImageUrl("3", "Yoga on a boat, wellness, meditation, sunrise, peaceful, Greek islands, blue water", "Yoga & Wellness Retreat"),
+    image: "/adventures/yoga___wellness_retreat.jpg",
     experience: "Relax and rejuvenate on a 7-day retreat blending sailing with holistic wellness. Start each morning with yoga on deck, followed by healthy meals and meditation sessions. Discover secluded coves and enjoy spa treatments at select ports.",
     itinerary: [
       {
@@ -197,7 +197,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "4",
     name: "Cleansing & Renewal",
     description: "A transformative journey combining sailing, detox programs, and holistic wellness.",
-    image: await getAdventureImageUrl("4", "Detox, wellness, sailing, Greek islands, healthy food, yoga, meditation", "Cleansing & Renewal"),
+    image: "/adventures/OpenAI/cleansing___renewal.png",
     experience: "A week focused on cleansing body and mind. Enjoy daily detox meals, guided mindfulness, and spa therapies. Sail to tranquil islands, participate in wellness workshops, and experience the healing power of the Aegean.",
     itinerary: [
       {
@@ -255,7 +255,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "5",
     name: "Greek Heritage Explorer",
     description: "Journey through time visiting ancient sites and historical landmarks by sea.",
-    image: await getAdventureImageUrl("5", "Ancient Greek ruins, sailing, history, culture, Greek islands, blue sea", "Greek Heritage Explorer"),
+    image: "/adventures/OpenAI/greek_heritage_explorer.png",
     experience: "Explore the cradle of Western civilization over 7 days. Sail to islands rich in history, guided by expert archaeologists. Visit temples, amphitheaters, and museums, with storytelling evenings under the stars.",
     itinerary: [
       {
@@ -313,7 +313,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "6",
     name: "Culinary Traditions",
     description: "Master Greek cooking while sailing through different regions and their unique flavors.",
-    image: await getAdventureImageUrl("6", "Greek cuisine, cooking, sailing, traditional recipes, local ingredients, Greek islands", "Culinary Traditions"),
+    image: "/adventures/OpenAI/culinary_traditions.png",
     experience: "A 7-day gastronomic voyage for food lovers. Each day features hands-on cooking classes, market visits, and wine tastings. Discover the secrets of Greek cuisine while anchoring in picturesque harbors.",
     itinerary: [
       {
@@ -371,7 +371,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "7",
     name: "Family Bonding Adventure",
     description: "Create lasting memories with activities designed for the whole family.",
-    image: await getAdventureImageUrl("7", "Family adventure, sailing, Greek islands, fun, games, bonding, quality time", "Family Bonding Adventure"),
+    image: "/adventures/OpenAI/family_bonding_adventure.png",
     experience: "A week of fun and connection for families. Each day brings new adventures: treasure hunts, beach games, and island explorations. Evenings feature storytelling, music, and shared meals under the stars.",
     itinerary: [
       {
@@ -429,7 +429,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "8",
     name: "Island Nightlife",
     description: "Experience the vibrant nightlife of Greek islands with friends.",
-    image: await getAdventureImageUrl("8", "Greek island nightlife, bars, clubs, dancing, fun, friends, party", "Island Nightlife"),
+    image: "/adventures/OpenAI/island_nightlife.png",
     experience: "Set sail for a week of excitement and celebration. Visit the most lively islands, enjoy beach parties, and discover hidden bars. Each night brings a new adventure, from sunset cocktails to dancing under the stars.",
     itinerary: [
       {
@@ -487,7 +487,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "9",
     name: "Sephardic Heritage Sailing: Thessaloniki & Beyond",
     description: "Discover the rich Jewish and Sephardic history of Thessaloniki and Northern Greece, sailing to sites of memory and culture. This adventure can be arranged as a fully Kosher experience, including Kosher meals and guidance.",
-    image: await getAdventureImageUrl("9", "Sailing, Thessaloniki, Jewish heritage, Sephardic history, synagogue, Greece, blue sea, historic sites", "Sephardic Heritage Sailing"),
+    image: "/adventures/OpenAI/sephardic_heritage_sailing.png",
     experience: "Embark on a 7-day cultural and historical journey starting from Thessaloniki, the Jerusalem of the Balkans. Visit the city's main Jewish landmarks, then sail to historic Sephardic communities along the Aegean coast. Guided tours, storytelling, and authentic cuisine bring the Sephardic legacy to life.",
     itinerary: [
       {
@@ -546,7 +546,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "10",
     name: "Mediterranean Flavors",
     description: "A gastronomic journey through Greece's finest cuisines and wine regions.",
-    image: await getAdventureImageUrl("10", "Greek cuisine, wine, sailing, Mediterranean flavors, local ingredients, traditional recipes", "Mediterranean Flavors"),
+    image: "/adventures/OpenAI/mediterranean_flavors.png",
     experience: "Indulge in a 7-day culinary escape. Taste the best of Greek cuisine, from fresh seafood to local cheeses and wines. Visit vineyards, meet local chefs, and enjoy gourmet meals with a view.",
     itinerary: [
       {
@@ -604,7 +604,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "11",
     name: "Greek Cooking Masters",
     description: "Learn authentic Greek recipes from local chefs while sailing the islands.",
-    image: await getAdventureImageUrl("11", "Greek cooking, sailing, local chefs, traditional recipes, cooking classes, Greek islands", "Greek Cooking Masters"),
+    image: "/adventures/OpenAI/greek_cooking_masters.png",
     experience: "A week for aspiring chefs and foodies. Daily workshops with renowned chefs, market visits, and hands-on cooking. End each day with a shared meal and stories from Greek culinary traditions.",
     itinerary: [
       {
@@ -662,7 +662,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "12",
     name: "Greek Islands Family Bike Adventure",
     description: "Cycle with your family through the beautiful Greek islands, combining sailing and biking for all ages.",
-    image: await getAdventureImageUrl("12", "Family biking, Greek islands, cycling, sailing, children, parents, scenic, adventure", "Greek Islands Family Bike Adventure"),
+    image: "/adventures/OpenAI/greek_islands_family_bike_adventure.png",
     experience: "A unique 7-day adventure where you and your family explore the Greek islands by both sailboat and bicycle. Each day features gentle rides along scenic coastal paths, stops at picturesque villages, and plenty of time for swimming and local treats. All routes are family-friendly and supported by guides, with flexible options for all ages and abilities.",
     itinerary: [
       {
@@ -720,7 +720,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "13",
     name: "Ionian Fishing & Island Discovery",
     description: "Experience the thrill of fishing in the crystal-clear waters of the Ionian Sea, including the beautiful island of Zakynthos. Perfect for anglers and sea lovers alike.",
-    image: await getAdventureImageUrl("13", "Fishing, Zakynthos, Ionian Sea, Greek islands, sailing, blue water, fresh catch, boat, adventure", "Ionian Fishing & Island Discovery"),
+    image: "/adventures/OpenAI/ionian_fishing___island_discovery.png",
     experience: "Set sail for a week of fishing and exploration in the Ionian islands. Learn traditional and modern fishing techniques from local experts, enjoy daily catches prepared onboard, and discover the vibrant marine life of Zakynthos, Kefalonia, and surrounding isles. Relax in secluded bays, swim in turquoise waters, and savor the freshest seafood dinners under the stars.",
     itinerary: [
       {
@@ -779,7 +779,7 @@ const adventures: Adventure[] = await Promise.all([
     id: "14",
     name: "Romantic Aegean Cruise: Proposal & Honeymoon",
     description: "A dreamy sailing adventure for couples, perfect for proposals, honeymoons, or anniversaries. Private, luxurious, and unforgettable.",
-    image: await getAdventureImageUrl("14", "Romantic sailing, couple, sunset, proposal, honeymoon, Greek islands, luxury yacht, candlelight dinner, rose petals, blue sea", "Romantic Aegean Cruise"),
+    image: "/adventures/OpenAI/romantic_aegean_cruise.png",
     experience: "Set sail on a private yacht with your loved one for a week of romance in the Greek islands. Enjoy secluded beaches, sunset dinners, and personalized touches for proposals or honeymoons. Each day is crafted to celebrate your love with privacy, luxury, and breathtaking scenery.",
     itinerary: [
       {
@@ -834,6 +834,6 @@ const adventures: Adventure[] = await Promise.all([
     ],
     features: ["Romantic", "Private yacht", "Proposal planning", "Honeymoon", "Luxury", "Secluded beaches", "Candlelit dinners", "Spa treatment", "Personalized experiences", "Photography"]
   }
-]);
+];
 
 export default adventures;
