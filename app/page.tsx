@@ -25,6 +25,7 @@ export default function Home() {
       category: "Culture & History",
       themes: [
         adventures.find(a => a.id === "5"), // Greek Heritage Explorer
+        adventures.find(a => a.id === "9"), // Sephardic Heritage Sailing: Thessaloniki & Beyond
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {

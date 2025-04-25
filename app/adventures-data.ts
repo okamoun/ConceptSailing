@@ -485,9 +485,68 @@ const adventures: Adventure[] = await Promise.all([
   },
   {
     id: "9",
+    name: "Sephardic Heritage Sailing: Thessaloniki & Beyond",
+    description: "Discover the rich Jewish and Sephardic history of Thessaloniki and Northern Greece, sailing to sites of memory and culture. This adventure can be arranged as a fully Kosher experience, including Kosher meals and guidance.",
+    image: await getAdventureImageUrl("9", "Sailing, Thessaloniki, Jewish heritage, Sephardic history, synagogue, Greece, blue sea, historic sites", "Sephardic Heritage Sailing"),
+    experience: "Embark on a 7-day cultural and historical journey starting from Thessaloniki, the Jerusalem of the Balkans. Visit the city's main Jewish landmarks, then sail to historic Sephardic communities along the Aegean coast. Guided tours, storytelling, and authentic cuisine bring the Sephardic legacy to life.",
+    itinerary: [
+      {
+        title: "Arrival in Thessaloniki",
+        description: "Arrive in Thessaloniki, welcome dinner with Sephardic cuisine. Evening walking tour of the old Jewish quarter.",
+        features: ["Welcome dinner", "Jewish quarter tour"],
+        lat: 40.6401, // Thessaloniki
+        lng: 22.9444
+      },
+      {
+        title: "Monastirioton Synagogue & Jewish Museum",
+        description: "Morning visit to the Monastirioton Synagogue, then the Jewish Museum of Thessaloniki. Afternoon free to explore Ladadika district.",
+        features: ["Synagogue visit", "Jewish Museum", "Ladadika district"],
+        lat: 40.6389,
+        lng: 22.9408
+      },
+      {
+        title: "Holocaust Memorial & Sailing to Kavala",
+        description: "Visit the Holocaust Memorial, then set sail east to the port city of Kavala. Evening stroll along the old port.",
+        features: ["Holocaust Memorial", "Sailing", "Old port walk"],
+        lat: 40.9369, // Kavala
+        lng: 24.4129
+      },
+      {
+        title: "Kavala Jewish Heritage",
+        description: "Discover Kavala's Jewish history with a guided tour, including the old Jewish quarter and synagogue site. Afternoon sail to Volos.",
+        features: ["Jewish quarter tour", "Synagogue site", "Sailing"],
+        lat: 39.3610, // Volos
+        lng: 22.9425
+      },
+      {
+        title: "Volos Synagogue & Community",
+        description: "Visit the Volos Synagogue and meet with local community members. Enjoy a Sephardic-style lunch. Evening at leisure in Volos.",
+        features: ["Synagogue visit", "Community meeting", "Sephardic lunch"],
+        lat: 39.3610, // Volos
+        lng: 22.9425
+      },
+      {
+        title: "Sail to Skiathos: Island Sephardic Stories",
+        description: "Sail to Skiathos. Guided walk through the old town, sharing stories of Sephardic traders and refugees. Beach afternoon.",
+        features: ["Sailing", "Storytelling", "Beach"],
+        lat: 39.1621, // Skiathos
+        lng: 23.4900
+      },
+      {
+        title: "Return to Thessaloniki & Farewell",
+        description: "Return sail to Thessaloniki. Closing reflections and group brunch at a local Jewish café. Departure in the afternoon.",
+        features: ["Return sail", "Farewell brunch"],
+        lat: 40.6401, // Thessaloniki
+        lng: 22.9444
+      }
+    ],
+    features: ["Jewish heritage", "Sephardic history", "Synagogue visits", "Museums", "Storytelling", "Sailing", "Cultural cuisine", "Kosher available"]
+  },
+  {
+    id: "10",
     name: "Mediterranean Flavors",
     description: "A gastronomic journey through Greece's finest cuisines and wine regions.",
-    image: await getAdventureImageUrl("9", "Greek cuisine, wine, sailing, Mediterranean flavors, local ingredients, traditional recipes", "Mediterranean Flavors"),
+    image: await getAdventureImageUrl("10", "Greek cuisine, wine, sailing, Mediterranean flavors, local ingredients, traditional recipes", "Mediterranean Flavors"),
     experience: "Indulge in a 7-day culinary escape. Taste the best of Greek cuisine, from fresh seafood to local cheeses and wines. Visit vineyards, meet local chefs, and enjoy gourmet meals with a view.",
     itinerary: [
       {
@@ -542,10 +601,10 @@ const adventures: Adventure[] = await Promise.all([
     features: ["Greek cuisine", "Wine regions", "Gourmet meals", "Vineyard visits", "Cheese workshops", "Olive oil tours", "Farm visits", "Chef's table experiences"]
   },
   {
-    id: "10",
+    id: "11",
     name: "Greek Cooking Masters",
     description: "Learn authentic Greek recipes from local chefs while sailing the islands.",
-    image: await getAdventureImageUrl("10", "Greek cooking, sailing, local chefs, traditional recipes, cooking classes, Greek islands", "Greek Cooking Masters"),
+    image: await getAdventureImageUrl("11", "Greek cooking, sailing, local chefs, traditional recipes, cooking classes, Greek islands", "Greek Cooking Masters"),
     experience: "A week for aspiring chefs and foodies. Daily workshops with renowned chefs, market visits, and hands-on cooking. End each day with a shared meal and stories from Greek culinary traditions.",
     itinerary: [
       {
@@ -600,10 +659,10 @@ const adventures: Adventure[] = await Promise.all([
     features: ["Greek recipes", "Local chefs", "Hands-on cooking", "Market visits", "Pastry classes", "Seafood workshops", "Wine pairings", "Cheese making"]
   },
   {
-    id: "11",
+    id: "12",
     name: "Greek Islands Family Bike Adventure",
     description: "Cycle with your family through the beautiful Greek islands, combining sailing and biking for all ages.",
-    image: await getAdventureImageUrl("11", "Family biking, Greek islands, cycling, sailing, children, parents, scenic, adventure", "Greek Islands Family Bike Adventure"),
+    image: await getAdventureImageUrl("12", "Family biking, Greek islands, cycling, sailing, children, parents, scenic, adventure", "Greek Islands Family Bike Adventure"),
     experience: "A unique 7-day adventure where you and your family explore the Greek islands by both sailboat and bicycle. Each day features gentle rides along scenic coastal paths, stops at picturesque villages, and plenty of time for swimming and local treats. All routes are family-friendly and supported by guides, with flexible options for all ages and abilities.",
     itinerary: [
       {
@@ -656,6 +715,65 @@ const adventures: Adventure[] = await Promise.all([
       }
     ],
     features: ["Family cycling", "Gentle routes", "Island exploration", "Local culture", "Bike rides", "Beach picnics", "Cycling tours", "Donkey meet-and-greets", "Swimming", "Island loop rides", "Bakery visits", "Sunset games", "Rides to temples", "Pistachio tastings", "Cooking classes", "Forest cycling", "Snorkeling", "Ice cream"]
+  },
+  {
+    id: "13",
+    name: "Ionian Fishing & Island Discovery",
+    description: "Experience the thrill of fishing in the crystal-clear waters of the Ionian Sea, including the beautiful island of Zakynthos. Perfect for anglers and sea lovers alike.",
+    image: await getAdventureImageUrl("13", "Fishing, Zakynthos, Ionian Sea, Greek islands, sailing, blue water, fresh catch, boat, adventure", "Ionian Fishing & Island Discovery"),
+    experience: "Set sail for a week of fishing and exploration in the Ionian islands. Learn traditional and modern fishing techniques from local experts, enjoy daily catches prepared onboard, and discover the vibrant marine life of Zakynthos, Kefalonia, and surrounding isles. Relax in secluded bays, swim in turquoise waters, and savor the freshest seafood dinners under the stars.",
+    itinerary: [
+      {
+        title: "Arrival in Zakynthos",
+        description: "Arrive in Zakynthos, meet your crew and fellow anglers. Welcome dinner featuring local seafood specialties.",
+        features: ["Welcome dinner", "Seafood specialties"],
+        lat: 37.7870, // Zakynthos
+        lng: 20.8990
+      },
+      {
+        title: "Zakynthos Fishing Day",
+        description: "Morning fishing expedition off Zakynthos coast. Afternoon swim at Navagio Beach (Shipwreck Bay). Evening grilling your catch onboard.",
+        features: ["Fishing", "Navagio Beach", "Grilled catch"],
+        lat: 37.8590, // Navagio Beach
+        lng: 20.6240
+      },
+      {
+        title: "Kefalonia Adventure",
+        description: "Sail to Kefalonia, trolling and bottom fishing en route. Explore Argostoli port and enjoy a seafood taverna dinner.",
+        features: ["Trolling", "Bottom fishing", "Seafood taverna"],
+        lat: 38.1754, // Argostoli
+        lng: 20.4890
+      },
+      {
+        title: "Ithaca Island",
+        description: "Early morning fishing and snorkeling near Ithaca. Afternoon village walk and local meze tasting.",
+        features: ["Fishing", "Snorkeling", "Meze tasting"],
+        lat: 38.3670, // Ithaca
+        lng: 20.7200
+      },
+      {
+        title: "Lefkada Lagoons",
+        description: "Sail to Lefkada, fish in the lagoons and salt flats. Birdwatching and picnic lunch by the water.",
+        features: ["Lagoon fishing", "Birdwatching", "Picnic"],
+        lat: 38.8333, // Lefkada
+        lng: 20.7000
+      },
+      {
+        title: "Meganisi Hidden Coves",
+        description: "Anchor at Meganisi, try hand-line fishing in secluded coves. Evening beach BBQ with your fresh catch.",
+        features: ["Hand-line fishing", "Beach BBQ", "Secluded coves"],
+        lat: 38.6500, // Meganisi
+        lng: 20.7833
+      },
+      {
+        title: "Return to Zakynthos & Farewell",
+        description: "Return to Zakynthos. Farewell brunch and sharing of fishing stories and photos. Departure in the afternoon.",
+        features: ["Return sail", "Farewell brunch", "Fishing stories"],
+        lat: 37.7870, // Zakynthos
+        lng: 20.8990
+      }
+    ],
+    features: ["Fishing", "Seafood cuisine", "Local guides", "Beach BBQ", "Swimming", "Snorkeling", "Island exploration"]
   }
 ]);
 
