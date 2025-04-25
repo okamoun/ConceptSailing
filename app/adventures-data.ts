@@ -774,6 +774,65 @@ const adventures: Adventure[] = await Promise.all([
       }
     ],
     features: ["Fishing", "Seafood cuisine", "Local guides", "Beach BBQ", "Swimming", "Snorkeling", "Island exploration"]
+  },
+  {
+    id: "14",
+    name: "Romantic Aegean Cruise: Proposal & Honeymoon",
+    description: "A dreamy sailing adventure for couples, perfect for proposals, honeymoons, or anniversaries. Private, luxurious, and unforgettable.",
+    image: await getAdventureImageUrl("14", "Romantic sailing, couple, sunset, proposal, honeymoon, Greek islands, luxury yacht, candlelight dinner, rose petals, blue sea", "Romantic Aegean Cruise"),
+    experience: "Set sail on a private yacht with your loved one for a week of romance in the Greek islands. Enjoy secluded beaches, sunset dinners, and personalized touches for proposals or honeymoons. Each day is crafted to celebrate your love with privacy, luxury, and breathtaking scenery.",
+    itinerary: [
+      {
+        title: "Welcome to Athens",
+        description: "Arrive in Athens, champagne welcome and private transfer to your yacht. Romantic dinner onboard with city views.",
+        features: ["Champagne welcome", "Private transfer", "Romantic dinner"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
+      },
+      {
+        title: "Saronic Gulf Escape",
+        description: "Sail to a secluded bay in the Saronic Gulf. Swim, relax, and enjoy a candlelit dinner on deck under the stars.",
+        features: ["Secluded bay", "Swimming", "Candlelit dinner"],
+        lat: 37.6500, // Saronic Gulf
+        lng: 23.4000
+      },
+      {
+        title: "Hydra Island Magic",
+        description: "Explore the romantic island of Hydra. Horse-drawn carriage ride and sunset drinks at a cliffside bar.",
+        features: ["Hydra island", "Carriage ride", "Sunset drinks"],
+        lat: 37.3500, // Hydra
+        lng: 23.4667
+      },
+      {
+        title: "Poros: Private Beach Day",
+        description: "Anchor at a hidden cove near Poros. Picnic lunch, snorkeling, and time for a surprise proposal or vow renewal.",
+        features: ["Private beach", "Picnic", "Snorkeling", "Proposal spot"],
+        lat: 37.5000, // Poros
+        lng: 23.4500
+      },
+      {
+        title: "Spetses: Island Romance",
+        description: "Visit Spetses for a couple's spa treatment and stroll through charming streets. Gourmet dinner at a seaside taverna.",
+        features: ["Couple's spa", "Island stroll", "Gourmet dinner"],
+        lat: 37.2500, // Spetses
+        lng: 23.1500
+      },
+      {
+        title: "Aegina: Sunset & Celebration",
+        description: "Sail to Aegina, sunset swim and celebration dinner with live music. Optional photographer for memories.",
+        features: ["Sunset swim", "Celebration dinner", "Live music", "Photography"],
+        lat: 37.7450, // Aegina
+        lng: 23.4275
+      },
+      {
+        title: "Return to Athens & Farewell",
+        description: "Return to Athens. Farewell brunch and private transfer to your hotel or airport. Option for a surprise gift or message.",
+        features: ["Farewell brunch", "Private transfer", "Surprise gift"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
+      }
+    ],
+    features: ["Romantic", "Private yacht", "Proposal planning", "Honeymoon", "Luxury", "Secluded beaches", "Candlelit dinners", "Spa treatment", "Personalized experiences", "Photography"]
   }
 ]);
 
