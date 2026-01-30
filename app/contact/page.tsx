@@ -11,7 +11,7 @@ export default function ContactPage() {
     <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
       <div className="max-w-3xl mx-auto px-4 glass p-10 shadow-xl border border-accent animate-fade-in-up">
         <div className="flex flex-col items-center mb-8">
-          <Image src="/logo_white_no_bg.png" alt="Concept Mediterranean Sailing Logo" width={80} height={80} className="mb-4" />
+         <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={140} height={140} className="mb-2" />
           <h1 className="text-4xl font-extrabold text-accent mb-2 text-center">Contact Us</h1>
           <p className="text-lg text-gray-200 text-center max-w-xl">We&apos;d love to help you plan your perfect Greek sailing adventure. Reach out for bookings, questions, or custom requests!</p>
         </div>

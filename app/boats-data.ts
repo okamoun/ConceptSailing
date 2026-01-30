@@ -19,7 +19,7 @@ export const boats: Boat[] = [
     brand: "Lagoon",
     length: "52 ft",
     description: "A premier catamaran offering comfort, stability, and green technology. Features large cabins, a flybridge, and extensive leisure gear. Perfect for sustainable luxury sailing.",
-    image: "/images/boats/lagoon-52f.jpg"
+    image: "/images/boats/lagoon-55.jpg"
   },
   {
     name: "Fountaine Pajot Aura 51",
