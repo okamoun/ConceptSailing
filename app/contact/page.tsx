@@ -31,9 +31,13 @@ export default function ContactPage() {
           <button type="submit" className="button-premium w-full py-3 text-lg font-bold rounded">Send Message</button>
         </form>
         <div className="mt-10 text-center text-gray-300">
-          <p>Email: <a href="mailto:info@windsurfcruises.com" className="text-accent underline">info@windsurfcruises.com</a></p>
-          <p>Phone: +30 123 456 7890</p>
-        </div>
+  <p>Email: <a href="mailto:contact@nj3cruises.com" className="text-accent underline">info@windsurfcruises.com</a></p>
+  <p>Phone: +33 6 75 60 45 32</p>
+  <div className="mt-6">
+    <p className="text-lg font-bold text-accent">NJ3 CRUISES</p>
+    <p className="text-lg">Adresse: 87 POSEIDONOS AVENUE 16674 - GLYFADA, Greece</p>
+  </div>
+</div>
       </div>
     </main>
   );

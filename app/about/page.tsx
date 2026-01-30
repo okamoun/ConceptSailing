@@ -11,9 +11,10 @@ export default function AboutPage() {
     <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
       <div className="max-w-3xl mx-auto px-4 glass p-10 shadow-xl border border-accent animate-fade-in-up">
         <div className="flex flex-col items-center mb-8">
-          <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={140} height={140} className="mb-4" />
-          <h1 className="text-4xl font-extrabold text-accent mb-2 text-center">About Us</h1>
-        </div>
+  <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={140} height={140} className="mb-2" />
+  <span className="text-accent font-semibold mb-2">By NJ3 cruises company</span>
+  <h1 className="text-4xl font-extrabold text-accent mb-2 text-center">About Us</h1>
+</div>
         <section className="text-lg text-gray-200 space-y-6">
           <p>
             <strong>Concept Mediterranean Sailing</strong> is redefining the way you experience sailing holidays in Greece. Traditionally, yacht charters have been all about the boat: its size, its luxury, its speed. But we believe the heart of a truly memorable holiday lies elsewhere.
