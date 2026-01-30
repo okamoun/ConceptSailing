@@ -34,7 +34,7 @@ export default function ContactPage() {
   <p>Email: <a href="mailto:contact@nj3cruises.com" className="text-accent underline">info@windsurfcruises.com</a></p>
   <p>Phone: +33 6 75 60 45 32</p>
   <div className="mt-6">
-    <p className="text-lg font-bold text-accent">NJ3 CRUISES</p>
+    <p className="text-lg font-bold text-accent">NJ3 CRUISES ike</p>
     <p className="text-lg">Adresse: 87 POSEIDONOS AVENUE 16674 - GLYFADA, Greece</p>
   </div>
 </div>
