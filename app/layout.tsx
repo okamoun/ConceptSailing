@@ -22,9 +22,10 @@ export default function RootLayout({
       <body className={inter.className + " bg-gradient-to-br from-[#101824] to-[#1f2937] min-h-screen"}>
         <nav className="glass shadow-lg">
           <div className="container mx-auto px-4 py-5 flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-3 group">
-              <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={200} height={128} className="h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105" style={{maxHeight:'160px'}} priority />
-              </Link>
+            <Link href="/" className="flex flex-col items-center gap-3 group">
+  <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={200} height={128} className="h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105" style={{maxHeight:'160px'}} priority />
+  <span className="text-accent font-semibold text-sm mt-1">By NJ3Cruises ike</span>
+</Link>
             <div className="space-x-8 text-lg font-semibold">
               <Link href="/themes" className="hover:text-accent transition-colors">Adventure Themes</Link>
               <Link href="/destinations" className="hover:text-accent transition-colors">Destinations</Link>
@@ -57,7 +58,11 @@ export default function RootLayout({
             <div>
               <h3 className="text-xl font-bold mb-4 text-accent">Contact Us</h3>
               <p className="text-lg">Email: <a href="mailto:info@windsurfcruises.com" className="hover:text-accent">info@windsurfcruises.com</a></p>
-              <p className="text-lg">Phone: +30 123 456 7890</p>
+<p className="text-lg">Phone: +30 123 456 7890</p>
+<div className="mt-4">
+  <p className="text-lg font-bold text-accent">NJ3 CRUISES</p>
+  <p className="text-lg">Adresse: 87 POSEIDONOS AVENUE 16674 - GLYFADA, Greece</p>
+</div>
             </div>
           </div>
         </footer>
