@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       size: '512x512',
       response_format: 'b64_json',
     });
-    const imageData = aiResponse.data[0].b64_json;
+    const imageData = aiResponse.data?.[0]?.b64_json;
     if (!imageData) {
       return NextResponse.json({ error: 'No image data returned from OpenAI' }, { status: 500 });
     }

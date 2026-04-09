@@ -22,14 +22,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 nav {
-  background: linear-gradient(90deg, #101824 60%, #1f2937 100%);
+  background: linear-gradient(90deg, #101824 0%, #1f2937 100%);
   box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  border-bottom: 1px solid rgba(201, 168, 107, 0.2);
 }
 
 footer {
-  background: var(--primary);
-  color: var(--accent);
-  border-top: 1px solid var(--border);
+  background: #1f2937;
+  color: var(--foreground);
+  border-top: 1px solid rgba(201, 168, 107, 0.3);
 }
 
 .glass {

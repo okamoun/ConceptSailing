@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@react-google-maps/api": "^2.20.6",
     "framer-motion": "^12.7.5",
     "next": "15.3.8",

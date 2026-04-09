@@ -22,7 +22,7 @@ export const boats: Boat[] = [
     image: "/images/boats/lagoon-55.jpg"
   },
   {
-    name: "Fountaine Pajot Aura 51",
+    name: "BlueOne",
     brand: "Fountaine Pajot",
     length: "51 ft",
     description: "A new-generation catamaran with a focus on eco-responsibility, solar panels, and hybrid systems. Elegant design with full safety and entertainment options for guests.",

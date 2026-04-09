@@ -38,7 +38,7 @@ export async function getAdventureImageUrl(adventureId: string, prompt: string, 
       size: '512x512',
       response_format: 'b64_json',
     });
-    const imageData = aiResponse.data[0].b64_json;
+    const imageData = aiResponse.data?.[0]?.b64_json;
     if (!imageData) {
       return `/images/placeholder.png`;
     }
