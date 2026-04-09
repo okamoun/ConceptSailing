@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import Link from 'next/link';
 import { sendBookingEmails, BookingEmailData } from '../../lib/emailjs';
+import adventures from '../adventures-data';
 
 interface Boat {
   name: string;
@@ -30,6 +31,8 @@ export default function BookingPageContent() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [holidayDescription, setHolidayDescription] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -154,6 +157,8 @@ export default function BookingPageContent() {
         date: selectedDate,
         passengers: passengers,
         embarkationPoint: embarkationPoints.find(point => point.id === embarkationPoint)?.name || '',
+        holidayDescription: holidayDescription || undefined,
+        selectedTheme: selectedTheme ? adventures.find(a => a.id === selectedTheme)?.name : undefined,
         timestamp: new Date().toISOString()
       };
 
@@ -375,6 +380,62 @@ export default function BookingPageContent() {
               </div>
             )}
 
+            {/* Holiday Preferences */}
+            <div>
+              <h3 className="text-xl font-semibold text-accent mb-4">Holiday Preferences</h3>
+              
+              {/* Holiday Description */}
+              <div className="mb-6">
+                <label className="block text-lg font-semibold text-accent mb-3">
+                  Describe Your Ideal Holiday
+                </label>
+                <textarea
+                  value={holidayDescription}
+                  onChange={(e) => setHolidayDescription(e.target.value)}
+                  rows={4}
+                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none resize-none"
+                  placeholder="Tell us about your ideal sailing holiday - activities you enjoy, places you'd like to visit, special occasions, etc..."
+                />
+                <p className="text-gray-400 text-sm mt-2">
+                  Help us customize your perfect sailing experience (optional)
+                </p>
+              </div>
+
+              {/* Adventure Theme Selection */}
+              <div>
+                <label className="block text-lg font-semibold text-accent mb-3">
+                  Preferred Adventure Theme
+                </label>
+                <select
+                  value={selectedTheme}
+                  onChange={(e) => setSelectedTheme(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                >
+                  <option value="">Select a theme (optional)</option>
+                  {adventures.map((adventure) => (
+                    <option key={adventure.id} value={adventure.id}>
+                      {adventure.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-gray-400 text-sm mt-2">
+                  Choose from our curated adventure themes or leave blank for a custom experience
+                </p>
+              </div>
+
+              {/* Selected Theme Description */}
+              {selectedTheme && (
+                <div className="mt-4 p-4 bg-accent/10 rounded-lg border border-accent/30">
+                  <h4 className="text-lg font-semibold text-accent mb-2">
+                    {adventures.find(a => a.id === selectedTheme)?.name}
+                  </h4>
+                  <p className="text-gray-300 text-sm">
+                    {adventures.find(a => a.id === selectedTheme)?.description}
+                  </p>
+                </div>
+              )}
+            </div>
+
             </div>
 
             {/* Booking Summary */}
@@ -424,6 +485,29 @@ export default function BookingPageContent() {
                   </div>
                 </div>
               </div>
+
+              {/* Holiday Preferences */}
+              {(holidayDescription || selectedTheme) && (
+                <div className="mb-4">
+                  <h4 className="text-lg font-semibold text-accent mb-2">Holiday Preferences</h4>
+                  <div className="space-y-2 text-gray-300">
+                    {holidayDescription && (
+                      <div>
+                        <span className="font-medium">Ideal Holiday:</span>
+                        <p className="text-white mt-1 text-sm">{holidayDescription}</p>
+                      </div>
+                    )}
+                    {selectedTheme && (
+                      <div className="flex justify-between">
+                        <span>Preferred Theme:</span>
+                        <span className="text-white">
+                          {adventures.find(a => a.id === selectedTheme)?.name || 'Not selected'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}

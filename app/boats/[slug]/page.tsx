@@ -1,41 +1,23 @@
+'use client';
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { boats } from '../../boats-data';
 import Image from "next/image";
+import { useState, useEffect } from 'react';
 
 interface BoatPageProps {
-  params: Promise<{
+  params: {
     slug: string;
-  }>;
-}
-
-export async function generateMetadata({ params }: BoatPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const boat = boats.find(b => b.name.toLowerCase().replace(/\s+/g, '-') === slug);
-  
-  if (!boat) {
-    return {
-      title: 'Boat Not Found | Concept Sailing',
-      description: 'The requested boat could not be found.'
-    };
-  }
-
-  return {
-    title: `${boat.name} | Concept Sailing`,
-    description: boat.description,
   };
 }
 
-export async function generateStaticParams() {
-  return boats.map((boat) => ({
-    slug: boat.name.toLowerCase().replace(/\s+/g, '-'),
-  }));
-}
-
-export default async function BoatPage({ params }: BoatPageProps) {
-  const { slug } = await params;
-  const boat = boats.find(b => b.name.toLowerCase().replace(/\s+/g, '-') === slug);
+export default function BoatPage({ params }: BoatPageProps) {
+  const [boat, setBoat] = useState(boats.find(b => b.name.toLowerCase().replace(/\s+/g, '-') === params.slug));
+  
+  // Modal state for crew image popup
+  const [modalImage, setModalImage] = useState<string | null>(null);
 
   if (!boat) {
     notFound();
@@ -43,18 +25,19 @@ export default async function BoatPage({ params }: BoatPageProps) {
 
   // BlueOne specific images from the blueone folder - organized by content
   const blueOneExteriorImages = boat.name === "BlueOne" ? [
+        "/images/boats/blueone/IMG_8670.jpeg", // Interior cabin/saloon
+    "/images/boats/blueone/IMG_8671.jpeg", // Interior detail
+    "/images/boats/blueone/8cb240ec-16e9-4574-aba4-113b3bbe3e36.jpg", // Interior galley or cabin
     "/images/boats/blueone/IMG_7667.jpeg", // Main exterior shot
     "/images/boats/blueone/277080815_7549724425052761_8631137394407809070_n.jpeg", // Sailing exterior
     "/images/boats/blueone/3cb1b5e1-c194-4ae2-bdcd-87d1681d432d.jpg", // Exterior profile
     "/images/boats/blueone/IMG4-FP51-2.jpg.webp", // Another exterior view
-    "/images/boats/blueone/WhatsApp Image 2026-03-11 at 18.33.02.jpeg", // Additional exterior
   ] : [];
 
   const blueOneInteriorImages = boat.name === "BlueOne" ? [
-    "/images/boats/blueone/IMG_8670.jpeg", // Interior cabin/saloon
-    "/images/boats/blueone/IMG_8671.jpeg", // Interior detail
-    "/images/boats/blueone/8cb240ec-16e9-4574-aba4-113b3bbe3e36.jpg", // Interior galley or cabin
-    "/images/boats/blueone/WhatsApp Image 2026-03-11 at 19.05.27.jpeg", // Interior view
+
+    "/images/boats/blueone/Actu-3-Aura51-Maestro-Bed.jpg.avif", // Master bedroom
+    "/images/boats/blueone/Actu-4-Aura51-Cabine-Bed.jpg.avif", // Cabin bedroom
   ] : [];
 
   const blueOneCockpitImages = boat.name === "BlueOne" ? [
@@ -65,12 +48,13 @@ export default async function BoatPage({ params }: BoatPageProps) {
 
   // Food and dining images - using available images that showcase dining experience
   const blueOneFoodImages = boat.name === "BlueOne" ? [
-    "/images/boats/blueone/0038_451.12.0-Presentation-Maestro-1.png.webp", // Dining presentation
-    "/images/boats/blueone/seabob-f5s-pic-1-1.jpg", // Additional lifestyle image
+    "/images/boats/blueone/food_1.jpeg", 
+    "/images/boats/blueone/food_2.jpeg", 
+    "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif", // Cockpit dining table
   ] : [];
 
   const blueOneChefImages = boat.name === "BlueOne" ? [
-    "/images/boats/blueone/0038_451.12.0-Presentation-Maestro-1.png.webp", // Chef placeholder using local image
+    "/images/boats/blueone/Chef Andreas aboard a Greek yacht.png", // Chef Andreas Tsitsilianis
   ] : [];
 
   // Captain images for the crew section
@@ -81,10 +65,19 @@ export default async function BoatPage({ params }: BoatPageProps) {
   // Activity images showing water toys and deck activities
   const blueOneActivityImages = boat.name === "BlueOne" ? [
     "/images/boats/blueone/Seabob_1.jpeg", // Seabob water toy
-    "/images/boats/blueone/images.jpeg", // General activity image
+    "/images/boats/blueone/seabob-f5s-pic-1-1.jpg", // Additional Seabob/water toy image
+    "/images/boats/blueone/snorkeling.png", // Snorkeling activity
+    "/images/boats/blueone/SUP_Relax.png", // SUP relaxation activity
+    "/images/boats/blueone/SUP_Yoga.png", // SUP yoga activity
+  ] : [];
+
+  // Floor plan image - using the floorplan file
+  const blueOneFloorplanImages = boat.name === "BlueOne" ? [
+    "/images/boats/blueone/floorplan.jpg", // Floor plan image
   ] : [];
 
   return (
+    <>
     <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
       <div className="max-w-6xl mx-auto px-4">
         <div className="mb-8">
@@ -118,6 +111,44 @@ export default async function BoatPage({ params }: BoatPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
               <p className="text-lg text-gray-100 leading-relaxed">{boat.description}</p>
+              
+              {/* Enhanced BlueOne Description */}
+              {boat.name === "BlueOne" && (
+                <div className="mt-6 p-6 bg-accent/10 rounded-lg border border-accent/30">
+                  <h3 className="text-xl font-semibold text-accent mb-4">Yacht Details & Specifications</h3>
+                  <div className="text-gray-100 leading-relaxed space-y-3">
+                    <p>
+                      <strong>BLUEONE</strong> is a brand-new Fountaine Pajot Aura 51, built in 2025, designed to offer comfort, efficiency, and a modern sailing experience. She accommodates up to 10 guests in five spacious double cabins, all with private en-suite facilities.
+                    </p>
+                    <p>
+                      Equipped with electric propulsion, BLUEONE cruises quietly at 5 knots with zero fuel consumption, offering an eco-friendly and peaceful experience at sea. With the hybrid mode generator in use, she cruises at 8 knots with a fuel consumption of 8 liters per hour, ensuring efficient performance.
+                    </p>
+                    <p>
+                      The extensive battery system provides 220V electricity in full comfort throughout your journey.
+                    </p>
+                  </div>
+                  
+                  {/* Key Specifications */}
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-[#1f2937] p-4 rounded-lg">
+                      <h4 className="text-accent font-semibold mb-2">Performance</h4>
+                      <ul className="text-gray-300 text-sm space-y-1">
+                        <li>Electric propulsion: 5 knots (0 fuel)</li>
+                        <li>Hybrid mode: 8 knots (8L/hour)</li>
+                        <li>Battery-powered 220V system</li>
+                      </ul>
+                    </div>
+                    <div className="bg-[#1f2937] p-4 rounded-lg">
+                      <h4 className="text-accent font-semibold mb-2">Accommodation</h4>
+                      <ul className="text-gray-300 text-sm space-y-1">
+                        <li>5 spacious double cabins</li>
+                        <li>Private en-suite facilities</li>
+                        <li>Up to 10 guests</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div>
@@ -258,6 +289,87 @@ export default async function BoatPage({ params }: BoatPageProps) {
                       <span>Swim platform with shower</span>
                     </li>
                   </ul>
+                  
+                  {/* Floor Plan Subsection */}
+                  <div className="mt-8 p-6 bg-accent/10 rounded-lg border border-accent/30">
+                    <h3 className="text-2xl font-semibold text-accent mb-4">Yacht Layout & Floor Plan</h3>
+                    
+                    {/* Display floorplan image if available */}
+                    {blueOneFloorplanImages.length > 0 ? (
+                      <div className="mb-4">
+                        {blueOneFloorplanImages.map((image: string, index: number) => (
+                          <div key={index} className="mb-4">
+                            <Image
+                              src={image}
+                              alt="BlueOne Floor Plan"
+                              width={800}
+                              height={600}
+                              className="w-full h-auto object-contain rounded-lg border-2 border-accent/50"
+                              draggable={false}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Placeholder layout when floorplan image not available */
+                      <div className="mb-4">
+                        <div className="bg-gradient-to-r from-[#1f2937] to-[#101824] p-8 rounded-lg border-2 border-accent/50">
+                          <div className="text-center">
+                            <div className="text-accent text-6xl mb-4">Lagoon 52F</div>
+                            <div className="text-gray-300 text-xl mb-6">Luxury Catamaran Layout</div>
+                            
+                            {/* Simplified Floor Plan Layout */}
+                            <div className="grid grid-cols-3 gap-2 max-w-md mx-auto mb-6">
+                              <div className="bg-accent/20 p-4 rounded border border-accent/50">
+                                <div className="text-xs text-accent font-semibold">MASTER</div>
+                                <div className="text-xs text-gray-300">Suite</div>
+                              </div>
+                              <div className="bg-accent/20 p-4 rounded border border-accent/50">
+                                <div className="text-xs text-accent font-semibold">SALOON</div>
+                                <div className="text-xs text-gray-300">Dining</div>
+                              </div>
+                              <div className="bg-accent/20 p-4 rounded border border-accent/50">
+                                <div className="text-xs text-accent font-semibold">GALLEY</div>
+                                <div className="text-xs text-gray-300">Kitchen</div>
+                              </div>
+                              <div className="bg-accent/20 p-4 rounded border border-accent/50">
+                                <div className="text-xs text-accent font-semibold">CABIN 1</div>
+                                <div className="text-xs text-gray-300">Double</div>
+                              </div>
+                              <div className="bg-accent/20 p-4 rounded border border-accent/50">
+                                <div className="text-xs text-accent font-semibold">CABIN 2</div>
+                                <div className="text-xs text-gray-300">Double</div>
+                              </div>
+                              <div className="bg-accent/20 p-4 rounded border border-accent/50">
+                                <div className="text-xs text-accent font-semibold">CABIN 3</div>
+                                <div className="text-xs text-gray-300">Double</div>
+                              </div>
+                            </div>
+                            
+                            <div className="text-gray-300 text-sm">
+                              <p className="mb-2">Length: 52 ft | Beam: 29.5 ft | Draft: 4.9 ft</p>
+                              <p>4 Cabins | 4 Bathrooms | 8 Guests + 2 Crew</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <ul className="space-y-2 text-gray-200 text-sm">
+                      <li className="flex items-start gap-2">
+                        <span className="text-accent"></span>
+                        <span>Starboard hull: Master suite forward, galley mid, crew cabin aft</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-accent"></span>
+                        <span>Port hull: 3 double cabins with en-suite bathrooms</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-accent"></span>
+                        <span>Central deck: Spacious saloon with dining and navigation</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
                 <div>
                   <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -513,15 +625,20 @@ export default async function BoatPage({ params }: BoatPageProps) {
                       <h3 className="text-2xl font-semibold text-accent mb-3">Local Captain</h3>
                       <div className="flex gap-4 mb-3">
                         {blueOneCaptainImages.map((image: string, index: number) => (
-                          <Image
+                          <div 
                             key={index}
-                            src={image}
-                            alt="Captain Ioannis Aliferis"
-                            width={120}
-                            height={120}
-                            className="w-24 h-24 object-cover rounded-full border-2 border-accent/50"
-                            draggable={false}
-                          />
+                            className="cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => setModalImage(image)}
+                          >
+                            <Image
+                              src={image}
+                              alt="Captain Ioannis Aliferis"
+                              width={120}
+                              height={120}
+                              className="w-24 h-24 object-cover rounded-full border-2 border-accent/50 hover:border-accent transition-colors"
+                              draggable={false}
+                            />
+                          </div>
                         ))}
                         <div className="flex-1">
                           <p className="text-gray-200">
@@ -540,15 +657,20 @@ export default async function BoatPage({ params }: BoatPageProps) {
                       <h3 className="text-2xl font-semibold text-accent mb-3">Chef & Crew</h3>
                       <div className="flex gap-4 mb-3">
                         {blueOneChefImages.map((image: string, index: number) => (
-                          <Image
+                          <div 
                             key={index}
-                            src={image}
-                            alt="Chef Andreas Tsitsilianis"
-                            width={120}
-                            height={120}
-                            className="w-24 h-24 object-cover rounded-full border-2 border-accent/50"
-                            draggable={false}
-                          />
+                            className="cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => setModalImage(image)}
+                          >
+                            <Image
+                              src={image}
+                              alt="Chef Andreas Tsitsilianis"
+                              width={120}
+                              height={120}
+                              className="w-24 h-24 object-cover rounded-full border-2 border-accent/50 hover:border-accent transition-colors"
+                              draggable={false}
+                            />
+                          </div>
                         ))}
                         <div className="flex-1">
                           <p className="text-gray-200">
@@ -635,5 +757,36 @@ export default async function BoatPage({ params }: BoatPageProps) {
         </div>
       </div>
     </main>
+
+    {/* Image Modal for Crew Profiles */}
+    {modalImage && (
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+        onClick={() => setModalImage(null)}
+      >
+        <div className="relative max-w-4xl max-h-full">
+          <button
+            className="absolute -top-12 right-0 text-white text-2xl hover:text-accent transition-colors"
+            onClick={() => setModalImage(null)}
+          >
+            × Close
+          </button>
+          {modalImage && (
+            <Image
+              src={modalImage}
+              alt="Crew Member Profile"
+              width={800}
+              height={600}
+              className="max-w-full max-h-full object-contain rounded-lg"
+              draggable={false}
+            />
+          )}
+          <div className="text-center mt-4 text-white">
+            <p className="text-sm">Click anywhere to close</p>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

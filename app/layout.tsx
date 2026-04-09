@@ -56,7 +56,7 @@ export default function RootLayout({
             </div>
             <div>
               <h3 className="text-xl font-bold mb-4 text-accent">Contact Us</h3>
-              <p className="text-lg">Email: <a href="mailto:contact@conceptsailing.com" className="hover:text-accent transition-colors">contact@conceptsailing.com</a></p>
+              <p className="text-lg">Email: <a href="mailto:contact@nj3cruises.com" className="hover:text-accent transition-colors">contact@nj3cruises.com</a></p>
               <p className="text-lg">Phone: +30 210 123 4567</p>
               <div className="mt-4">
                 <p className="text-lg font-bold text-accent">Concept Sailing</p>

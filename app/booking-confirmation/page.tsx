@@ -238,7 +238,7 @@ export default function BookingConfirmationPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-accent font-semibold mb-1">Email</div>
-                <div className="text-gray-300">bookings@conceptsailing.com</div>
+                <div className="text-gray-300">bookings@nj3cruises.com</div>
               </div>
               <div>
                 <div className="text-accent font-semibold mb-1">Phone</div>

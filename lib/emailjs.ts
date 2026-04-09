@@ -7,7 +7,7 @@ const EMAILJS_BUSINESS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_BUSINESS_TE
 const EMAILJS_CLIENT_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CLIENT_TEMPLATE_ID || 'demo_client_template';
 
 // Fallback business email for demo purposes
-const BUSINESS_EMAIL = 'contact@conceptsailing.com';
+const BUSINESS_EMAIL = 'contact@nj3cruises.com';
 
 export interface BookingEmailData {
   name: string;
@@ -17,6 +17,8 @@ export interface BookingEmailData {
   date: string;
   passengers: number;
   embarkationPoint: string;
+  holidayDescription?: string;
+  selectedTheme?: string;
   timestamp: string;
 }
 
@@ -89,6 +91,8 @@ export async function sendBusinessNotificationEmail(bookingData: BookingEmailDat
       charter_date: bookingData.date,
       passengers: bookingData.passengers,
       embarkation_point: bookingData.embarkationPoint,
+      comment: bookingData.holidayDescription,
+      theme : bookingData.selectedTheme,
       submission_time: new Date(bookingData.timestamp).toLocaleString(),
       reply_to: bookingData.email,
     };
@@ -152,6 +156,8 @@ export async function sendClientConfirmationEmail(bookingData: BookingEmailData)
       passengers: bookingData.passengers,
       embarkation_point: bookingData.embarkationPoint,
       submission_time: new Date(bookingData.timestamp).toLocaleString(),
+      comment: bookingData.holidayDescription,
+      theme : bookingData.selectedTheme,
       contact_email: BUSINESS_EMAIL,
       contact_phone: '+30 210 123 4567',
     };
