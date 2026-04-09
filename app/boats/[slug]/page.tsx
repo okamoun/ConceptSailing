@@ -1,6 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { boats } from '../../boats-data';
@@ -8,16 +7,42 @@ import Image from "next/image";
 import { useState, useEffect } from 'react';
 
 interface BoatPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default function BoatPage({ params }: BoatPageProps) {
-  const [boat, setBoat] = useState(boats.find(b => b.name.toLowerCase().replace(/\s+/g, '-') === params.slug));
+  const [slug, setSlug] = useState<string>('');
+  const [boat, setBoat] = useState(boats.find(b => b.name.toLowerCase().replace(/\s+/g, '-') === slug));
+  const [isLoading, setIsLoading] = useState(true);
   
   // Modal state for crew image popup
   const [modalImage, setModalImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setSlug(resolvedParams.slug);
+      const foundBoat = boats.find(b => b.name.toLowerCase().replace(/\s+/g, '-') === resolvedParams.slug);
+      setBoat(foundBoat);
+      setIsLoading(false);
+    };
+    getParams();
+  }, [params]);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <div className="animate-pulse">
+            <h1 className="text-4xl font-bold text-accent mb-4">Loading...</h1>
+            <p className="text-gray-300">Loading boat details...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   if (!boat) {
     notFound();
@@ -54,7 +79,7 @@ export default function BoatPage({ params }: BoatPageProps) {
   ] : [];
 
   const blueOneChefImages = boat.name === "BlueOne" ? [
-    "/images/boats/blueone/Chef Andreas aboard a Greek yacht.png", // Chef Andreas Tsitsilianis
+    "/images/boats/blueone/profile_andrea_chef.jpg", // Chef Andreas Tsitsilianis
   ] : [];
 
   // Captain images for the crew section
@@ -642,7 +667,7 @@ export default function BoatPage({ params }: BoatPageProps) {
                         ))}
                         <div className="flex-1">
                           <p className="text-gray-200">
-                           Ioannis's connection with the sea is very special — it started from a very young age and has eventually become his profession. In the meantime he finished his studies in design and construction of systems and products, gaining technical experience and strong problem-solving skills. His professional career at sea started six years ago. Through this time he has developed excellent nautical skills and in-depth knowledge of boat management, ensuring the comfort and safety of all passengers. In every weather condition, with responsibility and composure, he guarantees every guest a memorable experience.
+                           Ioannis&apos;s connection with the sea is very special — it started from a very young age and has eventually become his profession. In the meantime he finished his studies in design and construction of systems and products, gaining technical experience and strong problem-solving skills. His professional career at sea started six years ago. Through this time he has developed excellent nautical skills and in-depth knowledge of boat management, ensuring the comfort and safety of all passengers. In every weather condition, with responsibility and composure, he guarantees every guest a memorable experience.
                           </p>
                         </div>
                       </div>
@@ -679,11 +704,14 @@ export default function BoatPage({ params }: BoatPageProps) {
                         </div>
                       </div>
                       <ul className="space-y-1 text-gray-300 text-sm">
-                        <li>Andreas Tsitsilianis - Executive Chef</li>
-                        <li>Luxury hotel experience in Mykonos</li>
-                        <li>Fine-dining expertise in Athens</li>
-                        <li>International culinary experience (Italy & France)</li>
-                        <li>Michelin-level precision with Mediterranean soul</li>
+                        <li>I am Andreas Tsitsilianis, a chef with over 12 years of experience in professional kitchens across Greece and Europe.
+Coming from a family of cooks, my passion for food was shaped from an early age, with knowledge and values passed down from father to son. This foundation taught me to respect ingredients and focus on simplicity, flavor, and authenticity.
+</li>
+<li> I have worked in France and Italy, as well as in high-end restaurants in Athens, Mykonos, and as a Head Chef in Tinos. These experiences have shaped my culinary identity, combining discipline, creativity, and consistency.
+</li>
+<li>My cuisine is inspired by modern Mediterranean flavors, with a strong Greek identity. I focus on fresh, seasonal ingredients, seafood, and balanced dishes, combining traditional recipes with refined techniques and subtle international influences.  
+On board, my goal is to create a relaxed yet refined dining experience, adapting to guests’ preferences while delivering clean, flavorful and memorable dishes.
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -725,6 +753,96 @@ export default function BoatPage({ params }: BoatPageProps) {
                 </div>
               </div>
             </section>
+
+            {/* Sample Menu Section - BlueOne Only */}
+            {boat.name === "BlueOne" && (
+              <section className="mt-16 glass p-8 shadow-xl animate-fade-in-up">
+                <h2 className="text-4xl font-bold text-accent mb-8 text-center">Sample Mediterranean Menu</h2>
+                <p className="text-center text-gray-300 mb-8 max-w-3xl mx-auto">
+                  Chef Andreas creates a daily menu inspired by fresh, seasonal ingredients and modern Mediterranean cuisine. Below is a sample of what you might experience during your BlueOne journey.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {/* Appetizers */}
+                  <div className="bg-[#1f2937] p-6 rounded-lg border border-accent/30">
+                    <h3 className="text-2xl font-semibold text-accent mb-6 text-center">Appetizers</h3>
+                    <div className="space-y-4">
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Greek Mezze Platter</h4>
+                        <p className="text-gray-300 text-sm">Tzatziki, hummus, taramasalata, olives, fresh vegetables</p>
+                      </div>
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Grilled Calamari</h4>
+                        <p className="text-gray-300 text-sm">Fresh squid with lemon, olive oil, and herbs</p>
+                      </div>
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Seafood Ceviche</h4>
+                        <p className="text-gray-300 text-sm">Fresh fish marinated in citrus with Mediterranean herbs</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white mb-1">Greek Salad</h4>
+                        <p className="text-gray-300 text-sm">Tomatoes, cucumber, feta, olives, red onion</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Courses */}
+                  <div className="bg-[#1f2937] p-6 rounded-lg border border-accent/30">
+                    <h3 className="text-2xl font-semibold text-accent mb-6 text-center">Main Courses</h3>
+                    <div className="space-y-4">
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Fresh Fish of the Day</h4>
+                        <p className="text-gray-300 text-sm">Grilled local catch with lemon butter sauce</p>
+                      </div>
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Lobster Pasta</h4>
+                        <p className="text-gray-300 text-sm">Homemade pasta with fresh lobster, cherry tomatoes</p>
+                      </div>
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Moussaka</h4>
+                        <p className="text-gray-300 text-sm">Traditional layers with eggplant, meat sauce, béchamel</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white mb-1">Grilled Lamb Chops</h4>
+                        <p className="text-gray-300 text-sm">Herb-crusted with roasted vegetables</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Desserts & Beverages */}
+                  <div className="bg-[#1f2937] p-6 rounded-lg border border-accent/30">
+                    <h3 className="text-2xl font-semibold text-accent mb-6 text-center">Desserts & Wine</h3>
+                    <div className="space-y-4">
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Baklava</h4>
+                        <p className="text-gray-300 text-sm">Honey-soaked phyllo with pistachios and walnuts</p>
+                      </div>
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Greek Yogurt Parfait</h4>
+                        <p className="text-gray-300 text-sm">Local honey, fresh berries, granola</p>
+                      </div>
+                      <div className="border-b border-accent/20 pb-3">
+                        <h4 className="font-semibold text-white mb-1">Wine Selection</h4>
+                        <p className="text-gray-300 text-sm">Greek wines: Assyrtiko, Agiorgitiko, Xinomavro</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white mb-1">Fresh Fruit Platter</h4>
+                        <p className="text-gray-300 text-sm">Seasonal Mediterranean fruits</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 p-6 bg-accent/10 rounded-lg border border-accent/30 text-center">
+                  <p className="text-gray-200 mb-2">
+                    <strong>Chef&apos;s Note:</strong> All menus are customized based on fresh daily catch, seasonal availability, and guest preferences.
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    Dietary restrictions and special requests are accommodated with advance notice.
+                  </p>
+                </div>
+              </section>
+            )}
 
             {/* Complete Gallery Section */}
             <section className="mt-16 glass p-8 shadow-xl animate-fade-in-up">
