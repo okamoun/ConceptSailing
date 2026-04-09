@@ -26,7 +26,7 @@ export default function BoatsPage() {
       return a[sortBy].localeCompare(b[sortBy]);
     });
 
-  const brands = ['all', ...Array.from(new Set(boats.map(boat => boat.brand)))];
+  const brands: Array<'all' | 'Fountaine Pajot' | 'Lagoon'> = ['all', ...Array.from(new Set(boats.map(boat => boat.brand))) as Array<'Fountaine Pajot' | 'Lagoon'>];
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
@@ -70,7 +70,7 @@ export default function BoatsPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Filter by Brand</label>
                 <select 
                   value={selectedBrand}
-                  onChange={(e) => setSelectedBrand(e.target.value as any)}
+                  onChange={(e) => setSelectedBrand(e.target.value as 'all' | 'Fountaine Pajot' | 'Lagoon')}
                   className="bg-[#1f2937] border border-accent/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 >
                   {brands.map(brand => (
@@ -84,7 +84,7 @@ export default function BoatsPage() {
                 <label className="block text-sm font-medium text-gray-300 mb-2">Sort by</label>
                 <select 
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={(e) => setSortBy(e.target.value as 'name' | 'length' | 'brand')}
                   className="bg-[#1f2937] border border-accent/50 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 >
                   <option value="name">Name</option>
