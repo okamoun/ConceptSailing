@@ -50,17 +50,17 @@ export default function BoatPage({ params }: BoatPageProps) {
 
   // BlueOne specific images from the blueone folder - organized by content
   const blueOneExteriorImages = boat.name === "BlueOne" ? [
-        "/images/boats/blueone/IMG_8670.jpeg", // Interior cabin/saloon
-    "/images/boats/blueone/IMG_8671.jpeg", // Interior detail
-    "/images/boats/blueone/8cb240ec-16e9-4574-aba4-113b3bbe3e36.jpg", // Interior galley or cabin
     "/images/boats/blueone/IMG_7667.jpeg", // Main exterior shot
-    "/images/boats/blueone/277080815_7549724425052761_8631137394407809070_n.jpeg", // Sailing exterior
-    "/images/boats/blueone/3cb1b5e1-c194-4ae2-bdcd-87d1681d432d.jpg", // Exterior profile
-    "/images/boats/blueone/IMG4-FP51-2.jpg.webp", // Another exterior view
+    "/images/boats/blueone/External_reading.jpg", // Exterior reading area
+    "/images/boats/blueone/External_sailing.jpg", // Sailing exterior view
+    "/images/boats/blueone/IMG_8914.jpeg", // Exterior view
+    "/images/boats/blueone/IMG_8917.jpeg", // Another exterior view
+    "/images/boats/blueone/277080815_7549724425052761_8631137394407809070_n.jpeg", // Exterior photo
   ] : [];
 
   const blueOneInteriorImages = boat.name === "BlueOne" ? [
-
+    "/images/boats/blueone/Interior_table.jpg", // Interior dining table area
+    "/images/boats/blueone/kitchen.jpg", // Kitchen/galley area
     "/images/boats/blueone/Actu-3-Aura51-Maestro-Bed.jpg.avif", // Master bedroom
     "/images/boats/blueone/Actu-4-Aura51-Cabine-Bed.jpg.avif", // Cabin bedroom
   ] : [];
@@ -638,117 +638,220 @@ export default function BoatPage({ params }: BoatPageProps) {
 
             {/* Crew Section */}
             <section className="mt-16 glass p-8 shadow-xl animate-fade-in-up">
-              <h2 className="text-4xl font-bold text-accent mb-6">Professional Crew</h2>
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-accent mb-4">Meet Your Professional Crew</h2>
+                <p className="text-gray-300 text-lg max-w-3xl mx-auto">
+                  BlueOne is operated by a first-class professional crew dedicated to providing exceptional service 
+                  and ensuring your safety and comfort throughout your journey.
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-gray-100 leading-relaxed mb-6">
-                    BlueOne is operated by a first-class professional crew dedicated to providing exceptional service 
-                    and ensuring your safety and comfort throughout your journey.
-                  </p>
-                  <div className="space-y-6">
-                    <div className="p-6 bg-accent/10 rounded-lg border border-accent/30">
-                      <h3 className="text-2xl font-semibold text-accent mb-3">Local Captain</h3>
-                      <div className="flex gap-4 mb-3">
+                {/* Captain Card */}
+                <div className="bg-gradient-to-br from-accent/5 to-accent/10 rounded-2xl border border-accent/30 overflow-hidden hover:shadow-2xl transition-all duration-300">
+                  <div className="bg-accent/20 p-4 border-b border-accent/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5h9" />
+                        </svg>
+                      </div>
+                      <h3 className="text-2xl font-bold text-white">Captain</h3>
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <div className="flex flex-col sm:flex-row gap-6 mb-6">
+                      <div className="flex-shrink-0">
                         {blueOneCaptainImages.map((image: string, index: number) => (
                           <div 
                             key={index}
-                            className="cursor-pointer hover:scale-105 transition-transform"
+                            className="cursor-pointer group relative"
                             onClick={() => setModalImage(image)}
                           >
+                            <div className="absolute inset-0 bg-accent/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                             <Image
                               src={image}
                               alt="Captain Ioannis Aliferis"
                               width={120}
                               height={120}
-                              className="w-24 h-24 object-cover rounded-full border-2 border-accent/50 hover:border-accent transition-colors"
+                              className="w-28 h-28 object-cover rounded-full border-3 border-accent/50 group-hover:border-accent transition-all duration-300 shadow-lg"
                               draggable={false}
                             />
+                            <div className="absolute bottom-0 right-0 bg-accent text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                              Click to view
+                            </div>
                           </div>
                         ))}
-                        <div className="flex-1">
-                          <p className="text-gray-200">
-                           Ioannis&apos;s connection with the sea is very special — it started from a very young age and has eventually become his profession. In the meantime he finished his studies in design and construction of systems and products, gaining technical experience and strong problem-solving skills. His professional career at sea started six years ago. Through this time he has developed excellent nautical skills and in-depth knowledge of boat management, ensuring the comfort and safety of all passengers. In every weather condition, with responsibility and composure, he guarantees every guest a memorable experience.
-                          </p>
-                        </div>
                       </div>
-                      <ul className="space-y-1 text-gray-300 text-sm">
-                        <li>Ioannis Aliferis - Professional Captain</li>
-                        <li>6+ years professional maritime experience</li>
-                        <li>Technical background in systems design</li>
-                        <li>Expert boat management and safety skills</li>
-                      </ul>
+                      
+                      <div className="flex-1">
+                        <h4 className="text-xl font-bold text-white mb-2">Ioannis Aliferis</h4>
+                        <p className="text-accent font-medium mb-3">Professional Captain</p>
+                        <p className="text-gray-300 leading-relaxed text-sm">
+                          Ioannis&apos;s connection with the sea is very special - it started from a very young age and has eventually become his profession. Through his technical background and 6+ years of maritime experience, he ensures exceptional comfort and safety for all guests.
+                        </p>
+                      </div>
                     </div>
-                    <div className="p-6 bg-accent/10 rounded-lg border border-accent/30">
-                      <h3 className="text-2xl font-semibold text-accent mb-3">Chef & Crew</h3>
-                      <div className="flex gap-4 mb-3">
-                        {blueOneChefImages.map((image: string, index: number) => (
-                          <div 
-                            key={index}
-                            className="cursor-pointer hover:scale-105 transition-transform"
-                            onClick={() => setModalImage(image)}
-                          >
-                            <Image
-                              src={image}
-                              alt="Chef Andreas Tsitsilianis"
-                              width={120}
-                              height={120}
-                              className="w-24 h-24 object-cover rounded-full border-2 border-accent/50 hover:border-accent transition-colors"
-                              draggable={false}
-                            />
-                          </div>
-                        ))}
-                        <div className="flex-1">
-                          <p className="text-gray-200">
-                            Andreas is a highly skilled chef who brings a blend of Michelin-level precision and authentic Mediterranean soul to the sea. With a career that spans luxury hotels in Mykonos, fine-dining landmarks in Athens, and international experience in Italy and France, he is an expert at tailoring world-class culinary experiences for high-end clientele.
-                          </p>
-                        </div>
-                      </div>
-                      <ul className="space-y-1 text-gray-300 text-sm">
-                        <li>I am Andreas Tsitsilianis, a chef with over 12 years of experience in professional kitchens across Greece and Europe.
-Coming from a family of cooks, my passion for food was shaped from an early age, with knowledge and values passed down from father to son. This foundation taught me to respect ingredients and focus on simplicity, flavor, and authenticity.
-</li>
-<li> I have worked in France and Italy, as well as in high-end restaurants in Athens, Mykonos, and as a Head Chef in Tinos. These experiences have shaped my culinary identity, combining discipline, creativity, and consistency.
-</li>
-<li>My cuisine is inspired by modern Mediterranean flavors, with a strong Greek identity. I focus on fresh, seasonal ingredients, seafood, and balanced dishes, combining traditional recipes with refined techniques and subtle international influences.  
-On board, my goal is to create a relaxed yet refined dining experience, adapting to guests’ preferences while delivering clean, flavorful and memorable dishes.
+                    
+                    <div className="bg-[#1f2937]/50 rounded-lg p-4">
+                      <h5 className="text-accent font-semibold mb-3">Expertise & Qualifications</h5>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-300 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          6+ years maritime experience
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          Technical systems design
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          Expert boat management
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          Advanced safety skills
                         </li>
                       </ul>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <div className="p-6 bg-accent/10 rounded-lg border border-accent/30">
-                    <h3 className="text-xl font-semibold text-accent mb-4">Crew Services</h3>
-                    <ul className="space-y-2 text-gray-200">
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent">•</span>
-                        <span>24/7 professional service</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent">•</span>
-                        <span>Daily housekeeping</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent">•</span>
-                        <span>Gourmet meal preparation</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent">•</span>
-                        <span>Bar service and cocktail mixing</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent">•</span>
-                        <span>Water sports instruction</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent">•</span>
-                        <span>Local excursion planning</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-accent">•</span>
-                        <span>Evening entertainment coordination</span>
-                      </li>
-                    </ul>
+
+                {/* Chef Card */}
+                <div className="bg-gradient-to-br from-accent/5 to-accent/10 rounded-2xl border border-accent/30 overflow-hidden hover:shadow-2xl transition-all duration-300">
+                  <div className="bg-accent/20 p-4 border-b border-accent/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                      </div>
+                      <h3 className="text-2xl font-bold text-white">Executive Chef</h3>
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <div className="flex flex-col sm:flex-row gap-6 mb-6">
+                      <div className="flex-shrink-0">
+                        {blueOneChefImages.map((image: string, index: number) => (
+                          <div 
+                            key={index}
+                            className="cursor-pointer group relative"
+                            onClick={() => setModalImage(image)}
+                          >
+                            <div className="absolute inset-0 bg-accent/20 rounded-full scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                            <Image
+                              src={image}
+                              alt="Chef Andreas Tsitsilianis"
+                              width={120}
+                              height={120}
+                              className="w-28 h-28 object-cover rounded-full border-3 border-accent/50 group-hover:border-accent transition-all duration-300 shadow-lg"
+                              draggable={false}
+                            />
+                            <div className="absolute bottom-0 right-0 bg-accent text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                              Click to view
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <h4 className="text-xl font-bold text-white mb-2">Andreas Tsitsilianis</h4>
+                        <p className="text-accent font-medium mb-3">Executive Chef</p>
+                        <p className="text-gray-300 leading-relaxed text-sm">
+                          Andreas brings Michelin-level precision and authentic Mediterranean soul to the sea. With 12+ years of experience across Greece, Italy, and France, he creates exceptional culinary experiences tailored to each guest.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-[#1f2937]/50 rounded-lg p-4">
+                      <h5 className="text-accent font-semibold mb-3">Culinary Excellence</h5>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-300 text-sm">
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          Modern Mediterranean
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          Luxury hotel experience
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          Seasonal ingredients
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-accent rounded-full"></span>
+                          Custom menus
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Crew Services Section */}
+              <div className="mt-12 bg-gradient-to-r from-accent/10 to-accent/5 rounded-2xl border border-accent/30 p-8">
+                <h3 className="text-2xl font-bold text-white mb-6 text-center">Complete Crew Services</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="text-center group">
+                    <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/30 transition-colors">
+                      <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-white font-semibold mb-2">24/7 Service</h4>
+                    <p className="text-gray-400 text-sm">Round-the-clock professional assistance</p>
+                  </div>
+                  
+                  <div className="text-center group">
+                    <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/30 transition-colors">
+                      <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
+                    </div>
+                    <h4 className="text-white font-semibold mb-2">Daily Housekeeping</h4>
+                    <p className="text-gray-400 text-sm">Maintained luxury living spaces</p>
+                  </div>
+                  
+                  <div className="text-center group">
+                    <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/30 transition-colors">
+                      <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-white font-semibold mb-2">Gourmet Dining</h4>
+                    <p className="text-gray-400 text-sm">Exquisite meals prepared daily</p>
+                  </div>
+                  
+                  <div className="text-center group">
+                    <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/30 transition-colors">
+                      <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 7c0 5.5-3.5 8-8 8s-8-2.5-8-8c0-1.5.5-3 1.5-4.5S7 1 10 1s5.5 1.5 6.5 3S18 5.5 18 7z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-white font-semibold mb-2">Bar Service</h4>
+                    <p className="text-gray-400 text-sm">Premium cocktails & beverages</p>
+                  </div>
+                  
+                  <div className="text-center group">
+                    <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/30 transition-colors">
+                      <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-white font-semibold mb-2">Water Sports</h4>
+                    <p className="text-gray-400 text-sm">Professional instruction & guidance</p>
+                  </div>
+                  
+                  <div className="text-center group">
+                    <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/30 transition-colors">
+                      <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      </svg>
+                    </div>
+                    <h4 className="text-white font-semibold mb-2">Local Excursions</h4>
+                    <p className="text-gray-400 text-sm">Curated destination experiences</p>
                   </div>
                 </div>
               </div>
