@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
 import Image from 'next/image';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Contact | Concept Mediterranean Sailing',
-  description: 'Contact Concept Mediterranean Sailing for inquiries, bookings, and personalized sailing experiences in Greece.',
+  title: 'Contact | Concept Sailing',
+  description: 'Contact Concept Sailing for inquiries, bookings, and personalized sailing experiences in the Caribbean.',
 };
 
 export default function ContactPage() {
@@ -11,9 +11,9 @@ export default function ContactPage() {
     <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
       <div className="max-w-3xl mx-auto px-4 glass p-10 shadow-xl border border-accent animate-fade-in-up">
         <div className="flex flex-col items-center mb-8">
-         <Image src="/logo_cms.svg" alt="Concept Mediterranean Sailing Logo" width={140} height={140} className="mb-2" />
+         <Image src="/logo_cms.svg" alt="Concept Sailing Logo" width={140} height={140} className="mb-2" />
           <h1 className="text-4xl font-extrabold text-accent mb-2 text-center">Contact Us</h1>
-          <p className="text-lg text-gray-200 text-center max-w-xl">We&apos;d love to help you plan your perfect Greek sailing adventure. Reach out for bookings, questions, or custom requests!</p>
+          <p className="text-lg text-gray-200 text-center max-w-xl">We&apos;d love to help you plan your perfect Caribbean sailing adventure. Reach out for bookings, questions, or custom requests!</p>
         </div>
         <form className="space-y-6 mt-6">
           <div>
@@ -31,11 +31,12 @@ export default function ContactPage() {
           <button type="submit" className="button-premium w-full py-3 text-lg font-bold rounded">Send Message</button>
         </form>
         <div className="mt-10 text-center text-gray-300">
-  <p>Email: <a href="mailto:contact@nj3cruises.com" className="text-accent underline">info@windsurfcruises.com</a></p>
-  <p>Phone: +33 6 75 60 45 32</p>
+  <p>Email: <a href="mailto:contact@nj3cruises.com" className="text-accent underline">contact@nj3cruises.com</a></p>
+  <p>Phone: +33 (6) 75604532</p>
   <div className="mt-6">
-    <p className="text-lg font-bold text-accent">NJ3 CRUISES ike</p>
-    <p className="text-lg">Adresse: 87 POSEIDONOS AVENUE 16674 - GLYFADA, Greece</p>
+    <p className="text-lg font-bold text-accent">Concept Sailing</p>
+    <p className="text-lg">Greek Headquarters</p>
+
   </div>
 </div>
       </div>

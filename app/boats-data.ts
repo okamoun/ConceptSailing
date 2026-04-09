@@ -7,6 +7,13 @@ export type Boat = {
 };
 
 export const boats: Boat[] = [
+    {
+    name: "BlueOne",
+    brand: "Fountaine Pajot",
+    length: "51 ft",
+    description: "A new-generation catamaran with a focus on eco-responsibility, solar panels, and hybrid systems. Elegant design with full safety and entertainment options for guests.",
+    image: "/images/boats/fp-aura51.jpg"
+  },
   {
     name: "Fountaine Pajot Saba 50",
     brand: "Fountaine Pajot",
@@ -21,13 +28,7 @@ export const boats: Boat[] = [
     description: "A premier catamaran offering comfort, stability, and green technology. Features large cabins, a flybridge, and extensive leisure gear. Perfect for sustainable luxury sailing.",
     image: "/images/boats/lagoon-55.jpg"
   },
-  {
-    name: "Fountaine Pajot Aura 51",
-    brand: "Fountaine Pajot",
-    length: "51 ft",
-    description: "A new-generation catamaran with a focus on eco-responsibility, solar panels, and hybrid systems. Elegant design with full safety and entertainment options for guests.",
-    image: "/images/boats/fp-aura51.jpg"
-  },
+
   {
     name: "Lagoon 55",
     brand: "Lagoon",
