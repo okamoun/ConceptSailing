@@ -103,8 +103,16 @@ export default function BoatPage({ params }: BoatPageProps) {
 
   return (
     <>
-    <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
-      <div className="max-w-6xl mx-auto px-4">
+    <main className="min-h-screen relative" style={{
+      backgroundImage: boat.name === "BlueOne" 
+        ? `linear-gradient(rgba(16, 24, 36, 0.85), rgba(31, 41, 55, 0.9)), url('/images/boats/blueone/External_sailing.jpg')`
+        : 'linear-gradient(to bottom right, #101824, #1f2937)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      <div className="min-h-screen bg-gradient-to-br from-[#101824]/50 to-[#1f2937]/50 py-16">
+        <div className="max-w-6xl mx-auto px-4">
         <div className="mb-8">
           <Link href="/boats" className="text-accent hover:text-accent/80 transition-colors inline-flex items-center gap-2">
             ← Back to All Boats
@@ -977,6 +985,7 @@ export default function BoatPage({ params }: BoatPageProps) {
           </a>
         </div>
       </div>
+    </div>
     </main>
 
     {/* Image Modal for Crew Profiles */}

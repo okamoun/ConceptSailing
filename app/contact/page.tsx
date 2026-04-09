@@ -32,7 +32,7 @@ export default function ContactPage() {
         </form>
         <div className="mt-10 text-center text-gray-300">
   <p>Email: <a href="mailto:contact@nj3cruises.com" className="text-accent underline">contact@nj3cruises.com</a></p>
-  <p>Phone: +1 (555) 123-4567</p>
+  <p>Phone: +33 (6) 75604532</p>
   <div className="mt-6">
     <p className="text-lg font-bold text-accent">Concept Sailing</p>
     <p className="text-lg">Greek Headquarters</p>
