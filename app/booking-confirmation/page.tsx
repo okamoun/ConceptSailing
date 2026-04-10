@@ -15,8 +15,8 @@ interface BookingData {
 }
 
 interface EmailStatus {
-  business: { status: string; message: string };
-  client: { status: string; message: string };
+  status: string;
+  message: string;
 }
 
 export default function BookingConfirmationPage() {
@@ -115,67 +115,37 @@ export default function BookingConfirmationPage() {
           {/* Email Status */}
           {emailStatus && (
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-accent mb-4">Email Notifications</h2>
-              <div className="space-y-3">
-                <div className={`p-4 rounded-lg border ${
-                  emailStatus.business.status === 'success' 
-                    ? 'bg-green-500/20 border-green-500/50' 
-                    : 'bg-red-500/20 border-red-500/50'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      emailStatus.business.status === 'success' ? 'bg-green-500' : 'bg-red-500'
-                    }`}>
-                      {emailStatus.business.status === 'success' ? (
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold">Business Notification</h3>
-                      <p className="text-gray-300 text-sm">
-                        {emailStatus.business.status === 'success' 
-                          ? 'Email sent to Concept Sailing team successfully'
-                          : 'Failed to send email to business team'
-                        }
-                      </p>
-                    </div>
+              <h2 className="text-2xl font-bold text-accent mb-4">Email Notification</h2>
+              <div className={`p-4 rounded-lg border ${
+                emailStatus.status === 'success' 
+                  ? 'bg-green-500/20 border-green-500/50' 
+                  : 'bg-red-500/20 border-red-500/50'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    emailStatus.status === 'success' ? 'bg-green-500' : 'bg-red-500'
+                  }`}>
+                    {emailStatus.status === 'success' ? (
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    )}
                   </div>
-                </div>
-
-                <div className={`p-4 rounded-lg border ${
-                  emailStatus.client.status === 'success' 
-                    ? 'bg-green-500/20 border-green-500/50' 
-                    : 'bg-red-500/20 border-red-500/50'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                      emailStatus.client.status === 'success' ? 'bg-green-500' : 'bg-red-500'
-                    }`}>
-                      {emailStatus.client.status === 'success' ? (
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold">Client Confirmation</h3>
-                      <p className="text-gray-300 text-sm">
-                        {emailStatus.client.status === 'success' 
-                          ? 'Confirmation email sent to your inbox'
-                          : 'Failed to send confirmation email to your inbox'
-                        }
-                      </p>
-                    </div>
+                  <div>
+                    <h3 className="text-white font-semibold">Booking Email</h3>
+                    <p className="text-gray-300 text-sm">
+                      {emailStatus.status === 'success' 
+                        ? 'Email sent successfully to both client and contact@nj3cruises.com'
+                        : 'Failed to send booking email'
+                      }
+                    </p>
+                    {emailStatus.message && (
+                      <p className="text-gray-400 text-xs mt-1">{emailStatus.message}</p>
+                    )}
                   </div>
                 </div>
               </div>

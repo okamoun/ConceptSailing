@@ -3,8 +3,7 @@ import emailjs from '@emailjs/browser';
 // EmailJS configuration with fallbacks
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'demo_public_key';
 const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'demo_service';
-const EMAILJS_BUSINESS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_BUSINESS_TEMPLATE_ID || 'demo_business_template';
-const EMAILJS_CLIENT_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CLIENT_TEMPLATE_ID || 'demo_client_template';
+const EMAILJS_BOOKING_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_BOOKING_TEMPLATE_ID || 'demo_booking_template';
 
 // Fallback business email for demo purposes
 const BUSINESS_EMAIL = 'contact@nj3cruises.com';
@@ -41,10 +40,8 @@ function isEmailJSConfigured(): boolean {
     EMAILJS_PUBLIC_KEY.includes('your_public_key_here') ||
     EMAILJS_SERVICE_ID.includes('demo') ||
     EMAILJS_SERVICE_ID.includes('your_service_id_here') ||
-    EMAILJS_BUSINESS_TEMPLATE_ID.includes('demo') ||
-    EMAILJS_BUSINESS_TEMPLATE_ID.includes('your_business_template_id_here') ||
-    EMAILJS_CLIENT_TEMPLATE_ID.includes('demo') ||
-    EMAILJS_CLIENT_TEMPLATE_ID.includes('your_client_template_id_here')
+    EMAILJS_BOOKING_TEMPLATE_ID.includes('demo') ||
+    EMAILJS_BOOKING_TEMPLATE_ID.includes('your_booking_template_id_here')
   );
 }
 
@@ -63,151 +60,97 @@ try {
 }
 
 /**
- * Send booking notification email to business
+ * Send booking notification email to both client and business
  */
-export async function sendBusinessNotificationEmail(bookingData: BookingEmailData): Promise<EmailResponse> {
-  console.log('Business email request received');
+export async function sendBookingEmail(bookingData: BookingEmailData): Promise<EmailResponse> {
+  console.log('Booking email request received');
   console.log('EmailJS configured:', isEmailJSConfigured());
   console.log('EmailJS initialized:', emailjsInitialized);
   
   // Check if EmailJS is properly configured and initialized
   if (!isEmailJSConfigured() || !emailjsInitialized) {
-    console.log('EmailJS not configured or initialized - simulating business email');
+    console.log('EmailJS not configured or initialized - simulating booking email');
     return {
       status: 'success',
-      message: 'Business notification simulated (EmailJS not configured)'
+      message: 'Booking email simulated (EmailJS not configured)'
     };
   }
 
   try {
     const templateParams = {
-      to_email: BUSINESS_EMAIL,
-      email: BUSINESS_EMAIL,
-      to_name: 'Concept Sailing Team',
-      from_name: bookingData.name,
-      from_email: bookingData.email,
-      from_phone: bookingData.phone,
+      // Recipients - both client and business will receive this email
+      to_email: BUSINESS_EMAIL, // Business email as primary recipient
+      cc_email: bookingData.email, // Client email as CC
+      
+      // Client information
+      client_name: bookingData.name,
+      client_email: bookingData.email,
+      client_phone: bookingData.phone,
+      
+      // Booking details
       boat_name: bookingData.boat,
       charter_date: bookingData.date,
       passengers: bookingData.passengers,
       embarkation_point: bookingData.embarkationPoint,
+      
+      // Additional details
       comment: bookingData.holidayDescription,
-      theme : bookingData.selectedTheme,
+      theme: bookingData.selectedTheme,
       submission_time: new Date(bookingData.timestamp).toLocaleString(),
+      
+      // Business contact information
+      business_email: BUSINESS_EMAIL,
+      business_phone: '+30 210 123 4567',
+      
+      // Reply to client for easy communication
       reply_to: bookingData.email,
     };
 
-    console.log('Sending business notification with params:', templateParams);
+    console.log('Sending booking email with params:', templateParams);
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
-      EMAILJS_BUSINESS_TEMPLATE_ID,
+      EMAILJS_BOOKING_TEMPLATE_ID,
       templateParams
     );
 
-    console.log('Business notification response:', response);
+    console.log('Booking email response:', response);
 
     if (response.status === 200) {
       return {
         status: 'success',
-        message: 'Business notification sent successfully'
+        message: 'Booking email sent successfully to both client and business'
       };
     } else {
       return {
         status: 'error',
-        message: `Failed to send business notification: ${JSON.stringify(templateParams)} ${response.text || 'Unknown error'}`
+        message: `Failed to send booking email: ${response.text || 'Unknown error'}`
       };
     }
   } catch (error: unknown) {
-    console.error('Error sending business notification:', error);
+    console.error('Error sending booking email:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorText = (error as EmailJSError)?.text || errorMessage;
     return {
       status: 'error',
-      message: `Error sending business notification: ${errorText}`
+      message: `Error sending booking email: ${errorText}`
     };
   }
 }
 
 /**
- * Send confirmation email to client
- */
-export async function sendClientConfirmationEmail(bookingData: BookingEmailData): Promise<EmailResponse> {
-  console.log('Client confirmation email request received');
-  console.log('EmailJS configured:', isEmailJSConfigured());
-  console.log('EmailJS initialized:', emailjsInitialized);
-  
-  // Check if EmailJS is properly configured and initialized
-  if (!isEmailJSConfigured() || !emailjsInitialized) {
-    console.log('EmailJS not configured or initialized - simulating client email');
-    return {
-      status: 'success',
-      message: 'Client confirmation simulated (EmailJS not configured)'
-    };
-  }
-
-  try {
-    const templateParams = {
-      to_email: bookingData.email,
-      email: bookingData.email,
-      to_name: bookingData.name,
-      boat_name: bookingData.boat,
-      charter_date: bookingData.date,
-      passengers: bookingData.passengers,
-      embarkation_point: bookingData.embarkationPoint,
-      submission_time: new Date(bookingData.timestamp).toLocaleString(),
-      comment: bookingData.holidayDescription,
-      theme : bookingData.selectedTheme,
-      contact_email: BUSINESS_EMAIL,
-      contact_phone: '+30 210 123 4567',
-    };
-
-    console.log('Sending client confirmation with params:', templateParams);
-
-    const response = await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_CLIENT_TEMPLATE_ID,
-      templateParams
-    );
-
-    console.log('Client confirmation response:', response);
-
-    if (response.status === 200) {
-      return {
-        status: 'success',
-        message: 'Client confirmation sent successfully'
-      };
-    } else {
-      return {
-        status: 'error',
-        message: `Failed to send client confirmation: ${response.text || 'Unknown error'}`
-      };
-    }
-  } catch (error: unknown) {
-    console.error('Error sending client confirmation:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorText = (error as EmailJSError)?.text || errorMessage;
-    return {
-      status: 'error',
-      message: `Error sending client confirmation: ${errorText}`
-    };
-  }
-}
-
-/**
- * Send both business notification and client confirmation emails
+ * Legacy function for backward compatibility - now uses single email
+ * @deprecated Use sendBookingEmail instead
  */
 export async function sendBookingEmails(bookingData: BookingEmailData): Promise<{
   business: EmailResponse;
   client: EmailResponse;
 }> {
-  const [businessResponse, clientResponse] = await Promise.all([
-    sendBusinessNotificationEmail(bookingData),
-    sendClientConfirmationEmail(bookingData)
-  ]);
-
+  const response = await sendBookingEmail(bookingData);
+  
+  // Return the same response for both business and client for backward compatibility
   return {
-    business: businessResponse,
-    client: clientResponse
+    business: response,
+    client: response
   };
 }

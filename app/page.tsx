@@ -1,168 +1,190 @@
+'use client';
+
 import Image from 'next/image';
 import Link from "next/link";
-import adventures from "./adventures-data";
-import { featureIconMap } from "./feature-icons";
+import { useEffect } from 'react';
+import { useBlueOneMode } from './contexts/BlueOneContext';
 
 export default function Home() {
-  // Map adventure categories and themes using the correct IDs and names from adventures-data.ts
-  const adventureCategories = [
-    {
-      category: "Active & Sports",
-      themes: [
-        adventures.find(a => a.id === "1"), // Wind Sports  Adventure
-        adventures.find(a => a.id === "2"), // Family Sailing School
-        adventures.find(a => a.id === "11"), // Greek Islands Family Bike Adventure
-      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
-    },
-    {
-      category: "Wellness & Relaxation",
-      themes: [
-        adventures.find(a => a.id === "3"), // Yoga & Wellness Retreat
-        adventures.find(a => a.id === "4"), // Cleansing & Renewal
-      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
-    },
-    {
-      category: "Culture & History",
-      themes: [
-        adventures.find(a => a.id === "5"), // Greek Heritage Explorer
-        adventures.find(a => a.id === "9"), // Sephardic Heritage Sailing: Thessaloniki & Beyond
-      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
-    },
-    {
-      category: "Food",
-      themes: [
-        adventures.find(a => a.id === "6"), // Culinary Traditions
-        adventures.find(a => a.id === "9"), // Mediterranean Natural Flavors
-        adventures.find(a => a.id === "10"), // Greek Cooking Masters
-      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
-    },
-    {
-      category: "Social & Family",
-      themes: [
-        adventures.find(a => a.id === "7"), // Family Bonding Adventure
-        adventures.find(a => a.id === "8"), // Island Nightlife
-      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
-    }
-  ];
+  const { resetTheme } = useBlueOneMode();
 
+  useEffect(() => {
+    // Reset theme when entering through main entry point
+    resetTheme();
+  }, [resetTheme]);
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative h-[75vh] flex items-center justify-center mb-16">
-        <div className="glass px-12 py-16 flex flex-col items-center text-center shadow-xl border border-accent hero-glass-animate">
-          <h1 className="text-6xl font-black text-accent drop-shadow-lg mb-6 tracking-tight animate-fade-in-up" style={{letterSpacing:'0.03em'}}>Exclusive Greek Sailing Experiences</h1>
-          <p className="text-2xl text-gray-200 max-w-2xl mb-8 animate-fade-in-up" style={{animationDelay:'0.15s',animationFillMode:'both'}}>Sail the Aegean in style. Discover curated adventures, luxury yachts, and unforgettable moments on the water.</p>
-          <Link href="/themes" className="button-premium text-xl animate-fade-in-up" style={{animationDelay:'0.3s',animationFillMode:'both'}}>Explore Themes</Link>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      {/* Hero Section with BlueOne Focus */}
+      <section className="relative min-h-screen flex items-center justify-center">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/boats/blueone/External_sailing.jpg"
+            alt="BlueOne Sailing"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 via-blue-900/40 to-blue-900/60"></div>
         </div>
-        <div className="absolute inset-0 z-[-1] bg-gradient-to-br from-[#101824] to-[#1f2937] opacity-80"></div>
-      </section>
-
-      {/* Introductory Text Section */}
-      <section className="w-full flex justify-center py-12 bg-white">
-        <div className="max-w-4xl mx-auto bg-white/80 rounded-lg p-10 shadow text-gray-900">
-          <h2 className="text-4xl font-extrabold mb-4 text-center">Discover Greece Like Never Before — With Concept Sailing</h2>
-          <p className="mb-3">Embark on a private luxury sailing experience tailored just for you. Concept Sailing offers exclusive catamaran cruises around the Greek islands, each designed around a unique theme — from culinary adventures and wellness retreats to cultural explorations and family fun.</p>
-          <p className="mb-3">Set sail with your loved ones and explore hidden coves, crystal-clear waters, and authentic Greek charm, all from the comfort of a premium catamaran. Whether you&apos;re dreaming of tranquil relaxation or active discovery, our themed journeys create unforgettable memories under the Aegean sun.</p>
-          <p className="font-semibold text-center">Your adventure starts here we take care of everything.</p>
-        </div>
-      </section>
-
-      {/* Adventure Categories */}
-      <div className="max-w-6xl mx-auto">
-        {adventureCategories.map((category, index) => (
-          <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-transparent' : 'bg-[#151e2c]'}`}> 
-            <div className="container mx-auto px-4">
-              <h2 className={`text-4xl md:text-5xl font-extrabold text-center mb-12 drop-shadow-lg tracking-tight flex items-center justify-center gap-3 animate-fade-in-up text-accent`}>
-                {category.category}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                {category.themes.map((adv) => (
-                  <div key={adv.id} className="card-premium overflow-hidden flex flex-col animate-fade-in-up" style={{animationDelay:`${0.1 + Number(adv.id) * 0.07}s`,animationFillMode:'both'}}>
-                    <div className="relative h-56 w-full">
-                      <Image
-                        src={adv.image}
-                        alt={adv.name}
-                        fill
-                        className="object-cover rounded-t-xl"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        priority={true}
-                      />
-                    </div>
-                    <div className="p-8 flex flex-col flex-grow">
-                      <h3 className="text-2xl font-bold mb-3 text-accent drop-shadow animate-fade-in-up" style={{animationDelay:'0.2s',animationFillMode:'both'}}>{adv.name}</h3>
-                      <p className="mb-6 text-gray-200 text-lg animate-fade-in-up" style={{animationDelay:'0.28s',animationFillMode:'both'}}>{adv.description}</p>
-                      {adv.features && adv.features.length > 0 && (
-                        <ul className="mb-4 flex flex-wrap gap-2 animate-fade-in-up" style={{animationDelay:'0.32s',animationFillMode:'both'}}>
-                          {adv.features.map((feature: string, idx: number) => (
-                            <li
-                              key={idx}
-                              className="inline-flex items-center gap-1 bg-accent text-white rounded-full px-3 py-1 text-sm font-semibold shadow relative group cursor-pointer"
-                            >
-                              <span>{featureIconMap[feature]}</span>
-                              <span
-                                className="absolute left-1/2 top-full mt-2 -translate-x-1/2 bg-accent text-white px-3 py-1 rounded shadow text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20"
-                                style={{minWidth:'max-content'}}
-                              >
-                                {feature}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      <Link href={`/themes/${adv.id}`} className="mt-auto button-premium text-center animate-fade-in-up" style={{animationDelay:'0.35s',animationFillMode:'both'}}>View Experience</Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        ))}
-      </div>
-
-      {/* Why Choose Us */}
-      <section className="py-16 bg-blue-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">Why Choose Our Themed Adventures?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-blue-600">Tailored Experience</h3>
-              <p className="text-gray-600">Choose the adventure that perfectly matches your interests</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-blue-600">Expert Guides</h3>
-              <p className="text-gray-600">Skilled skippers and specialized activity instructors</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2 text-blue-600">Unique Experiences</h3>
-              <p className="text-gray-600">Carefully curated activities for each theme</p>
+        
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-12 shadow-2xl border border-blue-100">
+            <h1 className="text-5xl md:text-7xl font-bold text-blue-900 mb-6 animate-fade-in-up">
+              BlueOne
+            </h1>
+            <p className="text-2xl md:text-3xl text-blue-700 mb-4 animate-fade-in-up" style={{animationDelay:'0.1s',animationFillMode:'both'}}>
+              Premium Luxury Catamaran
+            </p>
+            <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto animate-fade-in-up" style={{animationDelay:'0.2s',animationFillMode:'both'}}>
+              Experience the ultimate Greek sailing adventure aboard our eco-friendly Fountaine Pajot catamaran. 
+              Luxury, comfort, and sustainability in perfect harmony.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{animationDelay:'0.3s',animationFillMode:'both'}}>
+              <Link 
+                href="/blueone" 
+                className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
+              >
+                Explore BlueOne
+              </Link>
+              <Link 
+                href="/booking?boat=BlueOne&brand=Fountaine%20Pajot&length=51%20ft&description=A%20new-generation%20catamaran%20with%20a%20focus%20on%20eco-responsibility,%20solar%20panels,%20and%20hybrid%20systems.%20Elegant%20design%20with%20full%20safety%20and%20entertainment%20options%20for%20guests.&image=/images/boats/fp-aura51.jpg"
+                className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-colors"
+              >
+                Book Your Journey
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Quick Features */}
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-blue-900 mb-16">Why Choose BlueOne?</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-blue-900 mb-4">Eco-Friendly</h3>
+              <p className="text-gray-600">Solar panels, hybrid systems, and sustainable sailing technology for minimal environmental impact</p>
+            </div>
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-blue-900 mb-4">Premium Comfort</h3>
+              <p className="text-gray-600">Spacious cabins, modern amenities, and luxury furnishings for the ultimate sailing experience</p>
+            </div>
+            <div className="text-center group">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-blue-900 mb-4">Expert Crew</h3>
+              <p className="text-gray-600">Professional captain and gourmet chef dedicated to your safety and exceptional service</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Secondary Entry Points */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center text-blue-900 mb-4">More Adventures Await</h2>
+          <p className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto">
+            Beyond our flagship BlueOne, discover themed experiences and destinations across the Greek islands
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <Link 
+              href="/themes" 
+              className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
+            >
+              <div className="flex items-center mb-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-purple-200 transition-colors">
+                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">Themed Adventures</h3>
+                  <p className="text-gray-600">Curated sailing experiences</p>
+                </div>
+              </div>
+              <p className="text-gray-600 mb-6">
+                From culinary journeys to wellness retreats, explore our collection of themed sailing adventures designed around your interests.
+              </p>
+              <div className="text-purple-600 font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                Explore Themes
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </div>
+            </Link>
+
+            <Link 
+              href="/destinations" 
+              className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-blue-300"
+            >
+              <div className="flex items-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-green-200 transition-colors">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">Destinations</h3>
+                  <p className="text-gray-600">Greek island paradise</p>
+                </div>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Discover the stunning Greek islands, from hidden coves to vibrant harbors. Each destination offers unique beauty and authentic experiences.
+              </p>
+              <div className="text-green-600 font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                View Destinations
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </div>
+            </Link>
+          </div>
+
+          <div className="text-center mt-12">
+            <Link 
+              href="/boats" 
+              className="inline-block bg-gray-800 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-900 transition-colors"
+            >
+              View All Boats
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Call to Action */}
-      <section className="py-16 bg-blue-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-blue-600">Ready to Start Your Greek Adventure?</h2>
-          <p className="text-xl mb-8">Choose your perfect themed sailing experience today</p>
-          <Link href="/themes" className="bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
-            View All Themes
-          </Link>
+      <section className="py-20 bg-blue-600 text-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold mb-6">Ready for Your Greek Adventure?</h2>
+          <p className="text-xl mb-8">Book BlueOne or explore our themed experiences for an unforgettable journey</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              href="/booking?boat=BlueOne&brand=Fountaine%20Pajot&length=51%20ft&description=A%20new-generation%20catamaran%20with%20a%20focus%20on%20eco-responsibility,%20solar%20panels,%20and%20hybrid%20systems.%20Elegant%20design%20with%20full%20safety%20and%20entertainment%20options%20for%20guests.&image=/images/boats/fp-aura51.jpg"
+              className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+            >
+              Book BlueOne Now
+            </Link>
+            <Link 
+              href="/contact" 
+              className="bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-800 transition-colors border-2 border-blue-500"
+            >
+              Contact Us
+            </Link>
+          </div>
         </div>
       </section>
     </div>

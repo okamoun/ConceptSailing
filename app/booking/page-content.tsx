@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import Link from 'next/link';
-import { sendBookingEmails, BookingEmailData } from '../../lib/emailjs';
+import { sendBookingEmail, BookingEmailData } from '../../lib/emailjs';
 import adventures from '../adventures-data';
 
 interface Boat {
@@ -162,32 +162,23 @@ export default function BookingPageContent() {
         timestamp: new Date().toISOString()
       };
 
-      // Send emails via EmailJS
-      const emailResponses = await sendBookingEmails(bookingData);
+      // Send email via EmailJS
+      const emailResponse = await sendBookingEmail(bookingData);
 
-      // Check if emails were sent successfully
-      if (emailResponses.business.status === 'success' && emailResponses.client.status === 'success') {
+      // Check if email was sent successfully
+      if (emailResponse.status === 'success') {
         // Store booking data for confirmation page
         localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
         localStorage.setItem('emailStatus', JSON.stringify({
-          business: emailResponses.business,
-          client: emailResponses.client
+          status: emailResponse.status,
+          message: emailResponse.message
         }));
         
         // Redirect to confirmation page
         window.location.href = '/booking-confirmation';
       } else {
-        // Handle email sending errors
-        let errorMessage = 'There was an error sending your request:\n';
-        if (emailResponses.business.status === 'error') {
-          errorMessage += `- Business notification: ${emailResponses.business.message}\n`;
-        }
-        if (emailResponses.client.status === 'error') {
-          errorMessage += `- Client confirmation: ${emailResponses.client.message}\n`;
-        }
-        errorMessage += 'Please try again or contact us directly.';
-        
-        alert(errorMessage);
+        // Handle email sending error
+        alert(`There was an error sending your request: ${emailResponse.message}. Please try again or contact us directly.`);
       }
     } catch (error) {
       console.error('Error submitting booking:', error);
