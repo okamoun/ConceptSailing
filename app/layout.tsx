@@ -1,22 +1,22 @@
+'use client';
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import "./globals.css";
 import "./animations.css";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Concept Sailing | Greek Sailing Holidays & Adventures",
-  description: "Discover amazing sailing holidays in Greece. Choose from various themed cruises and create your perfect sailing adventure with Concept Sailing.",
-};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  
   return (
     <html lang="en">
       <body className={inter.className + " bg-gradient-to-br from-[#101824] to-[#1f2937] min-h-screen"}>
@@ -27,9 +27,13 @@ export default function RootLayout({
               <span className="text-accent font-semibold text-sm mt-1">Premium Sailing Adventures</span>
             </Link>
             <div className="space-x-8 text-lg font-semibold">
+              <Link href="/blueone" className="hover:text-accent transition-colors text-blue-400 font-bold">BlueOne</Link>
+              <Link href="/experiences" className="hover:text-accent transition-colors">Experiences</Link>
               <Link href="/themes" className="hover:text-accent transition-colors">Adventure Themes</Link>
               <Link href="/destinations" className="hover:text-accent transition-colors">Destinations</Link>
-              <Link href="/boats" className="hover:text-accent transition-colors">Boats</Link>
+              {pathname !== '/blueone' && (
+                <Link href="/boats" className="hover:text-accent transition-colors">All Boats</Link>
+              )}
               <Link href="/about" className="hover:text-accent transition-colors">About</Link>
               <Link href="/contact" className="hover:text-accent transition-colors">Contact</Link>
             </div>
