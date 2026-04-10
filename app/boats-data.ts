@@ -29,7 +29,6 @@ export const boats: Boat[] = [
       "Water Toys & Snorkeling Gear",
       "Fishing Equipment",
       "Stand-Up Paddleboards",
-      "Kayaks",
       "Safety Equipment & First Aid",
       "Navigation & Communication Systems"
     ]

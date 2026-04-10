@@ -139,9 +139,6 @@ export default function BlueOnePage() {
               </div>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl animate-fade-in-up">
-              BlueOne
-            </h1>
             <p className="text-2xl md:text-3xl text-blue-100 mb-4 drop-shadow-lg animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               {boat.brand} {boat.length}
             </p>
@@ -171,63 +168,6 @@ export default function BlueOnePage() {
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 via-blue-800/30 to-blue-900/60"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 py-16">
-
-            {/* Premium Features */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Premium Features & Amenities</h2>
-              
-              <div className="mb-8 text-center">
-                <div className="inline-flex items-center gap-3 bg-blue-800/50 rounded-full px-6 py-3 border border-blue-400/30 backdrop-blur-sm">
-                  <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                  <span className="text-blue-200 font-semibold">Starlink High-Speed Internet Available</span>
-                </div>
-              </div>
-
-              {/* Condensed Features Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                {boat.features?.map((feature, index) => (
-                  <div key={index} className={`text-center p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
-                    feature.includes('Starlink') 
-                      ? 'bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-500/25' 
-                      : 'bg-blue-800/20 border-blue-500/30 hover:bg-blue-800/40'
-                  }`}>
-                    <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${
-                      feature.includes('Starlink') 
-                        ? 'bg-blue-500/30 border border-blue-400' 
-                        : 'bg-blue-600/20 border border-blue-500'
-                    }`}>
-                      {feature.includes('Starlink') ? (
-                        <svg className="w-4 h-4 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-                        </svg>
-                      )}
-                    </div>
-                    <span className={`text-xs font-medium ${
-                      feature.includes('Starlink') ? 'text-blue-200' : 'text-blue-100'
-                    }`}>
-                      {feature.length > 20 ? feature.substring(0, 20) + '...' : feature}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center">
-                <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/20 rounded-xl p-6 border border-blue-400/30">
-                  <h3 className="text-2xl font-bold text-blue-200 mb-3">Stay Connected at Sea</h3>
-                  <p className="text-blue-100 leading-relaxed max-w-2xl mx-auto">
-                    With Starlink high-speed internet, you can stay connected with family, work remotely, 
-                    stream entertainment, and share your sailing adventures in real-time. Enjoy reliable, 
-                    fast WiFi connectivity even in the most remote Greek island locations.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             {/* Exterior Gallery */}
             <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
@@ -377,17 +317,22 @@ export default function BlueOnePage() {
                     ensuring endless entertainment and adventure during your charter.
                   </p>
                   
-                  {/* Seabob Feature Image */}
+                  {/* Seabob Feature Video */}
                   <div className="mb-8 glass p-4 shadow-lg animate-fade-in-up">
                     <div className="flex flex-col items-center">
-                      <Image
-                        src="/images/boats/blueone/Seabob_1.jpeg"
-                        alt="Seabob Underwater Scooter"
-                        width={300}
-                        height={200}
-                        className="w-full h-48 object-cover rounded-lg border-2 border-blue-300/50 mb-4"
-                        draggable={false}
-                      />
+                      <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-blue-300/50 mb-4">
+                        <video
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full h-full object-cover"
+                          poster="/images/boats/blueone/Seabob_1.jpeg"
+                        >
+                          <source src="https://seabob.com/media/SEABOB_F9_Loop.mp4" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
                       <h3 className="text-xl font-bold text-white mb-2">Premium Seabob Experience</h3>
                       <p className="text-blue-200 text-center text-sm">
                         Explore underwater worlds with our state-of-the-art Seabob underwater scooters
@@ -501,6 +446,63 @@ export default function BlueOnePage() {
                   </div>
                   <p className="text-sm text-blue-200 mt-4 text-center">
                     *Gourmet meals prepared by our professional chef
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Premium Features & Amenities */}
+            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
+              <h2 className="text-4xl font-bold text-white mb-8 text-center">Premium Features & Amenities</h2>
+              
+              <div className="mb-8 text-center">
+                <div className="inline-flex items-center gap-3 bg-blue-800/50 rounded-full px-6 py-3 border border-blue-400/30 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span className="text-blue-200 font-semibold">Starlink High-Speed Internet Available</span>
+                </div>
+              </div>
+
+              {/* Condensed Features Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                {boat.features?.map((feature, index) => (
+                  <div key={index} className={`text-center p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                    feature.includes('Starlink') 
+                      ? 'bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-500/25' 
+                      : 'bg-blue-800/20 border-blue-500/30 hover:bg-blue-800/40'
+                  }`}>
+                    <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${
+                      feature.includes('Starlink') 
+                        ? 'bg-blue-500/30 border border-blue-400' 
+                        : 'bg-blue-600/20 border border-blue-500'
+                    }`}>
+                      {feature.includes('Starlink') ? (
+                        <svg className="w-4 h-4 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span className={`text-xs font-medium ${
+                      feature.includes('Starlink') ? 'text-blue-200' : 'text-blue-100'
+                    }`}>
+                      {feature.length > 20 ? feature.substring(0, 20) + '...' : feature}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center">
+                <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/20 rounded-xl p-6 border border-blue-400/30">
+                  <h3 className="text-2xl font-bold text-blue-200 mb-3">Stay Connected at Sea</h3>
+                  <p className="text-blue-100 leading-relaxed max-w-2xl mx-auto">
+                    With Starlink high-speed internet, you can stay connected with family, work remotely, 
+                    stream entertainment, and share your sailing adventures in real-time. Enjoy reliable, 
+                    fast WiFi connectivity even in the most remote Greek island locations.
                   </p>
                 </div>
               </div>

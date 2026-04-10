@@ -15,19 +15,19 @@ function NavigationContent() {
   const { isBlueOneMode } = useBlueOneMode();
   
   return (
-    <nav className={`shadow-lg border-b ${isBlueOneMode ? 'bg-gradient-to-r from-blue-900 to-blue-800 border-blue-400/30' : 'bg-gradient-to-r from-[#101824] to-[#1f2937] border-accent/20'}`}>
-      <div className="container mx-auto px-4 py-5 flex justify-between items-center">
-        <Link href="/" className="flex flex-col items-center gap-3 group">
+    <nav className={`sticky top-0 z-50 shadow-lg border-b backdrop-blur-sm ${isBlueOneMode ? 'bg-gradient-to-r from-blue-900/95 to-blue-800/95 border-blue-400/30' : 'bg-gradient-to-r from-[#101824]/95 to-[#1f2937]/95 border-accent/20'}`}>
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <Link href="/" className="flex flex-col items-center gap-2 group">
           <Image 
             src={isBlueOneMode ? "/images/boats/blueone/logo_blueone.png" : "/logo_cms.svg"} 
             alt={isBlueOneMode ? "BlueOne Logo" : "Concept Sailing Logo"} 
-            width={isBlueOneMode ? 150 : 200} 
-            height={isBlueOneMode ? 75 : 128} 
-            className={`h-32 w-auto drop-shadow-lg transition-transform group-hover:scale-105 ${isBlueOneMode ? 'object-contain' : ''}`} 
-            style={{maxHeight:'160px'}} 
+            width={isBlueOneMode ? 120 : 160} 
+            height={isBlueOneMode ? 60 : 100} 
+            className={`h-24 w-auto drop-shadow-lg transition-transform group-hover:scale-105 ${isBlueOneMode ? 'object-contain' : ''}`} 
+            style={{maxHeight:'120px'}} 
             priority 
           />
-          <span className={`${isBlueOneMode ? 'text-blue-300' : 'text-accent'} font-semibold text-sm mt-1`}>
+          <span className={`${isBlueOneMode ? 'text-blue-300' : 'text-accent'} font-semibold text-xs mt-1`}>
             {isBlueOneMode ? 'BlueOne Luxury Yacht' : 'Premium Sailing Adventures'}
           </span>
         </Link>
