@@ -5,12 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { boats } from '../boats-data';
+import { useBlueOneMode } from '../contexts/BlueOneContext';
 
 // This is a dedicated page for BlueOne that bypasses the boats listing
 export default function BlueOnePage() {
   const [boat, setBoat] = useState<typeof boats[0] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modalImage, setModalImage] = useState<string | null>(null);
+  const { setIsBlueOneMode } = useBlueOneMode();
 
   useEffect(() => {
     // Find the BlueOne boat
@@ -19,7 +21,10 @@ export default function BlueOnePage() {
       setBoat(blueOneBoat);
     }
     setIsLoading(false);
-  }, []);
+    
+    // Activate BlueOne mode (will persist across navigation)
+    setIsBlueOneMode(true);
+  }, [setIsBlueOneMode]);
 
   // BlueOne specific images from the blueone folder - organized by content
   const blueOneExteriorImages = [
@@ -90,50 +95,138 @@ export default function BlueOnePage() {
   return (
     <>
       <main className="min-h-screen relative" style={{
-        backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.85), rgba(59, 130, 246, 0.9)), url('/images/boats/blueone/External_sailing.jpg')`,
+        backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boats/blueone/External_sailing.jpg')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
       }}>
-        <div className="min-h-screen bg-gradient-to-br from-blue-900/50 to-blue-600/50 py-16">
-          <div className="max-w-6xl mx-auto px-4">
-            {/* BlueOne Logo and Header */}
-            <div className="text-center mb-12">
-              <div className="mb-6">
+        {/* Hero Section with Attractive Header */}
+        <div className="relative min-h-screen flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-900/20 to-blue-900/40"></div>
+          
+          {/* Attractive Header Picture */}
+          <div className="absolute top-0 left-0 right-0 h-32 overflow-hidden">
+            <div className="relative w-full h-full bg-gradient-to-r from-blue-600 to-blue-800">
+              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative z-10 h-full flex items-center justify-center">
+                <div className="text-center">
+                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-wide">BlueOne Luxury Catamaran</h1>
+                  <p className="text-lg md:text-xl text-blue-100">Premium Sailing Adventures in Greece</p>
+                </div>
+              </div>
+              {/* Decorative waves */}
+              <div className="absolute bottom-0 left-0 right-0">
+                <svg className="w-full h-8 text-blue-50" fill="currentColor" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                  <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <div className="relative z-20 text-center px-4 pt-20">
+            {/* BlueOne Logo */}
+            <div className="mb-8">
+              <div className="relative inline-block">
+                <div className="absolute inset-0 bg-blue-400/20 blur-3xl rounded-full"></div>
                 <Image 
                   src="/images/boats/blueone/logo_blueone.png" 
                   alt="BlueOne Logo" 
                   width={200} 
                   height={100} 
-                  className="mx-auto drop-shadow-lg"
+                  className="relative z-10 mx-auto drop-shadow-2xl transform hover:scale-105 transition-transform duration-300"
                   priority
                 />
               </div>
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
-                BlueOne
-              </h1>
-              <p className="text-2xl md:text-3xl text-blue-100 mb-2">
-                {boat.brand} {boat.length}
-              </p>
-              <p className="text-lg text-blue-200 max-w-3xl mx-auto">
-                {boat.description}
-              </p>
             </div>
 
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl animate-fade-in-up">
+              BlueOne
+            </h1>
+            <p className="text-2xl md:text-3xl text-blue-100 mb-4 drop-shadow-lg animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+              {boat.brand} {boat.length}
+            </p>
+            <p className="text-lg md:text-xl text-blue-200 max-w-3xl mx-auto mb-12 drop-shadow-md animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+              {boat.description}
+            </p>
+
             {/* Quick Actions */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-fade-in-up" style={{animationDelay: '0.6s'}}>
               <a 
-                href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
-                className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-xl text-center"
+                href={`/blueone/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
+                className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 text-center"
               >
                 Book BlueOne Now
               </a>
               <Link 
-                href="/experiences" 
-                className="bg-blue-800/80 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700/80 transition-colors border-2 border-blue-400 text-center backdrop-blur-sm"
+                href="/blueone/contact" 
+                className="bg-blue-800/80 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700/80 transition-all duration-300 border-2 border-blue-400/50 hover:border-blue-300 text-center shadow-2xl hover:shadow-blue-400/25 transform hover:scale-105"
               >
-                Explore Experiences
+                Contact BlueOne Team
               </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Sections with Enhanced Background */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 via-blue-800/30 to-blue-900/60"></div>
+          <div className="relative z-10 max-w-6xl mx-auto px-4 py-16">
+
+            {/* Premium Features */}
+            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
+              <h2 className="text-4xl font-bold text-white mb-8 text-center">Premium Features & Amenities</h2>
+              
+              <div className="mb-8 text-center">
+                <div className="inline-flex items-center gap-3 bg-blue-800/50 rounded-full px-6 py-3 border border-blue-400/30 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span className="text-blue-200 font-semibold">Starlink High-Speed Internet Available</span>
+                </div>
+              </div>
+
+              {/* Condensed Features Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                {boat.features?.map((feature, index) => (
+                  <div key={index} className={`text-center p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                    feature.includes('Starlink') 
+                      ? 'bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-500/25' 
+                      : 'bg-blue-800/20 border-blue-500/30 hover:bg-blue-800/40'
+                  }`}>
+                    <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${
+                      feature.includes('Starlink') 
+                        ? 'bg-blue-500/30 border border-blue-400' 
+                        : 'bg-blue-600/20 border border-blue-500'
+                    }`}>
+                      {feature.includes('Starlink') ? (
+                        <svg className="w-4 h-4 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span className={`text-xs font-medium ${
+                      feature.includes('Starlink') ? 'text-blue-200' : 'text-blue-100'
+                    }`}>
+                      {feature.length > 20 ? feature.substring(0, 20) + '...' : feature}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center">
+                <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/20 rounded-xl p-6 border border-blue-400/30">
+                  <h3 className="text-2xl font-bold text-blue-200 mb-3">Stay Connected at Sea</h3>
+                  <p className="text-blue-100 leading-relaxed max-w-2xl mx-auto">
+                    With Starlink high-speed internet, you can stay connected with family, work remotely, 
+                    stream entertainment, and share your sailing adventures in real-time. Enjoy reliable, 
+                    fast WiFi connectivity even in the most remote Greek island locations.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Exterior Gallery */}
@@ -601,6 +694,58 @@ export default function BlueOnePage() {
               </div>
             </div>
 
+            {/* Premium Features */}
+            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
+              <h2 className="text-4xl font-bold text-white mb-8 text-center">Premium Features & Amenities</h2>
+              
+              <div className="mb-8 text-center">
+                <div className="inline-flex items-center gap-3 bg-blue-800/50 rounded-full px-6 py-3 border border-blue-400/30 backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span className="text-blue-200 font-semibold">Starlink High-Speed Internet Available</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {boat.features?.map((feature, index) => (
+                  <div key={index} className="bg-blue-800/30 rounded-xl p-4 border border-blue-400/20 backdrop-blur-sm hover:bg-blue-800/40 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        feature.includes('Starlink') 
+                          ? 'bg-blue-500/20 border-2 border-blue-400' 
+                          : 'bg-blue-600/20 border border-blue-500'
+                      }`}>
+                        {feature.includes('Starlink') ? (
+                          <svg className="w-5 h-5 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                          </svg>
+                        )}
+                      </div>
+                      <span className={`text-sm ${feature.includes('Starlink') ? 'text-blue-200 font-semibold' : 'text-blue-100'}`}>
+                        {feature}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 text-center">
+                <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/20 rounded-xl p-6 border border-blue-400/30">
+                  <h3 className="text-2xl font-bold text-blue-200 mb-3">Stay Connected at Sea</h3>
+                  <p className="text-blue-100 leading-relaxed">
+                    With Starlink high-speed internet, you can stay connected with family, work remotely, 
+                    stream entertainment, and share your sailing adventures in real-time. Enjoy reliable, 
+                    fast WiFi connectivity even in the most remote Greek island locations.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Complete Gallery Section */}
             <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
               <h2 className="text-4xl font-bold text-white mb-8 text-center">Complete BlueOne Gallery</h2>
@@ -626,7 +771,7 @@ export default function BlueOnePage() {
                 <h3 className="text-3xl font-bold text-white mb-6">Ready to Sail BlueOne?</h3>
                 <p className="text-xl text-blue-100 mb-8">Experience the ultimate luxury sailing adventure in the Greek islands</p>
                 <a 
-                  href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
+                  href={`/blueone/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                   className="inline-block bg-white text-blue-900 px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-xl"
                 >
                   Book Your BlueOne Experience

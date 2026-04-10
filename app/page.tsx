@@ -1,7 +1,17 @@
+'use client';
+
 import Image from 'next/image';
 import Link from "next/link";
+import { useEffect } from 'react';
+import { useBlueOneMode } from './contexts/BlueOneContext';
 
 export default function Home() {
+  const { resetTheme } = useBlueOneMode();
+
+  useEffect(() => {
+    // Reset theme when entering through main entry point
+    resetTheme();
+  }, [resetTheme]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Hero Section with BlueOne Focus */}
