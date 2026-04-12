@@ -1,6 +1,5 @@
 import emailjs from '@emailjs/browser';
 import { CONTACT } from '../app/config/contact';
-import { MapContext } from '@react-google-maps/api';
 
 // EmailJS configuration with fallbacks
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'demo_public_key';

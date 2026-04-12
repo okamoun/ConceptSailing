@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
 import { CONTACT } from '../config/contact';
 
 export default function ContactPage() {
