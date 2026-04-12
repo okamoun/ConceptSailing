@@ -16,6 +16,7 @@ export function BlueOneProvider({ children }: { children: ReactNode }) {
   const isBlueOneMode = pathname?.startsWith('/blueone') ?? false;
 
   // No-ops kept for API compatibility with pages that call these
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const setIsBlueOneMode = (_mode: boolean) => {};
   const resetTheme = () => {};
 
