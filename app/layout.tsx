@@ -34,7 +34,6 @@ function NavigationContent() {
         <div className="space-x-8 text-lg font-semibold">
           <Link href="/blueone" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-200 font-bold' : 'text-blue-400 font-bold'}`}>BlueOne</Link>
           <Link href="/experiences" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Experiences</Link>
-          <Link href="/themes" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Adventure Themes</Link>
           <Link href="/destinations" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Destinations</Link>
           {pathname !== '/blueone' && !isBlueOneMode && (
             <Link href="/boats" className="hover:text-accent transition-colors">All Boats</Link>

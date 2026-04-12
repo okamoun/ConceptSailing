@@ -584,6 +584,17 @@ export default function BlueOnePage() {
                         <h4 className="text-xl font-bold text-white mb-2">Andreas Tsitsilianis</h4>
                         <p className="text-blue-300 font-medium mb-3">Professional Chef</p>
                         <p className="text-blue-100 leading-relaxed text-sm">Chef Andreas brings culinary excellence to your sailing experience, specializing in Mediterranean cuisine with fresh, local ingredients.</p>
+                        <div className="mt-4">
+                          <Link 
+                            href="/chef/andreas-tsitsilianis" 
+                            className="inline-flex items-center gap-2 bg-blue-600/30 hover:bg-blue-600/50 text-white px-4 py-2 rounded-lg transition-colors text-sm border border-blue-400/30"
+                          >
+                            <span>View Full Profile</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        </div>
                         <div className="mt-4 bg-blue-800/50 rounded-lg p-3">
                           <h5 className="text-blue-300 font-semibold mb-2">Culinary Excellence</h5>
                           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-blue-100 text-sm">

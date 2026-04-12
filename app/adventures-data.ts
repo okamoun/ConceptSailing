@@ -836,4 +836,114 @@ const adventures: Adventure[] = [
   }
 ];
 
+// Chef data structure
+export type Chef = {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  longDescription: string;
+  image: string;
+  foodImages: string[];
+  specialties: string[];
+  experience: string;
+  sampleMenus: {
+    appetizers: { name: string; description: string }[];
+    mainCourses: { name: string; description: string }[];
+    desserts: { name: string; description: string }[];
+    wines: { name: string; description: string }[];
+  };
+};
+
+export const chefs: Chef[] = [
+  {
+    id: "andreas-tsitsilianis",
+    name: "Andreas Tsitsilianis",
+    title: "Executive Chef",
+    description: "Andreas brings Michelin-level precision and authentic Mediterranean soul to the sea.",
+    longDescription: "Chef Andreas Tsitsilianis is a culinary virtuoso whose journey spans the most prestigious kitchens across Greece, Italy, and France. With over 12 years of experience in luxury hotels and fine dining establishments, Andreas has mastered the art of combining traditional Mediterranean flavors with modern culinary techniques. His philosophy is rooted in respecting seasonal ingredients, supporting local producers, and creating memorable dining experiences that tell a story with every dish. Andreas specializes in transforming the freshest daily catches and locally sourced organic produce into gastronomic masterpieces that delight the senses and celebrate the rich culinary heritage of the Mediterranean region.",
+    image: "/images/boats/blueone/profile_andrea_chef.jpg",
+    foodImages: [
+      "/images/boats/blueone/food_1.jpeg",
+      "/images/boats/blueone/food_2.jpeg",
+      "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif"
+    ],
+    specialties: [
+      "Modern Mediterranean Cuisine",
+      "Fresh Seafood Preparation",
+      "Greek Traditional Techniques",
+      "Farm-to-Table Philosophy",
+      "Dietary Accommodations",
+      "Wine Pairing Expertise"
+    ],
+    experience: "12+ years in luxury hotels across Greece, Italy, and France. Michelin-starred restaurant experience. Private yacht chef for VIP clients.",
+    sampleMenus: {
+      appetizers: [
+        {
+          name: "Greek Mezze Platter",
+          description: "Tzatziki, hummus, taramasalata, olives, fresh vegetables with homemade pita bread"
+        },
+        {
+          name: "Grilled Calamari",
+          description: "Fresh squid with lemon, olive oil, and Mediterranean herbs"
+        },
+        {
+          name: "Seafood Ceviche",
+          description: "Fresh fish marinated in citrus with Mediterranean herbs and microgreens"
+        },
+        {
+          name: "Greek Salad",
+          description: "Tomatoes, cucumber, feta, olives, red onion with extra virgin olive oil"
+        }
+      ],
+      mainCourses: [
+        {
+          name: "Fresh Fish of the Day",
+          description: "Grilled local catch with lemon butter sauce and seasonal vegetables"
+        },
+        {
+          name: "Lobster Pasta",
+          description: "Homemade pasta with fresh lobster, cherry tomatoes, garlic, and white wine"
+        },
+        {
+          name: "Moussaka",
+          description: "Traditional layers with eggplant, meat sauce, béchamel, and herbs"
+        },
+        {
+          name: "Grilled Lamb Chops",
+          description: "Herb-crusted with roasted vegetables and potato gratin"
+        }
+      ],
+      desserts: [
+        {
+          name: "Baklava",
+          description: "Honey-soaked phyllo with pistachios and walnuts"
+        },
+        {
+          name: "Greek Yogurt Parfait",
+          description: "Local honey, fresh berries, granola, and Greek yogurt"
+        },
+        {
+          name: "Fresh Fruit Platter",
+          description: "Seasonal Mediterranean fruits with local honey"
+        }
+      ],
+      wines: [
+        {
+          name: "Assyrtiko",
+          description: "Crisp white wine from Santorini with citrus and mineral notes"
+        },
+        {
+          name: "Agiorgitiko",
+          description: "Rich red wine from Nemea with dark fruit flavors"
+        },
+        {
+          name: "Xinomavro",
+          description: "Complex red wine from Northern Greece with tart cherry and spice"
+        }
+      ]
+    }
+  }
+];
+
 export default adventures;
