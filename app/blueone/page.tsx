@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { boats } from '../boats-data';
 import { useBlueOneMode } from '../contexts/BlueOneContext';
+import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
+import { boats } from '../boats-data';
 
 // This is a dedicated page for BlueOne that bypasses the boats listing
 export default function BlueOnePage() {
@@ -16,7 +17,7 @@ export default function BlueOnePage() {
 
   useEffect(() => {
     // Find the BlueOne boat
-    const blueOneBoat = boats.find(b => b.name === "BlueOne");
+    const blueOneBoat = boats.find((b) => b.name === "BlueOne");
     if (blueOneBoat) {
       setBoat(blueOneBoat);
     }
@@ -707,75 +708,13 @@ export default function BlueOnePage() {
               </div>
             </div>
 
-            {/* Premium Features */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Premium Features & Amenities</h2>
-              
-              <div className="mb-8 text-center">
-                <div className="inline-flex items-center gap-3 bg-blue-800/50 rounded-full px-6 py-3 border border-blue-400/30 backdrop-blur-sm">
-                  <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                  <span className="text-blue-200 font-semibold">Starlink High-Speed Internet Available</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {boat.features?.map((feature, index) => (
-                  <div key={index} className="bg-blue-800/30 rounded-xl p-4 border border-blue-400/20 backdrop-blur-sm hover:bg-blue-800/40 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        feature.includes('Starlink') 
-                          ? 'bg-blue-500/20 border-2 border-blue-400' 
-                          : 'bg-blue-600/20 border border-blue-500'
-                      }`}>
-                        {feature.includes('Starlink') ? (
-                          <svg className="w-5 h-5 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-                          </svg>
-                        )}
-                      </div>
-                      <span className={`text-sm ${feature.includes('Starlink') ? 'text-blue-200 font-semibold' : 'text-blue-100'}`}>
-                        {feature}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 text-center">
-                <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/20 rounded-xl p-6 border border-blue-400/30">
-                  <h3 className="text-2xl font-bold text-blue-200 mb-3">Stay Connected at Sea</h3>
-                  <p className="text-blue-100 leading-relaxed">
-                    With Starlink high-speed internet, you can stay connected with family, work remotely, 
-                    stream entertainment, and share your sailing adventures in real-time. Enjoy reliable, 
-                    fast WiFi connectivity even in the most remote Greek island locations.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Complete Gallery Section */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Complete BlueOne Gallery</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages].map((image: string, index: number) => (
-                  <div key={index} className="glass p-2 shadow-lg animate-fade-in-up hover:scale-105 transition-transform" style={{animationDelay: `${index * 0.1}s`, animationFillMode: 'both'}}>
-                    <Image
-                      src={image}
-                      alt={`BlueOne Gallery ${index + 1}`}
-                      width={400}
-                      height={300}
-                      className="w-full h-48 object-cover rounded-lg"
-                      draggable={false}
-                    />
-                  </div>
-                ))}
-              </div>
+            {/* Complete Gallery Section - Now as Slideshow */}
+            <div className="animate-fade-in-up mb-12">
+              <h2 className="text-4xl font-bold text-white mb-8 text-center">BlueOne Gallery</h2>
+              <BlueOneGallerySlideshow 
+                images={[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages]}
+                className="max-w-4xl mx-auto"
+              />
             </div>
 
             {/* Final CTA */}
