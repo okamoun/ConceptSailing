@@ -122,7 +122,7 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
       reply_to: bookingData.email,
     };
 
-    console.log('Sending booking email with params:', templateParams);
+    console.log('Sending booking email with params :', templateParams);
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
