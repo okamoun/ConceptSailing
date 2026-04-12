@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useBlueOneMode } from '../../contexts/BlueOneContext';
 import Image from 'next/image';
 import Link from 'next/link';
+import { CONTACT } from '../../config/contact';
 
 function BookingContent() {
   const searchParams = useSearchParams();
@@ -182,7 +183,7 @@ function BookingContent() {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                      placeholder="+30 210 123 4567"
+                      placeholder={CONTACT.phone.formatted}
                     />
                   </div>
                   

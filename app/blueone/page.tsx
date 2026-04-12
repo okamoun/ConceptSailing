@@ -149,7 +149,7 @@ export default function BlueOnePage() {
             {/* Quick Actions */}
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-fade-in-up" style={{animationDelay: '0.6s'}}>
               <a 
-                href={`/blueone/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
+                href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                 className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 text-center"
               >
                 Book BlueOne Now
@@ -584,6 +584,17 @@ export default function BlueOnePage() {
                         <h4 className="text-xl font-bold text-white mb-2">Andreas Tsitsilianis</h4>
                         <p className="text-blue-300 font-medium mb-3">Professional Chef</p>
                         <p className="text-blue-100 leading-relaxed text-sm">Chef Andreas brings culinary excellence to your sailing experience, specializing in Mediterranean cuisine with fresh, local ingredients.</p>
+                        <div className="mt-4">
+                          <Link 
+                            href="/chef/andreas-tsitsilianis" 
+                            className="inline-flex items-center gap-2 bg-blue-600/30 hover:bg-blue-600/50 text-white px-4 py-2 rounded-lg transition-colors text-sm border border-blue-400/30"
+                          >
+                            <span>View Full Profile</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        </div>
                         <div className="mt-4 bg-blue-800/50 rounded-lg p-3">
                           <h5 className="text-blue-300 font-semibold mb-2">Culinary Excellence</h5>
                           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-blue-100 text-sm">
@@ -773,7 +784,7 @@ export default function BlueOnePage() {
                 <h3 className="text-3xl font-bold text-white mb-6">Ready to Sail BlueOne?</h3>
                 <p className="text-xl text-blue-100 mb-8">Experience the ultimate luxury sailing adventure in the Greek islands</p>
                 <a 
-                  href={`/blueone/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
+                  href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                   className="inline-block bg-white text-blue-900 px-10 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-xl"
                 >
                   Book Your BlueOne Experience

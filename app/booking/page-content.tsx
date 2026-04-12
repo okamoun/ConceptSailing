@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CONTACT } from '../config/contact';
 import { useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import Link from 'next/link';
@@ -285,7 +286,7 @@ export default function BookingPageContent() {
                   onChange={(e) => setPhone(e.target.value)}
                   required
                   className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
-                  placeholder="+30 210 123 4567"
+                  placeholder={CONTACT.phone.formatted}
                 />
               </div>
             </div>

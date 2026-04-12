@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { CONTACT } from '../../config/contact';
 import { useBlueOneMode } from '../../contexts/BlueOneContext';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -72,7 +73,7 @@ export default function BlueOneContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-blue-900">Phone</h3>
-                    <p className="text-blue-700">+30 210 123 4567</p>
+                    <p className="text-blue-700">{CONTACT.phone.formatted}</p>
                     <p className="text-sm text-gray-600">Mon-Fri: 9:00 AM - 6:00 PM</p>
                   </div>
                 </div>
@@ -85,7 +86,7 @@ export default function BlueOneContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-blue-900">Email</h3>
-                    <p className="text-blue-700">blueone@concept-sailing.gr</p>
+                    <p className="text-blue-700">contact@nj3cruises.com</p>
                     <p className="text-sm text-gray-600">24/7 Response Time</p>
                   </div>
                 </div>
@@ -185,7 +186,7 @@ export default function BlueOneContactPage() {
                       value={formData.phone}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                      placeholder="+30 210 123 4567"
+                      placeholder={CONTACT.phone.formatted}
                     />
                   </div>
                   
@@ -231,7 +232,7 @@ export default function BlueOneContactPage() {
                   <h3 className="font-semibold text-blue-900 mb-2">Response Time</h3>
                   <p className="text-sm text-blue-700">
                     We typically respond to all inquiries within 24 hours. For urgent matters, 
-                    please call us directly at +30 210 123 4567.
+                    please call us directly at +33 6 75 60 45 32.
                   </p>
                 </div>
 
@@ -263,7 +264,7 @@ export default function BlueOneContactPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/blueone/booking?boat=BlueOne&brand=Fountaine%20Pajot&length=51%20ft&description=A%20new-generation%20catamaran%20with%20a%20focus%20on%20eco-responsibility,%20solar%20panels,%20and%20hybrid%20systems.&image=/images/boats/blueone/External_sailing.jpg"
+                href="/booking?boat=BlueOne&brand=Fountaine%20Pajot&length=51%20ft&description=A%20new-generation%20catamaran%20with%20a%20focus%20on%20eco-responsibility,%20solar%20panels,%20and%20hybrid%20systems.&image=/images/boats/blueone/External_sailing.jpg"
                 className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
                 Book BlueOne Now

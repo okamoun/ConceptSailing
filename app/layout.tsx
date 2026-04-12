@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { CONTACT } from './config/contact';
 import { BlueOneProvider, useBlueOneMode } from "./contexts/BlueOneContext";
 import "./globals.css";
 import "./animations.css";
@@ -34,7 +35,6 @@ function NavigationContent() {
         <div className="space-x-8 text-lg font-semibold">
           <Link href="/blueone" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-200 font-bold' : 'text-blue-400 font-bold'}`}>BlueOne</Link>
           <Link href="/experiences" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Experiences</Link>
-          <Link href="/themes" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Adventure Themes</Link>
           <Link href="/destinations" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Destinations</Link>
           {pathname !== '/blueone' && !isBlueOneMode && (
             <Link href="/boats" className="hover:text-accent transition-colors">All Boats</Link>
@@ -85,7 +85,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <div>
             <h3 className={`text-xl font-bold mb-4 ${isBlueOneMode ? 'text-blue-300' : 'text-accent'}`}>Contact Us</h3>
             <p className="text-lg">Email: <a href="mailto:contact@nj3cruises.com" className={`hover:${isBlueOneMode ? 'text-blue-300' : 'text-accent'} transition-colors`}>contact@nj3cruises.com</a></p>
-            <p className="text-lg">Phone: +30 210 123 4567</p>
+            <p className="text-lg">Phone: {CONTACT.phone.formatted}</p>
             <div className="mt-4">
               <p className={`text-lg font-bold ${isBlueOneMode ? 'text-blue-300' : 'text-accent'}`}>Concept Sailing</p>
               <p className="text-sm text-gray-400">Athens, Greece</p>

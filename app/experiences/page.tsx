@@ -67,14 +67,8 @@ export default function ExperiencesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up" style={{animationDelay:'0.3s',animationFillMode:'both'}}>
               <Link 
-                href="/themes" 
-                className="bg-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-purple-700 transition-colors shadow-lg"
-              >
-                Explore All Themes
-              </Link>
-              <Link 
                 href="/destinations" 
-                className="bg-white/20 text-white border-2 border-white/30 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/30 transition-colors backdrop-blur-sm"
+                className="bg-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-purple-700 transition-colors shadow-lg"
               >
                 View Destinations
               </Link>

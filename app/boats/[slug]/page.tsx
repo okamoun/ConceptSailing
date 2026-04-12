@@ -770,6 +770,17 @@ export default function BoatPage({ params }: BoatPageProps) {
                         <p className="text-gray-300 leading-relaxed text-sm">
                           Andreas brings Michelin-level precision and authentic Mediterranean soul to the sea. With 12+ years of experience across Greece, Italy, and France, he creates exceptional culinary experiences tailored to each guest.
                         </p>
+                        <div className="mt-4">
+                          <Link 
+                            href="/chef/andreas-tsitsilianis" 
+                            className="inline-flex items-center gap-2 bg-accent/20 hover:bg-accent/30 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                          >
+                            <span>View Full Profile</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                     
