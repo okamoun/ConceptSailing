@@ -15,12 +15,24 @@ export default function DestinationsPage() {
   const { isBlueOneMode } = useBlueOneMode();
 
   return (
-    <main className={`min-h-screen py-16 ${isBlueOneMode ? 'bg-gradient-to-br from-blue-50 to-white' : 'bg-gradient-to-br from-[#101824] to-[#1f2937]'}`}>
-      <div className={`max-w-6xl mx-auto px-2 sm:px-4 p-4 sm:p-10 shadow-xl border animate-fade-in-up ${
-        isBlueOneMode 
-          ? 'bg-white border-blue-200' 
-          : 'glass border-accent'
-      }`}>
+    <main className={`min-h-screen relative py-16 ${
+      isBlueOneMode 
+        ? '' 
+        : ''
+    }`} style={{
+      backgroundImage: isBlueOneMode 
+        ? `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.6)), url('/destinations/Rhodes.jpg')`
+        : `linear-gradient(rgba(16, 24, 36, 0.4), rgba(31, 41, 55, 0.6)), url('/destinations/lavrio.jpg')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed'
+    }}>
+      <div className={`min-h-screen ${isBlueOneMode ? 'bg-gradient-to-br from-blue-50/30 to-white/40' : 'bg-gradient-to-br from-[#101824]/20 to-[#1f2937]/30'} py-16`}>
+        <div className={`max-w-6xl mx-auto px-2 sm:px-4 p-4 sm:p-10 shadow-xl border animate-fade-in-up backdrop-blur-sm ${
+          isBlueOneMode 
+            ? 'bg-white/60 border-blue-200' 
+            : 'glass border-accent'
+        }`}>
         <div className="text-center mb-8">
           {isBlueOneMode && (
             <div className="mb-6">
@@ -29,24 +41,44 @@ export default function DestinationsPage() {
                 alt="BlueOne Logo" 
                 width={120} 
                 height={60} 
-                className="mx-auto drop-shadow-lg"
+                className="mx-auto drop-shadow-lg animate-pulse"
                 priority
               />
             </div>
           )}
-          <h1 className={`text-2xl sm:text-4xl font-extrabold mb-6 text-center ${
+          <h1 className={`text-3xl sm:text-5xl font-extrabold mb-6 text-center drop-shadow-2xl animate-fade-in-up ${
             isBlueOneMode ? 'text-blue-900' : 'text-accent'
-          }`}>
+          }`} style={{
+            textShadow: isBlueOneMode 
+              ? '2px 2px 4px rgba(0,0,0,0.1)' 
+              : '2px 2px 8px rgba(0,0,0,0.5)'
+          }}>
             {isBlueOneMode ? 'BlueOne Sailing Destinations' : 'Top Sailing Destinations in Greece'}
           </h1>
-          <p className={`text-base sm:text-lg mb-10 text-center max-w-2xl mx-auto ${
-            isBlueOneMode ? 'text-gray-700' : 'text-gray-200'
-          }`}>
+          <p className={`text-lg sm:text-xl mb-10 text-center max-w-3xl mx-auto leading-relaxed animate-fade-in-up ${
+            isBlueOneMode ? 'text-gray-700' : 'text-gray-100'
+          }`} style={{
+            textShadow: isBlueOneMode 
+              ? '1px 1px 2px rgba(0,0,0,0.1)' 
+              : '1px 1px 4px rgba(0,0,0,0.8)'
+          }}>
             {isBlueOneMode 
               ? 'Explore the stunning destinations you can visit aboard BlueOne. Each location offers unique highlights and easy access to beautiful island groups.'
               : 'Explore the most popular embarkation ports for sailing holidays in Greece. Each destination offers unique highlights and easy access to stunning island groups.'
             }
           </p>
+          <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+            <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-full ${
+              isBlueOneMode 
+                ? 'bg-blue-100 text-blue-800 border border-blue-200' 
+                : 'bg-accent/20 text-accent border border-accent/30 backdrop-blur-sm'
+            }`}>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+              </svg>
+              <span className="font-medium">Dream Destinations Await</span>
+            </div>
+          </div>
         </div>
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start w-full">
           {/* Map on the left */}
@@ -87,11 +119,11 @@ export default function DestinationsPage() {
                         zIndex: selectedId === dest.id ? 20 : 10
                       }}
                       transition={{ type: 'spring', stiffness: 400, damping: 30, delay: idx * 0.07 }}
-                      className={`rounded-xl shadow-lg border flex flex-col sm:flex-row gap-2 sm:gap-4 items-center cursor-pointer w-full sm:w-11/12 mx-auto transition-all duration-300 group ${
+                      className={`rounded-xl shadow-2xl border flex flex-col sm:flex-row gap-2 sm:gap-4 items-center cursor-pointer w-full sm:w-11/12 mx-auto transition-all duration-500 group backdrop-blur-sm ${
                         isBlueOneMode 
-                          ? 'bg-white border-blue-200' 
-                          : 'bg-[#172132] border-accent'
-                      } ${selectedId === dest.id ? (isBlueOneMode ? 'ring-4 ring-blue-400/50' : 'ring-4 ring-accent/50') : ''}`}
+                          ? 'bg-white/70 border-blue-200 hover:bg-white/80' 
+                          : 'bg-[#172132]/60 border-accent hover:bg-[#172132]/70'
+                      } ${selectedId === dest.id ? (isBlueOneMode ? 'ring-4 ring-blue-400/60 shadow-blue-400/30' : 'ring-4 ring-accent/60 shadow-accent/30') : ''}`}
                       style={{
                         marginTop: (idx === 0 ? 0 : -24) + extraMargin,
                         boxShadow: selectedId === dest.id ? '0 8px 32px 0 rgba(0,0,0,0.35)' : '0 4px 16px 0 rgba(0,0,0,0.15)',
@@ -111,11 +143,15 @@ export default function DestinationsPage() {
                       alt={dest.name} 
                       width={100} 
                       height={70} 
-                      className={`rounded-lg object-cover border-2 w-full sm:w-24 h-24 sm:h-16 group-hover:transition-all ${
+                      className={`rounded-lg object-cover border-2 w-full sm:w-24 h-24 sm:h-16 group-hover:transition-all duration-300 ${
                         isBlueOneMode 
-                          ? 'border-blue-300 group-hover:border-blue-500' 
-                          : 'border-accent group-hover:border-white'
+                          ? 'border-blue-300 group-hover:border-blue-500 shadow-lg group-hover:shadow-xl' 
+                          : 'border-accent group-hover:border-white shadow-lg group-hover:shadow-xl group-hover:brightness-110'
                       }`} 
+                      style={{
+                        filter: isBlueOneMode ? 'none' : 'brightness(0.9) contrast(1.1)',
+                        transition: 'all 0.3s ease'
+                      }}
                     />
                       <div className="flex-1 w-full">
                         <h2 className={`text-lg sm:text-xl font-bold mb-1 ${
@@ -140,6 +176,7 @@ export default function DestinationsPage() {
           </div>
         </div>
       </div>
+    </div>
     </main>
   );
 }
