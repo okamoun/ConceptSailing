@@ -86,10 +86,10 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
   
   // Check if EmailJS is properly configured and initialized
   if (!isEmailJSConfigured() || !emailjsInitialized) {
-    console.log('EmailJS not configured or initialized - simulating booking email');
+    console.error('EmailJS not configured or initialized - cannot send booking email');
     return {
-      status: 'success',
-      message: 'Booking email simulated (EmailJS not configured)'
+      status: 'error',
+      message: 'Email service is not properly configured. Please contact support.'
     };
   }
 
@@ -165,10 +165,10 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
   
   // Check if EmailJS is properly configured and initialized
   if (!isEmailJSConfigured() || !emailjsInitialized) {
-    console.log('EmailJS not configured or initialized - simulating contact email');
+    console.error('EmailJS not configured or initialized - cannot send contact email');
     return {
-      status: 'success',
-      message: 'Contact email simulated (EmailJS not configured)'
+      status: 'error',
+      message: 'Email service is not properly configured. Please contact support.'
     };
   }
 
