@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { CONTACT } from '../config/contact';
 import Link from 'next/link';
 
 interface BookingData {
@@ -212,7 +214,7 @@ export default function BookingConfirmationPage() {
               </div>
               <div>
                 <div className="text-accent font-semibold mb-1">Phone</div>
-                <div className="text-gray-300">+1 (555) 123-4567</div>
+                <div className="text-gray-300">{CONTACT.phone.formatted}</div>
               </div>
               <div>
                 <div className="text-accent font-semibold mb-1">Office Hours</div>
