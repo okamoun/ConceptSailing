@@ -139,7 +139,7 @@ const adventures: Adventure[] = [
     id: "3",
     name: "Yoga & Wellness Retreat",
     description: "Combine sailing with daily yoga, meditation, and wellness activities for mind and body.",
-    image: "/adventures/yoga___wellness_retreat.jpg",
+    image: "/adventures/yoga_wellness_retreat.jpg",
     experience: "Relax and rejuvenate on a 7-day retreat blending sailing with holistic wellness. Start each morning with yoga on deck, followed by healthy meals and meditation sessions. Discover secluded coves and enjoy spa treatments at select ports.",
     itinerary: [
       {
@@ -197,7 +197,7 @@ const adventures: Adventure[] = [
     id: "4",
     name: "Cleansing & Renewal",
     description: "A transformative journey combining sailing, detox programs, and holistic wellness.",
-    image: "/adventures/OpenAI/cleansing___renewal.png",
+    image: "/adventures/OpenAI/cleansing_renewal.png",
     experience: "A week focused on cleansing body and mind. Enjoy daily detox meals, guided mindfulness, and spa therapies. Sail to tranquil islands, participate in wellness workshops, and experience the healing power of the Aegean.",
     itinerary: [
       {
@@ -255,7 +255,7 @@ const adventures: Adventure[] = [
     id: "5",
     name: "Greek Heritage Explorer",
     description: "Journey through time visiting ancient sites and historical landmarks by sea.",
-    image: "/adventures/OpenAI/greek_heritage_explorer.png",
+    image: "/adventures/greek-heritage-explorer.jpg",
     experience: "Explore the cradle of Western civilization over 7 days. Sail to islands rich in history, guided by expert archaeologists. Visit temples, amphitheaters, and museums, with storytelling evenings under the stars.",
     itinerary: [
       {
@@ -720,7 +720,7 @@ const adventures: Adventure[] = [
     id: "13",
     name: "Ionian Fishing & Island Discovery",
     description: "Experience the thrill of fishing in the crystal-clear waters of the Ionian Sea, including the beautiful island of Zakynthos. Perfect for anglers and sea lovers alike.",
-    image: "/adventures/OpenAI/ionian_fishing___island_discovery.png",
+    image: "/adventures/OpenAI/ionian_fishing_island_discovery.png",
     experience: "Set sail for a week of fishing and exploration in the Ionian islands. Learn traditional and modern fishing techniques from local experts, enjoy daily catches prepared onboard, and discover the vibrant marine life of Zakynthos, Kefalonia, and surrounding isles. Relax in secluded bays, swim in turquoise waters, and savor the freshest seafood dinners under the stars.",
     itinerary: [
       {
