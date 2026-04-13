@@ -35,7 +35,7 @@ export default function BookingPageContent() {
   };
   
   const [selectedDate, setSelectedDate] = useState('');
-  const [passengers, setPassengers] = useState(1);
+  const [passengers, setPassengers] = useState(8);
   const [embarkationPoint, setEmbarkationPoint] = useState('nea-peramos');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -87,8 +87,8 @@ export default function BookingPageContent() {
   // Boat capacity mapping
   const boatCapacities: { [key: string]: { min: number; max: number } } = {
     'fountaine-pajot-saba-50': { min: 1, max: 10 },
-    'blueone': { min: 1, max: 12 },
-    'lagoon-55': { min: 1, max: 14 }
+    'blueone': { min: 1, max: 10 },
+    'lagoon-55': { min: 1, max: 10 }
   };
 
   useEffect(() => {
