@@ -25,9 +25,17 @@ interface EmbarkationPoint {
 
 export default function BookingPageContent() {
   const searchParams = useSearchParams();
-  const [boat, setBoat] = useState<Boat | null>(null);
+  // BlueOne is the only boat now, so we set it directly
+  const blueOneBoat: Boat = {
+    name: "BlueOne",
+    brand: "Fountaine Pajot",
+    length: "51 ft",
+    description: "A new-generation catamaran with a focus on eco-responsibility, solar panels, and hybrid systems. Elegant design with full safety and entertainment options for guests.",
+    image: "/images/boats/fp-aura51.jpg"
+  };
+  
   const [selectedDate, setSelectedDate] = useState('');
-  const [passengers, setPassengers] = useState(1);
+  const [passengers, setPassengers] = useState(8);
   const [embarkationPoint, setEmbarkationPoint] = useState('nea-peramos');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,7 +43,6 @@ export default function BookingPageContent() {
   const [holidayDescription, setHolidayDescription] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Embarkation points around Athens
   const embarkationPoints: EmbarkationPoint[] = [
@@ -80,30 +87,19 @@ export default function BookingPageContent() {
   // Boat capacity mapping
   const boatCapacities: { [key: string]: { min: number; max: number } } = {
     'fountaine-pajot-saba-50': { min: 1, max: 10 },
-    'lagoon-52f': { min: 1, max: 12 },
-    'blueone': { min: 1, max: 12 },
-    'lagoon-55': { min: 1, max: 14 }
+    'blueone': { min: 1, max: 10 },
+    'lagoon-55': { min: 1, max: 10 }
   };
 
   useEffect(() => {
-    if (!searchParams) return;
-    
-    const boatName = searchParams.get('boat');
-    const boatBrand = searchParams.get('brand');
-    const boatLength = searchParams.get('length');
-    const boatDescription = searchParams.get('description');
-    const boatImage = searchParams.get('image');
-
-    if (boatName && boatBrand && boatLength && boatDescription && boatImage) {
-      setBoat({
-        name: boatName,
-        brand: boatBrand,
-        length: boatLength,
-        description: boatDescription,
-        image: boatImage
-      });
+    // BlueOne is the only boat, so we don't need URL parameter logic
+    // We could still check for theme or other parameters if needed
+    if (searchParams) {
+      const themeParam = searchParams.get('theme');
+      if (themeParam) {
+        setSelectedTheme(themeParam);
+      }
     }
-    setIsLoading(false);
   }, [searchParams]);
 
   const getTodayDate = () => {
@@ -118,9 +114,7 @@ export default function BookingPageContent() {
   };
 
   const getBoatCapacity = () => {
-    if (!boat) return { min: 1, max: 10 };
-    const boatKey = boat.name.toLowerCase().replace(/\s+/g, '-');
-    return boatCapacities[boatKey] || { min: 1, max: 10 };
+    return boatCapacities['blueone'];
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -154,7 +148,7 @@ export default function BookingPageContent() {
         name: name,
         email: email,
         phone: phone,
-        boat: boat?.name || '',
+        boat: blueOneBoat.name,
         date: selectedDate,
         passengers: passengers,
         embarkationPoint: embarkationPoints.find(point => point.id === embarkationPoint)?.name || '',
@@ -189,57 +183,36 @@ export default function BookingPageContent() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] flex items-center justify-center">
-        <div className="text-white text-xl">Loading booking information...</div>
-      </div>
-    );
-  }
-
-  if (!boat) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-red-500 mb-4">Booking Error</h1>
-          <p className="text-white mb-6">No boat selected for booking</p>
-          <Link href="/boats" className="text-accent hover:text-accent/80 underline">
-            Return to Boats
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
+  
   const capacity = getBoatCapacity();
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <Link href={`/boats/${boat.name.toLowerCase().replace(/\s+/g, '-')}`} className="text-accent hover:text-accent/80 transition-colors inline-flex items-center gap-2">
-            &larr; Back to {boat.name}
+          <Link href="/blueone" className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-2">
+            &larr; Back to BlueOne
           </Link>
         </div>
 
         <div className="glass p-8 shadow-xl">
-          <h1 className="text-4xl font-bold text-accent mb-8 text-center">Book Your Charter</h1>
+          <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">Book Your BlueOne Experience</h1>
           
           {/* Boat Summary */}
-          <div className="mb-8 p-6 bg-accent/10 rounded-lg border border-accent/30">
+          <div className="mb-8 p-6 bg-blue-100 rounded-lg border border-blue-200">
             <div className="flex items-center gap-6">
               <Image
-                src={boat.image}
-                alt={boat.name}
+                src={blueOneBoat.image}
+                alt={blueOneBoat.name}
                 width={120}
                 height={80}
-                className="w-32 h-20 object-cover rounded-lg border-2 border-accent/50"
+                className="w-32 h-20 object-cover rounded-lg border-2 border-blue-300"
                 draggable={false}
               />
               <div>
-                <h2 className="text-2xl font-bold text-accent">{boat.name}</h2>
-                <p className="text-gray-300">{boat.brand} - {boat.length}</p>
-                <p className="text-gray-400 text-sm mt-1">{boat.description}</p>
+                <h2 className="text-2xl font-bold text-blue-900">{blueOneBoat.name}</h2>
+                <p className="text-gray-700">{blueOneBoat.brand} - {blueOneBoat.length}</p>
+                <p className="text-gray-600 text-sm mt-1">{blueOneBoat.description}</p>
               </div>
             </div>
           </div>
@@ -247,10 +220,10 @@ export default function BookingPageContent() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Contact Information */}
             <div>
-              <h3 className="text-xl font-semibold text-accent mb-4">Contact Information</h3>
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Contact Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-lg font-semibold text-accent mb-3">
+                  <label className="block text-lg font-semibold text-blue-900 mb-3">
                     Full Name *
                   </label>
                   <input
@@ -258,12 +231,12 @@ export default function BookingPageContent() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                    className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                     placeholder="Enter your full name"
                   />
                 </div>
                 <div>
-                  <label className="block text-lg font-semibold text-accent mb-3">
+                  <label className="block text-lg font-semibold text-blue-900 mb-3">
                     Email Address *
                   </label>
                   <input
@@ -271,13 +244,13 @@ export default function BookingPageContent() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                    className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                     placeholder="your.email@example.com"
                   />
                 </div>
               </div>
               <div className="mt-6">
-                <label className="block text-lg font-semibold text-accent mb-3">
+                <label className="block text-lg font-semibold text-blue-900 mb-3">
                   Phone Number *
                 </label>
                 <input
@@ -285,7 +258,7 @@ export default function BookingPageContent() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                   placeholder={CONTACT.phone.formatted}
                 />
               </div>
@@ -293,10 +266,10 @@ export default function BookingPageContent() {
 
             {/* Charter Details */}
             <div>
-              <h3 className="text-xl font-semibold text-accent mb-4">Charter Details</h3>
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Charter Details</h3>
             {/* Date Selection */}
             <div>
-              <label className="block text-lg font-semibold text-accent mb-3">
+              <label className="block text-lg font-semibold text-blue-900 mb-3">
                 Charter Date *
               </label>
               <input
@@ -306,16 +279,16 @@ export default function BookingPageContent() {
                 min={getTodayDate()}
                 max={getMaxDate()}
                 required
-                className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
               />
-              <p className="text-gray-400 text-sm mt-2">
+              <p className="text-gray-600 text-sm mt-2">
                 Select your preferred charter date (bookings available up to 1 year in advance)
               </p>
             </div>
 
             {/* Passenger Selection */}
             <div>
-              <label className="block text-lg font-semibold text-accent mb-3">
+              <label className="block text-lg font-semibold text-blue-900 mb-3">
                 Number of Passengers *
               </label>
               <div className="flex items-center gap-4">
@@ -326,27 +299,27 @@ export default function BookingPageContent() {
                   min={capacity.min}
                   max={capacity.max}
                   required
-                  className="w-32 p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                  className="w-32 p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                 />
-                <span className="text-gray-300">
+                <span className="text-gray-700">
                   (Capacity: {capacity.min} - {capacity.max} guests)
                 </span>
               </div>
-              <p className="text-gray-400 text-sm mt-2">
-                This {boat.name.toLowerCase()} can accommodate up to {capacity.max} guests comfortably
+              <p className="text-gray-600 text-sm mt-2">
+                This {blueOneBoat.name.toLowerCase()} can accommodate up to {capacity.max} guests comfortably
               </p>
             </div>
 
             {/* Embarkation Point Selection */}
             <div>
-              <label className="block text-lg font-semibold text-accent mb-3">
+              <label className="block text-lg font-semibold text-blue-900 mb-3">
                 Embarkation Point *
               </label>
               <select
                 value={embarkationPoint}
                 onChange={(e) => setEmbarkationPoint(e.target.value)}
                 required
-                className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
               >
                 <option value="">Select embarkation point</option>
                 {embarkationPoints.map((point) => (
@@ -355,18 +328,18 @@ export default function BookingPageContent() {
                   </option>
                 ))}
               </select>
-              <p className="text-gray-400 text-sm mt-2">
+              <p className="text-gray-600 text-sm mt-2">
                 Choose your preferred starting location for your Greek sailing adventure
               </p>
             </div>
 
             {/* Embarkation Point Details */}
             {embarkationPoint && (
-              <div className="p-4 bg-accent/10 rounded-lg border border-accent/30">
-                <h3 className="text-lg font-semibold text-accent mb-2">
+              <div className="p-4 bg-blue-100 rounded-lg border border-blue-200">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
                   {embarkationPoints.find(p => p.id === embarkationPoint)?.name}
                 </h3>
-                <p className="text-gray-300">
+                <p className="text-gray-700">
                   {embarkationPoints.find(p => p.id === embarkationPoint)?.description}
                 </p>
               </div>
@@ -374,34 +347,34 @@ export default function BookingPageContent() {
 
             {/* Holiday Preferences */}
             <div>
-              <h3 className="text-xl font-semibold text-accent mb-4">Holiday Preferences</h3>
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Holiday Preferences</h3>
               
               {/* Holiday Description */}
               <div className="mb-6">
-                <label className="block text-lg font-semibold text-accent mb-3">
+                <label className="block text-lg font-semibold text-blue-900 mb-3">
                   Describe Your Ideal Holiday
                 </label>
                 <textarea
                   value={holidayDescription}
                   onChange={(e) => setHolidayDescription(e.target.value)}
                   rows={4}
-                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none resize-none"
+                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none resize-none"
                   placeholder="Tell us about your ideal sailing holiday - activities you enjoy, places you'd like to visit, special occasions, etc..."
                 />
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-gray-600 text-sm mt-2">
                   Help us customize your perfect sailing experience (optional)
                 </p>
               </div>
 
               {/* Adventure Theme Selection */}
               <div>
-                <label className="block text-lg font-semibold text-accent mb-3">
+                <label className="block text-lg font-semibold text-blue-900 mb-3">
                   Preferred Adventure Theme
                 </label>
                 <select
                   value={selectedTheme}
                   onChange={(e) => setSelectedTheme(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">Select a theme (optional)</option>
                   {adventures.map((adventure) => (
@@ -410,18 +383,18 @@ export default function BookingPageContent() {
                     </option>
                   ))}
                 </select>
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-gray-600 text-sm mt-2">
                   Choose from our curated adventure themes or leave blank for a custom experience
                 </p>
               </div>
 
               {/* Selected Theme Description */}
               {selectedTheme && (
-                <div className="mt-4 p-4 bg-accent/10 rounded-lg border border-accent/30">
-                  <h4 className="text-lg font-semibold text-accent mb-2">
+                <div className="mt-4 p-4 bg-blue-100 rounded-lg border border-blue-200">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-2">
                     {adventures.find(a => a.id === selectedTheme)?.name}
                   </h4>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-gray-700 text-sm">
                     {adventures.find(a => a.id === selectedTheme)?.description}
                   </p>
                 </div>
@@ -431,47 +404,47 @@ export default function BookingPageContent() {
             </div>
 
             {/* Booking Summary */}
-            <div className="p-6 bg-accent/10 rounded-lg border border-accent/30">
-              <h3 className="text-xl font-semibold text-accent mb-4">Information Request Summary</h3>
+            <div className="p-6 bg-blue-100 rounded-lg border border-blue-200">
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Information Request Summary</h3>
               
               {/* Contact Information */}
               <div className="mb-4">
-                <h4 className="text-lg font-semibold text-accent mb-2">Contact Information</h4>
-                <div className="space-y-2 text-gray-300">
+                <h4 className="text-lg font-semibold text-blue-900 mb-2">Contact Information</h4>
+                <div className="space-y-2 text-gray-700">
                   <div className="flex justify-between">
                     <span>Name:</span>
-                    <span className="text-white">{name || 'Not provided'}</span>
+                    <span className="text-gray-900 font-medium">{name || 'Not provided'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Email:</span>
-                    <span className="text-white">{email || 'Not provided'}</span>
+                    <span className="text-gray-900 font-medium">{email || 'Not provided'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Phone:</span>
-                    <span className="text-white">{phone || 'Not provided'}</span>
+                    <span className="text-gray-900 font-medium">{phone || 'Not provided'}</span>
                   </div>
                 </div>
               </div>
               
               {/* Charter Details */}
               <div>
-                <h4 className="text-lg font-semibold text-accent mb-2">Charter Details</h4>
-                <div className="space-y-2 text-gray-300">
+                <h4 className="text-lg font-semibold text-blue-900 mb-2">Charter Details</h4>
+                <div className="space-y-2 text-gray-700">
                   <div className="flex justify-between">
                     <span>Boat:</span>
-                    <span className="text-white">{boat.name}</span>
+                    <span className="text-gray-900 font-medium">{blueOneBoat.name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Date:</span>
-                    <span className="text-white">{selectedDate || 'Not selected'}</span>
+                    <span className="text-gray-900 font-medium">{selectedDate || 'Not selected'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Passengers:</span>
-                    <span className="text-white">{passengers}</span>
+                    <span className="text-gray-900 font-medium">{passengers}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Embarkation:</span>
-                    <span className="text-white">
+                    <span className="text-gray-900 font-medium">
                       {embarkationPoints.find(p => p.id === embarkationPoint)?.name || 'Not selected'}
                     </span>
                   </div>
@@ -481,18 +454,18 @@ export default function BookingPageContent() {
               {/* Holiday Preferences */}
               {(holidayDescription || selectedTheme) && (
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-accent mb-2">Holiday Preferences</h4>
-                  <div className="space-y-2 text-gray-300">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-2">Holiday Preferences</h4>
+                  <div className="space-y-2 text-gray-700">
                     {holidayDescription && (
                       <div>
-                        <span className="font-medium">Ideal Holiday:</span>
-                        <p className="text-white mt-1 text-sm">{holidayDescription}</p>
+                        <span className="font-medium text-blue-900">Ideal Holiday:</span>
+                        <p className="text-gray-900 mt-1 text-sm">{holidayDescription}</p>
                       </div>
                     )}
                     {selectedTheme && (
                       <div className="flex justify-between">
                         <span>Preferred Theme:</span>
-                        <span className="text-white">
+                        <span className="text-gray-900 font-medium">
                           {adventures.find(a => a.id === selectedTheme)?.name || 'Not selected'}
                         </span>
                       </div>

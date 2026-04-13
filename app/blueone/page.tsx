@@ -101,32 +101,13 @@ export default function BlueOnePage() {
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
       }}>
-        {/* Hero Section with Attractive Header */}
+        {/* Hero Section - Enhanced Readability */}
         <div className="relative min-h-screen flex items-center justify-center">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-900/20 to-blue-900/40"></div>
           
-          {/* Attractive Header Picture */}
-          <div className="absolute top-0 left-0 right-0 h-32 overflow-hidden">
-            <div className="relative w-full h-full bg-gradient-to-r from-blue-600 to-blue-800">
-              <div className="absolute inset-0 bg-black/20"></div>
-              <div className="relative z-10 h-full flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-wide">BlueOne Luxury Catamaran</h1>
-                  <p className="text-lg md:text-xl text-blue-100">Premium Sailing Adventures in Greece</p>
-                </div>
-              </div>
-              {/* Decorative waves */}
-              <div className="absolute bottom-0 left-0 right-0">
-                <svg className="w-full h-8 text-blue-50" fill="currentColor" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                  <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div className="relative z-20 text-center px-4 pt-20">
+          <div className="relative z-20 text-center px-4 max-w-5xl mx-auto">
             {/* BlueOne Logo */}
-            <div className="mb-8">
+            <div className="mb-12">
               <div className="relative inline-block">
                 <div className="absolute inset-0 bg-blue-400/20 blur-3xl rounded-full"></div>
                 <Image 
@@ -140,317 +121,381 @@ export default function BlueOnePage() {
               </div>
             </div>
 
-            <p className="text-2xl md:text-3xl text-blue-100 mb-4 drop-shadow-lg animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-              {boat.brand} {boat.length}
-            </p>
-            <p className="text-lg md:text-xl text-blue-200 max-w-3xl mx-auto mb-12 drop-shadow-md animate-fade-in-up" style={{animationDelay: '0.4s'}}>
-              {boat.description}
-            </p>
+            {/* Enhanced Typography Hierarchy */}
+            <div className="space-y-6 mb-16">
+           
+              <p className="text-2xl md:text-3xl text-hero-subtitle mb-6 leading-relaxed animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+                Luxury Catamaran
+              </p>
+              <div className="text-xl md:text-2xl text-hero-description font-semibold mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                {boat.brand} {boat.length}
+              </div>
+              <p className="text-lg md:text-xl text-on-dark-gradient-muted max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                {boat.description}
+              </p>
+            </div>
 
-            {/* Quick Actions */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+            {/* Enhanced Call-to-Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up" style={{animationDelay: '0.5s'}}>
               <a 
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
-                className="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 text-center"
+                className="btn-primary text-lg px-8 py-4 shadow-2xl"
               >
                 Book BlueOne Now
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
               </a>
               <Link 
                 href="/blueone/contact" 
-                className="bg-blue-800/80 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700/80 transition-all duration-300 border-2 border-blue-400/50 hover:border-blue-300 text-center shadow-2xl hover:shadow-blue-400/25 transform hover:scale-105"
+                className="btn-secondary text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-blue-600"
               >
                 Contact BlueOne Team
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Content Sections with Enhanced Background */}
+        {/* Content Sections - Enhanced Readability */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/40 via-blue-800/30 to-blue-900/60"></div>
-          <div className="relative z-10 max-w-6xl mx-auto px-4 py-16">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/80 via-blue-800/70 to-blue-900/90"></div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 py-20">
 
-            {/* Exterior Gallery */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Exterior Elegance</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {blueOneExteriorImages.map((image: string, index: number) => (
-                  <div key={index} className="relative group">
-                    <Image
-                      src={image}
-                      alt={`BlueOne Exterior ${index + 1}`}
-                      width={400}
-                      height={300}
-                      className="w-full h-64 object-cover rounded-xl border-2 border-blue-300/50 group-hover:border-blue-400 transition-all duration-300 shadow-lg"
-                      draggable={false}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                  </div>
-                ))}
+            {/* Exterior Gallery Section */}
+            <section className="mb-20">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-section-title mb-6">Exterior Elegance</h2>
+                <p className="text-xl text-section-subtitle max-w-3xl mx-auto leading-relaxed">
+                  Experience the stunning exterior design of BlueOne, where form meets function in perfect harmony
+                </p>
               </div>
-            </div>
-
-            {/* Interior Comfort */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Interior Luxury</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-blue-100 leading-relaxed mb-6">
-                    Step inside BlueOne and discover a world of refined elegance and comfort. 
-                    The interior spaces are thoughtfully designed to provide the ultimate sailing experience 
-                    with premium materials, modern amenities, and sophisticated styling throughout.
-                  </p>
-                  <div className="space-y-4">
-                    <h3 className="text-2xl font-semibold text-blue-300">Interior Features</h3>
-                    <ul className="space-y-2 text-blue-100">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Spacious saloon with panoramic windows</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Fully equipped gourmet galley</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Luxurious master cabin with en-suite</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Additional guest cabins with premium amenities</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Climate control and entertainment systems</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Elegant dining area for all guests</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div>
-                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                    {blueOneInteriorImages.map((image: string, index: number) => (
+              <div className="glass p-8 shadow-xl animate-fade-in-up">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {blueOneExteriorImages.map((image: string, index: number) => (
+                    <div key={index} className="relative group">
                       <Image
-                        key={index}
                         src={image}
-                        alt={`BlueOne Interior ${index + 1}`}
-                        width={300}
-                        height={200}
-                        className="w-full h-48 object-cover rounded-lg border-2 border-blue-300/50 hover:scale-105 transition-transform"
+                        alt={`BlueOne Exterior ${index + 1}`}
+                        width={400}
+                        height={300}
+                        className="w-full h-64 object-cover rounded-xl border-2 border-blue-300/50 group-hover:border-blue-400 transition-all duration-300 shadow-lg"
                         draggable={false}
                       />
-                    ))}
+                      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* Interior Luxury Section */}
+            <section className="mb-20">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-section-title mb-6">Interior Luxury</h2>
+                <p className="text-xl text-section-subtitle max-w-3xl mx-auto leading-relaxed">
+                  Step inside BlueOne and discover a world of refined elegance and sophisticated comfort
+                </p>
+              </div>
+              <div className="glass p-8 shadow-xl animate-fade-in-up">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-on-light-glass mb-4">Premium Living Spaces</h3>
+                      <p className="text-on-light-glass-muted leading-relaxed mb-6">
+                        The interior spaces are thoughtfully designed to provide the ultimate sailing experience 
+                        with premium materials, modern amenities, and sophisticated styling throughout.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-on-light-glass mb-6">Interior Features</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Spacious saloon with panoramic windows</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Fully equipped gourmet galley</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Luxurious master cabin with en-suite</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Additional guest cabins with premium amenities</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Climate control and entertainment systems</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Elegant dining area for all guests</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {blueOneInteriorImages.map((image: string, index: number) => (
+                        <div key={index} className="relative group">
+                          <Image
+                            src={image}
+                            alt={`BlueOne Interior ${index + 1}`}
+                            width={300}
+                            height={200}
+                            className="w-full h-48 object-cover rounded-lg border-2 border-blue-300/50 group-hover:scale-105 transition-transform duration-300"
+                            draggable={false}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
 
             {/* Cockpit & Deck Areas Section */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Cockpit & Deck Areas</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-blue-100 leading-relaxed mb-6">
-                    The BlueOne features exceptional outdoor living spaces designed for relaxation, dining, and entertainment. 
-                    The cockpit and deck areas provide the perfect setting for enjoying the Mediterranean climate and stunning ocean views.
-                  </p>
-                  <div className="space-y-4">
-                    <h3 className="text-2xl font-semibold text-blue-300">Outdoor Features</h3>
-                    <ul className="space-y-2 text-blue-100">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Spacious cockpit with elegant dining table</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Front cockpit with comfortable seating</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Large deck areas for sunbathing</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Flybridge with panoramic views</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Swim platform with easy water access</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Outdoor shower and bar area</span>
-                      </li>
-                    </ul>
+            <section className="mb-20">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-section-title mb-6">Cockpit & Deck Areas</h2>
+                <p className="text-xl text-section-subtitle max-w-3xl mx-auto leading-relaxed">
+                  Exceptional outdoor living spaces designed for relaxation, dining, and entertainment
+                </p>
+              </div>
+              <div className="glass p-8 shadow-xl animate-fade-in-up">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-on-light-glass mb-4">Outdoor Living Excellence</h3>
+                      <p className="text-on-light-glass-muted leading-relaxed mb-6">
+                        The BlueOne features exceptional outdoor living spaces designed for relaxation, dining, and entertainment. 
+                        The cockpit and deck areas provide the perfect setting for enjoying the Mediterranean climate and stunning ocean views.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-on-light-glass mb-6">Outdoor Features</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Spacious cockpit with elegant dining table</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Front cockpit with comfortable seating</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Large deck areas for sunbathing</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Flybridge with panoramic views</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Swim platform with easy water access</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Outdoor shower and bar area</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {blueOneCockpitImages.map((image: string, index: number) => (
-                      <Image
-                        key={index}
-                        src={image}
-                        alt={`Cockpit Area ${index + 1}`}
-                        width={300}
-                        height={200}
-                        className="w-full h-48 object-cover rounded-lg border-2 border-blue-300/50 hover:scale-105 transition-transform"
-                        draggable={false}
-                      />
-                    ))}
+                  <div>
+                    <div className="grid grid-cols-2 gap-4">
+                      {blueOneCockpitImages.map((image: string, index: number) => (
+                        <div key={index} className="relative group">
+                          <Image
+                            src={image}
+                            alt={`Cockpit Area ${index + 1}`}
+                            width={300}
+                            height={200}
+                            className="w-full h-48 object-cover rounded-lg border-2 border-blue-300/50 group-hover:scale-105 transition-transform duration-300"
+                            draggable={false}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-sm text-blue-200 mt-4 text-center">
-                    *Cockpit dining and seating areas perfect for entertaining
-                  </p>
                 </div>
               </div>
-            </div>
+            </section>
 
             {/* Activities & Sea Toys Section */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Activities & Sea Toys</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-blue-100 leading-relaxed mb-6">
-                    BlueOne comes fully equipped with an extensive range of water toys and recreational equipment, 
-                    ensuring endless entertainment and adventure during your charter.
-                  </p>
-                  
-                  {/* Seabob Feature Video */}
-                  <div className="mb-8 glass p-4 shadow-lg animate-fade-in-up">
-                    <div className="flex flex-col items-center">
-                      <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-blue-300/50 mb-4">
-                        <video
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="w-full h-full object-cover"
-                          poster="/images/boats/blueone/Seabob_1.jpeg"
-                        >
-                          <source src="https://seabob.com/media/SEABOB_F9_Loop.mp4" type="video/mp4" />
-                          Your browser does not support the video tag.
-                        </video>
+            <section className="mb-20">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-section-title mb-6">Activities & Sea Toys</h2>
+                <p className="text-xl text-section-subtitle max-w-3xl mx-auto leading-relaxed">
+                  Fully equipped with an extensive range of water toys and recreational equipment for endless adventure
+                </p>
+              </div>
+              <div className="glass p-8 shadow-xl animate-fade-in-up">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-on-light-glass mb-4">Premium Water Adventures</h3>
+                      <p className="text-on-light-glass-muted leading-relaxed mb-6">
+                        BlueOne comes fully equipped with an extensive range of water toys and recreational equipment, 
+                        ensuring endless entertainment and adventure during your charter.
+                      </p>
+                    </div>
+                    
+                    {/* Seabob Feature Video */}
+                    <div className="glass p-6 shadow-lg animate-fade-in-up">
+                      <div className="flex flex-col items-center">
+                        <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-blue-300/50 mb-4">
+                          <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover"
+                            poster="/images/boats/blueone/Seabob_1.jpeg"
+                          >
+                            <source src="https://seabob.com/media/SEABOB_F9_Loop.mp4" type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                        <h4 className="text-xl font-bold text-on-light-glass mb-2">Premium Seabob Experience</h4>
+                        <p className="text-on-light-glass-muted text-center text-sm leading-relaxed">
+                          Explore underwater worlds with our state-of-the-art Seabob underwater scooters
+                        </p>
                       </div>
-                      <h3 className="text-xl font-bold text-white mb-2">Premium Seabob Experience</h3>
-                      <p className="text-blue-200 text-center text-sm">
-                        Explore underwater worlds with our state-of-the-art Seabob underwater scooters
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-xl font-semibold text-on-light-glass mb-6">Water Activities</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Seabob underwater scooters for marine exploration</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Professional snorkeling equipment and guidance</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Stand-up paddleboards for fitness and relaxation</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">SUP yoga sessions on calm Mediterranean waters</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Fishing gear for deep-sea fishing adventures</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Beach games and water sports equipment</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      {blueOneActivityImages.map((image: string, index: number) => (
+                        <div key={index} className="relative group">
+                          <Image
+                            src={image}
+                            alt={`BlueOne Activity ${index + 1}`}
+                            width={300}
+                            height={200}
+                            className="w-full h-48 object-cover rounded-lg border-2 border-blue-300/50 group-hover:scale-105 transition-transform duration-300"
+                            draggable={false}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-center p-4 bg-blue-800/30 rounded-lg border border-blue-400/30">
+                      <p className="text-note text-sm font-medium">
+                        All water toys and safety equipment included
                       </p>
                     </div>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <h3 className="text-2xl font-semibold text-blue-300">Water Activities</h3>
-                    <ul className="space-y-2 text-blue-100">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Seabob underwater scooters for marine exploration</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Professional snorkeling equipment and guidance</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Stand-up paddleboards for fitness and relaxation</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>SUP yoga sessions on calm Mediterranean waters</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Fishing gear for deep-sea fishing adventures</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Beach games and water sports equipment</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {blueOneActivityImages.map((image: string, index: number) => (
-                      <Image
-                        key={index}
-                        src={image}
-                        alt={`BlueOne Activity ${index + 1}`}
-                        width={300}
-                        height={200}
-                        className="w-full h-48 object-cover rounded-lg border-2 border-blue-300/50 hover:scale-105 transition-transform"
-                        draggable={false}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-sm text-blue-200 mt-4 text-center">
-                    *All water toys and safety equipment included
-                  </p>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* Culinary Experience Section */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Culinary Excellence</h2>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-blue-100 leading-relaxed mb-6">
-                    Indulge in exceptional dining experiences aboard BlueOne, where our professional chef 
-                    creates memorable meals using the freshest local ingredients and Mediterranean culinary traditions.
-                  </p>
-                  <div className="space-y-4">
-                    <h3 className="text-2xl font-semibold text-blue-300">Dining Features</h3>
-                    <ul className="space-y-2 text-blue-100">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Professional chef specializing in Mediterranean cuisine</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Fresh, locally sourced ingredients</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Customizable menus to suit dietary preferences</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Al fresco dining in cockpit and deck areas</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Extensive wine selection and cocktail service</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
-                        <span>Cooking demonstrations and culinary workshops</span>
-                      </li>
-                    </ul>
+            {/* Culinary Excellence Section */}
+            <section className="mb-20">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold text-section-title mb-6">Culinary Excellence</h2>
+                <p className="text-xl text-section-subtitle max-w-3xl mx-auto leading-relaxed">
+                  Exceptional dining experiences with fresh local ingredients and Mediterranean culinary traditions
+                </p>
+              </div>
+              <div className="glass p-8 shadow-xl animate-fade-in-up">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-on-light-glass mb-4">Gourmet Dining Experience</h3>
+                      <p className="text-on-light-glass-muted leading-relaxed mb-6">
+                        Indulge in exceptional dining experiences aboard BlueOne, where our professional chef 
+                        creates memorable meals using the freshest local ingredients and Mediterranean culinary traditions.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-on-light-glass mb-6">Dining Features</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Professional chef specializing in Mediterranean cuisine</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Fresh, locally sourced ingredients</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Customizable menus to suit dietary preferences</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Al fresco dining in cockpit and deck areas</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Extensive wine selection and cocktail service</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                          <span className="text-on-light-glass-muted">Cooking demonstrations and culinary workshops</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="grid grid-cols-1 gap-4">
-                    {blueOneFoodImages.map((image: string, index: number) => (
-                      <Image
-                        key={index}
-                        src={image}
-                        alt={`Gourmet Dining ${index + 1}`}
-                        width={400}
-                        height={250}
-                        className="w-full h-56 object-cover rounded-lg border-2 border-blue-300/50 hover:scale-105 transition-transform"
-                        draggable={false}
-                      />
-                    ))}
+                  <div>
+                    <div className="grid grid-cols-1 gap-6 mb-6">
+                      {blueOneFoodImages.map((image: string, index: number) => (
+                        <div key={index} className="relative group">
+                          <Image
+                            src={image}
+                            alt={`Gourmet Dining ${index + 1}`}
+                            width={400}
+                            height={250}
+                            className="w-full h-56 object-cover rounded-lg border-2 border-blue-300/50 group-hover:scale-105 transition-transform duration-300"
+                            draggable={false}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-center p-4 bg-blue-800/30 rounded-lg border border-blue-400/30">
+                      <p className="text-note text-sm font-medium">
+                        Gourmet meals prepared by our professional chef
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-blue-200 mt-4 text-center">
-                    *Gourmet meals prepared by our professional chef
-                  </p>
                 </div>
               </div>
-            </div>
+            </section>
 
             {/* Premium Features & Amenities */}
             <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
