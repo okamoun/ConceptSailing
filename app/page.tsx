@@ -14,12 +14,12 @@ export default function Home() {
   }, [resetTheme]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Hero Section with BlueOne Focus */}
+      {/* Hero Section - BlueOne Experiences Focus */}
       <section className="relative min-h-screen flex items-center justify-center">
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/boats/blueone/External_sailing.jpg"
-            alt="BlueOne Sailing"
+            alt="BlueOne Sailing Experience"
             fill
             className="object-cover"
             priority
@@ -30,27 +30,27 @@ export default function Home() {
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
           <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-12 shadow-2xl border border-blue-100">
             <h1 className="text-5xl md:text-7xl font-bold text-blue-900 mb-6 animate-fade-in-up">
-              BlueOne
+              BlueOne Experiences
             </h1>
             <p className="text-2xl md:text-3xl text-blue-700 mb-4 animate-fade-in-up" style={{animationDelay:'0.1s',animationFillMode:'both'}}>
-              Premium Luxury Catamaran
+              Luxury Sailing Adventures
             </p>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto animate-fade-in-up" style={{animationDelay:'0.2s',animationFillMode:'both'}}>
-              Experience the ultimate Greek sailing adventure aboard our eco-friendly Fountaine Pajot catamaran. 
-              Luxury, comfort, and sustainability in perfect harmony.
+              Discover extraordinary sailing experiences aboard the BlueOne catamaran. 
+              From island hopping to sunset cruises, create your perfect Greek adventure.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{animationDelay:'0.3s',animationFillMode:'both'}}>
               <Link 
-                href="/blueone" 
+                href="/experiences" 
                 className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
-                Explore BlueOne
+                Explore Experiences
               </Link>
               <Link 
-                href="/booking?boat=BlueOne&brand=Fountaine%20Pajot&length=51%20ft&description=A%20new-generation%20catamaran%20with%20a%20focus%20on%20eco-responsibility,%20solar%20panels,%20and%20hybrid%20systems.%20Elegant%20design%20with%20full%20safety%20and%20entertainment%20options%20for%20guests.&image=/images/boats/fp-aura51.jpg"
-                className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-colors"
+                href="/blueone" 
+                className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg"
               >
-                Book Your Journey
+                The Yacht
               </Link>
             </div>
           </div>
