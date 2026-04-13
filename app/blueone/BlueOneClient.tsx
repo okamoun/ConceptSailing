@@ -264,7 +264,7 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Yacht Features</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {boat.features.map((feature, index) => (
+              {(boat.features ?? []).map((feature, index) => (
                 <div key={index} className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
                   <h3 className="text-xl font-bold text-white mb-3">{feature}</h3>
                 </div>
@@ -352,7 +352,6 @@ export default function BlueOneClient() {
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Complete Gallery</h2>
             <BlueOneGallerySlideshow 
               images={[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages]}
-              yachtName={boat.name}
             />
           </div>
         </section>
