@@ -221,6 +221,30 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Water Activities & Toys</h2>
+
+            {/* Seabob Feature Video */}
+            <div className="mb-12 glass p-4 shadow-lg animate-fade-in-up max-w-2xl mx-auto">
+              <div className="flex flex-col items-center">
+                <div className="relative w-full rounded-lg overflow-hidden border-2 border-blue-300/50 mb-4">
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full object-cover"
+                    poster="/images/boats/blueone/Seabob_1.jpeg"
+                  >
+                    <source src="https://seabob.com/media/SEABOB_F9_Loop.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Premium Seabob Experience</h3>
+                <p className="text-blue-200 text-center text-sm">
+                  Explore underwater worlds with our state-of-the-art Seabob underwater scooters
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {blueOneActivityImages.map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
@@ -317,8 +341,14 @@ export default function BlueOneClient() {
                 </div>
               ))}
             </div>
-            <div className="text-center mt-8">
-              <Link href="/contact" className="btn-primary border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4">
+            <div className="text-center mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/chef/andreas-tsitsilianis" className="btn-primary text-lg px-8 py-4">
+                View Full Profile &amp; Menu
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+              <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4">
                 Discuss Your Culinary Preferences
               </Link>
             </div>
