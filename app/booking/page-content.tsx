@@ -428,23 +428,23 @@ export default function BookingPageContent() {
               
               {/* Charter Details */}
               <div>
-                <h4 className="text-lg font-semibold text-accent mb-2">Charter Details</h4>
-                <div className="space-y-2 text-gray-300">
+                <h4 className="text-lg font-semibold text-blue-900 mb-2">Charter Details</h4>
+                <div className="space-y-2 text-gray-700">
                   <div className="flex justify-between">
                     <span>Boat:</span>
-                    <span className="text-white">{blueOneBoat.name}</span>
+                    <span className="text-gray-900 font-medium">{blueOneBoat.name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Date:</span>
-                    <span className="text-white">{selectedDate || 'Not selected'}</span>
+                    <span className="text-gray-900 font-medium">{selectedDate || 'Not selected'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Passengers:</span>
-                    <span className="text-white">{passengers}</span>
+                    <span className="text-gray-900 font-medium">{passengers}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Embarkation:</span>
-                    <span className="text-white">
+                    <span className="text-gray-900 font-medium">
                       {embarkationPoints.find(p => p.id === embarkationPoint)?.name || 'Not selected'}
                     </span>
                   </div>
@@ -454,18 +454,18 @@ export default function BookingPageContent() {
               {/* Holiday Preferences */}
               {(holidayDescription || selectedTheme) && (
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-accent mb-2">Holiday Preferences</h4>
-                  <div className="space-y-2 text-gray-300">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-2">Holiday Preferences</h4>
+                  <div className="space-y-2 text-gray-700">
                     {holidayDescription && (
                       <div>
-                        <span className="font-medium">Ideal Holiday:</span>
-                        <p className="text-white mt-1 text-sm">{holidayDescription}</p>
+                        <span className="font-medium text-blue-900">Ideal Holiday:</span>
+                        <p className="text-gray-900 mt-1 text-sm">{holidayDescription}</p>
                       </div>
                     )}
                     {selectedTheme && (
                       <div className="flex justify-between">
                         <span>Preferred Theme:</span>
-                        <span className="text-white">
+                        <span className="text-gray-900 font-medium">
                           {adventures.find(a => a.id === selectedTheme)?.name || 'Not selected'}
                         </span>
                       </div>
