@@ -5,14 +5,12 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { destinations } from '../destinations-data';
-import { useBlueOneMode } from '../contexts/BlueOneContext';
 
 // Dynamically import GoogleMap to avoid SSR issues
 const CustomGoogleMap = dynamic(() => import('./GoogleMap.client'), { ssr: false });
 
 export default function DestinationsPage() {
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-  const { isBlueOneMode } = useBlueOneMode();
 
   return (
     <main className="min-h-screen relative py-16" style={{
@@ -22,7 +20,7 @@ export default function DestinationsPage() {
       backgroundAttachment: 'fixed'
     }}>
       <div className="min-h-screen bg-gradient-to-br from-blue-50/30 to-white/40 py-16">
-        <div className="max-w-6xl mx-auto px-2 sm:px-4 p-4 sm:p-10 shadow-xl border animate-fade-in-up backdrop-blur-sm bg-white/60 border-blue-200">
+        <div className="max-w-6xl mx-auto px-2 sm:px-4 p-4 sm:p-10 shadow-xl border animate-fade-in-up backdrop-blur-sm bg-blue/60 border-blue-200">
         <div className="text-center mb-8">
           <div className="mb-6">
             <Image 
@@ -68,7 +66,7 @@ export default function DestinationsPage() {
           <div className="w-full md:w-1/2 flex flex-col gap-4 sm:gap-6">
             <div className="relative w-full flex flex-col items-center" style={{ minHeight: 200, height: '100%' }}>
               {/* Stackable cards container, but contained within its column */}
-              <div className="w-full flex flex-col items-center gap-0 relative" style={{ minHeight: 200, height: '100%' }}>
+              <div className="w-full flex flex-col items-center gap-0 relative" style={{ minHeight: 100, height: '100%' }}>
                 {destinations.map((dest, idx) => {
                   const selectedIdx = destinations.findIndex(d => d.id === selectedId);
                   // Only the card immediately below the selected card is translated
@@ -92,11 +90,7 @@ export default function DestinationsPage() {
                         zIndex: selectedId === dest.id ? 20 : 10
                       }}
                       transition={{ type: 'spring', stiffness: 400, damping: 30, delay: idx * 0.07 }}
-                      className={`rounded-xl shadow-2xl border flex flex-col sm:flex-row gap-2 sm:gap-4 items-center cursor-pointer w-full sm:w-11/12 mx-auto transition-all duration-500 group backdrop-blur-sm ${
-                        isBlueOneMode 
-                          ? 'bg-white/70 border-blue-200 hover:bg-white/80' 
-                          : 'bg-[#172132]/60 border-accent hover:bg-[#172132]/70'
-                      } ${selectedId === dest.id ? (isBlueOneMode ? 'ring-4 ring-blue-400/60 shadow-blue-400/30' : 'ring-4 ring-accent/60 shadow-accent/30') : ''}`}
+                      className={`rounded-xl shadow-2xl border flex flex-col sm:flex-row gap-2 sm:gap-4 items-center cursor-pointer w-full sm:w-11/12 mx-auto transition-all duration-500 group backdrop-blur-sm bg-white/70 border-blue-200 hover:bg-white/80 ${selectedId === dest.id ? 'ring-4 ring-blue-400/60 shadow-blue-400/30' : ''}`}
                       style={{
                         marginTop: (idx === 0 ? 0 : -24) + extraMargin,
                         boxShadow: selectedId === dest.id ? '0 8px 32px 0 rgba(0,0,0,0.35)' : '0 4px 16px 0 rgba(0,0,0,0.15)',
@@ -116,26 +110,16 @@ export default function DestinationsPage() {
                       alt={dest.name} 
                       width={100} 
                       height={70} 
-                      className={`rounded-lg object-cover border-2 w-full sm:w-24 h-24 sm:h-16 group-hover:transition-all duration-300 ${
-                        isBlueOneMode 
-                          ? 'border-blue-300 group-hover:border-blue-500 shadow-lg group-hover:shadow-xl' 
-                          : 'border-accent group-hover:border-white shadow-lg group-hover:shadow-xl group-hover:brightness-110'
-                      }`} 
+                      className="rounded-lg object-cover border-2 w-full sm:w-24 h-24 sm:h-16 group-hover:transition-all duration-300 border-blue-300 group-hover:border-blue-500 shadow-lg group-hover:shadow-xl" 
                       style={{
-                        filter: isBlueOneMode ? 'none' : 'brightness(0.9) contrast(1.1)',
+                        filter: 'none',
                         transition: 'all 0.3s ease'
                       }}
                     />
                       <div className="flex-1 w-full">
-                        <h2 className={`text-lg sm:text-xl font-bold mb-1 ${
-                          isBlueOneMode ? 'text-blue-900' : 'text-accent'
-                        }`}>{dest.name}</h2>
-                        <p className={`mb-1 text-xs sm:text-sm ${
-                          isBlueOneMode ? 'text-gray-700' : 'text-gray-100'
-                        }`}>{dest.description}</p>
-                        <ul className={`list-disc list-inside text-xs ${
-                          isBlueOneMode ? 'text-blue-700' : 'text-accent'
-                        }`}>
+                        <h3 className="text-base sm:text-md font-bold ">{dest.name}</h3>
+                        <p className="mb-1 text-xs sm:text-sm text-gray-700">{dest.description}</p>
+                        <ul className="list-disc list-inside text-xs text-blue-700">
                           {dest.highlights.slice(0, 2).map((hl, i) => (
                             <li key={i}>{hl}</li>
                           ))}

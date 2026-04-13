@@ -250,7 +250,7 @@ export default function BookingPageContent() {
                 </div>
               </div>
               <div className="mt-6">
-                <label className="block text-lg font-semibold text-accent mb-3">
+                <label className="block text-lg font-semibold text-blue-900 mb-3">
                   Phone Number *
                 </label>
                 <input
@@ -258,7 +258,7 @@ export default function BookingPageContent() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                   placeholder={CONTACT.phone.formatted}
                 />
               </div>
@@ -266,10 +266,10 @@ export default function BookingPageContent() {
 
             {/* Charter Details */}
             <div>
-              <h3 className="text-xl font-semibold text-accent mb-4">Charter Details</h3>
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Charter Details</h3>
             {/* Date Selection */}
             <div>
-              <label className="block text-lg font-semibold text-accent mb-3">
+              <label className="block text-lg font-semibold text-blue-900 mb-3">
                 Charter Date *
               </label>
               <input
@@ -279,16 +279,16 @@ export default function BookingPageContent() {
                 min={getTodayDate()}
                 max={getMaxDate()}
                 required
-                className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
               />
-              <p className="text-gray-400 text-sm mt-2">
+              <p className="text-gray-600 text-sm mt-2">
                 Select your preferred charter date (bookings available up to 1 year in advance)
               </p>
             </div>
 
             {/* Passenger Selection */}
             <div>
-              <label className="block text-lg font-semibold text-accent mb-3">
+              <label className="block text-lg font-semibold text-blue-900 mb-3">
                 Number of Passengers *
               </label>
               <div className="flex items-center gap-4">
@@ -299,27 +299,27 @@ export default function BookingPageContent() {
                   min={capacity.min}
                   max={capacity.max}
                   required
-                  className="w-32 p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                  className="w-32 p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                 />
-                <span className="text-gray-300">
+                <span className="text-gray-700">
                   (Capacity: {capacity.min} - {capacity.max} guests)
                 </span>
               </div>
-              <p className="text-gray-400 text-sm mt-2">
+              <p className="text-gray-600 text-sm mt-2">
                 This {blueOneBoat.name.toLowerCase()} can accommodate up to {capacity.max} guests comfortably
               </p>
             </div>
 
             {/* Embarkation Point Selection */}
             <div>
-              <label className="block text-lg font-semibold text-accent mb-3">
+              <label className="block text-lg font-semibold text-blue-900 mb-3">
                 Embarkation Point *
               </label>
               <select
                 value={embarkationPoint}
                 onChange={(e) => setEmbarkationPoint(e.target.value)}
                 required
-                className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
               >
                 <option value="">Select embarkation point</option>
                 {embarkationPoints.map((point) => (
@@ -328,18 +328,18 @@ export default function BookingPageContent() {
                   </option>
                 ))}
               </select>
-              <p className="text-gray-400 text-sm mt-2">
+              <p className="text-gray-600 text-sm mt-2">
                 Choose your preferred starting location for your Greek sailing adventure
               </p>
             </div>
 
             {/* Embarkation Point Details */}
             {embarkationPoint && (
-              <div className="p-4 bg-accent/10 rounded-lg border border-accent/30">
-                <h3 className="text-lg font-semibold text-accent mb-2">
+              <div className="p-4 bg-blue-100 rounded-lg border border-blue-200">
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">
                   {embarkationPoints.find(p => p.id === embarkationPoint)?.name}
                 </h3>
-                <p className="text-gray-300">
+                <p className="text-gray-700">
                   {embarkationPoints.find(p => p.id === embarkationPoint)?.description}
                 </p>
               </div>
@@ -347,34 +347,34 @@ export default function BookingPageContent() {
 
             {/* Holiday Preferences */}
             <div>
-              <h3 className="text-xl font-semibold text-accent mb-4">Holiday Preferences</h3>
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Holiday Preferences</h3>
               
               {/* Holiday Description */}
               <div className="mb-6">
-                <label className="block text-lg font-semibold text-accent mb-3">
+                <label className="block text-lg font-semibold text-blue-900 mb-3">
                   Describe Your Ideal Holiday
                 </label>
                 <textarea
                   value={holidayDescription}
                   onChange={(e) => setHolidayDescription(e.target.value)}
                   rows={4}
-                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none resize-none"
+                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none resize-none"
                   placeholder="Tell us about your ideal sailing holiday - activities you enjoy, places you'd like to visit, special occasions, etc..."
                 />
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-gray-600 text-sm mt-2">
                   Help us customize your perfect sailing experience (optional)
                 </p>
               </div>
 
               {/* Adventure Theme Selection */}
               <div>
-                <label className="block text-lg font-semibold text-accent mb-3">
+                <label className="block text-lg font-semibold text-blue-900 mb-3">
                   Preferred Adventure Theme
                 </label>
                 <select
                   value={selectedTheme}
                   onChange={(e) => setSelectedTheme(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-[#2a2a2a] border border-accent/50 text-white focus:border-accent focus:outline-none"
+                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">Select a theme (optional)</option>
                   {adventures.map((adventure) => (
@@ -383,18 +383,18 @@ export default function BookingPageContent() {
                     </option>
                   ))}
                 </select>
-                <p className="text-gray-400 text-sm mt-2">
+                <p className="text-gray-600 text-sm mt-2">
                   Choose from our curated adventure themes or leave blank for a custom experience
                 </p>
               </div>
 
               {/* Selected Theme Description */}
               {selectedTheme && (
-                <div className="mt-4 p-4 bg-accent/10 rounded-lg border border-accent/30">
-                  <h4 className="text-lg font-semibold text-accent mb-2">
+                <div className="mt-4 p-4 bg-blue-100 rounded-lg border border-blue-200">
+                  <h4 className="text-lg font-semibold text-blue-900 mb-2">
                     {adventures.find(a => a.id === selectedTheme)?.name}
                   </h4>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-gray-700 text-sm">
                     {adventures.find(a => a.id === selectedTheme)?.description}
                   </p>
                 </div>
@@ -404,24 +404,24 @@ export default function BookingPageContent() {
             </div>
 
             {/* Booking Summary */}
-            <div className="p-6 bg-accent/10 rounded-lg border border-accent/30">
-              <h3 className="text-xl font-semibold text-accent mb-4">Information Request Summary</h3>
+            <div className="p-6 bg-blue-100 rounded-lg border border-blue-200">
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Information Request Summary</h3>
               
               {/* Contact Information */}
               <div className="mb-4">
-                <h4 className="text-lg font-semibold text-accent mb-2">Contact Information</h4>
-                <div className="space-y-2 text-gray-300">
+                <h4 className="text-lg font-semibold text-blue-900 mb-2">Contact Information</h4>
+                <div className="space-y-2 text-gray-700">
                   <div className="flex justify-between">
                     <span>Name:</span>
-                    <span className="text-white">{name || 'Not provided'}</span>
+                    <span className="text-gray-900 font-medium">{name || 'Not provided'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Email:</span>
-                    <span className="text-white">{email || 'Not provided'}</span>
+                    <span className="text-gray-900 font-medium">{email || 'Not provided'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Phone:</span>
-                    <span className="text-white">{phone || 'Not provided'}</span>
+                    <span className="text-gray-900 font-medium">{phone || 'Not provided'}</span>
                   </div>
                 </div>
               </div>
