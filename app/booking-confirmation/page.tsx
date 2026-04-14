@@ -44,20 +44,20 @@ export default function BookingConfirmationPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] flex items-center justify-center">
-        <div className="text-white text-xl">Loading booking confirmation...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+        <div className="text-blue-900 text-xl">Loading booking confirmation...</div>
       </div>
     );
   }
 
   if (!bookingData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-red-500 mb-4">No Booking Found</h1>
-          <p className="text-white mb-6">Please complete a booking form first</p>
-          <Link href="/boats" className="text-accent hover:text-accent/80 underline">
-            Return to Boats
+          <p className="text-gray-700 mb-6">Please complete a booking form first</p>
+          <Link href="/blueone" className="text-blue-600 hover:text-blue-800 underline">
+            Return to BlueOne
           </Link>
         </div>
       </div>
@@ -86,28 +86,28 @@ export default function BookingConfirmationPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <Link href="/boats" className="text-accent hover:text-accent/80 transition-colors inline-flex items-center gap-2">
-            &larr; Back to Boats
+          <Link href="/blueone" className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-2">
+            &larr; Back to BlueOne
           </Link>
         </div>
 
         {/* Success Message */}
-        <div className="glass p-8 shadow-xl mb-8">
+        <div className="glass p-8 shadow-xl border border-blue-200 mb-8">
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h1 className="text-4xl font-bold text-accent mb-4">Information Request Received!</h1>
-            <p className="text-xl text-gray-200 mb-4">
+            <h1 className="text-4xl font-bold text-blue-600 mb-4">Information Request Received!</h1>
+            <p className="text-xl text-gray-700 mb-4">
               Thank you for your interest in chartering {bookingData.boat}. Your <strong>information request</strong> has been received and our team will contact you shortly to discuss availability and pricing.
             </p>
-            <div className="p-4 bg-yellow-500/20 rounded-lg border border-yellow-500/50">
-              <p className="text-yellow-300 text-sm">
+            <div className="p-4 bg-amber-50 rounded-lg border border-amber-300">
+              <p className="text-amber-700 text-sm">
                 <strong>Please Note:</strong> This is not a confirmed booking. Our team will contact you to finalize details, check availability, and provide pricing before any confirmation.
               </p>
             </div>
@@ -116,11 +116,11 @@ export default function BookingConfirmationPage() {
           {/* Email Status */}
           {emailStatus && (
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-accent mb-4">Email Notification</h2>
+              <h2 className="text-2xl font-bold text-blue-900 mb-4">Email Notification</h2>
               <div className={`p-4 rounded-lg border ${
-                emailStatus.status === 'success' 
-                  ? 'bg-green-500/20 border-green-500/50' 
-                  : 'bg-red-500/20 border-red-500/50'
+                emailStatus.status === 'success'
+                  ? 'bg-green-50 border-green-300'
+                  : 'bg-red-50 border-red-300'
               }`}>
                 <div className="flex items-center gap-3">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
@@ -137,15 +137,15 @@ export default function BookingConfirmationPage() {
                     )}
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold">Booking Email</h3>
-                    <p className="text-gray-300 text-sm">
-                      {emailStatus.status === 'success' 
+                    <h3 className="text-gray-900 font-semibold">Booking Email</h3>
+                    <p className="text-gray-600 text-sm">
+                      {emailStatus.status === 'success'
                         ? 'Email sent successfully to both client and contact@nj3cruises.com'
                         : 'Failed to send booking email'
                       }
                     </p>
                     {emailStatus.message && (
-                      <p className="text-gray-400 text-xs mt-1">{emailStatus.message}</p>
+                      <p className="text-gray-500 text-xs mt-1">{emailStatus.message}</p>
                     )}
                   </div>
                 </div>
@@ -155,69 +155,69 @@ export default function BookingConfirmationPage() {
 
           {/* Booking Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-accent mb-4">Contact Information</h2>
+            <div className="bg-blue-50 rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-blue-900 mb-4">Contact Information</h2>
               <div className="space-y-3">
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Name:</span>
-                  <span className="text-white font-semibold">{bookingData.name}</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Name:</span>
+                  <span className="text-gray-900 font-semibold">{bookingData.name}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Email:</span>
-                  <span className="text-white font-semibold">{bookingData.email}</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Email:</span>
+                  <span className="text-gray-900 font-semibold">{bookingData.email}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Phone:</span>
-                  <span className="text-white font-semibold">{bookingData.phone}</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Phone:</span>
+                  <span className="text-gray-900 font-semibold">{bookingData.phone}</span>
                 </div>
               </div>
             </div>
-            
-            <div>
-              <h2 className="text-2xl font-bold text-accent mb-4">Charter Details</h2>
+
+            <div className="bg-blue-50 rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-blue-900 mb-4">Charter Details</h2>
               <div className="space-y-3">
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Boat:</span>
-                  <span className="text-white font-semibold">{bookingData.boat}</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Boat:</span>
+                  <span className="text-gray-900 font-semibold">{bookingData.boat}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Charter Date:</span>
-                  <span className="text-white font-semibold">{formatDate(bookingData.date)}</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Charter Date:</span>
+                  <span className="text-gray-900 font-semibold">{formatDate(bookingData.date)}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Number of Passengers:</span>
-                  <span className="text-white font-semibold">{bookingData.passengers} guests</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Number of Passengers:</span>
+                  <span className="text-gray-900 font-semibold">{bookingData.passengers} guests</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Embarkation Point:</span>
-                  <span className="text-white font-semibold">{bookingData.embarkationPoint}</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Embarkation Point:</span>
+                  <span className="text-gray-900 font-semibold">{bookingData.embarkationPoint}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-600">
-                  <span className="text-gray-400">Request Submitted:</span>
-                  <span className="text-white font-semibold">{formatTimestamp(bookingData.timestamp)}</span>
+                <div className="flex justify-between py-2 border-b border-blue-200">
+                  <span className="text-gray-600">Request Submitted:</span>
+                  <span className="text-gray-900 font-semibold">{formatTimestamp(bookingData.timestamp)}</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Contact Information */}
-          <div className="p-6 bg-accent/10 rounded-lg border border-accent/30">
-            <h3 className="text-xl font-semibold text-accent mb-4">Need to Make Changes?</h3>
-            <p className="text-gray-300 mb-4">
+          <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
+            <h3 className="text-xl font-semibold text-blue-900 mb-4">Need to Make Changes?</h3>
+            <p className="text-gray-600 mb-4">
               If you need to modify your booking request or have any questions, please don&apos;t hesitate to contact us:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-accent font-semibold mb-1">Email</div>
-                <div className="text-gray-300">bookings@nj3cruises.com</div>
+                <div className="text-blue-600 font-semibold mb-1">Email</div>
+                <div className="text-gray-700">bookings@nj3cruises.com</div>
               </div>
               <div>
-                <div className="text-accent font-semibold mb-1">Phone</div>
-                <div className="text-gray-300">{CONTACT.phone.formatted}</div>
+                <div className="text-blue-600 font-semibold mb-1">Phone</div>
+                <div className="text-gray-700">{CONTACT.phone.formatted}</div>
               </div>
               <div>
-                <div className="text-accent font-semibold mb-1">Office Hours</div>
-                <div className="text-gray-300">Mon-Fri 9AM-6PM AST</div>
+                <div className="text-blue-600 font-semibold mb-1">Office Hours</div>
+                <div className="text-gray-700">Mon-Fri 9AM-6PM EET</div>
               </div>
             </div>
           </div>
@@ -226,14 +226,14 @@ export default function BookingConfirmationPage() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            href="/boats"
-            className="bg-accent text-white px-8 py-3 rounded-lg font-semibold hover:bg-accent/90 transition-colors text-center"
+            href="/blueone"
+            className="btn-primary text-center"
           >
-            Browse More Boats
+            Back to BlueOne
           </Link>
           <Link
             href="/contact"
-            className="border border-accent text-accent px-8 py-3 rounded-lg font-semibold hover:bg-accent/10 transition-colors text-center"
+            className="btn-secondary text-center"
           >
             Contact Us Directly
           </Link>
