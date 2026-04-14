@@ -15,6 +15,7 @@ export default function BlueOneContactPage() {
     subject: '',
     message: ''
   });
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     // Activate BlueOne mode (will persist across navigation)
@@ -23,10 +24,9 @@ export default function BlueOneContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
     console.log('Contact form submitted:', formData);
-    // Show success message or redirect
-    alert('Thank you for your inquiry! We will contact you soon.');
+    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    setSubmitted(true);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -85,7 +85,7 @@ export default function BlueOneContactPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-blue-900">Email</h3>
-                    <p className="text-blue-700">blueone@concept-sailing.gr</p>
+                    <p className="text-blue-700">contact@nj3cruises.com</p>
                     <p className="text-sm text-gray-600">24/7 Response Time</p>
                   </div>
                 </div>
@@ -137,7 +137,19 @@ export default function BlueOneContactPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-blue-200">
               <h2 className="text-3xl font-bold text-blue-900 mb-6">Send Us a Message</h2>
-              
+
+              {submitted && (
+                <div className="bg-blue-50 border border-blue-300 rounded-xl p-6 text-center mb-6">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-blue-900 mb-1">Message Sent!</h3>
+                  <p className="text-blue-700">Thank you for your inquiry. We&apos;ll be in touch within 24 hours.</p>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>

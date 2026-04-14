@@ -203,27 +203,27 @@ export default function BlueOnePage() {
                     <h3 className="text-2xl font-semibold text-blue-300">Interior Features</h3>
                     <ul className="space-y-2 text-blue-100">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Spacious saloon with panoramic windows</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Fully equipped gourmet galley</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Luxurious master cabin with en-suite</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Additional guest cabins with premium amenities</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Climate control and entertainment systems</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Elegant dining area for all guests</span>
                       </li>
                     </ul>
@@ -260,27 +260,27 @@ export default function BlueOnePage() {
                     <h3 className="text-2xl font-semibold text-blue-300">Outdoor Features</h3>
                     <ul className="space-y-2 text-blue-100">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Spacious cockpit with elegant dining table</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Front cockpit with comfortable seating</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Large deck areas for sunbathing</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Flybridge with panoramic views</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Swim platform with easy water access</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Outdoor shower and bar area</span>
                       </li>
                     </ul>
@@ -344,27 +344,27 @@ export default function BlueOnePage() {
                     <h3 className="text-2xl font-semibold text-blue-300">Water Activities</h3>
                     <ul className="space-y-2 text-blue-100">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Seabob underwater scooters for marine exploration</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Professional snorkeling equipment and guidance</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Stand-up paddleboards for fitness and relaxation</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>SUP yoga sessions on calm Mediterranean waters</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Fishing gear for deep-sea fishing adventures</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Beach games and water sports equipment</span>
                       </li>
                     </ul>
@@ -404,27 +404,27 @@ export default function BlueOnePage() {
                     <h3 className="text-2xl font-semibold text-blue-300">Dining Features</h3>
                     <ul className="space-y-2 text-blue-100">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Professional chef specializing in Mediterranean cuisine</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Fresh, locally sourced ingredients</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Customizable menus to suit dietary preferences</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Al fresco dining in cockpit and deck areas</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Extensive wine selection and cocktail service</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Cooking demonstrations and culinary workshops</span>
                       </li>
                     </ul>
@@ -446,63 +446,6 @@ export default function BlueOnePage() {
                   </div>
                   <p className="text-sm text-blue-200 mt-4 text-center">
                     *Gourmet meals prepared by our professional chef
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Features & Amenities */}
-            <div className="glass p-8 shadow-xl animate-fade-in-up mb-12">
-              <h2 className="text-4xl font-bold text-white mb-8 text-center">Premium Features & Amenities</h2>
-              
-              <div className="mb-8 text-center">
-                <div className="inline-flex items-center gap-3 bg-blue-800/50 rounded-full px-6 py-3 border border-blue-400/30 backdrop-blur-sm">
-                  <svg className="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
-                  <span className="text-blue-200 font-semibold">Starlink High-Speed Internet Available</span>
-                </div>
-              </div>
-
-              {/* Condensed Features Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                {boat.features?.map((feature, index) => (
-                  <div key={index} className={`text-center p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
-                    feature.includes('Starlink') 
-                      ? 'bg-blue-600/30 border-blue-400 shadow-lg shadow-blue-500/25' 
-                      : 'bg-blue-800/20 border-blue-500/30 hover:bg-blue-800/40'
-                  }`}>
-                    <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${
-                      feature.includes('Starlink') 
-                        ? 'bg-blue-500/30 border border-blue-400' 
-                        : 'bg-blue-600/20 border border-blue-500'
-                    }`}>
-                      {feature.includes('Starlink') ? (
-                        <svg className="w-4 h-4 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-                        </svg>
-                      )}
-                    </div>
-                    <span className={`text-xs font-medium ${
-                      feature.includes('Starlink') ? 'text-blue-200' : 'text-blue-100'
-                    }`}>
-                      {feature.length > 20 ? feature.substring(0, 20) + '...' : feature}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center">
-                <div className="bg-gradient-to-r from-blue-600/20 to-blue-400/20 rounded-xl p-6 border border-blue-400/30">
-                  <h3 className="text-2xl font-bold text-blue-200 mb-3">Stay Connected at Sea</h3>
-                  <p className="text-blue-100 leading-relaxed max-w-2xl mx-auto">
-                    With Starlink high-speed internet, you can stay connected with family, work remotely, 
-                    stream entertainment, and share your sailing adventures in real-time. Enjoy reliable, 
-                    fast WiFi connectivity even in the most remote Greek island locations.
                   </p>
                 </div>
               </div>
@@ -649,27 +592,27 @@ export default function BlueOnePage() {
                     <h3 className="text-2xl font-semibold text-blue-300">Layout Features</h3>
                     <ul className="space-y-2 text-blue-100">
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>4 double cabins with en-suite facilities</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Spacious master suite with private bathroom</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Open-plan saloon and dining area</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Modern galley with premium appliances</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Multiple outdoor social areas</span>
                       </li>
                       <li className="flex items-start gap-2">
-                        <span className="text-blue-400">â¢</span>
+                        <span className="text-blue-400">•</span>
                         <span>Ample storage throughout</span>
                       </li>
                     </ul>

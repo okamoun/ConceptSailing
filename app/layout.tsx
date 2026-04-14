@@ -3,6 +3,7 @@
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { BlueOneProvider, useBlueOneMode } from "./contexts/BlueOneContext";
 import "./globals.css";
@@ -13,36 +14,66 @@ const inter = Inter({ subsets: ["latin"] });
 function NavigationContent() {
   const pathname = usePathname();
   const { isBlueOneMode } = useBlueOneMode();
-  
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const linkClass = (base: string) =>
+    `${base} hover:text-blue-300 transition-colors`;
+
+  const navLinks = (
+    <>
+      <Link href="/blueone" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-200 font-bold' : 'text-blue-400 font-bold')}>BlueOne</Link>
+      <Link href="/experiences" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Experiences</Link>
+      <Link href="/themes" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Adventure Themes</Link>
+      <Link href="/destinations" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Destinations</Link>
+      {pathname !== '/blueone' && !isBlueOneMode && (
+        <Link href="/boats" onClick={() => setMobileOpen(false)} className="hover:text-accent transition-colors">All Boats</Link>
+      )}
+      <Link href="/about" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>About</Link>
+      <Link href="/contact" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Contact</Link>
+    </>
+  );
+
   return (
     <nav className={`sticky top-0 z-50 shadow-lg border-b backdrop-blur-sm ${isBlueOneMode ? 'bg-gradient-to-r from-blue-900/95 to-blue-800/95 border-blue-400/30' : 'bg-gradient-to-r from-[#101824]/95 to-[#1f2937]/95 border-accent/20'}`}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link href="/" className="flex flex-col items-center gap-2 group">
-          <Image 
-            src={isBlueOneMode ? "/images/boats/blueone/logo_blueone.png" : "/logo_cms.svg"} 
-            alt={isBlueOneMode ? "BlueOne Logo" : "Concept Sailing Logo"} 
-            width={isBlueOneMode ? 120 : 160} 
-            height={isBlueOneMode ? 60 : 100} 
-            className={`h-24 w-auto drop-shadow-lg transition-transform group-hover:scale-105 ${isBlueOneMode ? 'object-contain' : ''}`} 
-            style={{maxHeight:'120px'}} 
-            priority 
+          <Image
+            src={isBlueOneMode ? "/images/boats/blueone/logo_blueone.png" : "/logo_cms.svg"}
+            alt={isBlueOneMode ? "BlueOne Logo" : "Concept Sailing Logo"}
+            width={isBlueOneMode ? 120 : 160}
+            height={isBlueOneMode ? 60 : 100}
+            className={`h-24 w-auto drop-shadow-lg transition-transform group-hover:scale-105 ${isBlueOneMode ? 'object-contain' : ''}`}
+            style={{maxHeight:'120px'}}
+            priority
           />
           <span className={`${isBlueOneMode ? 'text-blue-300' : 'text-accent'} font-semibold text-xs mt-1`}>
             {isBlueOneMode ? 'BlueOne Luxury Yacht' : 'Premium Sailing Adventures'}
           </span>
         </Link>
-        <div className="space-x-8 text-lg font-semibold">
-          <Link href="/blueone" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-200 font-bold' : 'text-blue-400 font-bold'}`}>BlueOne</Link>
-          <Link href="/experiences" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Experiences</Link>
-          <Link href="/themes" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Adventure Themes</Link>
-          <Link href="/destinations" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Destinations</Link>
-          {pathname !== '/blueone' && !isBlueOneMode && (
-            <Link href="/boats" className="hover:text-accent transition-colors">All Boats</Link>
-          )}
-          <Link href="/about" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>About</Link>
-          <Link href="/contact" className={`hover:text-blue-300 transition-colors ${isBlueOneMode ? 'text-blue-100' : 'text-gray-300'}`}>Contact</Link>
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex space-x-8 text-lg font-semibold">
+          {navLinks}
         </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="md:hidden flex flex-col gap-1.5 p-2 text-white"
+          onClick={() => setMobileOpen(o => !o)}
+          aria-label="Toggle menu"
+        >
+          <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileOpen ? 'translate-y-2 rotate-45' : ''}`} />
+          <span className={`block w-6 h-0.5 bg-current transition-opacity ${mobileOpen ? 'opacity-0' : ''}`} />
+          <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+        </button>
       </div>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className={`md:hidden px-6 pb-6 flex flex-col gap-4 text-lg font-semibold ${isBlueOneMode ? 'bg-blue-900/95' : 'bg-[#101824]/95'}`}>
+          {navLinks}
+        </div>
+      )}
     </nav>
   );
 }

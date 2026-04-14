@@ -14,7 +14,8 @@ function BookingContent() {
     name: '',
     email: '',
     phone: '',
-    dates: '',
+    dateFrom: '',
+    dateTo: '',
     guests: '',
     message: ''
   });
@@ -199,29 +200,42 @@ function BookingContent() {
                       className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                     >
                       <option value="">Select guests</option>
-                      <option value="2">2 Guests</option>
-                      <option value="4">4 Guests</option>
-                      <option value="6">6 Guests</option>
-                      <option value="8">8 Guests</option>
-                      <option value="10">10 Guests</option>
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
+                        <option key={n} value={n}>{n} {n === 1 ? 'Guest' : 'Guests'}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="dates" className="block text-sm font-medium text-blue-900 mb-2">
-                    Preferred Dates *
-                  </label>
-                  <input
-                    type="text"
-                    id="dates"
-                    name="dates"
-                    value={formData.dates}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                    placeholder="June 15-22, 2024"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="dateFrom" className="block text-sm font-medium text-blue-900 mb-2">
+                      From *
+                    </label>
+                    <input
+                      type="date"
+                      id="dateFrom"
+                      name="dateFrom"
+                      value={formData.dateFrom}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="dateTo" className="block text-sm font-medium text-blue-900 mb-2">
+                      To *
+                    </label>
+                    <input
+                      type="date"
+                      id="dateTo"
+                      name="dateTo"
+                      value={formData.dateTo}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                    />
+                  </div>
                 </div>
 
                 <div>
