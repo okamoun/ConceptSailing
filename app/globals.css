@@ -358,3 +358,40 @@ input:focus, textarea:focus, select:focus {
 .text-on-light-glass-muted {
   color: var(--gray-700);
 }
+
+/* Missing utility classes for design consistency */
+.text-accent {
+  color: var(--blueone-accent);
+}
+
+.bg-accent {
+  background-color: var(--blueone-primary);
+}
+
+.border-accent {
+  border-color: var(--blueone-accent);
+}
+
+/* Premium button style alias for backward compatibility */
+.button-premium {
+  background: linear-gradient(135deg, var(--blueone-primary) 0%, var(--blueone-primary-dark) 100%);
+  color: var(--white);
+  font-weight: 600;
+  border-radius: 1rem;
+  padding: 0.875rem 2rem;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 102, 204, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.button-premium:hover {
+  background: linear-gradient(135deg, var(--blueone-primary-light) 0%, var(--blueone-primary) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 102, 204, 0.35);
+}
