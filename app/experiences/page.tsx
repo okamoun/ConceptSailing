@@ -32,7 +32,7 @@ export default function ExperiencesPage() {
       themes: [
         adventures.find(a => a.id === "1"), // Wind Sports  Adventure
         adventures.find(a => a.id === "2"), // Family Sailing School
-        adventures.find(a => a.id === "11"), // Greek Islands Family Bike Adventure
+        adventures.find(a => a.id === "12"), // Greek Islands Family Bike Adventure
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {
@@ -53,8 +53,8 @@ export default function ExperiencesPage() {
       category: "Food",
       themes: [
         adventures.find(a => a.id === "6"), // Culinary Traditions
-        adventures.find(a => a.id === "9"), // Mediterranean Natural Flavors
-        adventures.find(a => a.id === "10"), // Greek Cooking Masters
+        adventures.find(a => a.id === "10"), // Mediterranean Flavors
+        adventures.find(a => a.id === "11"), // Greek Cooking Masters
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {
@@ -62,6 +62,12 @@ export default function ExperiencesPage() {
       themes: [
         adventures.find(a => a.id === "7"), // Family Bonding Adventure
         adventures.find(a => a.id === "8"), // Island Nightlife
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    },
+    {
+      category: "Nature & Sea",
+      themes: [
+        adventures.find(a => a.id === "13"), // Ionian Fishing & Island Discovery
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     }
   ];
