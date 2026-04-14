@@ -287,78 +287,239 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Yacht Features</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {(boat.features ?? []).map((feature, index) => (
-                <div key={index} className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                  <h3 className="text-xl font-bold text-white mb-3">{feature}</h3>
+                <div key={index} className="bg-white/20 backdrop-blur-md rounded-xl px-5 py-4 border border-white/30 flex items-center gap-3">
+                  <span className="w-2 h-2 rounded-full bg-blue-300 flex-shrink-0"></span>
+                  <span className="text-white text-sm font-medium">{feature}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Captain Section */}
+        {/* Professional Crew Section */}
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Your Captain</h2>
-            <div className="flex flex-wrap justify-center gap-8">
-              {blueOneCaptainImages.map((image, index) => (
-                <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
-                  <Image
-                    src={image}
-                    alt="BlueOne Captain"
-                    width={300}
-                    height={400}
-                    className="w-72 h-96 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                </div>
-              ))}
+            {/* Header */}
+            <div className="text-center mb-14">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Professional Crew</h2>
+              <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+                Our experienced crew is dedicated to providing exceptional service and ensuring your safety throughout your journey.
+              </p>
             </div>
-            <div className="text-center mt-8">
-              <Link href="/contact" className="btn-primary border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4">
-                Meet Your Captain
-              </Link>
-            </div>
-          </div>
-        </section>
 
-        {/* Chef Section */}
-        <section className="py-20 bg-black/20 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Executive Chef</h2>
-            <div className="flex flex-wrap justify-center gap-8">
-              {blueOneChefImages.map((image, index) => (
-                <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
-                  <Image
-                    src={image}
-                    alt="BlueOne Executive Chef"
-                    width={300}
-                    height={400}
-                    className="w-72 h-96 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
+            {/* Captain + Chef cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+
+              {/* Captain Card */}
+              <div className="bg-white/20 backdrop-blur-md rounded-2xl overflow-hidden border border-white/30 shadow-xl">
+                {/* Card header bar */}
+                <div className="bg-blue-600/80 px-6 py-4 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-white font-bold text-lg">Captain</span>
+                </div>
+                {/* Card body */}
+                <div className="p-6">
+                  {/* Profile row */}
+                  <div className="flex items-start gap-5 mb-6">
+                    <div className="flex-shrink-0 cursor-pointer" onClick={() => setModalImage(blueOneCaptainImages[0])}>
+                      <Image
+                        src={blueOneCaptainImages[0]}
+                        alt="Captain Ioannis Aliferis"
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 rounded-full object-cover border-3 border-white/30 shadow-lg"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-1">Ioannis Aliferis</h3>
+                      <p className="text-blue-200 text-sm font-medium mb-3">Professional Captain</p>
+                      <p className="text-blue-50 text-sm leading-relaxed">
+                        With over 6 years of maritime experience, Captain Ioannis brings expertise in Greek waters and ensures safe, memorable journeys for all guests.
+                      </p>
+                    </div>
+                  </div>
+                  {/* Qualifications box */}
+                  <div className="bg-blue-900/60 rounded-xl p-5">
+                    <h4 className="text-white font-bold mb-4">Expertise &amp; Qualifications</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        '6+ years maritime experience',
+                        'Greek islands specialist',
+                        'Advanced navigation skills',
+                        'Safety certified',
+                        'Multilingual (English, Greek)',
+                        'Local knowledge expert',
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="text-blue-300 mt-0.5 flex-shrink-0">•</span>
+                          <span className="text-white text-sm">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chef Card */}
+              <div className="bg-white/20 backdrop-blur-md rounded-2xl overflow-hidden border border-white/30 shadow-xl">
+                {/* Card header bar */}
+                <div className="bg-blue-600/80 px-6 py-4 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <span className="text-white font-bold text-lg">Chef</span>
+                </div>
+                {/* Card body */}
+                <div className="p-6">
+                  {/* Profile row */}
+                  <div className="flex items-start gap-5 mb-5">
+                    <div className="flex-shrink-0 cursor-pointer" onClick={() => setModalImage(blueOneChefImages[0])}>
+                      <Image
+                        src={blueOneChefImages[0]}
+                        alt="Chef Andreas Tsitsilianis"
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 rounded-full object-cover border-3 border-white/30 shadow-lg"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-1">Andreas Tsitsilianis</h3>
+                      <p className="text-blue-200 text-sm font-medium mb-3">Professional Chef</p>
+                      <p className="text-blue-50 text-sm leading-relaxed">
+                        Chef Andreas brings culinary excellence to your sailing experience, specializing in Mediterranean cuisine with fresh, local ingredients.
+                      </p>
+                    </div>
+                  </div>
+                  {/* View Full Profile button */}
+                  <Link
+                    href="/chef/andreas-tsitsilianis"
+                    className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-lg border border-white/30 transition-colors mb-5"
+                  >
+                    View Full Profile
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  {/* Culinary excellence box */}
+                  <div className="bg-blue-900/60 rounded-xl p-5">
+                    <h4 className="text-white font-bold mb-4">Culinary Excellence</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        'Mediterranean specialist',
+                        'Fresh local ingredients',
+                        'Custom menu creation',
+                        'Dietary accommodations',
+                        'Greek cuisine expert',
+                        'Wine pairing knowledge',
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="text-blue-300 mt-0.5 flex-shrink-0">•</span>
+                          <span className="text-white text-sm">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Complete Crew Services */}
+            <div className="text-center mb-10">
+              <h3 className="text-2xl font-bold text-white">Complete Crew Services</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: (
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                  ),
+                  label: 'Full Service',
+                  desc: 'Complete crew service for all your needs',
+                },
+                {
+                  icon: (
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  ),
+                  label: 'Safety First',
+                  desc: 'Experienced crew ensuring your safety',
+                },
+                {
+                  icon: (
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                    </svg>
+                  ),
+                  label: 'Premium Dining',
+                  desc: 'Gourmet meals prepared by professional chef',
+                },
+              ].map((item, i) => (
+                <div key={i} className="bg-white/20 backdrop-blur-md rounded-2xl p-8 border border-white/30 text-center hover:bg-white/25 transition-colors">
+                  <div className="w-16 h-16 bg-blue-600/70 rounded-full flex items-center justify-center mx-auto mb-4">
+                    {item.icon}
+                  </div>
+                  <h4 className="text-white font-bold text-lg mb-2">{item.label}</h4>
+                  <p className="text-white text-sm">{item.desc}</p>
                 </div>
               ))}
-            </div>
-            <div className="text-center mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/chef/andreas-tsitsilianis" className="btn-primary text-lg px-8 py-4">
-                View Full Profile &amp; Menu
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-              <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4">
-                Discuss Your Culinary Preferences
-              </Link>
             </div>
           </div>
         </section>
 
         {/* Floor Plan Section */}
-        <section className="py-20 bg-black/30 backdrop-blur-sm">
+        <section className="py-20 bg-black/40 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Yacht Layout</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-6">Yacht Layout</h2>
+            <p className="text-blue-100 text-center text-lg max-w-2xl mx-auto mb-16">
+              Designed for those who refuse to compromise between performance and comfort at sea.
+            </p>
+
+            {/* Layout Description */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16 items-start">
+              {/* Left — prose description */}
+              <div className="bg-blue-100 rounded-2xl p-8 border border-blue-200 shadow-lg">
+                <h3 className="text-2xl font-bold text-blue-900 mb-4">A Home on the Water</h3>
+                <p className="text-blue-900 leading-relaxed mb-5">
+                  The <strong>Fountaine Pajot Aura 51</strong> redefines what it means to live aboard. Her wide-open saloon floods with natural light through floor-to-ceiling windows, seamlessly connecting the interior living space to the expansive cockpit — creating one continuous, breathable living environment.
+                </p>
+                <p className="text-blue-900 leading-relaxed mb-5">
+                  Below deck, four generous en-suite cabins offer hotel-grade comfort. Each cabin features a full-size double bed, generous storage, individual climate control, and a private bathroom — so every guest has their own sanctuary, regardless of how long the voyage lasts.
+                </p>
+                <p className="text-blue-900 leading-relaxed">
+                  The galley is positioned for the chef to remain part of the conversation — open, modern, and fully equipped for gourmet cooking. Upstairs, the flybridge offers panoramic 360° views, a second helm station, and a shaded lounge for sunset cocktails above the world.
+                </p>
+              </div>
+
+              {/* Right — space cards */}
+              <div className="space-y-4">
+                {[
+                  { icon: '🛏️', label: '4 Generous Guest Cabins', desc: 'Four spacious double-bed cabins, each with a private en-suite bathroom, individual climate control, and generous storage.' },
+                  { icon: '🍽️', label: 'Open Saloon & Galley', desc: 'A light-filled social hub with panoramic sea views, a fully equipped professional kitchen, and a large dining table.' },
+                  { icon: '☀️', label: 'Cockpit & Flybridge', desc: 'Shaded outdoor dining aft, plus a flybridge lounge for open-air relaxation and 360° horizon views.' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 bg-blue-100 rounded-xl p-5 shadow-lg border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
+                    <span className="text-3xl flex-shrink-0">{item.icon}</span>
+                    <div>
+                      <h4 className="text-blue-900 font-bold mb-1">{item.label}</h4>
+                      <p className="text-blue-800 text-sm leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Floor Plan Image */}
             <div className="flex justify-center">
               {blueOneFloorplanImages.map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
