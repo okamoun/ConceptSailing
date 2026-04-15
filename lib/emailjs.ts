@@ -1,5 +1,6 @@
 import emailjs from '@emailjs/browser';
 import { CONTACT } from '../app/config/contact';
+import { trackEvent } from './analytics';
 
 // EmailJS configuration with fallbacks
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'demo_public_key';
@@ -133,6 +134,7 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
     console.log('Booking email response:', response);
 
     if (response.status === 200) {
+      trackEvent('booking_submitted', { boat: bookingData.boat, theme: bookingData.selectedTheme || '' });
       return {
         status: 'success',
         message: 'Booking email sent successfully to both client and business'
@@ -201,6 +203,7 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
     console.log('Contact email response:', response);
 
     if (response.status === 200) {
+      trackEvent('contact_submitted');
       return {
         status: 'success',
         message: 'Contact email sent successfully'

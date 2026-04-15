@@ -7,6 +7,7 @@ import type { Review } from '../../lib/reviews';
 import ReviewCard from '../components/ReviewCard';
 import StarRating from '../components/StarRating';
 import emailjs from '@emailjs/browser';
+import { trackEvent } from '../../lib/analytics';
 
 const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '';
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '';
@@ -117,6 +118,7 @@ export default function ReviewsClient() {
         photos: photoUrls,
         order: 0,
       });
+      trackEvent('review_submitted', { rating, has_photos: photoUrls.length > 0 });
 
       const base = window.location.origin;
       const confirmLink = `${base}/reviews/manage?token=${token}&action=confirm`;
