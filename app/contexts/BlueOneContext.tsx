@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface BlueOneContextType {
   isBlueOneMode: boolean;
@@ -11,33 +12,16 @@ interface BlueOneContextType {
 const BlueOneContext = createContext<BlueOneContextType | undefined>(undefined);
 
 export function BlueOneProvider({ children }: { children: ReactNode }) {
-  const [isBlueOneMode, setIsBlueOneMode] = useState(false);
+  const pathname = usePathname();
+  const isBlueOneMode = pathname?.startsWith('/blueone') ?? false;
 
-  useEffect(() => {
-    // Check localStorage on mount to see if BlueOne mode was previously activated
-    const storedMode = localStorage.getItem('blueOneMode');
-    if (storedMode === 'true') {
-      setIsBlueOneMode(true);
-    }
-  }, []);
-
-  const setBlueOneModeWithPersistence = (mode: boolean) => {
-    setIsBlueOneMode(mode);
-    // Persist to localStorage
-    localStorage.setItem('blueOneMode', mode.toString());
-  };
-
-  const resetTheme = () => {
-    setIsBlueOneMode(false);
-    localStorage.removeItem('blueOneMode');
-  };
+  // No-ops kept for API compatibility with pages that call these
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const setIsBlueOneMode = (_mode: boolean) => {};
+  const resetTheme = () => {};
 
   return (
-    <BlueOneContext.Provider value={{ 
-      isBlueOneMode, 
-      setIsBlueOneMode: setBlueOneModeWithPersistence,
-      resetTheme 
-    }}>
+    <BlueOneContext.Provider value={{ isBlueOneMode, setIsBlueOneMode, resetTheme }}>
       {children}
     </BlueOneContext.Provider>
   );
