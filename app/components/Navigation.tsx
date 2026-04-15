@@ -12,6 +12,7 @@ export default function Navigation() {
     { href: "/destinations", label: "Destinations", bold: false },
     { href: "/blueone", label: "The Yacht", bold: true },
     { href: "/about", label: "About", bold: false },
+    { href: "/reviews", label: "Reviews", bold: false },
     { href: "/contact", label: "Contact", bold: false },
   ];
 
