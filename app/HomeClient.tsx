@@ -2,17 +2,27 @@
 
 import Image from 'next/image';
 import Link from "next/link";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useBlueOneMode } from './contexts/BlueOneContext';
 import { LocalBusinessStructuredData, TouristTripStructuredData } from './components/StructuredData';
+import { getConfirmedReviews } from '../lib/reviews';
+import type { Review } from '../lib/reviews';
+import ReviewCard from './components/ReviewCard';
 
 export default function HomeClient() {
   const { resetTheme } = useBlueOneMode();
+  const [topReviews, setTopReviews] = useState<Review[]>([]);
 
   useEffect(() => {
     // Reset theme when entering through main entry point
     resetTheme();
   }, [resetTheme]);
+
+  useEffect(() => {
+    getConfirmedReviews()
+      .then(reviews => setTopReviews(reviews.slice(0, 3)))
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -69,8 +79,8 @@ export default function HomeClient() {
             </div>
             
             <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Discover extraordinary sailing experiences aboard the BlueOne catamaran. 
-              From island hopping to sunset cruises, create your perfect Greek adventure with premium comfort and service.
+              Discover extraordinary sailing experiences aboard the BlueOne electric catamaran. 
+              From island hopping to sunset cruises, create your perfect Greek adventure with premium comfort and service and silence of electric engines.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -147,6 +157,33 @@ export default function HomeClient() {
           </div>
         </div>
       </section>
+
+      {/* Guest Reviews Preview */}
+      {topReviews.length > 0 && (
+        <section className="py-16 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-15" style={{ backgroundImage: `url('/images/boats/blueone/External_sailing.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+          <div className="relative max-w-5xl mx-auto px-4">
+            <div className="text-center mb-8">
+              <p className="text-blue-300 uppercase tracking-widest text-xs font-semibold mb-2">Testimonials</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">What Our Guests Say</h2>
+              <p className="text-blue-200 text-sm">Real experiences from real sailors</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+              {topReviews.map(r => (
+                <ReviewCard key={r.id} review={r} compact />
+              ))}
+            </div>
+            <div className="text-center">
+              <Link href="/reviews" className="inline-flex items-center gap-2 text-blue-200 hover:text-white text-sm font-medium transition-colors border border-white/25 px-5 py-2.5 rounded-xl hover:bg-white/10">
+                See All Reviews
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Call to Action */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700">
