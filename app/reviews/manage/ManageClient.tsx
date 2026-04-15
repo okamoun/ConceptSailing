@@ -8,6 +8,7 @@ import {
   updateReview,
   deleteReview,
 } from '../../../lib/reviews';
+import { trackEvent } from '../../../lib/analytics';
 import type { Review } from '../../../lib/reviews';
 import StarRating from '../../components/StarRating';
 
@@ -50,6 +51,7 @@ export default function ManageClient({ token, action }: Props) {
     setSaving(true);
     try {
       await confirmReview(review.id);
+      trackEvent('review_confirmed', { rating: review.rating });
       setDone(true);
     } catch {
       setError('Failed to confirm. Please try again.');
