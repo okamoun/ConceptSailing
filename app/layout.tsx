@@ -96,10 +96,10 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <body className="min-h-screen bg-blue-900">
         <BlueOneProvider>
           <Navigation />
-          <main className="pt-6">{children}</main>
+          <main>{children}</main>
           <Footer />
         </BlueOneProvider>
       </body>

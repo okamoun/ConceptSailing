@@ -70,8 +70,7 @@ h4 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
 h5 { font-size: clamp(1.125rem, 2vw, 1.25rem); }
 h6 { font-size: clamp(1rem, 1.5vw, 1.125rem); }
 
-p {
-  color: var(--text-secondary);
+:where(p) {
   margin-bottom: 1rem;
 }
 
@@ -79,7 +78,6 @@ p {
 nav {
   background: linear-gradient(135deg, var(--blueone-ocean) 0%, var(--blueone-primary) 100%);
   box-shadow: 0 4px 24px rgba(0, 102, 204, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
 }
 
