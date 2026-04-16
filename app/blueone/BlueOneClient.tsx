@@ -553,7 +553,7 @@ export default function BlueOneClient() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready for Your BlueOne Adventure?
             </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
               Book your luxury sailing experience today and create memories that will last a lifetime
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
