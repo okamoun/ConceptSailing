@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Greek Sailing Adventures | Themed Yacht Experiences',
     description: 'Discover curated themed sailing adventures in Greece. From culinary journeys to wellness retreats, find the perfect Greek island experience.',
     type: 'website',
-    url: 'https://blueone-yacht.com/experiences',
+    url: 'https://www.blueoneyacht.com/experiences',
     images: [
       {
         url: '/images/boats/blueone/External_sailing.jpg',

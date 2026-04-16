@@ -4,7 +4,7 @@ import { destinations } from './destinations-data'
 import { boats } from './boats-data'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://blueone-yacht.com'
+  const baseUrl = 'https://www.blueoneyacht.com'
 
   // Core pages
   const corePages = [

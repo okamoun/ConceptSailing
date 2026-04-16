@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: 'Book Your BlueOne Yacht Charter | Luxury Sailing Greece',
     description: 'Reserve your luxury sailing adventure in Greece. Book the BlueOne catamaran for island hopping and premium yacht experiences.',
     type: 'website',
-    url: 'https://blueone-yacht.com/booking',
+    url: 'https://www.blueoneyacht.com/booking',
     images: [
       {
         url: '/images/boats/blueone/External_sailing.jpg',

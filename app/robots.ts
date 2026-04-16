@@ -11,8 +11,6 @@ export default function robots(): MetadataRoute.Robots {
           '/admin/',
           '/_next/',
           '/static/',
-          '/images/adventures/',
-          '/images/destinations/',
         ],
       },
       {
@@ -26,7 +24,7 @@ export default function robots(): MetadataRoute.Robots {
         crawlDelay: 1,
       },
     ],
-    sitemap: 'https://blueone-yacht.com/sitemap.xml',
-    host: 'https://blueone-yacht.com',
+    sitemap: 'https://www.blueoneyacht.com/sitemap.xml',
+    host: 'https://www.blueoneyacht.com',
   }
 }

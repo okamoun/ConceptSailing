@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: 'BlueOne Luxury Catamaran | Premium Yacht Charter Greece',
     description: 'Discover the BlueOne catamaran - a luxury 51-foot Fountaine Pajot yacht perfect for Greek island sailing.',
     type: 'website',
-    url: 'https://blueone-yacht.com/blueone',
+    url: 'https://www.blueoneyacht.com/blueone',
     images: [
       {
         url: '/images/boats/blueone/External_sailing.jpg',

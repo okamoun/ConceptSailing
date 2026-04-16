@@ -12,7 +12,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://blueone-yacht.com'),
+  metadataBase: new URL('https://www.blueoneyacht.com'),
   title: {
     default: 'BlueOne Luxury Yacht Charters | Sailing Adventures in Greece',
     template: '%s | BlueOne Luxury Yacht Charters'
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://blueone-yacht.com',
+    url: 'https://www.blueoneyacht.com',
     siteName: 'BlueOne Luxury Yacht Charters',
     title: 'BlueOne Luxury Yacht Charters | Sailing Adventures in Greece',
     description: 'Experience luxury sailing adventures in Greece aboard the BlueOne catamaran. Premium yacht charters with island hopping, sunset cruises, and all-inclusive experiences.',
@@ -60,9 +60,55 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'your-google-verification-code',
-  },
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'TouristInformationCenter',
+      '@id': 'https://www.blueoneyacht.com/#organization',
+      name: 'BlueOne Luxury Yacht Charters',
+      url: 'https://www.blueoneyacht.com',
+      logo: 'https://www.blueoneyacht.com/images/boats/blueone/logo_blueone.png',
+      image: 'https://www.blueoneyacht.com/images/boats/blueone/External_sailing.jpg',
+      description: 'Premium luxury yacht charter company offering curated sailing experiences across the Greek islands aboard the BlueOne Fountaine Pajot Aura 51 catamaran.',
+      telephone: '+33675604532',
+      email: 'contact@nj3cruises.com',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Alimos Marina',
+        addressLocality: 'Athens',
+        addressCountry: 'GR',
+      },
+      areaServed: {
+        '@type': 'Country',
+        name: 'Greece',
+      },
+      priceRange: '$$$',
+      openingHoursSpecification: [
+        {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          opens: '09:00',
+          closes: '18:00',
+        },
+      ],
+      sameAs: [],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://www.blueoneyacht.com/#website',
+      url: 'https://www.blueoneyacht.com',
+      name: 'BlueOne Luxury Yacht Charters',
+      publisher: { '@id': 'https://www.blueoneyacht.com/#organization' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://www.blueoneyacht.com/experiences?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
 }
 
 export default function RootLayout({
@@ -73,7 +119,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <head>
-        <link rel="canonical" href="https://blueone-yacht.com" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {GA_ID && (
           <>
             <Script

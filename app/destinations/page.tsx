@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     title: 'Greek Islands Sailing Destinations | BlueOne Yacht Charters',
     description: 'Explore stunning Greek islands destinations aboard BlueOne. From Rhodes to hidden coves, discover the best sailing spots in the Aegean Sea.',
     type: 'website',
-    url: 'https://blueone-yacht.com/destinations',
+    url: 'https://www.blueoneyacht.com/destinations',
     images: [
       {
         url: '/destinations/Rhodes.jpg',
