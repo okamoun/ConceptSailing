@@ -29,7 +29,7 @@ export default function HomeClient() {
       <LocalBusinessStructuredData
         name="BlueOne Luxury Yacht Charters"
         description="Experience luxury sailing adventures in Greece aboard the BlueOne catamaran. Premium yacht charters with island hopping, sunset cruises, and all-inclusive experiences."
-        url="https://blueone-yacht.com"
+        url="https://www.blueoneyacht.com"
         telephone="+30 210 1234567"
         email="contact@nj3cruises.com"
         address={{

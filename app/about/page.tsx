@@ -2,8 +2,23 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 
 export const metadata: Metadata = {
-  title: 'About | BlueOne Luxury Yacht Charters',
-  description: 'Learn about BlueOne\'s unique approach to Greek sailing holidays, focused on families, experiences, and sustainable luxury.'
+  title: 'About BlueOne | Family Sailing Holidays in Greece',
+  description: 'Discover BlueOne\'s philosophy — luxury family sailing holidays in Greece built around experiences, not just the boat. Meet our crew and learn what makes us different.',
+  keywords: ['about BlueOne', 'family sailing holidays Greece', 'luxury catamaran crew', 'sustainable sailing Greece', 'Greek island sailing company', 'BlueOne story'],
+  openGraph: {
+    title: 'About BlueOne | Family Sailing Holidays in Greece',
+    description: 'BlueOne puts families and experiences at the heart of every sailing holiday. Discover our story, values, and crew.',
+    type: 'website',
+    url: 'https://www.blueoneyacht.com/about',
+    images: [
+      {
+        url: '/images/boats/blueone/External_sailing.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'BlueOne Luxury Catamaran - About Us',
+      },
+    ],
+  },
 };
 
 export default function AboutPage() {

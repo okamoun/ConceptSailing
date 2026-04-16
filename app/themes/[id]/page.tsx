@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import adventures from '../../adventures-data';
 import { featureIconMap } from '../../feature-icons';
 import type { AdventureItineraryDay } from '../../adventures-data';
@@ -8,6 +9,46 @@ import MapLoader from './MapLoader.client';
 
 interface ThemePageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+  return adventures.map((a) => ({ id: a.id }));
+}
+
+export async function generateMetadata({ params }: ThemePageProps): Promise<Metadata> {
+  const { id } = await params;
+  const adventure = adventures.find((a) => a.id === id);
+  if (!adventure) return {};
+
+  const title = `${adventure.name} | BlueOne Sailing Adventures Greece`;
+  const description = `${adventure.description} Experience ${adventure.name.toLowerCase()} aboard the BlueOne luxury catamaran in the Greek islands.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      adventure.name,
+      'Greek sailing adventure',
+      'luxury yacht Greece',
+      'BlueOne catamaran',
+      'Greek islands sailing',
+      ...(adventure.features ?? []),
+    ],
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `https://www.blueoneyacht.com/themes/${adventure.id}`,
+      images: [
+        {
+          url: adventure.image,
+          width: 1200,
+          height: 630,
+          alt: `${adventure.name} - BlueOne Sailing Adventure`,
+        },
+      ],
+    },
+  };
 }
 
 export default async function ThemePage({ params }: ThemePageProps) {
