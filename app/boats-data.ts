@@ -14,8 +14,8 @@ export const boats: Boat[] = [
     length: "51 ft",
     description: "A new-generation catamaran with a focus on eco-responsibility, solar panels, and hybrid systems.\
                Elegant design with full safety and entertainment options for guests.\
-                BlueOne is the First Hybride commercial catamaran operating in the Greek water, it provides you a unique \
-                oppotunity to visit the most protected sites in total confort without air and \
+                BlueOne is the First Hybrid commercial catamaran operating in the Greek water, it provides you a unique \
+                opportunity to visit the most protected sites in total comfort without air and \
                 noise pollution. It also give you electricity when and where you want to enjoy air conditioning and other electric devices.",
     image: "/images/boats/fp-aura51.jpg",
     features: [
