@@ -504,7 +504,7 @@ export default function BlueOneClient() {
               {/* Right — space cards */}
               <div className="space-y-4">
                 {[
-                  { icon: '🛏️', label: '4 Generous Guest Cabins', desc: 'Four spacious double-bed cabins, each with a private en-suite bathroom, individual climate control, and generous storage.' },
+                  { icon: '🛏️', label: '5 Generous Guest Cabins', desc: 'Four spacious double-bed cabins and one master cabin, each with a private en-suite bathroom, individual climate control, and generous storage.' },
                   { icon: '🍽️', label: 'Open Saloon & Galley', desc: 'A light-filled social hub with panoramic sea views, a fully equipped professional kitchen, and a large dining table.' },
                   { icon: '☀️', label: 'Cockpit & Flybridge', desc: 'Shaded outdoor dining aft, plus a flybridge lounge for open-air relaxation and 360° horizon views.' },
                 ].map((item, i) => (
@@ -547,6 +547,33 @@ export default function BlueOneClient() {
           </div>
         </section>
 
+        {/* Rates Teaser */}
+        <section className="py-16 bg-black/30 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="bg-gradient-to-br from-blue-700/40 to-blue-900/50 border border-blue-400/30 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1 text-center md:text-left">
+                <p className="text-blue-300 uppercase tracking-widest text-xs font-semibold mb-2">Summer 2026</p>
+                <h2 className="text-3xl font-bold text-white mb-3">Charter Rates</h2>
+                <p className="text-blue-100 text-sm leading-relaxed mb-2">
+                  Weekly rates from <strong className="text-white">€18,000</strong> to <strong className="text-white">€24,000</strong> depending on season, plus expenses (MYBA terms).
+                </p>
+                <p className="text-blue-200 text-sm">All-inclusive experience packages also available on request.</p>
+              </div>
+              <div className="flex flex-col gap-3 flex-shrink-0">
+                <Link href="/rates" className="btn-primary px-8 py-3 inline-flex items-center gap-2 whitespace-nowrap">
+                  View Full Rates
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link href="/booking?boat=BlueOne" className="btn-secondary border-white/40 text-white hover:bg-white/10 px-8 py-3 inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                  Request a Quote
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Call to Action */}
         <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700">
           <div className="max-w-4xl mx-auto px-4 text-center">
@@ -557,12 +584,15 @@ export default function BlueOneClient() {
               Book your luxury sailing experience today and create memories that will last a lifetime
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
+              <a
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                 className="btn-primary bg-white text-blue-600 hover:bg-gray-50"
               >
                 Booking Request
               </a>
+              <Link href="/specifications" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+                View Specifications
+              </Link>
               <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
                 Contact Us
               </Link>

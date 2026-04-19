@@ -196,7 +196,7 @@ export default function BookingPageContent() {
         </div>
 
         <div className="glass p-8 shadow-xl">
-          <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">Book Your BlueOne Experience</h1>
+          <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">Contact us to prepare your next dream experience</h1>
           
           {/* Boat Summary */}
           <div className="mb-8 p-6 bg-blue-100 rounded-lg border border-blue-200">
