@@ -58,7 +58,7 @@ export default function Footer() {
             </div>
             <div className="pt-4 border-t border-gray-700">
               <p className="text-sm text-gray-400">Athens, Greece</p>
-              <p className="text-sm text-blue-200 mt-1">Premium Yacht Experiences Since 2024</p>
+              <p className="text-sm text-blue-200 mt-1">Premium Yacht Experiences Since 2025</p>
             </div>
           </div>
         </div>
