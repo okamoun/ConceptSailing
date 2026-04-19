@@ -34,16 +34,13 @@ export default function RatesPage() {
         {/* Season Rate Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { season: 'High Season', months: 'July & August', rate: '€24,000', highlight: true },
-            { season: 'Mid Season', months: 'June & September', rate: '€21,000', highlight: false },
-            { season: 'Low Season', months: 'All other months', rate: '€18,000', highlight: false },
+            { season: 'High Season', months: 'July & August', rate: '€24,000' },
+            { season: 'Mid Season', months: 'June & September', rate: '€21,000' },
+            { season: 'Low Season', months: 'All other months', rate: '€18,000' },
           ].map((item) => (
-            <div key={item.season} className={`rounded-2xl border p-8 text-center ${item.highlight ? 'bg-blue-600/50 border-blue-300/60 shadow-xl shadow-blue-900/40' : 'bg-white/15 border-white/25'}`}>
-              {item.highlight && (
-                <span className="inline-block bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full mb-3 uppercase tracking-wide">Peak</span>
-              )}
+            <div key={item.season} className="rounded-2xl border p-8 text-center bg-blue-600/50 border-blue-300/60 shadow-xl shadow-blue-900/40">
               <p className="text-blue-200 text-sm font-semibold uppercase tracking-widest mb-1">{item.season}</p>
-              <p className="text-white/70 text-xs mb-4">{item.months}</p>
+              <p className="text-blue-100 text-sm font-medium mb-4">{item.months}</p>
               <p className="text-5xl font-bold text-white mb-1">{item.rate}</p>
               <p className="text-blue-200 text-sm">per week</p>
             </div>
@@ -66,9 +63,18 @@ export default function RatesPage() {
             </h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-blue-100">
-                <span>Cyclades (catamarans up to 52 ft)</span>
+                <span>Cyclades : </span>
                 <span className="font-semibold text-white">€1,000</span>
               </div>
+              <div className="flex justify-between text-blue-100">
+                <span>Sporades : </span>
+                <span className="font-semibold text-white">€1,000</span>
+              </div>
+              <div className="flex justify-between text-blue-100">
+                <span>Ionian : </span>
+                <span className="font-semibold text-white">€1,000</span>
+              </div>
+          
               <p className="text-blue-300 text-xs pt-2">
                 * Charters with embarkation/disembarkation in Santorini will be charged one extra day due to logistics.
               </p>
