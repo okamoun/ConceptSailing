@@ -198,7 +198,7 @@ export default function HomeClient() {
             <Link href="/booking" className="btn-primary bg-white text-blue-600 hover:bg-gray-50">
               Booking Request
             </Link>
-            <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+            <Link href="/booking" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
               Contact Us
             </Link>
           </div>
