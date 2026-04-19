@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueOne Yacht Specifications | Luxury Catamaran Greece</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        /* Navigation */
+        nav {
+            background: linear-gradient(135deg, #1F4E78 0%, #2E5FA3 100%);
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1.5rem;
+            transition: opacity 0.3s;
+        }
+
+        nav a:hover {
+            opacity: 0.8;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1F4E78 0%, #2E5FA3 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Specs Grid */
+        .specs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .spec-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .spec-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .spec-card h3 {
+            color: #1F4E78;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #2E5FA3;
+            padding-bottom: 0.5rem;
+        }
+
+        .spec-item {
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .spec-label {
+            font-weight: 600;
+            color: #1F4E78;
+            min-width: 140px;
+        }
+
+        .spec-value {
+            color: #555;
+            text-align: right;
+            flex: 1;
+            padding-left: 1rem;
+        }
+
+        /* Table Style */
+        .specs-table-wrapper {
+            overflow-x: auto;
+            margin: 3rem 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #1F4E78 0%, #2E5FA3 100%);
+            color: white;
+        }
+
+        th {
+            padding: 1.2rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #f8f9fa;
+        }
+
+        /* Sections */
+        .section-title {
+            color: #1F4E78;
+            font-size: 2rem;
+            margin: 3rem 0 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #2E5FA3;
+        }
+
+        .section-intro {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            background: #E8EFF7;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #2E5FA3;
+        }
+
+        /* Highlights */
+        .highlight-box {
+            background: linear-gradient(135deg, #E8EFF7 0%, #D9E1F2 100%);
+            border-left: 4px solid #2E5FA3;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 4px;
+        }
+
+        .highlight-box h4 {
+            color: #1F4E78;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: #1F4E78;
+            color: white;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 0.5rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            nav .container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav a {
+                margin: 0 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .spec-item {
+                flex-direction: column;
+            }
+
+            .spec-value {
+                text-align: left;
+                padding-left: 0;
+                margin-top: 0.3rem;
+            }
+        }
+
+        /* Button Style */
+        .btn {
+            display: inline-block;
+            background: #2E5FA3;
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: #1F4E78;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #1F4E78;
+            border: 2px solid #2E5FA3;
+        }
+
+        .btn-secondary:hover {
+            background: #2E5FA3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="logo">BlueOne</div>
+            <div>
+                <a href="/">Home</a>
+                <a href="/blueone">The Yacht</a>
+                <a href="#specifications">Specifications</a>
+                <a href="/contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <h1>BlueOne Specifications</h1>
+            <p>Complete Technical Details - Fountaine Pajot Aura 51</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="section-intro">
+            <strong>BlueOne</strong> is the first hybrid commercial catamaran operating in Greek waters, 
+            combining luxury, sustainability, and exceptional performance. Explore our comprehensive specifications below.
+        </div>
+
+        <!-- Quick Facts -->
+        <h2 class="section-title" id="specifications">Quick Facts</h2>
+        <div class="specs-container">
+            <div class="spec-card">
+                <h3>🚤 Vessel Information</h3>
+                <div class="spec-item">
+                    <span class="spec-label">Vessel Name:</span>
+                    <span class="spec-value">BlueOne</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Manufacturer:</span>
+                    <span class="spec-value">Fountaine Pajot</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Model:</span>
+                    <span class="spec-value">Aura 51</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Year Built:</span>
+                    <span class="spec-value">2025</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Type:</span>
+                    <span class="spec-value">Luxury Catamaran</span>
+                </div>
+            </div>
+
+            <div class="spec-card">
+                <h3>📏 Dimensions</h3>
+                <div class="spec-item">
+                    <span class="spec-label">Length:</span>
+                    <span class="spec-value">51 Feet</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Beam (Width):</span>
+                    <span class="spec-value">26.70 Feet</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Draft:</span>
+                    <span class="spec-value">4.70 Feet</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Max Capacity:</span>
+                    <span class="spec-value">10 Persons</span>
+                </div>
+            </div>
+
+            <div class="spec-card">
+                <h3>⚡ Performance</h3>
+                <div class="spec-item">
+                    <span class="spec-label">Cruising Speed:</span>
+                    <span class="spec-value">7 Knots</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Max Speed:</span>
+                    <span class="spec-value">10 Knots</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Engines:</span>
+                    <span class="spec-value">2 x 70A</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Generator:</span>
+                    <span class="spec-value">Kohler 32 kVA</span>
+                </div>
+            </div>
+
+            <div class="spec-card">
+                <h3>🛏️ Accommodations</h3>
+                <div class="spec-item">
+                    <span class="spec-label">Total Cabins:</span>
+                    <span class="spec-value">7 (5 Guest + 2 Crew)</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Configuration:</span>
+                    <span class="spec-value">5 Double + 2 Crew</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Heads:</span>
+                    <span class="spec-value">5</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Showers:</span>
+                    <span class="spec-value">5</span>
+                </div>
+            </div>
+
+            <div class="spec-card">
+                <h3>🌍 Sustainability</h3>
+                <div class="spec-item">
+                    <span class="spec-label">Power System:</span>
+                    <span class="spec-value">Solar + Hybrid</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Water Maker:</span>
+                    <span class="spec-value">Yes</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Internet:</span>
+                    <span class="spec-value">Starlink</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Emissions:</span>
+                    <span class="spec-value">Zero Noise/Air</span>
+                </div>
+            </div>
+
+            <div class="spec-card">
+                <h3>👥 Crew</h3>
+                <div class="spec-item">
+                    <span class="spec-label">Captain:</span>
+                    <span class="spec-value">Professional</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Chef:</span>
+                    <span class="spec-value">Professional</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Experience:</span>
+                    <span class="spec-value">6+ years</span>
+                </div>
+                <div class="spec-item">
+                    <span class="spec-label">Cuisine:</span>
+                    <span class="spec-value">Mediterranean</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Specifications Table -->
+        <h2 class="section-title">Complete Specifications</h2>
+        
+        <div class="specs-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Specification</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- General -->
+                    <tr>
+                        <td colspan="3" style="background: #E8EFF7; font-weight: bold; color: #1F4E78;">ONBOARD SYSTEMS & POWER</td>
+                    </tr>
+                    <tr>
+                        <td>Systems</td>
+                        <td>Air Conditioning</td>
+                        <td>Full - Throughout vessel</td>
+                    </tr>
+                    <tr>
+                        <td>Systems</td>
+                        <td>Engines</td>
+                        <td>2 x 70A</td>
+                    </tr>
+                    <tr>
+                        <td>Systems</td>
+                        <td>Generator</td>
+                        <td>Kohler 32 kVA</td>
+                    </tr>
+                    <tr>
+                        <td>Systems</td>
+                        <td>Water Maker</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Systems</td>
+                        <td>Ice Maker</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td>Systems</td>
+                        <td>Power System</td>
+                        <td>Solar Panels & Hybrid Systems</td>
+                    </tr>
+                    <tr>
+                        <td>Systems</td>
+                        <td>Internet</td>
+                        <td>Starlink High-Speed Internet</td>
+                    </tr>
+
+                    <!-- Amenities -->
+                    <tr>
+                        <td colspan="3" style="background: #E8EFF7; font-weight: bold; color: #1F4E78;">AMENITIES</td>
+                    </tr>
+                    <tr>
+                        <td>Amenities</td>
+                        <td>Salon TV</td>
+                        <td>Smart TV & Entertainment System</td>
+                    </tr>
+                    <tr>
+                        <td>Amenities</td>
+                        <td>Audio</td>
+                        <td>Premium Sound System & Outdoor Speakers</td>
+                    </tr>
+                    <tr>
+                        <td>Amenities</td>
+                        <td>Kitchen</td>
+                        <td>Full Kitchen Equipment with Professional Chef</td>
+                    </tr>
+                    <tr>
+                        <td>Amenities</td>
+                        <td>Dining</td>
+                        <td>Open Saloon with panoramic views</td>
+                    </tr>
+                    <tr>
+                        <td>Amenities</td>
+                        <td>Outdoor</td>
+                        <td>BBQ Grill, Deck Shower, Bimini Shade</td>
+                    </tr>
+                    <tr>
+                        <td>Amenities</td>
+                        <td>Safety</td>
+                        <td>Safety Equipment & First Aid</td>
+                    </tr>
+
+                    <!-- Water Sports -->
+                    <tr>
+                        <td colspan="3" style="background: #E8EFF7; font-weight: bold; color: #1F4E78;">WATER SPORTS & ACTIVITIES</td>
+                    </tr>
+                    <tr>
+                        <td>Water Sports</td>
+                        <td>Tender</td>
+                        <td>Highfield 380 + Honda 30 HP (4 person capacity)</td>
+                    </tr>
+                    <tr>
+                        <td>Water Sports</td>
+                        <td>Seabobs</td>
+                        <td>1 x Premium underwater scooter</td>
+                    </tr>
+                    <tr>
+                        <td>Water Sports</td>
+                        <td>Water Equipment</td>
+                        <td>1 x SUP, 1 x Wakeboard, 1 x Kayak, Snorkel Gear</td>
+                    </tr>
+                    <tr>
+                        <td>Water Sports</td>
+                        <td>Platform</td>
+                        <td>Swim Platform with Boarding Ladder</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Highlight Box -->
+        <div class="highlight-box">
+            <h4>Why Choose BlueOne?</h4>
+            <p><strong>Eco-Conscious Luxury:</strong> The first hybrid commercial catamaran in Greek waters, combining cutting-edge sustainability with premium comfort.</p>
+            <p style="margin-top: 0.8rem;"><strong>Expert Crew:</strong> Professional Captain and Chef with Mediterranean expertise and 6+ years of maritime experience.</p>
+            <p style="margin-top: 0.8rem;"><strong>Modern Amenities:</strong> Complete with Starlink internet, solar power, advanced entertainment systems, and full kitchen facilities.</p>
+        </div>
+
+        <!-- Call to Action -->
+        <div style="text-align: center; margin: 3rem 0;">
+            <h2 style="color: #1F4E78; margin-bottom: 1.5rem;">Ready for Your BlueOne Adventure?</h2>
+            <button class="btn" onclick="window.location.href='/contact'">Book Your Charter</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/blueone'">View More</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 BlueOne Luxury Yacht Charters. All rights reserved.</p>
+        <p>Athens, Greece | contact@nj3cruises.com | +33 6 75 60 45 32</p>
+    </footer>
+</body>
+</html>

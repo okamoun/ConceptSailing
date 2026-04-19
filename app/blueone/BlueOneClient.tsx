@@ -504,7 +504,7 @@ export default function BlueOneClient() {
               {/* Right — space cards */}
               <div className="space-y-4">
                 {[
-                  { icon: '🛏️', label: '4 Generous Guest Cabins', desc: 'Four spacious double-bed cabins, each with a private en-suite bathroom, individual climate control, and generous storage.' },
+                  { icon: '🛏️', label: '5 Generous Guest Cabins', desc: 'Four spacious double-bed cabins and one master cabin, each with a private en-suite bathroom, individual climate control, and generous storage.' },
                   { icon: '🍽️', label: 'Open Saloon & Galley', desc: 'A light-filled social hub with panoramic sea views, a fully equipped professional kitchen, and a large dining table.' },
                   { icon: '☀️', label: 'Cockpit & Flybridge', desc: 'Shaded outdoor dining aft, plus a flybridge lounge for open-air relaxation and 360° horizon views.' },
                 ].map((item, i) => (
@@ -557,12 +557,15 @@ export default function BlueOneClient() {
               Book your luxury sailing experience today and create memories that will last a lifetime
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
+              <a
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                 className="btn-primary bg-white text-blue-600 hover:bg-gray-50"
               >
                 Booking Request
               </a>
+              <Link href="/specifications" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+                View Specifications
+              </Link>
               <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
                 Contact Us
               </Link>
