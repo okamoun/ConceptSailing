@@ -123,7 +123,7 @@ export default function RatesPage() {
           </div>
 
           <p className="text-blue-100 leading-relaxed mb-8 text-base">
-            Beyond a standard bare-boat charter, we offer <strong className="text-white">fully tailored experience packages</strong> — a single all-inclusive price that covers the yacht, crew, a custom itinerary, hand-picked activities, and premium on-board services. You simply arrive and enjoy.
+            Beyond a standard crewed boat charter, we offer <strong className="text-white">fully tailored experience packages</strong> — a single all-inclusive price that covers the yacht, crew, a custom itinerary, hand-picked activities, and premium on-board services. You simply arrive and enjoy.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
