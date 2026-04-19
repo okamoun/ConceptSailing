@@ -547,6 +547,33 @@ export default function BlueOneClient() {
           </div>
         </section>
 
+        {/* Rates Teaser */}
+        <section className="py-16 bg-black/30 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="bg-gradient-to-br from-blue-700/40 to-blue-900/50 border border-blue-400/30 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1 text-center md:text-left">
+                <p className="text-blue-300 uppercase tracking-widest text-xs font-semibold mb-2">Summer 2026</p>
+                <h2 className="text-3xl font-bold text-white mb-3">Charter Rates</h2>
+                <p className="text-blue-100 text-sm leading-relaxed mb-2">
+                  Weekly rates from <strong className="text-white">€18,000</strong> to <strong className="text-white">€24,000</strong> depending on season, plus expenses (MYBA terms).
+                </p>
+                <p className="text-blue-200 text-sm">All-inclusive experience packages also available on request.</p>
+              </div>
+              <div className="flex flex-col gap-3 flex-shrink-0">
+                <Link href="/rates" className="btn-primary px-8 py-3 inline-flex items-center gap-2 whitespace-nowrap">
+                  View Full Rates
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+                <Link href="/booking?boat=BlueOne" className="btn-secondary border-white/40 text-white hover:bg-white/10 px-8 py-3 inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                  Request a Quote
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Call to Action */}
         <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700">
           <div className="max-w-4xl mx-auto px-4 text-center">
