@@ -192,7 +192,7 @@ export default function HomeClient() {
             Ready for Your BlueOne Adventure?
           </h2>
           <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
-            Book your luxury sailing experience today and create memories that will last a lifetime
+            Request a quote for your luxury sailing experience and create memories that will last a lifetime
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/booking" className="btn-primary bg-white text-blue-600 hover:bg-gray-50">
