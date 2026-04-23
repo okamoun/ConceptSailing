@@ -139,7 +139,7 @@ export default function BlueOneClient() {
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                 className="btn-primary text-lg px-8 py-4 shadow-2xl"
               >
-                Book Your Adventure
+                Get a Quote
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
@@ -581,7 +581,7 @@ export default function BlueOneClient() {
               Ready for Your BlueOne Adventure?
             </h2>
             <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
-              Book your luxury sailing experience today and create memories that will last a lifetime
+              Request a quote for your luxury sailing experience and create memories that will last a lifetime
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a

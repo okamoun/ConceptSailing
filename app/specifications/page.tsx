@@ -240,7 +240,7 @@ export default function SpecificationsPage() {
               href="/contact"
               className="bg-blue-700 hover:bg-blue-900 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
             >
-              Book Your Charter
+              Get a Quote
             </Link>
             <Link 
               href="/blueone"
