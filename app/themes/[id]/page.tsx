@@ -77,7 +77,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
       <div className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 py-10">
         <div
           className="absolute inset-0 opacity-20"
-          style={{ backgroundImage: `url('${adventure.image}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          style={{ backgroundImage: `url('${adventure.image || '/adventures/beach.jpg'}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 to-blue-900/95" />
         <div className="relative max-w-5xl mx-auto px-4">
@@ -101,7 +101,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
               )}
             </div>
             <div className="lg:col-span-2 relative rounded-xl overflow-hidden shadow-xl border-2 border-white/20 h-44 lg:h-52">
-              <Image src={adventure.image} alt={adventure.name} fill className="object-cover" priority />
+              <Image src={adventure.image || '/adventures/beach.jpg'} alt={adventure.name} fill className="object-cover" priority />
             </div>
           </div>
         </div>

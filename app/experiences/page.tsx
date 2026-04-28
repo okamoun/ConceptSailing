@@ -65,6 +65,14 @@ export default function ExperiencesPage() {
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     },
     {
+      category: "Celebrations & Milestones",
+      themes: [
+        adventures.find(a => a.id === "15"), // Birthday Celebration at Sea
+        adventures.find(a => a.id === "16"), // Anniversary Celebration Voyage
+        adventures.find(a => a.id === "14"), // Romantic Aegean Cruise: Proposal & Honeymoon
+      ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
+    },
+    {
       category: "Nature & Sea",
       themes: [
         adventures.find(a => a.id === "13"), // Ionian Fishing & Island Discovery

@@ -833,6 +833,124 @@ const adventures: Adventure[] = [
       }
     ],
     features: ["Romantic", "Private yacht", "Proposal planning", "Honeymoon", "Luxury", "Secluded beaches", "Candlelit dinners", "Spa treatment", "Personalized experiences", "Photography"]
+  },
+  {
+    id: "15",
+    name: "Birthday Celebration at Sea",
+    description: "Make memories with an unforgettable birthday sailing adventure tailored to the birthday celebrant. Celebration, relaxation, and magical Greek island moments.",
+    image: "/adventures/OpenAI/birthday_celebration_at_sea.png",
+    experience: "Set sail for an exclusive birthday celebration in the Greek islands. A customized week designed entirely around creating unforgettable moments for the birthday celebrant. From surprise decorations and personalized menus to champagne toasts and special activities, every detail is crafted to make this birthday truly magical. Whether you're turning 30, 50, or any age in between, experience a celebration surrounded by loved ones in the most beautiful setting imaginable.",
+    itinerary: [
+      {
+        title: "Welcome & Birthday Surprise",
+        description: "Arrive in Athens to a surprise welcome with decorations, champagne, and a special birthday cake. Meet your crew and fellow celebrants. Evening opening party onboard with entertainment.",
+        features: ["Birthday surprise", "Champagne toast", "Special cake", "Decorations", "Opening party"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
+      },
+      {
+        title: "Birthday Beach Day",
+        description: "Sail to a pristine beach for an exclusive birthday celebration. Beach games, a gourmet birthday lunch, swimming, and sunset viewing. Live musician performs birthday favorites.",
+        features: ["Beach party", "Birthday lunch", "Swimming", "Live music", "Sunset"],
+        lat: 37.6500, // Saronic Gulf
+        lng: 23.4000
+      },
+      {
+        title: "Island Discovery & Spa",
+        description: "Explore a charming Greek island village with the group. Afternoon spa session onboard with massage treatments. Evening celebration dinner with personalized menu and surprise entertainment.",
+        features: ["Island exploration", "Spa treatments", "Massage", "Celebration dinner", "Entertainment"],
+        lat: 37.3500, // Hydra
+        lng: 23.4667
+      },
+      {
+        title: "Water Activities & Feast",
+        description: "A day of optional water activities: snorkeling, paddleboarding, or kayaking. Anchor at a beautiful cove for a gourmet feast with wine pairing, followed by stargazing.",
+        features: ["Snorkeling", "Paddleboarding", "Kayaking", "Gourmet feast", "Wine pairing", "Stargazing"],
+        lat: 37.5000, // Poros
+        lng: 23.4500
+      },
+      {
+        title: "Adventure & Celebration",
+        description: "Choose your adventure: hiking, biking, or leisurely village exploration. Return for an elegant celebration dinner with live bouzouki music and dancing under the stars.",
+        features: ["Adventure options", "Hiking", "Biking", "Live bouzouki", "Dancing", "Fine dining"],
+        lat: 37.2500, // Spetses
+        lng: 23.1500
+      },
+      {
+        title: "Sunset Celebration Cruise",
+        description: "A special sunset cruise with champagne cocktails and appetizers. Photo session with professional photographer to capture memories. Intimate celebration dinner with personalized toasts.",
+        features: ["Sunset cruise", "Champagne cocktails", "Professional photos", "Celebration dinner", "Toasts"],
+        lat: 37.7450, // Aegina
+        lng: 23.4275
+      },
+      {
+        title: "Farewell & Memories",
+        description: "Return to Athens with a farewell birthday brunch. Group slideshow of photos and videos from the week. Special gift package and memories to treasure forever.",
+        features: ["Farewell brunch", "Photo slideshow", "Memory video", "Gift package", "Group celebration"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
+      }
+    ],
+    features: ["Birthday celebration", "Customized experience", "Surprise decorations", "Gourmet dining", "Live entertainment", "Water activities", "Photography", "Spa treatments", "Private yacht", "Champagne toasts"]
+  },
+  {
+    id: "16",
+    name: "Anniversary Celebration Voyage",
+    description: "Celebrate your special milestone with a romantic and personalized sailing adventure in Greece. Perfect for any anniversary year.",
+    image: "/adventures/OpenAI/anniversary_celebration_voyage.png",
+    experience: "Embark on a magical week celebrating your love and commitment. This customized voyage is designed to honor your unique journey together, whether it's your 1st or 50th anniversary. Enjoy intimate moments, special dining experiences, renewal of vows, and quality time in the most romantic Greek island settings. Every element is tailored to reflect your love story.",
+    itinerary: [
+      {
+        title: "Anniversary Arrival",
+        description: "Arrive in Athens to flower decorations, champagne, and a special welcome for the anniversary couple. Private transfer to your yacht with anniversary welcome dinner.",
+        features: ["Champagne welcome", "Flower arrangements", "Private transfer", "Anniversary dinner"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
+      },
+      {
+        title: "Romantic Sailing",
+        description: "Sail to a secluded anchorage in the Saronic Gulf. Candlelit lunch on deck, afternoon relaxation, and sunset cocktails with panoramic ocean views.",
+        features: ["Secluded anchorage", "Candlelit lunch", "Sunset cocktails", "Ocean views"],
+        lat: 37.6500, // Saronic Gulf
+        lng: 23.4000
+      },
+      {
+        title: "Island Romance & Spa",
+        description: "Dock at the romantic island of Hydra. Couples spa session with massage, facials, and wellness treatments. Evening stroll through charming cobblestone streets followed by gourmet dinner.",
+        features: ["Couples spa", "Massage", "Facials", "Island stroll", "Fine dining"],
+        lat: 37.3500, // Hydra
+        lng: 23.4667
+      },
+      {
+        title: "Vow Renewal Ceremony",
+        description: "Optional vow renewal ceremony in a picturesque private cove at sunset. Professional officiant and photographer included. Followed by celebration dinner with champagne and live violin music.",
+        features: ["Vow renewal", "Private ceremony", "Sunset backdrop", "Photographer", "Champagne", "Live music"],
+        lat: 37.5000, // Poros
+        lng: 23.4500
+      },
+      {
+        title: "Adventure Together",
+        description: "Snorkeling, kayaking, or beach picnic - choose activities to enjoy together. Anchor at a pristine beach for swimming and relaxation. Evening romantic dinner with personalized menu.",
+        features: ["Snorkeling", "Kayaking", "Beach picnic", "Swimming", "Romantic dinner"],
+        lat: 37.2500, // Spetses
+        lng: 23.1500
+      },
+      {
+        title: "Celebration & Connection",
+        description: "Spa treatments and wellness activities for two. Sunset champagne reception with appetizers. Anniversary celebration dinner featuring cuisine from significant moments in your relationship.",
+        features: ["Spa day for two", "Champagne reception", "Themed menu", "Quality time", "Special touches"],
+        lat: 37.7450, // Aegina
+        lng: 23.4275
+      },
+      {
+        title: "Farewell & Forever Memories",
+        description: "Return to Athens with farewell anniversary brunch. Professional photo album presentation of the week. Memory book with notes from the crew and celebration team.",
+        features: ["Farewell brunch", "Photo album", "Memory book", "Keepsakes", "Celebration reflection"],
+        lat: 37.9838, // Athens
+        lng: 23.7275
+      }
+    ],
+    features: ["Anniversary celebration", "Romantic voyage", "Couples spa", "Vow renewal option", "Candlelit dinners", "Professional photography", "Customized menu", "Private yacht", "Intimate experiences", "Personalized touches"]
   }
 ];
 
