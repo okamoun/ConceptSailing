@@ -14,7 +14,7 @@ import { getAllReviews, adminDeleteReview, updateReviewOrder } from '../../lib/r
 import type { Review } from '../../lib/reviews';
 import StarRating from '../components/StarRating';
 import MarinaMap from './MarinaMap';
-import { marinas, marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
+import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
 
 const ADMIN_SECRET = process.env.NEXT_PUBLIC_ADMIN_SECRET || 'admin';
 
