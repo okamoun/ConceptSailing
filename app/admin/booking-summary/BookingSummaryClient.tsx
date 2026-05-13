@@ -1,22 +1,12 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getAllBookings, type BookingSubmission } from '@/lib/submissions';
 import { getAllAvailabilityEntries, type AvailabilityEntry } from '@/lib/availability';
 import BookingCalendar from './BookingCalendar';
-import Link from 'next/link';
 
 const BookingMap = dynamic(() => import('./BookingMapClient'), { ssr: false });
-
-const ADMIN_SECRET = process.env.NEXT_PUBLIC_ADMIN_SECRET || 'admin';
-
-const bg = {
-  backgroundImage: `linear-gradient(rgba(30,58,138,0.55),rgba(59,130,246,0.65)),url('/images/boats/blueone/External_sailing.jpg')`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  backgroundAttachment: 'fixed',
-};
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -28,28 +18,17 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 }
 
 export default function BookingSummaryClient() {
-  const [authed, setAuthed] = useState(false);
-  const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-
   const [bookings, setBookings] = useState<BookingSubmission[]>([]);
   const [availability, setAvailability] = useState<AvailabilityEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (password === ADMIN_SECRET) { setAuthed(true); setAuthError(''); }
-    else setAuthError('Incorrect password.');
-  }
-
   useEffect(() => {
-    if (!authed) return;
     setLoading(true);
     Promise.all([getAllBookings(), getAllAvailabilityEntries()])
       .then(([b, a]) => { setBookings(b); setAvailability(a); })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [authed]);
+  }, []);
 
   // Derived stats
   const today = new Date();
@@ -59,49 +38,16 @@ export default function BookingSummaryClient() {
   });
   const totalPassengers = bookings.reduce((s, b) => s + (b.passengers ?? 0), 0);
 
-  if (!authed) {
-    return (
-      <main className="min-h-screen flex items-center justify-center px-4" style={bg}>
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-sm bg-white/15 backdrop-blur-sm border border-white/25 rounded-2xl p-8 space-y-4"
-        >
-          <h1 className="text-white font-bold text-xl text-center">Booking Summary</h1>
-          <div>
-            <label className="text-blue-100 text-xs font-medium block mb-1">Admin Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
-              autoFocus
-            />
-          </div>
-          {authError && <p className="text-red-300 text-xs">{authError}</p>}
-          <button type="submit" className="btn-primary w-full py-3 text-sm">Enter</button>
-        </form>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen px-4 py-10" style={bg}>
+    <main className="px-4 py-6">
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-white font-bold text-2xl">Booking Summary</h1>
-            <p className="text-blue-200 text-xs mt-0.5">
-              {today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-          </div>
-          <Link
-            href="/admin"
-            className="text-blue-200 text-xs hover:text-white border border-white/20 rounded-lg px-3 py-1.5 hover:bg-white/10 transition-colors"
-          >
-            ← Admin Dashboard
-          </Link>
+        <div>
+          <h1 className="text-white font-bold text-2xl">Booking Summary</h1>
+          <p className="text-blue-200 text-xs mt-0.5">
+            {today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
 
         {/* Stats */}

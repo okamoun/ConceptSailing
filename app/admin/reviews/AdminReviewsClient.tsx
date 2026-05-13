@@ -1,39 +1,22 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getAllReviews, adminDeleteReview, updateReviewOrder } from '../../../lib/reviews';
 import type { Review } from '../../../lib/reviews';
 import StarRating from '../../components/StarRating';
 
-const ADMIN_SECRET = process.env.NEXT_PUBLIC_ADMIN_SECRET || 'admin';
-
 export default function AdminReviewsClient() {
-  const [authed, setAuthed] = useState(false);
-  const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (password === ADMIN_SECRET) {
-      setAuthed(true);
-      setAuthError('');
-    } else {
-      setAuthError('Incorrect password.');
-    }
-  }
-
   useEffect(() => {
-    if (!authed) return;
     setLoading(true);
     getAllReviews()
       .then(setReviews)
       .catch(() => setReviews([]))
       .finally(() => setLoading(false));
-  }, [authed]);
+  }, []);
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this review permanently?')) return;
@@ -54,37 +37,8 @@ export default function AdminReviewsClient() {
 
   const visible = reviews.filter(r => filter === 'all' || r.status === filter);
 
-  const bg = {
-    backgroundImage: `linear-gradient(rgba(30,58,138,0.5),rgba(59,130,246,0.6)),url('/images/boats/blueone/External_sailing.jpg')`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundAttachment: 'fixed',
-  };
-
-  if (!authed) {
-    return (
-      <main className="min-h-screen flex items-center justify-center px-4" style={bg}>
-        <form onSubmit={handleLogin} className="w-full max-w-sm bg-white/15 backdrop-blur-sm border border-white/25 rounded-2xl p-8 space-y-4">
-          <h1 className="text-white font-bold text-xl text-center">Admin Login</h1>
-          <div>
-            <label className="text-blue-100 text-xs font-medium block mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
-              autoFocus
-            />
-          </div>
-          {authError && <p className="text-red-300 text-xs">{authError}</p>}
-          <button type="submit" className="btn-primary w-full py-3 text-sm">Enter</button>
-        </form>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen px-4 py-10" style={bg}>
+    <main className="px-4 py-6">
       <div className="max-w-5xl mx-auto space-y-6">
 
         <div className="flex items-center justify-between">
