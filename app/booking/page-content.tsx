@@ -8,7 +8,7 @@ import Image from "next/image";
 import Link from 'next/link';
 import { sendBookingEmail, BookingEmailData } from '../../lib/emailjs';
 import adventures from '../adventures-data';
-import { marinas, marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
+import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
 
 const MarinaMap = dynamic(() => import('../components/MarinaMap'), { ssr: false });
 
