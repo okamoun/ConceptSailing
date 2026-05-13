@@ -298,7 +298,7 @@ export default function AvailabilityAdminClient() {
                   type="date"
                   value={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, startDate: e.target.value } : m)}
-                  className="w-full min-w-0 bg-white/10 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400"
+                  className="w-full min-w-0 bg-blue-800 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark]"
                 />
               </div>
               <MarinaSelectWithInfo
@@ -313,7 +313,7 @@ export default function AvailabilityAdminClient() {
                   value={modal.endDate}
                   min={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, endDate: e.target.value } : m)}
-                  className="w-full min-w-0 bg-white/10 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400"
+                  className="w-full min-w-0 bg-blue-800 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark]"
                 />
               </div>
               <MarinaSelectWithInfo
