@@ -951,6 +951,73 @@ const adventures: Adventure[] = [
       }
     ],
     features: ["Anniversary celebration", "Romantic voyage", "Couples spa", "Vow renewal option", "Candlelit dinners", "Professional photography", "Customized menu", "Private yacht", "Intimate experiences", "Personalized touches"]
+  },
+  {
+    id: "17",
+    name: "The Big Blue Freediving Journey",
+    description: "Dive into the silence of the deep Aegean and follow in the wake of legends — a week of freediving training, breath-hold mastery, and spiritual connection with the sea around Amorgos.",
+    image: "/adventures/OpenAI/free_diving_training.png",
+    experience: "Inspired by Luc Besson's The Big Blue and the legendary rivalry of Jacques Mayol and Enzo Molinari, this seven-day voyage takes you to the crystalline waters of the Cyclades to learn the art of freediving from certified instructors. You will master breath-hold techniques, equalization, and the mental stillness required to descend in silence — guided by the same Aegean depths that made Amorgos famous. Each day balances structured training sessions with the sheer wonder of drifting through underwater caves, sharing the water with dolphins, and anchoring in hidden coves at dusk. This is not just a diving course; it is an invitation to discover who you are when the surface world falls away.",
+    features: [
+      "Freediving Training",
+      "Apnea Techniques",
+      "Underwater Exploration",
+      "Dolphin Encounters",
+      "Certified Instructors",
+      "Mediterranean Depth Dives",
+      "Island Hopping",
+    ],
+    itinerary: [
+      {
+        title: "Santorini: Arrival & First Breath",
+        description: "Board in Santorini and settle into life aboard the yacht. Your instructor leads an introductory session on the philosophy and physiology of freediving — diaphragmatic breathing, relaxation drills, and the mammalian dive reflex. The evening ends watching the caldera sunset.",
+        features: ["Welcome Briefing", "Breathing Foundations", "Relaxation Drills"],
+        lat: 36.3932,
+        lng: 25.4615,
+      },
+      {
+        title: "Ios: Shallow Water Skills",
+        description: "Sail south to the sheltered bays of Ios for your first in-water sessions in calm, shallow conditions. Practice static apnea on the surface, learn proper freediving fins technique, and begin dynamic apnea exercises in the clear turquoise shallows.",
+        features: ["Static Apnea", "Dynamic Apnea", "Fins Technique"],
+        lat: 36.7220,
+        lng: 25.2950,
+      },
+      {
+        title: "Amorgos: Into the Deep Blue",
+        description: "Arrive at Amorgos — the heart of The Big Blue — and anchor below the iconic white Chozoviotissa Monastery. Your afternoon dive session descends along the dramatic underwater wall at Agia Anna, the very location where key scenes of the film were shot. The depth, the silence, and the impossible blue are unlike anywhere else in the Mediterranean.",
+        features: ["Depth Training", "Wall Diving", "Film Location Dive"],
+        lat: 36.8333,
+        lng: 25.8833,
+      },
+      {
+        title: "Amorgos: Dolphin Waters & Personal Records",
+        description: "A full day anchored off Amorgos to deepen your practice. Morning sessions focus on equalization technique and relaxed descent to personal depth milestones — each diver setting their own record in the spirit of Mayol and Molinari. The afternoon features a sunset search for the wild dolphins that frequent these waters.",
+        features: ["Depth Records", "Equalization Mastery", "Dolphin Encounter"],
+        lat: 36.7900,
+        lng: 25.8600,
+      },
+      {
+        title: "Naxos: Underwater Caves & Confidence Dives",
+        description: "Sail northwest to Naxos, whose sea caves and rocky archways offer perfect intermediate training grounds. Guided dives through natural archways build spatial awareness and calm underwater navigation. An evening debrief covers visualization and the mental stillness that defines exceptional freedivers.",
+        features: ["Cave Diving Introduction", "Underwater Navigation", "Mental Technique Workshop"],
+        lat: 37.1030,
+        lng: 25.3760,
+      },
+      {
+        title: "Paros: Open Water Consolidation",
+        description: "The bay of Parikia and the offshore reefs of Paros provide open-water conditions to consolidate everything learned during the week. Freedivers practice their deepest dives with full buddy protocols and safety line technique, before snorkeling the shallow Posidonia seagrass meadows.",
+        features: ["Open Water Freediving", "Buddy Safety Protocol", "Marine Life Snorkel"],
+        lat: 37.0850,
+        lng: 25.1500,
+      },
+      {
+        title: "Santorini: Surface & Farewell",
+        description: "Return to Santorini for a final debrief and certification review. Each diver receives a personal depth log and course record. A farewell dinner on deck at anchor in the caldera closes the journey — a last toast to the silence below, and to the sea that has no bottom.",
+        features: ["Certification Review", "Personal Depth Log", "Farewell Dinner"],
+        lat: 36.3932,
+        lng: 25.4615,
+      },
+    ],
   }
 ];
 
