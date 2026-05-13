@@ -285,7 +285,7 @@ export default function AvailabilityAdminClient() {
       {/* Modal */}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-blue-900/95 border border-white/20 rounded-2xl p-6 space-y-5 shadow-2xl">
+          <div className="w-full max-w-md bg-blue-900/95 border border-white/20 rounded-2xl p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-white font-bold text-lg">
               {modal.mode === 'add' ? 'Add Availability Entry' : 'Edit Entry'}
             </h2>
