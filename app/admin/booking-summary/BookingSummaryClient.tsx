@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import React, { useEffect, useState } from 'react';
 import { getAllBookings, type BookingSubmission } from '@/lib/submissions';
+import { getAllAvailabilityEntries, type AvailabilityEntry } from '@/lib/availability';
 import BookingCalendar from './BookingCalendar';
 import Link from 'next/link';
 
@@ -32,6 +33,7 @@ export default function BookingSummaryClient() {
   const [authError, setAuthError] = useState('');
 
   const [bookings, setBookings] = useState<BookingSubmission[]>([]);
+  const [availability, setAvailability] = useState<AvailabilityEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
   function handleLogin(e: React.FormEvent) {
@@ -43,8 +45,8 @@ export default function BookingSummaryClient() {
   useEffect(() => {
     if (!authed) return;
     setLoading(true);
-    getAllBookings()
-      .then(setBookings)
+    Promise.all([getAllBookings(), getAllAvailabilityEntries()])
+      .then(([b, a]) => { setBookings(b); setAvailability(a); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [authed]);
@@ -56,12 +58,6 @@ export default function BookingSummaryClient() {
     return new Date(`${b.date.slice(0, 10)}T12:00:00`) >= today;
   });
   const totalPassengers = bookings.reduce((s, b) => s + (b.passengers ?? 0), 0);
-  const marinaCounts = bookings.reduce<Record<string, number>>((acc, b) => {
-    const k = b.embarkationPoint || 'Unknown';
-    acc[k] = (acc[k] ?? 0) + 1;
-    return acc;
-  }, {});
-  const topMarina = Object.entries(marinaCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—';
 
   if (!authed) {
     return (
@@ -110,13 +106,13 @@ export default function BookingSummaryClient() {
 
         {/* Stats */}
         {loading ? (
-          <p className="text-blue-200 text-sm animate-pulse">Loading bookings…</p>
+          <p className="text-blue-200 text-sm animate-pulse">Loading…</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard label="Total Bookings" value={bookings.length} />
             <StatCard label="Upcoming" value={upcoming.length} />
             <StatCard label="Total Passengers" value={totalPassengers} />
-            <StatCard label="Top Departure" value={topMarina.split(' ')[0]} />
+            <StatCard label="Availability Entries" value={availability.length} />
           </div>
         )}
 
@@ -132,7 +128,7 @@ export default function BookingSummaryClient() {
                   Click a highlighted date to see details
                 </span>
               </h2>
-              <BookingCalendar bookings={bookings} />
+              <BookingCalendar bookings={bookings} availability={availability} />
             </section>
 
             {/* Map panel */}
@@ -143,7 +139,7 @@ export default function BookingSummaryClient() {
                   Click a green marker to see bookings
                 </span>
               </h2>
-              <BookingMap bookings={bookings} />
+              <BookingMap bookings={bookings} availability={availability} />
             </section>
 
           </div>
