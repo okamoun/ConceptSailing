@@ -4,6 +4,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  updateDoc,
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
@@ -19,6 +20,8 @@ export interface BookingSubmission {
   date: string;
   passengers: number;
   embarkationPoint: string;
+  deliveryPoint?: string;
+  redeliveryPoint?: string;
   holidayDescription?: string;
   selectedTheme?: string;
   createdAt: Timestamp | null;
@@ -71,6 +74,14 @@ export async function getAllContacts(): Promise<ContactSubmission[]> {
 
 export async function deleteBooking(id: string): Promise<void> {
   await deleteDoc(doc(db, BOOKINGS_COL, id));
+}
+
+export async function updateBookingLocations(
+  id: string,
+  deliveryPoint: string,
+  redeliveryPoint: string
+): Promise<void> {
+  await updateDoc(doc(db, BOOKINGS_COL, id), { deliveryPoint, redeliveryPoint });
 }
 
 export async function deleteContact(id: string): Promise<void> {
