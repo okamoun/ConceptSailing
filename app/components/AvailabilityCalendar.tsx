@@ -49,10 +49,6 @@ function getStatusForDate(
   return best;
 }
 
-function getEntriesForDate(dateStr: string, entries: AvailabilityEntry[]): AvailabilityEntry[] {
-  return entries.filter(e => dateStr >= e.startDate && dateStr <= e.endDate);
-}
-
 export default function AvailabilityCalendar({
   entries,
   mode,
