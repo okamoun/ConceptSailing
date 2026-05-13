@@ -20,6 +20,8 @@ export interface BookingEmailData {
   date: string;
   passengers: number;
   embarkationPoint: string;
+  deliveryPoint?: string;
+  redeliveryPoint?: string;
   holidayDescription?: string;
   selectedTheme?: string;
   timestamp: string;
@@ -109,7 +111,9 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
       boat_name: bookingData.boat,
       charter_date: bookingData.date,
       passengers: bookingData.passengers,
-      embarkation_point: bookingData.embarkationPoint,
+      embarkation_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
+      delivery_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
+      redelivery_point: bookingData.redeliveryPoint || bookingData.deliveryPoint || bookingData.embarkationPoint,
       
       // Additional details
       comment: bookingData.holidayDescription,
@@ -144,7 +148,9 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
         boat: bookingData.boat,
         date: bookingData.date,
         passengers: bookingData.passengers,
-        embarkationPoint: bookingData.embarkationPoint,
+        embarkationPoint: bookingData.deliveryPoint || bookingData.embarkationPoint,
+        deliveryPoint: bookingData.deliveryPoint,
+        redeliveryPoint: bookingData.redeliveryPoint,
         holidayDescription: bookingData.holidayDescription,
         selectedTheme: bookingData.selectedTheme,
       }).catch(err => console.warn('Failed to save booking to DB:', err));

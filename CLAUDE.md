@@ -204,6 +204,9 @@ const { isBlueOneMode } = useBlueOneMode();
 
 ## Firebase Collections
 
+### `availability`
+Managed by `lib/availability.ts`. Fields: `id`, `startDate` (`'YYYY-MM-DD'`), `endDate` (`'YYYY-MM-DD'`), `status` (`'requested' | 'blocked' | 'booked'`), `note?`, `createdAt`. Users see dates as available/not available; admins see all three statuses.
+
 ### `reviews`
 Managed by `lib/reviews.ts`. Fields: `id`, `token`, `status` (`'pending' | 'confirmed'`), `name`, `email`, `title`, `description`, `rating`, `photos`, `createdAt`, `confirmedAt`, `order`.
 
@@ -235,7 +238,7 @@ Managed by `lib/submissions.ts`. Fields: `id`, `type: 'contact'`, `name`, `email
 
 | Service | Purpose | Config |
 |---|---|---|
-| Firebase Firestore | Reviews, bookings, contacts persistence | `lib/firebase.ts` + env vars |
+| Firebase Firestore | Availability, reviews, bookings, contacts persistence | `lib/firebase.ts` + env vars |
 | EmailJS | Transactional emails for bookings and contact | `lib/emailjs.ts` + env vars |
 | OpenAI API | Dynamic image generation for adventures | `app/api/adventure-image/route.ts` |
 | Google Maps | Interactive destination map | `@react-google-maps/api` in destinations pages |
