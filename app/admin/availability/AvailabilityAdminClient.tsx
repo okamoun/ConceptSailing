@@ -11,8 +11,8 @@ import {
   type AvailabilityEntry,
 } from '../../../lib/availability';
 import {
+  marinas,
   getMarinaById,
-  marinasByRegion,
   distanceFromNeaPeramos,
   formatNavTime,
   DEFAULT_MARINA_ID,
@@ -291,14 +291,14 @@ export default function AvailabilityAdminClient() {
             </h2>
 
             {/* Dates + Locations (2-column grid) */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
+            <div className="grid grid-cols-2 gap-3 items-start">
+              <div className="min-w-0">
                 <label className="text-blue-200 text-xs font-medium block mb-1">Start Date</label>
                 <input
                   type="date"
                   value={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, startDate: e.target.value } : m)}
-                  className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                  className="w-full min-w-0 bg-white/10 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <MarinaSelectWithInfo
@@ -306,14 +306,14 @@ export default function AvailabilityAdminClient() {
                 value={modal.deliveryPoint}
                 onChange={v => setModal(m => m ? { ...m, deliveryPoint: v } : m)}
               />
-              <div>
+              <div className="min-w-0">
                 <label className="text-blue-200 text-xs font-medium block mb-1">End Date</label>
                 <input
                   type="date"
                   value={modal.endDate}
                   min={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, endDate: e.target.value } : m)}
-                  className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                  className="w-full min-w-0 bg-white/10 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <MarinaSelectWithInfo
@@ -399,26 +399,49 @@ function MarinaSelectWithInfo({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const grouped = marinasByRegion();
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+
   const marina = getMarinaById(value);
   const distNm = marina ? distanceFromNeaPeramos(marina) : null;
 
+  const filtered = query.trim()
+    ? marinas.filter(m =>
+        m.name.toLowerCase().includes(query.toLowerCase()) ||
+        m.region.toLowerCase().includes(query.toLowerCase())
+      )
+    : marinas;
+
   return (
-    <div>
+    <div className="relative min-w-0">
       <label className="text-blue-200 text-xs font-medium block mb-1">{label}</label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-full bg-blue-800 border border-white/25 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
-      >
-        {Object.entries(grouped).map(([region, ms]) => (
-          <optgroup key={region} label={region}>
-            {ms.map(m => (
-              <option key={m.id} value={m.id}>{m.name}</option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
+      <input
+        type="text"
+        value={open ? query : (marina?.name ?? '')}
+        placeholder={open ? 'Search…' : 'Select marina…'}
+        onFocus={() => { setOpen(true); setQuery(''); }}
+        onChange={e => setQuery(e.target.value)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="w-full bg-blue-800 border border-white/25 text-white placeholder-blue-400 text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400"
+      />
+      {open && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-20 bg-blue-950 border border-white/20 rounded-lg shadow-xl max-h-44 overflow-y-auto">
+          {filtered.length === 0 && (
+            <p className="text-blue-300 text-xs px-3 py-2">No results</p>
+          )}
+          {filtered.map(m => (
+            <button
+              key={m.id}
+              type="button"
+              onMouseDown={() => { onChange(m.id); setOpen(false); setQuery(''); }}
+              className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-blue-800 transition-colors ${m.id === value ? 'text-white font-semibold' : 'text-blue-100'}`}
+            >
+              <span>{m.name}</span>
+              <span className="text-blue-400 text-xs ml-2 flex-shrink-0">{m.region}</span>
+            </button>
+          ))}
+        </div>
+      )}
       {distNm !== null && distNm > 0.5 && (
         <p className="text-blue-300 text-xs mt-0.5 leading-tight">
           {distNm.toFixed(0)} nm · ~{formatNavTime(distNm)}
