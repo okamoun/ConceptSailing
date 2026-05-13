@@ -94,7 +94,7 @@ export default function AvailabilityAdminClient() {
       setModal({
         mode: 'add',
         startDate: dateStr,
-        endDate: dateStr,
+        endDate: addDays(dateStr, 7),
         status: 'booked',
         note: '',
         deliveryPoint: DEFAULT_MARINA_ID,
@@ -290,68 +290,64 @@ export default function AvailabilityAdminClient() {
               {modal.mode === 'add' ? 'Add Availability Entry' : 'Edit Entry'}
             </h2>
 
-            {/* Start date */}
-            <div>
-              <label className="text-blue-200 text-xs font-medium block mb-1">Start Date</label>
-              <input
-                type="date"
-                value={modal.startDate}
-                onChange={e => setModal(m => m ? { ...m, startDate: e.target.value } : m)}
-                className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+            {/* Dates + Locations (2-column grid) */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-blue-200 text-xs font-medium block mb-1">Start Date</label>
+                <input
+                  type="date"
+                  value={modal.startDate}
+                  onChange={e => setModal(m => m ? { ...m, startDate: e.target.value } : m)}
+                  className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              <MarinaSelectWithInfo
+                label="Delivery"
+                value={modal.deliveryPoint}
+                onChange={v => setModal(m => m ? { ...m, deliveryPoint: v } : m)}
+              />
+              <div>
+                <label className="text-blue-200 text-xs font-medium block mb-1">End Date</label>
+                <input
+                  type="date"
+                  value={modal.endDate}
+                  min={modal.startDate}
+                  onChange={e => setModal(m => m ? { ...m, endDate: e.target.value } : m)}
+                  className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                />
+              </div>
+              <MarinaSelectWithInfo
+                label="Redelivery"
+                value={modal.redeliveryPoint}
+                onChange={v => setModal(m => m ? { ...m, redeliveryPoint: v } : m)}
               />
             </div>
 
-            {/* End date */}
-            <div>
-              <label className="text-blue-200 text-xs font-medium block mb-1">End Date</label>
-              <input
-                type="date"
-                value={modal.endDate}
-                min={modal.startDate}
-                onChange={e => setModal(m => m ? { ...m, endDate: e.target.value } : m)}
-                className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
-              />
+            {/* Status + Note */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-blue-200 text-xs font-medium block mb-1">Status</label>
+                <select
+                  value={modal.status}
+                  onChange={e => setModal(m => m ? { ...m, status: e.target.value as AvailabilityEntry['status'] } : m)}
+                  className="w-full bg-blue-800 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                >
+                  <option value="requested">Requested</option>
+                  <option value="blocked">Blocked</option>
+                  <option value="booked">Booked</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-blue-200 text-xs font-medium block mb-1">Note</label>
+                <input
+                  type="text"
+                  value={modal.note}
+                  onChange={e => setModal(m => m ? { ...m, note: e.target.value } : m)}
+                  placeholder="Charter for Smith family"
+                  className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                />
+              </div>
             </div>
-
-            {/* Status */}
-            <div>
-              <label className="text-blue-200 text-xs font-medium block mb-1">Status</label>
-              <select
-                value={modal.status}
-                onChange={e => setModal(m => m ? { ...m, status: e.target.value as AvailabilityEntry['status'] } : m)}
-                className="w-full bg-blue-800 border border-white/25 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
-              >
-                <option value="requested">Requested</option>
-                <option value="blocked">Blocked</option>
-                <option value="booked">Booked</option>
-              </select>
-            </div>
-
-            {/* Note */}
-            <div>
-              <label className="text-blue-200 text-xs font-medium block mb-1">Note (optional)</label>
-              <input
-                type="text"
-                value={modal.note}
-                onChange={e => setModal(m => m ? { ...m, note: e.target.value } : m)}
-                placeholder="e.g. Charter for Smith family"
-                className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
-              />
-            </div>
-
-            {/* Delivery location */}
-            <MarinaSelectWithInfo
-              label="Place of Delivery"
-              value={modal.deliveryPoint}
-              onChange={v => setModal(m => m ? { ...m, deliveryPoint: v } : m)}
-            />
-
-            {/* Redelivery location */}
-            <MarinaSelectWithInfo
-              label="Place of Redelivery"
-              value={modal.redeliveryPoint}
-              onChange={v => setModal(m => m ? { ...m, redeliveryPoint: v } : m)}
-            />
 
             {/* Map */}
             <MarinaMap
@@ -423,11 +419,17 @@ function MarinaSelectWithInfo({
           </optgroup>
         ))}
       </select>
-      {distNm !== null && (
-        <p className="text-blue-300 text-xs mt-1">
-          {distNm.toFixed(0)} nm from Nea Peramos · ~{formatNavTime(distNm)} at 6 kn
+      {distNm !== null && distNm > 0.5 && (
+        <p className="text-blue-300 text-xs mt-0.5 leading-tight">
+          {distNm.toFixed(0)} nm · ~{formatNavTime(distNm)}
         </p>
       )}
     </div>
   );
+}
+
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
 }
