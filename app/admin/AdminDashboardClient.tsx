@@ -171,7 +171,8 @@ export default function AdminDashboardClient() {
                       <Detail label="Boat" value={b.boat} />
                       <Detail label="Date" value={b.date} />
                       <Detail label="Passengers" value={String(b.passengers)} />
-                      <Detail label="Embarkation" value={b.embarkationPoint} />
+                      <Detail label="Delivery" value={b.deliveryPoint || b.embarkationPoint} />
+                      <Detail label="Redelivery" value={b.redeliveryPoint || b.deliveryPoint || b.embarkationPoint} />
                       {b.selectedTheme && <Detail label="Theme" value={b.selectedTheme} />}
                     </div>
                     {b.holidayDescription && (

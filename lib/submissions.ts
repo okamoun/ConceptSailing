@@ -19,6 +19,8 @@ export interface BookingSubmission {
   date: string;
   passengers: number;
   embarkationPoint: string;
+  deliveryPoint?: string;
+  redeliveryPoint?: string;
   holidayDescription?: string;
   selectedTheme?: string;
   createdAt: Timestamp | null;
