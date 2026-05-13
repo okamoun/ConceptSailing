@@ -56,3 +56,29 @@ export function marinasByRegion(): Record<string, Marina[]> {
     return acc;
   }, {});
 }
+
+// Haversine great-circle distance in nautical miles
+function haversineNm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3440.065;
+  const toRad = (d: number) => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const NEA_PERAMOS = marinas.find(m => m.id === 'nea-peramos')!;
+
+export function distanceFromNeaPeramos(marina: Marina): number {
+  return haversineNm(NEA_PERAMOS.lat, NEA_PERAMOS.lng, marina.lat, marina.lng);
+}
+
+export function formatNavTime(distanceNm: number, speedKn = 6): string {
+  const totalHours = distanceNm / speedKn;
+  const h = Math.floor(totalHours);
+  const m = Math.round((totalHours - h) * 60);
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} h`;
+  return `${h} h ${m} min`;
+}

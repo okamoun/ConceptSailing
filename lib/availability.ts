@@ -16,6 +16,8 @@ export interface AvailabilityEntry {
   endDate: string;   // 'YYYY-MM-DD'
   status: 'requested' | 'blocked' | 'booked';
   note?: string;
+  deliveryPoint?: string;   // marina id from marinas-data.ts
+  redeliveryPoint?: string; // marina id from marinas-data.ts
   createdAt: Timestamp | null;
 }
 
@@ -40,7 +42,7 @@ export async function getAllAvailabilityEntries(): Promise<AvailabilityEntry[]> 
 
 export async function updateAvailabilityEntry(
   id: string,
-  data: Partial<Pick<AvailabilityEntry, 'startDate' | 'endDate' | 'status' | 'note'>>
+  data: Partial<Pick<AvailabilityEntry, 'startDate' | 'endDate' | 'status' | 'note' | 'deliveryPoint' | 'redeliveryPoint'>>
 ): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), data);
 }

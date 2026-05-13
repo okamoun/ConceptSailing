@@ -10,6 +10,14 @@ import {
   deleteAvailabilityEntry,
   type AvailabilityEntry,
 } from '../../../lib/availability';
+import {
+  getMarinaById,
+  marinasByRegion,
+  distanceFromNeaPeramos,
+  formatNavTime,
+  DEFAULT_MARINA_ID,
+} from '../../marinas-data';
+import MarinaMap from '../MarinaMap';
 
 const ADMIN_SECRET = process.env.NEXT_PUBLIC_ADMIN_SECRET || 'admin';
 
@@ -33,6 +41,8 @@ interface ModalState {
   endDate: string;
   status: AvailabilityEntry['status'];
   note: string;
+  deliveryPoint: string;
+  redeliveryPoint: string;
 }
 
 export default function AvailabilityAdminClient() {
@@ -77,6 +87,8 @@ export default function AvailabilityAdminClient() {
         endDate: existing.endDate,
         status: existing.status,
         note: existing.note ?? '',
+        deliveryPoint: existing.deliveryPoint ?? DEFAULT_MARINA_ID,
+        redeliveryPoint: existing.redeliveryPoint ?? existing.deliveryPoint ?? DEFAULT_MARINA_ID,
       });
     } else {
       setModal({
@@ -85,6 +97,8 @@ export default function AvailabilityAdminClient() {
         endDate: dateStr,
         status: 'booked',
         note: '',
+        deliveryPoint: DEFAULT_MARINA_ID,
+        redeliveryPoint: DEFAULT_MARINA_ID,
       });
     }
   }
@@ -105,6 +119,8 @@ export default function AvailabilityAdminClient() {
           endDate: modal.endDate,
           status: modal.status,
           note: modal.note || undefined,
+          deliveryPoint: modal.deliveryPoint,
+          redeliveryPoint: modal.redeliveryPoint,
         });
         setEntries(prev => [...prev, {
           id,
@@ -112,6 +128,8 @@ export default function AvailabilityAdminClient() {
           endDate: modal.endDate,
           status: modal.status,
           note: modal.note || undefined,
+          deliveryPoint: modal.deliveryPoint,
+          redeliveryPoint: modal.redeliveryPoint,
           createdAt: null,
         }].sort((a, b) => a.startDate.localeCompare(b.startDate)));
       } else if (modal.entry) {
@@ -120,10 +138,12 @@ export default function AvailabilityAdminClient() {
           endDate: modal.endDate,
           status: modal.status,
           note: modal.note || undefined,
+          deliveryPoint: modal.deliveryPoint,
+          redeliveryPoint: modal.redeliveryPoint,
         });
         setEntries(prev =>
           prev.map(e => e.id === modal.entry!.id
-            ? { ...e, startDate: modal.startDate, endDate: modal.endDate, status: modal.status, note: modal.note || undefined }
+            ? { ...e, startDate: modal.startDate, endDate: modal.endDate, status: modal.status, note: modal.note || undefined, deliveryPoint: modal.deliveryPoint, redeliveryPoint: modal.redeliveryPoint }
             : e
           )
         );
@@ -208,20 +228,29 @@ export default function AvailabilityAdminClient() {
         {!loading && entries.length > 0 && (
           <div className="space-y-2">
             <h2 className="text-white font-semibold text-sm">All Entries</h2>
-            {entries.map(e => (
+            {entries.map(e => {
+              const delMarina = getMarinaById(e.deliveryPoint ?? '');
+              const relMarina = getMarinaById(e.redeliveryPoint ?? e.deliveryPoint ?? '');
+              return (
               <div key={e.id} className="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl px-4 py-3 flex items-center gap-4">
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${STATUS_BADGE[e.status]}`}>
                   {e.status}
                 </span>
-                <span className="text-white text-sm flex-1">
-                  {e.startDate} → {e.endDate}
-                </span>
-                {e.note && (
-                  <span className="text-blue-300 text-xs italic truncate max-w-xs">{e.note}</span>
-                )}
+                <div className="flex-1 min-w-0">
+                  <span className="text-white text-sm">{e.startDate} → {e.endDate}</span>
+                  {(delMarina || relMarina) && (
+                    <p className="text-blue-300 text-xs mt-0.5 truncate">
+                      {delMarina ? `↓ ${delMarina.name}` : ''}
+                      {delMarina && relMarina && delMarina.id !== relMarina.id ? ` · ↑ ${relMarina.name}` : ''}
+                    </p>
+                  )}
+                  {e.note && (
+                    <p className="text-blue-300 text-xs italic truncate">{e.note}</p>
+                  )}
+                </div>
                 <div className="flex gap-1 flex-shrink-0">
                   <button
-                    onClick={() => setModal({ mode: 'edit', entry: e, startDate: e.startDate, endDate: e.endDate, status: e.status, note: e.note ?? '' })}
+                    onClick={() => setModal({ mode: 'edit', entry: e, startDate: e.startDate, endDate: e.endDate, status: e.status, note: e.note ?? '', deliveryPoint: e.deliveryPoint ?? DEFAULT_MARINA_ID, redeliveryPoint: e.redeliveryPoint ?? e.deliveryPoint ?? DEFAULT_MARINA_ID })}
                     className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-colors"
                     title="Edit"
                   >
@@ -240,7 +269,8 @@ export default function AvailabilityAdminClient() {
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -309,6 +339,26 @@ export default function AvailabilityAdminClient() {
               />
             </div>
 
+            {/* Delivery location */}
+            <MarinaSelectWithInfo
+              label="Place of Delivery"
+              value={modal.deliveryPoint}
+              onChange={v => setModal(m => m ? { ...m, deliveryPoint: v } : m)}
+            />
+
+            {/* Redelivery location */}
+            <MarinaSelectWithInfo
+              label="Place of Redelivery"
+              value={modal.redeliveryPoint}
+              onChange={v => setModal(m => m ? { ...m, redeliveryPoint: v } : m)}
+            />
+
+            {/* Map */}
+            <MarinaMap
+              delivery={getMarinaById(modal.deliveryPoint)}
+              redelivery={getMarinaById(modal.redeliveryPoint)}
+            />
+
             {/* Actions */}
             <div className="flex gap-3 pt-1">
               <button
@@ -341,5 +391,43 @@ export default function AvailabilityAdminClient() {
         </div>
       )}
     </main>
+  );
+}
+
+function MarinaSelectWithInfo({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const grouped = marinasByRegion();
+  const marina = getMarinaById(value);
+  const distNm = marina ? distanceFromNeaPeramos(marina) : null;
+
+  return (
+    <div>
+      <label className="text-blue-200 text-xs font-medium block mb-1">{label}</label>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full bg-blue-800 border border-white/25 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
+      >
+        {Object.entries(grouped).map(([region, ms]) => (
+          <optgroup key={region} label={region}>
+            {ms.map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      {distNm !== null && (
+        <p className="text-blue-300 text-xs mt-1">
+          {distNm.toFixed(0)} nm from Nea Peramos · ~{formatNavTime(distNm)} at 6 kn
+        </p>
+      )}
+    </div>
   );
 }
