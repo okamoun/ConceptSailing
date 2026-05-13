@@ -85,7 +85,7 @@ export default function BookingSummaryClient() {
                   Click a green marker to see bookings
                 </span>
               </h2>
-              <BookingMap bookings={bookings} availability={availability} />
+              <BookingMap availability={availability} />
             </section>
 
           </div>

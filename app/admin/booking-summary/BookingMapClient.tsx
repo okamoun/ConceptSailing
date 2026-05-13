@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { GoogleMap, Marker, InfoWindow, Polyline, useJsApiLoader } from '@react-google-maps/api';
-import type { BookingSubmission } from '@/lib/submissions';
 import type { AvailabilityEntry } from '@/lib/availability';
 import { getMarinaById } from '@/app/marinas-data';
 
@@ -48,11 +47,10 @@ function polylineOptions(color: string) {
 }
 
 interface Props {
-  bookings: BookingSubmission[];
   availability: AvailabilityEntry[];
 }
 
-export default function BookingMapClient({ bookings, availability }: Props) {
+export default function BookingMapClient({ availability }: Props) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
   });

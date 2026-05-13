@@ -60,7 +60,6 @@ export default function BookingCalendar({ bookings, availability }: Props) {
   });
 
   const selectedBookings = selectedDate ? (byDate.get(selectedDate) ?? []) : [];
-  const selectedStatus = selectedDate ? statusForDate(selectedDate, availability) : null;
   const selectedEntry = selectedDate
     ? availability.find(e => selectedDate >= e.startDate && selectedDate <= e.endDate)
     : null;
