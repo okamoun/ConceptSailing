@@ -122,6 +122,52 @@ No props — all data is hardcoded from the static business information and `CON
 
 ---
 
+## AvailabilityCalendar
+
+**File:** `app/components/AvailabilityCalendar.tsx`  
+**Directive:** `'use client'`
+
+Renders a monthly calendar grid showing yacht availability. Used by both the public `/availability` page and the admin `/admin/availability` page.
+
+### Props
+
+| Prop | Type | Description |
+|---|---|---|
+| `entries` | `AvailabilityEntry[]` | Availability entries from Firestore |
+| `mode` | `'user' \| 'admin'` | Controls colour scheme and click behaviour |
+| `month` | `Date` | Currently displayed month (controlled) |
+| `onMonthChange` | `(d: Date) => void` | Called when prev/next month is clicked |
+| `onDayClick` | `(dateStr: string) => void` | Admin only — called with `'YYYY-MM-DD'` when a non-past day is clicked |
+
+### Colour scheme
+
+**User mode:**
+
+| State | Colour |
+|---|---|
+| Available (no entry) | Emerald green |
+| Not available (any entry) | Red |
+| Past date | Muted / transparent |
+
+**Admin mode:**
+
+| Status | Colour |
+|---|---|
+| Free | White / transparent |
+| `requested` | Amber |
+| `blocked` | Red |
+| `booked` | Emerald green |
+| Past date | Muted / transparent |
+
+When a day is covered by multiple entries, the highest-priority status wins: `booked > blocked > requested`.
+
+### Interaction (admin mode)
+- Click a free future day → `onDayClick` fires with that date string
+- Click an occupied day → `onDayClick` fires; parent can identify the overlapping entry and open an edit modal
+- Past days are not clickable
+
+---
+
 ## Contexts
 
 ### BlueOneContext

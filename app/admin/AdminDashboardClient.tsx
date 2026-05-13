@@ -115,9 +115,20 @@ export default function AdminDashboardClient() {
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* Header */}
-        <div>
-          <h1 className="text-white font-bold text-2xl">Admin Dashboard</h1>
-          <p className="text-blue-200 text-xs mt-0.5">All form submissions and reviews</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-white font-bold text-2xl">Admin Dashboard</h1>
+            <p className="text-blue-200 text-xs mt-0.5">All form submissions and reviews</p>
+          </div>
+          <a
+            href="/admin/availability"
+            className="flex-shrink-0 flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Availability
+          </a>
         </div>
 
         {/* Tabs */}
