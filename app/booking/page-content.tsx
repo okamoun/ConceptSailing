@@ -14,18 +14,10 @@ import { getAllCharters, type Charter } from '../../lib/availability';
 
 const MarinaMap = dynamic(() => import('../components/MarinaMap'), { ssr: false });
 
-type PassengerEntry = { kind: 'adult' } | { kind: 'child'; age: number };
-
-function passengerSummary(list: PassengerEntry[]): string {
-  const adults = list.filter(p => p.kind === 'adult').length;
-  const children = list.filter((p): p is { kind: 'child'; age: number } => p.kind === 'child');
-  const parts: string[] = [];
-  if (adults > 0) parts.push(`${adults} adult${adults !== 1 ? 's' : ''}`);
-  if (children.length > 0) {
-    const ages = children.map(c => `age ${c.age}`).join(', ');
-    parts.push(`${children.length} child${children.length !== 1 ? 'ren' : ''} (${ages})`);
-  }
-  return parts.join(', ');
+function passengerSummary(total: number, childAges: number[]): string {
+  if (childAges.length === 0) return `${total} passenger${total !== 1 ? 's' : ''}`;
+  const ages = childAges.map(a => `age ${a}`).join(', ');
+  return `${total} passenger${total !== 1 ? 's' : ''} (${childAges.length} child${childAges.length !== 1 ? 'ren' : ''}: ${ages})`;
 }
 
 export default function BookingPageContent() {
@@ -49,7 +41,8 @@ export default function BookingPageContent() {
   const [charters, setCharters] = useState<Charter[]>([]);
 
   // Passenger state
-  const [passengerList, setPassengerList] = useState<PassengerEntry[]>([{ kind: 'adult' }, { kind: 'adult' }]);
+  const [passengers, setPassengers] = useState(2);
+  const [childAges, setChildAges] = useState<number[]>([]);
 
   // Location state
   const [deliveryPoint, setDeliveryPoint] = useState(DEFAULT_MARINA_ID);
@@ -93,23 +86,6 @@ export default function BookingPageContent() {
 
   const getTodayDate = () => new Date().toISOString().split('T')[0];
   const capacity = { min: 1, max: 10 };
-
-  const addPassenger = () => {
-    if (passengerList.length < capacity.max) {
-      setPassengerList(p => [...p, { kind: 'adult' }]);
-    }
-  };
-
-  const removePassenger = (i: number) => {
-    if (passengerList.length > 1) {
-      setPassengerList(p => p.filter((_, idx) => idx !== i));
-    }
-  };
-
-  const updatePassenger = (i: number, entry: PassengerEntry) => {
-    setPassengerList(p => p.map((e, idx) => idx === i ? entry : e));
-  };
-
   const actualRedelivery = sameRedelivery ? deliveryPoint : redeliveryPoint;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,17 +102,19 @@ export default function BookingPageContent() {
       return;
     }
 
-    if (passengerList.length < capacity.min || passengerList.length > capacity.max) {
+    if (passengers < capacity.min || passengers > capacity.max) {
       alert(`Number of passengers must be between ${capacity.min} and ${capacity.max}`);
       return;
     }
 
-    // Validate child ages
-    for (const p of passengerList) {
-      if (p.kind === 'child' && (p.age < 1 || p.age > 17)) {
-        alert('Please enter a valid age (1–17) for all children');
-        return;
-      }
+    if (childAges.length > passengers) {
+      alert('Number of children cannot exceed total passengers');
+      return;
+    }
+
+    if (childAges.some(a => a < 1 || a > 17)) {
+      alert('Please enter a valid age (1–17) for all children');
+      return;
     }
 
     setIsSubmitting(true);
@@ -150,8 +128,8 @@ export default function BookingPageContent() {
         phone,
         boat: blueOneBoat.name,
         date: selectedDate,
-        passengers: passengerList.length,
-        passengerDetails: passengerSummary(passengerList),
+        passengers,
+        passengerDetails: passengerSummary(passengers, childAges),
         embarkationPoint: deliveryMarina?.name || deliveryPoint,
         deliveryPoint: deliveryMarina?.name || deliveryPoint,
         redeliveryPoint: redeliveryMarina?.name || actualRedelivery,
@@ -324,63 +302,80 @@ export default function BookingPageContent() {
               </div>
 
               {/* Passengers */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="block text-lg font-semibold text-blue-900">
-                    Passengers * <span className="text-gray-500 font-normal text-sm">({passengerList.length}/{capacity.max})</span>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-lg font-semibold text-blue-900 mb-3">
+                    Number of Passengers * <span className="text-gray-500 font-normal text-sm">(max {capacity.max})</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={addPassenger}
-                    disabled={passengerList.length >= capacity.max}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1 px-3 py-1.5 rounded-lg border border-blue-300 hover:bg-blue-50 disabled:border-gray-200 transition-colors"
-                  >
-                    + Add passenger
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = Math.max(capacity.min, passengers - 1);
+                        setPassengers(next);
+                        if (childAges.length > next) setChildAges(a => a.slice(0, next));
+                      }}
+                      className="w-9 h-9 rounded-lg border border-blue-300 text-blue-700 font-bold text-lg hover:bg-blue-50 transition-colors flex items-center justify-center"
+                    >−</button>
+                    <span className="w-8 text-center text-xl font-semibold text-blue-900">{passengers}</span>
+                    <button
+                      type="button"
+                      onClick={() => setPassengers(p => Math.min(capacity.max, p + 1))}
+                      className="w-9 h-9 rounded-lg border border-blue-300 text-blue-700 font-bold text-lg hover:bg-blue-50 transition-colors flex items-center justify-center"
+                    >+</button>
+                    <span className="text-gray-500 text-sm">guest{passengers !== 1 ? 's' : ''}</span>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {passengerList.map((p, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-white border border-blue-200 rounded-lg">
-                      <span className="text-sm text-gray-500 w-6 text-center flex-shrink-0">{i + 1}</span>
-                      <select
-                        value={p.kind}
-                        onChange={(e) => {
-                          if (e.target.value === 'adult') updatePassenger(i, { kind: 'adult' });
-                          else updatePassenger(i, { kind: 'child', age: 10 });
-                        }}
-                        className="flex-1 p-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 focus:border-blue-500 focus:outline-none text-sm"
-                      >
-                        <option value="adult">Adult</option>
-                        <option value="child">Child (under 18)</option>
-                      </select>
-                      {p.kind === 'child' && (
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <label className="text-sm text-gray-600 whitespace-nowrap">Age:</label>
+
+                {/* Children detail */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-base font-medium text-blue-800">
+                      Children under 18
+                      {childAges.length > 0 && <span className="ml-1 text-gray-500 font-normal text-sm">({childAges.length})</span>}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setChildAges(a => [...a, 10])}
+                      disabled={childAges.length >= passengers}
+                      className="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed px-3 py-1 rounded-lg border border-blue-200 hover:bg-blue-50 disabled:border-gray-200 transition-colors"
+                    >
+                      + Add child
+                    </button>
+                  </div>
+                  {childAges.length === 0 ? (
+                    <p className="text-gray-400 text-sm">No children — click &ldquo;Add child&rdquo; to specify ages</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {childAges.map((age, i) => (
+                        <div key={i} className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                          <span className="text-sm text-gray-600">Child {i + 1}, age:</span>
                           <input
                             type="number"
-                            value={p.age}
+                            value={age}
                             min={1}
                             max={17}
-                            onChange={(e) => updatePassenger(i, { kind: 'child', age: Math.min(17, Math.max(1, parseInt(e.target.value) || 1)) })}
-                            className="w-14 p-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 focus:border-blue-500 focus:outline-none text-sm text-center"
+                            onChange={(e) => {
+                              const v = Math.min(17, Math.max(1, parseInt(e.target.value) || 1));
+                              setChildAges(a => a.map((x, idx) => idx === i ? v : x));
+                            }}
+                            className="w-12 p-1 rounded border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none text-sm text-center bg-white"
                           />
+                          <button
+                            type="button"
+                            onClick={() => setChildAges(a => a.filter((_, idx) => idx !== i))}
+                            className="text-gray-400 hover:text-red-500 transition-colors ml-1"
+                            aria-label="Remove child"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
                         </div>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removePassenger(i)}
-                        disabled={passengerList.length <= 1}
-                        className="text-gray-400 hover:text-red-500 disabled:opacity-0 transition-colors flex-shrink-0"
-                        aria-label="Remove passenger"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-                <p className="text-gray-500 text-sm mt-2">{passengerSummary(passengerList)}</p>
               </div>
 
               {/* Place of Delivery */}
@@ -532,7 +527,7 @@ export default function BookingPageContent() {
                       ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
                       : 'Not selected'}
                   />
-                  <SummaryRow label="Passengers" value={`${passengerList.length} (${passengerSummary(passengerList)})`} />
+                  <SummaryRow label="Passengers" value={passengerSummary(passengers, childAges)} />
                   <SummaryRow label="Delivery" value={deliveryMarina?.name || 'Not selected'} />
                   <SummaryRow
                     label="Redelivery"
