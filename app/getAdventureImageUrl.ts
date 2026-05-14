@@ -6,9 +6,11 @@ function sanitizeFilename(name: string): string {
   return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
 export async function getAdventureImageUrl(adventureId: string, prompt: string, name: string): Promise<string> {
   // On client, just return the path
@@ -32,7 +34,7 @@ export async function getAdventureImageUrl(adventureId: string, prompt: string, 
   }
 
   try {
-    const aiResponse = await openai.images.generate({
+    const aiResponse = await getOpenAI().images.generate({
       prompt,
       n: 1,
       size: '512x512',

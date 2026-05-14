@@ -2,89 +2,115 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { GoogleMap, Marker, InfoWindow, Polyline, useJsApiLoader } from '@react-google-maps/api';
-import type { BookingSubmission } from '@/lib/submissions';
-import { destinations } from '@/app/destinations-data';
-
-// Embarkation marina coordinates (Athens area)
-const MARINA_COORDS: Record<string, { lat: number; lng: number }> = {
-  'Nea Peramos Marina': { lat: 38.002, lng: 23.412 },
-  'Piraeus Marina':     { lat: 37.947, lng: 23.637 },
-  'Flisvos Marina':     { lat: 37.904, lng: 23.708 },
-  'Alimos Marina':      { lat: 37.892, lng: 23.726 },
-  'Glyfada Marina':     { lat: 37.868, lng: 23.751 },
-  'Lake Vouliagmeni':   { lat: 37.828, lng: 23.783 },
-};
-
-// Island destinations used as end-point references (exclude Athens-area ports)
-const ISLAND_DEST_IDS = ['lefkada', 'corfu', 'kos', 'rhodes'];
-
-const MAP_CENTER = { lat: 38.2, lng: 24.8 };
-const MAP_ZOOM = 6;
+import {
+  type Charter,
+  type CharterStatus,
+  CHARTER_STATUS_PRIORITY,
+  CHARTER_STATUS_LABEL,
+} from '@/lib/availability';
+import { getMarinaById } from '@/app/marinas-data';
 
 type LatLng = { lat: number; lng: number };
 
+const MAP_CENTER: LatLng = { lat: 38.2, lng: 24.8 };
+const MAP_ZOOM = 6;
+
+const STATUS_COLOUR: Record<CharterStatus, string> = {
+  web_request:     '#0ea5e9',
+  broker_request:  '#d97706',
+  serious_request: '#f97316',
+  confirmed:       '#16a34a',
+  signed:          '#065f46',
+  canceled:        '#6b7280',
+  owner_use:       '#9333ea',
+  maintenance:     '#dc2626',
+};
+
 function svgMarker(color: string, label: string, size = 34) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-    <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 2}" fill="${color}" stroke="white" stroke-width="2"/>
-    <text x="${size / 2}" y="${size / 2 + 4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">${label}</text>
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2-2}" fill="${color}" stroke="white" stroke-width="2"/>
+    <text x="${size/2}" y="${size/2+4}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Arial,sans-serif">${label}</text>
   </svg>`;
   return { url: `data:image/svg+xml,${encodeURIComponent(svg)}` };
 }
 
-function smallDotMarker(color: string) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
-    <circle cx="10" cy="10" r="8" fill="${color}" stroke="white" stroke-width="1.5"/>
+function dotMarker(color: string, size = 16) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${size/2-1.5}" fill="${color}" stroke="white" stroke-width="1.5"/>
   </svg>`;
   return { url: `data:image/svg+xml,${encodeURIComponent(svg)}` };
+}
+
+function polylineOptions(color: string) {
+  return {
+    geodesic: true,
+    strokeColor: color,
+    strokeOpacity: 0,
+    icons: [
+      {
+        icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.7, strokeColor: color, scale: 2.5 },
+        offset: '0',
+        repeat: '14px',
+      },
+    ],
+  };
 }
 
 interface Props {
-  bookings: BookingSubmission[];
+  charters: Charter[];
 }
 
-export default function BookingMapClient({ bookings }: Props) {
+export default function BookingMapClient({ charters }: Props) {
   const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
   });
 
-  const [selectedMarina, setSelectedMarina] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  // Group bookings by embarkation point
-  const marinaGroups = useMemo(() => {
-    const map = new Map<string, BookingSubmission[]>();
-    bookings.forEach(b => {
-      const key = b.embarkationPoint || 'Unknown';
-      map.set(key, [...(map.get(key) ?? []), b]);
-    });
-    return map;
-  }, [bookings]);
-
-  // Only marinas that have known coordinates
-  const activeMarinaEntries = useMemo(
-    () =>
-      Array.from(marinaGroups.entries()).filter(([name]) => MARINA_COORDS[name]),
-    [marinaGroups],
+  const availRoutes = useMemo(() =>
+    charters
+      .filter(c => c.deliveryPoint && c.redeliveryPoint)
+      .map(c => {
+        const from = getMarinaById(c.deliveryPoint!);
+        const to   = getMarinaById(c.redeliveryPoint!);
+        if (!from || !to) return null;
+        return { charter: c, from, to };
+      })
+      .filter(Boolean) as Array<{ charter: Charter; from: { lat: number; lng: number; name: string }; to: { lat: number; lng: number; name: string } }>,
+    [charters],
   );
 
-  // Route polylines: from each active marina to each island destination
-  const routes = useMemo(() => {
-    const islandDests = destinations.filter(d => ISLAND_DEST_IDS.includes(d.id));
-    const result: Array<{ from: LatLng; to: LatLng }> = [];
-    activeMarinaEntries.forEach(([name]) => {
-      const from = MARINA_COORDS[name];
-      islandDests.forEach(dest => {
-        result.push({ from, to: { lat: dest.lat, lng: dest.lng } });
-      });
+  const deliveryGroups = useMemo(() => {
+    const map = new Map<string, { marina: ReturnType<typeof getMarinaById>; charters: Charter[] }>();
+    charters.forEach(c => {
+      if (!c.deliveryPoint) return;
+      const m = getMarinaById(c.deliveryPoint);
+      if (!m) return;
+      const existing = map.get(c.deliveryPoint);
+      if (existing) existing.charters.push(c);
+      else map.set(c.deliveryPoint, { marina: m, charters: [c] });
     });
-    return result;
-  }, [activeMarinaEntries]);
+    return Array.from(map.values());
+  }, [charters]);
 
-  const selectedBookings = selectedMarina ? (marinaGroups.get(selectedMarina) ?? []) : [];
+  const redeliveryGroups = useMemo(() => {
+    const map = new Map<string, { marina: ReturnType<typeof getMarinaById>; charters: Charter[] }>();
+    charters.forEach(c => {
+      const key = c.redeliveryPoint || c.deliveryPoint;
+      if (!key) return;
+      const m = getMarinaById(key);
+      if (!m) return;
+      if (key === c.deliveryPoint) return;
+      const existing = map.get(key);
+      if (existing) existing.charters.push(c);
+      else map.set(key, { marina: m, charters: [c] });
+    });
+    return Array.from(map.values());
+  }, [charters]);
 
-  const handleMarinaClick = useCallback(
-    (name: string) => setSelectedMarina(prev => (prev === name ? null : name)),
-    [],
-  );
+  const handleClick = useCallback((key: string) =>
+    setSelectedKey(prev => prev === key ? null : key), []);
 
   if (!isLoaded) {
     return (
@@ -93,6 +119,10 @@ export default function BookingMapClient({ bookings }: Props) {
       </div>
     );
   }
+
+  const selectedGroup =
+    deliveryGroups.find(g => g.marina?.id === selectedKey) ||
+    redeliveryGroups.find(g => g.marina?.id === selectedKey);
 
   return (
     <div className="relative">
@@ -111,119 +141,83 @@ export default function BookingMapClient({ bookings }: Props) {
           ],
         }}
       >
-        {/* Dashed route lines: marina → island destinations */}
-        {routes.map((r, i) => (
+        {availRoutes.map((r, i) => (
           <Polyline
             key={i}
-            path={[r.from, r.to]}
-            options={{
-              geodesic: true,
-              strokeColor: '#93c5fd',
-              strokeOpacity: 0,
-              icons: [
-                {
-                  icon: {
-                    path: 'M 0,-1 0,1',
-                    strokeOpacity: 0.5,
-                    strokeColor: '#93c5fd',
-                    scale: 2,
-                  },
-                  offset: '0',
-                  repeat: '12px',
-                },
-              ],
-            }}
+            path={[{ lat: r.from.lat, lng: r.from.lng }, { lat: r.to.lat, lng: r.to.lng }]}
+            options={polylineOptions(STATUS_COLOUR[r.charter.status])}
           />
         ))}
 
-        {/* Island destination markers (end-point references) */}
-        {destinations
-          .filter(d => ISLAND_DEST_IDS.includes(d.id))
-          .map(dest => (
-            <Marker
-              key={dest.id}
-              position={{ lat: dest.lat, lng: dest.lng }}
-              icon={smallDotMarker('#f59e0b')}
-              title={dest.name}
-            />
-          ))}
-
-        {/* Athens-area port markers (shown as reference even without bookings) */}
-        {destinations
-          .filter(d => !ISLAND_DEST_IDS.includes(d.id))
-          .map(dest => (
-            <Marker
-              key={dest.id}
-              position={{ lat: dest.lat, lng: dest.lng }}
-              icon={smallDotMarker('#60a5fa')}
-              title={dest.name}
-            />
-          ))}
-
-        {/* Active embarkation marina markers (departure / start points) */}
-        {activeMarinaEntries.map(([name, bks]) => {
-          const pos = MARINA_COORDS[name];
-          const isSelected = selectedMarina === name;
+        {redeliveryGroups.map(({ marina, charters: groupCharters }) => {
+          if (!marina) return null;
+          const topCharter = groupCharters.reduce((a, b) =>
+            CHARTER_STATUS_PRIORITY[a.status] >= CHARTER_STATUS_PRIORITY[b.status] ? a : b);
           return (
             <Marker
-              key={name}
-              position={pos}
-              icon={svgMarker(isSelected ? '#22c55e' : '#16a34a', String(bks.length))}
-              title={`${name} — ${bks.length} booking${bks.length !== 1 ? 's' : ''}`}
-              onClick={() => handleMarinaClick(name)}
+              key={`redeliv-${marina.id}`}
+              position={{ lat: marina.lat, lng: marina.lng }}
+              icon={dotMarker(STATUS_COLOUR[topCharter.status], 20)}
+              title={`${marina.name} — redelivery`}
+              onClick={() => handleClick(marina.id)}
+              zIndex={8}
+            />
+          );
+        })}
+
+        {deliveryGroups.map(({ marina, charters: groupCharters }) => {
+          if (!marina) return null;
+          const isSelected = selectedKey === marina.id;
+          const topCharter = groupCharters.reduce((a, b) =>
+            CHARTER_STATUS_PRIORITY[a.status] >= CHARTER_STATUS_PRIORITY[b.status] ? a : b);
+          return (
+            <Marker
+              key={`deliv-${marina.id}`}
+              position={{ lat: marina.lat, lng: marina.lng }}
+              icon={svgMarker(isSelected ? '#ffffff' : STATUS_COLOUR[topCharter.status], String(groupCharters.length))}
+              title={`${marina.name} — ${groupCharters.length} charter${groupCharters.length !== 1 ? 's' : ''}`}
+              onClick={() => handleClick(marina.id)}
               zIndex={10}
             />
           );
         })}
 
-        {/* InfoWindow for selected marina */}
-        {selectedMarina && MARINA_COORDS[selectedMarina] && (
+        {selectedKey && selectedGroup?.marina && (
           <InfoWindow
-            position={MARINA_COORDS[selectedMarina]}
-            onCloseClick={() => setSelectedMarina(null)}
+            position={{ lat: selectedGroup.marina.lat, lng: selectedGroup.marina.lng }}
+            onCloseClick={() => setSelectedKey(null)}
           >
-            <div className="text-xs min-w-[180px] max-w-[220px]">
-              <p className="font-bold text-gray-800 mb-1">{selectedMarina}</p>
-              <p className="text-gray-500 mb-2">
-                {selectedBookings.length} booking{selectedBookings.length !== 1 ? 's' : ''}
-              </p>
-              {selectedBookings.map((b, i) => (
-                <div key={i} className="py-1.5 border-t border-gray-200 first:border-0">
-                  <p className="font-semibold text-gray-800">{b.name}</p>
-                  <p className="text-gray-500">
-                    {b.date
-                      ? new Date(`${b.date.slice(0, 10)}T12:00:00`).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })
-                      : '—'}
-                  </p>
-                  <p className="text-gray-500">{b.passengers} pax · {b.boat}</p>
-                </div>
-              ))}
+            <div className="text-xs min-w-[190px] max-w-[240px]">
+              <p className="font-bold text-gray-800 mb-1">{selectedGroup.marina.name}</p>
+              {selectedGroup.charters.map((c, i) => {
+                const reMarina = getMarinaById(c.redeliveryPoint ?? c.deliveryPoint ?? '');
+                return (
+                  <div key={i} className="py-1.5 border-t border-gray-200 first:border-0">
+                    <p className="font-semibold text-gray-700">{CHARTER_STATUS_LABEL[c.status]}</p>
+                    <p className="text-gray-600">{c.startDate} → {c.endDate}</p>
+                    {c.name && <p className="text-gray-700 font-medium">{c.name}</p>}
+                    {reMarina && reMarina.id !== selectedGroup.marina?.id && (
+                      <p className="text-gray-500">↑ {reMarina.name}</p>
+                    )}
+                    {c.note && <p className="text-gray-400 italic">{c.note}</p>}
+                  </div>
+                );
+              })}
             </div>
           </InfoWindow>
         )}
       </GoogleMap>
 
-      {/* Map legend */}
-      <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 space-y-1.5 text-xs">
-        <div className="flex items-center gap-2 text-white">
-          <span className="w-4 h-4 rounded-full bg-green-500 inline-block flex-shrink-0" />
-          Departure marina (# = bookings)
-        </div>
-        <div className="flex items-center gap-2 text-white">
-          <span className="w-3 h-3 rounded-full bg-amber-400 inline-block flex-shrink-0" />
-          Island destination
-        </div>
-        <div className="flex items-center gap-2 text-white">
-          <span className="w-3 h-3 rounded-full bg-blue-400 inline-block flex-shrink-0" />
-          Athens-area port
-        </div>
-        <div className="flex items-center gap-2 text-blue-200">
-          <span className="w-4 h-px border-t border-dashed border-blue-300 inline-block" />
-          Route (click marina for details)
+      <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 space-y-1 text-xs max-h-[200px] overflow-y-auto">
+        {(Object.entries(STATUS_COLOUR) as [CharterStatus, string][]).map(([status, color]) => (
+          <div key={status} className="flex items-center gap-2 text-white">
+            <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+            {CHARTER_STATUS_LABEL[status]}
+          </div>
+        ))}
+        <div className="flex items-center gap-2 text-blue-200 pt-1 border-t border-white/20">
+          <span className="w-3 h-3 rounded-full border-2 border-white/60 inline-block flex-shrink-0" />
+          Redelivery (end)
         </div>
       </div>
     </div>
