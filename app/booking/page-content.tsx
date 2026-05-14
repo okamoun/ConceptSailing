@@ -32,12 +32,15 @@ export default function BookingPageContent() {
 
   // Date picker state
   const [selectedDate, setSelectedDate] = useState('');
-  const [calOpen, setCalOpen] = useState(false);
+  const [endDate, setEndDate] = useState('');
+  const [startCalOpen, setStartCalOpen] = useState(false);
+  const [endCalOpen, setEndCalOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
-  const calRef = useRef<HTMLDivElement>(null);
+  const startCalRef = useRef<HTMLDivElement>(null);
+  const endCalRef = useRef<HTMLDivElement>(null);
   const [charters, setCharters] = useState<Charter[]>([]);
 
   // Passenger state
@@ -72,17 +75,18 @@ export default function BookingPageContent() {
     getAllCharters().then(setCharters).catch(() => {});
   }, []);
 
-  // Close calendar on outside click
+  // Close calendars on outside click
   useEffect(() => {
-    if (!calOpen) return;
+    if (!startCalOpen && !endCalOpen) return;
     const handler = (e: MouseEvent) => {
-      if (calRef.current && !calRef.current.contains(e.target as Node)) {
-        setCalOpen(false);
-      }
+      if (startCalOpen && startCalRef.current && !startCalRef.current.contains(e.target as Node))
+        setStartCalOpen(false);
+      if (endCalOpen && endCalRef.current && !endCalRef.current.contains(e.target as Node))
+        setEndCalOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [calOpen]);
+  }, [startCalOpen, endCalOpen]);
 
   const getTodayDate = () => new Date().toISOString().split('T')[0];
   const capacity = { min: 1, max: 10 };
@@ -128,6 +132,7 @@ export default function BookingPageContent() {
         phone,
         boat: blueOneBoat.name,
         date: selectedDate,
+        endDate: endDate || undefined,
         passengers,
         passengerDetails: passengerSummary(passengers, childAges),
         embarkationPoint: deliveryMarina?.name || deliveryPoint,
@@ -235,70 +240,96 @@ export default function BookingPageContent() {
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-blue-900">Charter Details</h3>
 
-              {/* Date — popup calendar picker */}
+              {/* Dates — start + end popup pickers */}
               <div>
-                <label className="block text-lg font-semibold text-blue-900 mb-3">Charter Date *</label>
-                <div className="relative" ref={calRef}>
-                  <button
-                    type="button"
-                    onClick={() => setCalOpen(o => !o)}
-                    className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none text-left flex items-center justify-between hover:border-blue-400 transition-colors"
-                  >
-                    <span className={selectedDate ? 'text-gray-900' : 'text-gray-400'}>
-                      {selectedDate
-                        ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-                        : 'Click to select a date…'}
-                    </span>
-                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </button>
+                <label className="block text-lg font-semibold text-blue-900 mb-3">Charter Dates *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-                  {calOpen && (
-                    <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-4 w-72">
-                      <div className="flex items-center justify-between mb-3">
-                        <button
-                          type="button"
-                          onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
-                          className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium"
-                        >
-                          ←
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                          className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium"
-                        >
-                          →
-                        </button>
+                  {/* Start date */}
+                  <div className="relative" ref={startCalRef}>
+                    <p className="text-sm text-gray-600 mb-1.5">Start date</p>
+                    <button
+                      type="button"
+                      onClick={() => { setStartCalOpen(o => !o); setEndCalOpen(false); }}
+                      className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 text-left flex items-center justify-between hover:border-blue-400 transition-colors"
+                    >
+                      <span className={selectedDate ? 'text-gray-900 text-sm' : 'text-gray-400 text-sm'}>
+                        {selectedDate
+                          ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : 'Select start…'}
+                      </span>
+                      <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                    {startCalOpen && (
+                      <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-4 w-72">
+                        <CalNavRow onPrev={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))} onNext={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))} />
+                        <MiniCalendar
+                          entries={charters}
+                          month={calMonth}
+                          selectedDate={selectedDate}
+                          rangeStart={selectedDate}
+                          rangeEnd={endDate}
+                          onDayClick={(date) => {
+                            setSelectedDate(date);
+                            if (endDate && endDate <= date) setEndDate('');
+                            const [y, mo] = date.split('-').map(Number);
+                            setCalMonth(new Date(y, mo - 1, 1));
+                            setStartCalOpen(false);
+                          }}
+                          variant="light"
+                        />
+                        <CalLegend />
                       </div>
-                      <MiniCalendar
-                        entries={charters}
-                        month={calMonth}
-                        selectedDate={selectedDate}
-                        onDayClick={(date) => {
-                          if (date < getTodayDate()) return;
-                          setSelectedDate(date);
-                          const [y, m] = date.split('-').map(Number);
-                          setCalMonth(new Date(y, m - 1, 1));
-                          setCalOpen(false);
-                        }}
-                        variant="light"
-                      />
-                      <div className="flex gap-4 justify-center mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300 inline-block" /> Available
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <span className="w-3 h-3 rounded bg-red-100 border border-red-300 inline-block" /> Not available
-                        </span>
+                    )}
+                  </div>
+
+                  {/* End date */}
+                  <div className="relative" ref={endCalRef}>
+                    <p className="text-sm text-gray-600 mb-1.5">End date <span className="text-gray-400">(optional)</span></p>
+                    <button
+                      type="button"
+                      onClick={() => { setEndCalOpen(o => !o); setStartCalOpen(false); }}
+                      className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 text-left flex items-center justify-between hover:border-blue-400 transition-colors"
+                    >
+                      <span className={endDate ? 'text-gray-900 text-sm' : 'text-gray-400 text-sm'}>
+                        {endDate
+                          ? new Date(endDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : 'Select end…'}
+                      </span>
+                      <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                    {endCalOpen && (
+                      <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-4 w-72">
+                        <CalNavRow onPrev={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))} onNext={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))} />
+                        <MiniCalendar
+                          entries={charters}
+                          month={calMonth}
+                          selectedDate={endDate}
+                          rangeStart={selectedDate}
+                          rangeEnd={endDate}
+                          minDate={selectedDate || getTodayDate()}
+                          onDayClick={(date) => {
+                            setEndDate(date);
+                            const [y, mo] = date.split('-').map(Number);
+                            setCalMonth(new Date(y, mo - 1, 1));
+                            setEndCalOpen(false);
+                          }}
+                          variant="light"
+                        />
+                        <CalLegend />
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-                <p className="text-gray-600 text-sm mt-2">
-                  Click the field above to open the availability calendar
-                </p>
+                {selectedDate && endDate && (
+                  <p className="text-blue-700 text-sm mt-2 font-medium">
+                    {Math.round((new Date(endDate).getTime() - new Date(selectedDate).getTime()) / 86400000)} night{Math.round((new Date(endDate).getTime() - new Date(selectedDate).getTime()) / 86400000) !== 1 ? 's' : ''}
+                  </p>
+                )}
               </div>
 
               {/* Passengers */}
@@ -522,10 +553,16 @@ export default function BookingPageContent() {
                 <div className="space-y-2 text-gray-700">
                   <SummaryRow label="Boat" value={blueOneBoat.name} />
                   <SummaryRow
-                    label="Date"
+                    label="Start date"
                     value={selectedDate
                       ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
                       : 'Not selected'}
+                  />
+                  <SummaryRow
+                    label="End date"
+                    value={endDate
+                      ? new Date(endDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : 'Not specified'}
                   />
                   <SummaryRow label="Passengers" value={passengerSummary(passengers, childAges)} />
                   <SummaryRow label="Delivery" value={deliveryMarina?.name || 'Not selected'} />
@@ -592,6 +629,25 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between">
       <span>{label}:</span>
       <span className="text-gray-900 font-medium">{value}</span>
+    </div>
+  );
+}
+
+function CalNavRow({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
+  return (
+    <div className="flex items-center justify-between mb-3">
+      <button type="button" onClick={onPrev} className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium">←</button>
+      <button type="button" onClick={onNext} className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium">→</button>
+    </div>
+  );
+}
+
+function CalLegend() {
+  return (
+    <div className="flex gap-4 justify-center mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
+      <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300 inline-block" /> Available</span>
+      <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-100 border border-red-300 inline-block" /> Not available</span>
+      <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-100 border border-blue-300 inline-block" /> Selected</span>
     </div>
   );
 }

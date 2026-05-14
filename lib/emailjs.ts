@@ -19,6 +19,7 @@ export interface BookingEmailData {
   phone: string;
   boat: string;
   date: string;
+  endDate?: string;
   passengers: number;
   passengerDetails?: string;
   embarkationPoint: string;
@@ -112,6 +113,7 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
       // Booking details
       boat_name: bookingData.boat,
       charter_date: bookingData.date,
+      charter_end_date: bookingData.endDate || bookingData.date,
       passengers: bookingData.passengers,
       embarkation_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
       delivery_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
@@ -146,7 +148,7 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
       createCharter({
         status: 'web_request',
         startDate: bookingData.date,
-        endDate: bookingData.date,
+        endDate: bookingData.endDate || bookingData.date,
         name: bookingData.name,
         email: bookingData.email,
         phone: bookingData.phone,
