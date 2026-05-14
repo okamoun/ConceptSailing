@@ -331,7 +331,7 @@ export default function BookingPageContent() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-base font-medium text-blue-800">
-                      Children under 18
+                      Of which children under 18
                       {childAges.length > 0 && <span className="ml-1 text-gray-500 font-normal text-sm">({childAges.length})</span>}
                     </span>
                     <button
