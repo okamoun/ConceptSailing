@@ -20,6 +20,7 @@ export interface BookingEmailData {
   boat: string;
   date: string;
   passengers: number;
+  passengerDetails?: string;
   embarkationPoint: string;
   deliveryPoint?: string;
   redeliveryPoint?: string;
@@ -117,6 +118,7 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
       redelivery_point: bookingData.redeliveryPoint || bookingData.deliveryPoint || bookingData.embarkationPoint,
       
       // Additional details
+      passenger_details: bookingData.passengerDetails || '',
       comment: bookingData.holidayDescription,
       theme: bookingData.selectedTheme,
       submission_time: new Date(bookingData.timestamp).toLocaleString(),

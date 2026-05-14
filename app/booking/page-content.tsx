@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { CONTACT } from '../config/contact';
 import { useSearchParams } from 'next/navigation';
@@ -14,17 +14,23 @@ import { getAllCharters, type Charter } from '../../lib/availability';
 
 const MarinaMap = dynamic(() => import('../components/MarinaMap'), { ssr: false });
 
-interface Boat {
-  name: string;
-  brand: string;
-  length: string;
-  description: string;
-  image: string;
+type PassengerEntry = { kind: 'adult' } | { kind: 'child'; age: number };
+
+function passengerSummary(list: PassengerEntry[]): string {
+  const adults = list.filter(p => p.kind === 'adult').length;
+  const children = list.filter((p): p is { kind: 'child'; age: number } => p.kind === 'child');
+  const parts: string[] = [];
+  if (adults > 0) parts.push(`${adults} adult${adults !== 1 ? 's' : ''}`);
+  if (children.length > 0) {
+    const ages = children.map(c => `age ${c.age}`).join(', ');
+    parts.push(`${children.length} child${children.length !== 1 ? 'ren' : ''} (${ages})`);
+  }
+  return parts.join(', ');
 }
 
 export default function BookingPageContent() {
   const searchParams = useSearchParams();
-  const blueOneBoat: Boat = {
+  const blueOneBoat = {
     name: "BlueOne",
     brand: "Fountaine Pajot",
     length: "51 ft",
@@ -32,18 +38,30 @@ export default function BookingPageContent() {
     image: "/images/boats/fp-aura51.jpg"
   };
 
+  // Date picker state
   const [selectedDate, setSelectedDate] = useState('');
-  const [charters, setCharters] = useState<Charter[]>([]);
+  const [calOpen, setCalOpen] = useState(false);
   const [calMonth, setCalMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
-  const [passengers, setPassengers] = useState(8);
+  const calRef = useRef<HTMLDivElement>(null);
+  const [charters, setCharters] = useState<Charter[]>([]);
+
+  // Passenger state
+  const [passengerList, setPassengerList] = useState<PassengerEntry[]>([{ kind: 'adult' }, { kind: 'adult' }]);
+
+  // Location state
   const [deliveryPoint, setDeliveryPoint] = useState(DEFAULT_MARINA_ID);
+  const [sameRedelivery, setSameRedelivery] = useState(true);
   const [redeliveryPoint, setRedeliveryPoint] = useState(DEFAULT_MARINA_ID);
+
+  // Contact state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+
+  // Preferences state
   const [holidayDescription, setHolidayDescription] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,19 +79,43 @@ export default function BookingPageContent() {
     getAllCharters().then(setCharters).catch(() => {});
   }, []);
 
+  // Close calendar on outside click
+  useEffect(() => {
+    if (!calOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (calRef.current && !calRef.current.contains(e.target as Node)) {
+        setCalOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [calOpen]);
+
   const getTodayDate = () => new Date().toISOString().split('T')[0];
-  const getMaxDate = () => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() + 1);
-    return d.toISOString().split('T')[0];
+  const capacity = { min: 1, max: 10 };
+
+  const addPassenger = () => {
+    if (passengerList.length < capacity.max) {
+      setPassengerList(p => [...p, { kind: 'adult' }]);
+    }
   };
 
-  const capacity = { min: 1, max: 10 };
+  const removePassenger = (i: number) => {
+    if (passengerList.length > 1) {
+      setPassengerList(p => p.filter((_, idx) => idx !== i));
+    }
+  };
+
+  const updatePassenger = (i: number, entry: PassengerEntry) => {
+    setPassengerList(p => p.map((e, idx) => idx === i ? entry : e));
+  };
+
+  const actualRedelivery = sameRedelivery ? deliveryPoint : redeliveryPoint;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !email || !phone || !selectedDate || !deliveryPoint || !redeliveryPoint) {
+    if (!name || !email || !phone || !selectedDate || !deliveryPoint) {
       alert('Please fill in all required fields');
       return;
     }
@@ -84,15 +126,23 @@ export default function BookingPageContent() {
       return;
     }
 
-    if (passengers < capacity.min || passengers > capacity.max) {
+    if (passengerList.length < capacity.min || passengerList.length > capacity.max) {
       alert(`Number of passengers must be between ${capacity.min} and ${capacity.max}`);
       return;
+    }
+
+    // Validate child ages
+    for (const p of passengerList) {
+      if (p.kind === 'child' && (p.age < 1 || p.age > 17)) {
+        alert('Please enter a valid age (1–17) for all children');
+        return;
+      }
     }
 
     setIsSubmitting(true);
     try {
       const deliveryMarina = getMarinaById(deliveryPoint);
-      const redeliveryMarina = getMarinaById(redeliveryPoint);
+      const redeliveryMarina = getMarinaById(actualRedelivery);
 
       const bookingData: BookingEmailData = {
         name,
@@ -100,10 +150,11 @@ export default function BookingPageContent() {
         phone,
         boat: blueOneBoat.name,
         date: selectedDate,
-        passengers,
+        passengers: passengerList.length,
+        passengerDetails: passengerSummary(passengerList),
         embarkationPoint: deliveryMarina?.name || deliveryPoint,
         deliveryPoint: deliveryMarina?.name || deliveryPoint,
-        redeliveryPoint: redeliveryMarina?.name || redeliveryPoint,
+        redeliveryPoint: redeliveryMarina?.name || actualRedelivery,
         holidayDescription: holidayDescription || undefined,
         selectedTheme: selectedTheme ? adventures.find(a => a.id === selectedTheme)?.name : undefined,
         timestamp: new Date().toISOString()
@@ -127,7 +178,7 @@ export default function BookingPageContent() {
   };
 
   const deliveryMarina = getMarinaById(deliveryPoint);
-  const redeliveryMarina = getMarinaById(redeliveryPoint);
+  const redeliveryMarina = getMarinaById(actualRedelivery);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
@@ -206,83 +257,130 @@ export default function BookingPageContent() {
             <div className="space-y-6">
               <h3 className="text-xl font-semibold text-blue-900">Charter Details</h3>
 
-              {/* Date */}
+              {/* Date — popup calendar picker */}
               <div>
                 <label className="block text-lg font-semibold text-blue-900 mb-3">Charter Date *</label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => {
-                    setSelectedDate(e.target.value);
-                    if (e.target.value) {
-                      const [y, m] = e.target.value.split('-').map(Number);
-                      setCalMonth(new Date(y, m - 1, 1));
-                    }
-                  }}
-                  min={getTodayDate()}
-                  max={getMaxDate()}
-                  required
-                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
-                />
-                <p className="text-gray-600 text-sm mt-2">
-                  Select your preferred charter date (bookings available up to 1 year in advance)
-                </p>
+                <div className="relative" ref={calRef}>
+                  <button
+                    type="button"
+                    onClick={() => setCalOpen(o => !o)}
+                    className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none text-left flex items-center justify-between hover:border-blue-400 transition-colors"
+                  >
+                    <span className={selectedDate ? 'text-gray-900' : 'text-gray-400'}>
+                      {selectedDate
+                        ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                        : 'Click to select a date…'}
+                    </span>
+                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </button>
 
-                {/* Mini availability calendar */}
-                <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <div className="flex items-center justify-between mb-3">
-                    <button
-                      type="button"
-                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
-                      className="text-blue-600 hover:text-blue-800 transition-colors px-2 py-0.5 rounded hover:bg-blue-100 text-sm"
-                    >
-                      ←
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                      className="text-blue-600 hover:text-blue-800 transition-colors px-2 py-0.5 rounded hover:bg-blue-100 text-sm"
-                    >
-                      →
-                    </button>
-                  </div>
-                  <MiniCalendar
-                    entries={charters}
-                    month={calMonth}
-                    selectedDate={selectedDate}
-                    onDayClick={(date) => {
-                      setSelectedDate(date);
-                      const [y, m] = date.split('-').map(Number);
-                      setCalMonth(new Date(y, m - 1, 1));
-                    }}
-                    variant="light"
-                  />
-                  <div className="flex gap-4 justify-center mt-3 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300 inline-block" /> Available
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="w-3 h-3 rounded bg-red-100 border border-red-300 inline-block" /> Not available
-                    </span>
-                  </div>
+                  {calOpen && (
+                    <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-4 w-72">
+                      <div className="flex items-center justify-between mb-3">
+                        <button
+                          type="button"
+                          onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+                          className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium"
+                        >
+                          ←
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+                          className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium"
+                        >
+                          →
+                        </button>
+                      </div>
+                      <MiniCalendar
+                        entries={charters}
+                        month={calMonth}
+                        selectedDate={selectedDate}
+                        onDayClick={(date) => {
+                          if (date < getTodayDate()) return;
+                          setSelectedDate(date);
+                          const [y, m] = date.split('-').map(Number);
+                          setCalMonth(new Date(y, m - 1, 1));
+                          setCalOpen(false);
+                        }}
+                        variant="light"
+                      />
+                      <div className="flex gap-4 justify-center mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300 inline-block" /> Available
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-3 h-3 rounded bg-red-100 border border-red-300 inline-block" /> Not available
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
+                <p className="text-gray-600 text-sm mt-2">
+                  Click the field above to open the availability calendar
+                </p>
               </div>
 
               {/* Passengers */}
               <div>
-                <label className="block text-lg font-semibold text-blue-900 mb-3">Number of Passengers *</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="number"
-                    value={passengers}
-                    onChange={(e) => setPassengers(parseInt(e.target.value) || 1)}
-                    min={capacity.min}
-                    max={capacity.max}
-                    required
-                    className="w-32 p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
-                  />
-                  <span className="text-gray-700">(Capacity: {capacity.min}–{capacity.max} guests)</span>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-lg font-semibold text-blue-900">
+                    Passengers * <span className="text-gray-500 font-normal text-sm">({passengerList.length}/{capacity.max})</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addPassenger}
+                    disabled={passengerList.length >= capacity.max}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center gap-1 px-3 py-1.5 rounded-lg border border-blue-300 hover:bg-blue-50 disabled:border-gray-200 transition-colors"
+                  >
+                    + Add passenger
+                  </button>
                 </div>
+                <div className="space-y-2">
+                  {passengerList.map((p, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-white border border-blue-200 rounded-lg">
+                      <span className="text-sm text-gray-500 w-6 text-center flex-shrink-0">{i + 1}</span>
+                      <select
+                        value={p.kind}
+                        onChange={(e) => {
+                          if (e.target.value === 'adult') updatePassenger(i, { kind: 'adult' });
+                          else updatePassenger(i, { kind: 'child', age: 10 });
+                        }}
+                        className="flex-1 p-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 focus:border-blue-500 focus:outline-none text-sm"
+                      >
+                        <option value="adult">Adult</option>
+                        <option value="child">Child (under 18)</option>
+                      </select>
+                      {p.kind === 'child' && (
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <label className="text-sm text-gray-600 whitespace-nowrap">Age:</label>
+                          <input
+                            type="number"
+                            value={p.age}
+                            min={1}
+                            max={17}
+                            onChange={(e) => updatePassenger(i, { kind: 'child', age: Math.min(17, Math.max(1, parseInt(e.target.value) || 1)) })}
+                            className="w-14 p-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 focus:border-blue-500 focus:outline-none text-sm text-center"
+                          />
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removePassenger(i)}
+                        disabled={passengerList.length <= 1}
+                        className="text-gray-400 hover:text-red-500 disabled:opacity-0 transition-colors flex-shrink-0"
+                        aria-label="Remove passenger"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-gray-500 text-sm mt-2">{passengerSummary(passengerList)}</p>
               </div>
 
               {/* Place of Delivery */}
@@ -316,34 +414,52 @@ export default function BookingPageContent() {
                 )}
               </div>
 
-              {/* Place of Redelivery */}
+              {/* Place of Redelivery — optional */}
               <div>
-                <label className="block text-lg font-semibold text-blue-900 mb-3">Place of Redelivery *</label>
-                <p className="text-gray-600 text-sm mb-3">Where you will return the yacht at the end of your charter.</p>
-                <select
-                  value={redeliveryPoint}
-                  onChange={(e) => setRedeliveryPoint(e.target.value)}
-                  required
-                  className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none mb-4"
-                >
-                  {Object.entries(regionGroups).map(([region, ms]) => (
-                    <optgroup key={region} label={region}>
-                      {ms.map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-lg font-semibold text-blue-900">Place of Redelivery</label>
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={sameRedelivery}
+                      onChange={(e) => setSameRedelivery(e.target.checked)}
+                      className="w-4 h-4 accent-blue-600"
+                    />
+                    <span className="text-sm text-gray-600">Same as delivery</span>
+                  </label>
+                </div>
+                {sameRedelivery ? (
+                  <p className="text-gray-500 text-sm py-2 px-3 bg-gray-50 rounded-lg border border-gray-200">
+                    Redelivery at <span className="font-medium text-blue-700">{deliveryMarina?.name || 'same marina'}</span>
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-gray-600 text-sm mb-3">Where you will return the yacht at the end of your charter.</p>
+                    <select
+                      value={redeliveryPoint}
+                      onChange={(e) => setRedeliveryPoint(e.target.value)}
+                      className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none mb-4"
+                    >
+                      {Object.entries(regionGroups).map(([region, ms]) => (
+                        <optgroup key={region} label={region}>
+                          {ms.map(m => (
+                            <option key={m.id} value={m.id}>{m.name}</option>
+                          ))}
+                        </optgroup>
                       ))}
-                    </optgroup>
-                  ))}
-                </select>
-                {redeliveryMarina && (
-                  <div className="rounded-lg overflow-hidden border border-blue-200">
-                    <div className="px-3 py-2 bg-blue-50 border-b border-blue-200">
-                      <p className="text-blue-800 text-sm font-medium">
-                        {redeliveryMarina.name}
-                        <span className="text-blue-500 font-normal ml-2">— {redeliveryMarina.region}</span>
-                      </p>
-                    </div>
-                    <MarinaMap marina={redeliveryMarina} />
-                  </div>
+                    </select>
+                    {redeliveryMarina && redeliveryMarina.id !== deliveryMarina?.id && (
+                      <div className="rounded-lg overflow-hidden border border-blue-200">
+                        <div className="px-3 py-2 bg-blue-50 border-b border-blue-200">
+                          <p className="text-blue-800 text-sm font-medium">
+                            {redeliveryMarina.name}
+                            <span className="text-blue-500 font-normal ml-2">— {redeliveryMarina.region}</span>
+                          </p>
+                        </div>
+                        <MarinaMap marina={redeliveryMarina} />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -410,10 +526,18 @@ export default function BookingPageContent() {
                 <h4 className="text-lg font-semibold text-blue-900 mb-2">Charter Details</h4>
                 <div className="space-y-2 text-gray-700">
                   <SummaryRow label="Boat" value={blueOneBoat.name} />
-                  <SummaryRow label="Date" value={selectedDate || 'Not selected'} />
-                  <SummaryRow label="Passengers" value={String(passengers)} />
+                  <SummaryRow
+                    label="Date"
+                    value={selectedDate
+                      ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+                      : 'Not selected'}
+                  />
+                  <SummaryRow label="Passengers" value={`${passengerList.length} (${passengerSummary(passengerList)})`} />
                   <SummaryRow label="Delivery" value={deliveryMarina?.name || 'Not selected'} />
-                  <SummaryRow label="Redelivery" value={redeliveryMarina?.name || 'Not selected'} />
+                  <SummaryRow
+                    label="Redelivery"
+                    value={sameRedelivery ? `Same as delivery (${deliveryMarina?.name || '—'})` : redeliveryMarina?.name || 'Not selected'}
+                  />
                 </div>
               </div>
 
