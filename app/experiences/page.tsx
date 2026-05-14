@@ -76,6 +76,7 @@ export default function ExperiencesPage() {
       category: "Nature & Sea",
       themes: [
         adventures.find(a => a.id === "13"), // Ionian Fishing & Island Discovery
+        adventures.find(a => a.id === "17"), // The Big Blue Freediving Journey
       ].filter((adv): adv is typeof adventures[number] => Boolean(adv))
     }
   ];
