@@ -23,6 +23,7 @@ const DEFAULT_CENTER = { lat: 38.5, lng: 23.5 };
 
 export default function AdventureItineraryMap({ points }: Props) {
   const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
