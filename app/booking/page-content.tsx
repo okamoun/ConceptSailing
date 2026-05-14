@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { sendBookingEmail, BookingEmailData } from '../../lib/emailjs';
 import adventures from '../adventures-data';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
+import MiniCalendar from '../components/MiniCalendar';
+import { getAllCharters, type Charter } from '../../lib/availability';
 
 const MarinaMap = dynamic(() => import('../components/MarinaMap'), { ssr: false });
 
@@ -31,6 +33,11 @@ export default function BookingPageContent() {
   };
 
   const [selectedDate, setSelectedDate] = useState('');
+  const [charters, setCharters] = useState<Charter[]>([]);
+  const [calMonth, setCalMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [passengers, setPassengers] = useState(8);
   const [deliveryPoint, setDeliveryPoint] = useState(DEFAULT_MARINA_ID);
   const [redeliveryPoint, setRedeliveryPoint] = useState(DEFAULT_MARINA_ID);
@@ -49,6 +56,10 @@ export default function BookingPageContent() {
       if (themeParam) setSelectedTheme(themeParam);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    getAllCharters().then(setCharters).catch(() => {});
+  }, []);
 
   const getTodayDate = () => new Date().toISOString().split('T')[0];
   const getMaxDate = () => {
@@ -201,7 +212,13 @@ export default function BookingPageContent() {
                 <input
                   type="date"
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedDate(e.target.value);
+                    if (e.target.value) {
+                      const [y, m] = e.target.value.split('-').map(Number);
+                      setCalMonth(new Date(y, m - 1, 1));
+                    }
+                  }}
                   min={getTodayDate()}
                   max={getMaxDate()}
                   required
@@ -210,6 +227,45 @@ export default function BookingPageContent() {
                 <p className="text-gray-600 text-sm mt-2">
                   Select your preferred charter date (bookings available up to 1 year in advance)
                 </p>
+
+                {/* Mini availability calendar */}
+                <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
+                      className="text-blue-600 hover:text-blue-800 transition-colors px-2 py-0.5 rounded hover:bg-blue-100 text-sm"
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
+                      className="text-blue-600 hover:text-blue-800 transition-colors px-2 py-0.5 rounded hover:bg-blue-100 text-sm"
+                    >
+                      →
+                    </button>
+                  </div>
+                  <MiniCalendar
+                    entries={charters}
+                    month={calMonth}
+                    selectedDate={selectedDate}
+                    onDayClick={(date) => {
+                      setSelectedDate(date);
+                      const [y, m] = date.split('-').map(Number);
+                      setCalMonth(new Date(y, m - 1, 1));
+                    }}
+                    variant="light"
+                  />
+                  <div className="flex gap-4 justify-center mt-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded bg-emerald-100 border border-emerald-300 inline-block" /> Available
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded bg-red-100 border border-red-300 inline-block" /> Not available
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Passengers */}

@@ -6,24 +6,29 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useBlueOneMode } from '../contexts/BlueOneContext';
 import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
+import MiniCalendar from '../components/MiniCalendar';
 import { boats } from '../boats-data';
+import { getAllCharters, type Charter } from '../../lib/availability';
+
+function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
 export default function BlueOneClient() {
   const [boat, setBoat] = useState<typeof boats[0] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const { setIsBlueOneMode } = useBlueOneMode();
+  const [charters, setCharters] = useState<Charter[]>([]);
+  const [availMonth, setAvailMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
 
   useEffect(() => {
-    // Find the BlueOne boat
     const blueOneBoat = boats.find((b) => b.name === "BlueOne");
-    if (blueOneBoat) {
-      setBoat(blueOneBoat);
-    }
+    if (blueOneBoat) setBoat(blueOneBoat);
     setIsLoading(false);
-    
-    // Activate BlueOne mode (will persist across navigation)
     setIsBlueOneMode(true);
+    getAllCharters().then(setCharters).catch(() => {});
   }, [setIsBlueOneMode]);
 
   // BlueOne specific images from the blueone folder - organized by content
@@ -544,6 +549,43 @@ export default function BlueOneClient() {
             <BlueOneGallerySlideshow 
               images={[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages]}
             />
+          </div>
+        </section>
+
+        {/* Availability */}
+        <section className="py-16 bg-black/25 backdrop-blur-sm">
+          <div className="max-w-sm mx-auto px-4">
+            <h2 className="text-3xl font-bold text-white text-center mb-8">Availability</h2>
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setAvailMonth(m => addMonths(m, -1))}
+                  className="text-white/70 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/10 text-sm"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={() => setAvailMonth(m => addMonths(m, 1))}
+                  className="text-white/70 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/10 text-sm"
+                >
+                  →
+                </button>
+              </div>
+              <MiniCalendar entries={charters} month={availMonth} variant="dark" />
+              <div className="flex flex-wrap gap-3 justify-center text-xs text-blue-200 pt-1 border-t border-white/10">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded bg-emerald-500/60 inline-block" /> Available
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded bg-red-500/50 inline-block" /> Not available
+                </span>
+              </div>
+              <div className="text-center">
+                <Link href="/availability" className="text-blue-300 hover:text-white text-xs transition-colors">
+                  View full calendar →
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
