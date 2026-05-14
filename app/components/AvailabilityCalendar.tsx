@@ -1,31 +1,35 @@
 'use client';
 
-import type { AvailabilityEntry } from '../../lib/availability';
+import { type Charter, type CharterStatus, CHARTER_STATUS_PRIORITY, CHARTER_STATUS_LABEL, isPubliclyAvailable } from '../../lib/availability';
 
 interface AvailabilityCalendarProps {
-  entries: AvailabilityEntry[];
+  entries: Charter[];
   mode: 'user' | 'admin';
   month: Date;
   onMonthChange: (d: Date) => void;
   onDayClick?: (dateStr: string) => void;
 }
 
-const STATUS_PRIORITY: Record<AvailabilityEntry['status'], number> = {
-  booked: 3,
-  blocked: 2,
-  requested: 1,
+const ADMIN_CELL: Record<CharterStatus, string> = {
+  web_request:     'bg-sky-400/80 text-sky-900',
+  broker_request:  'bg-amber-400/80 text-amber-900',
+  serious_request: 'bg-orange-500/80 text-white',
+  confirmed:       'bg-emerald-500/80 text-white',
+  signed:          'bg-emerald-800/80 text-white',
+  canceled:        'bg-gray-500/60 text-gray-100',
+  owner_use:       'bg-purple-500/80 text-white',
+  maintenance:     'bg-red-500/80 text-white',
 };
 
-const ADMIN_CELL: Record<AvailabilityEntry['status'], string> = {
-  requested: 'bg-amber-400/80 text-amber-900',
-  blocked:   'bg-red-500/80 text-white',
-  booked:    'bg-emerald-600/80 text-white',
-};
-
-const ADMIN_BADGE: Record<AvailabilityEntry['status'], string> = {
-  requested: 'bg-amber-400/30 text-amber-200',
-  blocked:   'bg-red-500/30 text-red-200',
-  booked:    'bg-emerald-600/30 text-emerald-200',
+const ADMIN_BADGE: Record<CharterStatus, string> = {
+  web_request:     'bg-sky-400/30 text-sky-200',
+  broker_request:  'bg-amber-400/30 text-amber-200',
+  serious_request: 'bg-orange-500/30 text-orange-200',
+  confirmed:       'bg-emerald-500/30 text-emerald-200',
+  signed:          'bg-emerald-800/30 text-emerald-100',
+  canceled:        'bg-gray-500/30 text-gray-300',
+  owner_use:       'bg-purple-500/30 text-purple-200',
+  maintenance:     'bg-red-500/30 text-red-200',
 };
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -34,15 +38,12 @@ function toDateStr(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-function getStatusForDate(
-  dateStr: string,
-  entries: AvailabilityEntry[]
-): AvailabilityEntry['status'] | null {
-  let best: AvailabilityEntry['status'] | null = null;
+function getStatusForDate(dateStr: string, entries: Charter[]): CharterStatus | null {
+  let best: CharterStatus | null = null;
   let bestPriority = 0;
   for (const e of entries) {
     if (dateStr >= e.startDate && dateStr <= e.endDate) {
-      const p = STATUS_PRIORITY[e.status];
+      const p = CHARTER_STATUS_PRIORITY[e.status];
       if (p > bestPriority) { best = e.status; bestPriority = p; }
     }
   }
@@ -64,12 +65,8 @@ export default function AvailabilityCalendar({
 
   const monthLabel = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  function prevMonth() {
-    onMonthChange(new Date(year, mon - 1, 1));
-  }
-  function nextMonth() {
-    onMonthChange(new Date(year, mon + 1, 1));
-  }
+  function prevMonth() { onMonthChange(new Date(year, mon - 1, 1)); }
+  function nextMonth() { onMonthChange(new Date(year, mon + 1, 1)); }
 
   const cells: (number | null)[] = [
     ...Array(firstDay).fill(null),
@@ -104,16 +101,11 @@ export default function AvailabilityCalendar({
       {/* Day-of-week headers */}
       <div className="grid grid-cols-7 gap-1">
         {DAYS.map(d => (
-          <div key={d} className="text-center text-blue-300 text-xs font-semibold py-1">
-            {d}
-          </div>
+          <div key={d} className="text-center text-blue-300 text-xs font-semibold py-1">{d}</div>
         ))}
 
-        {/* Day cells */}
         {cells.map((day, idx) => {
-          if (day === null) {
-            return <div key={`empty-${idx}`} />;
-          }
+          if (day === null) return <div key={`empty-${idx}`} />;
 
           const dateStr = `${year}-${String(mon + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           const status = getStatusForDate(dateStr, entries);
@@ -123,15 +115,15 @@ export default function AvailabilityCalendar({
           let cellClass = 'rounded-lg p-1 text-center text-xs font-medium transition-colors relative ';
 
           if (mode === 'user') {
-            if (!status && !isPast) {
-              cellClass += 'bg-emerald-500/30 text-emerald-100 border border-emerald-400/40';
-            } else if (!status && isPast) {
+            const available = !status || isPubliclyAvailable(status);
+            if (isPast) {
               cellClass += 'bg-white/5 text-white/30 border border-white/10';
+            } else if (available) {
+              cellClass += 'bg-emerald-500/30 text-emerald-100 border border-emerald-400/40';
             } else {
               cellClass += 'bg-red-500/30 text-red-200 border border-red-400/30';
             }
           } else {
-            // admin mode
             if (status) {
               cellClass += `${ADMIN_CELL[status]} border border-white/20 cursor-pointer hover:opacity-80`;
             } else if (isPast) {
@@ -148,7 +140,7 @@ export default function AvailabilityCalendar({
               key={dateStr}
               className={cellClass}
               onClick={clickable ? () => onDayClick(dateStr) : undefined}
-              title={mode === 'admin' && status ? status : undefined}
+              title={mode === 'admin' && status ? CHARTER_STATUS_LABEL[status] : undefined}
             >
               <span>{day}</span>
             </div>
@@ -167,9 +159,14 @@ export default function AvailabilityCalendar({
         ) : (
           <>
             <LegendDot color="bg-white/20 border border-white/20" label="Free" />
-            <LegendDot color="bg-amber-400/80" label="Requested" />
-            <LegendDot color="bg-red-500/80" label="Blocked" />
-            <LegendDot color="bg-emerald-600/80" label="Booked" />
+            <LegendDot color={ADMIN_CELL.web_request} label="Web Request" />
+            <LegendDot color={ADMIN_CELL.broker_request} label="Broker" />
+            <LegendDot color={ADMIN_CELL.serious_request} label="Serious" />
+            <LegendDot color={ADMIN_CELL.confirmed} label="Confirmed" />
+            <LegendDot color={ADMIN_CELL.signed} label="Signed" />
+            <LegendDot color={ADMIN_CELL.owner_use} label="Owner Use" />
+            <LegendDot color={ADMIN_CELL.maintenance} label="Maintenance" />
+            <LegendDot color={ADMIN_CELL.canceled} label="Canceled" />
             <LegendDot color="bg-white/10 border border-white/10" label="Past" />
           </>
         )}
@@ -183,16 +180,19 @@ export default function AvailabilityCalendar({
             .filter(e => {
               const start = new Date(e.startDate);
               const end = new Date(e.endDate);
-              return start.getFullYear() === year && start.getMonth() === mon ||
-                     end.getFullYear() === year && end.getMonth() === mon ||
-                     (start < new Date(year, mon, 1) && end >= new Date(year, mon, 1));
+              return (
+                (start.getFullYear() === year && start.getMonth() === mon) ||
+                (end.getFullYear() === year && end.getMonth() === mon) ||
+                (start < new Date(year, mon, 1) && end >= new Date(year, mon, 1))
+              );
             })
             .map(e => (
               <div key={e.id} className="flex items-center gap-2">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${ADMIN_BADGE[e.status]}`}>
-                  {e.status}
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ADMIN_BADGE[e.status]}`}>
+                  {CHARTER_STATUS_LABEL[e.status]}
                 </span>
                 <span className="text-white text-xs">{e.startDate} → {e.endDate}</span>
+                {e.name && <span className="text-blue-200 text-xs truncate">{e.name}</span>}
                 {e.note && <span className="text-blue-300 text-xs italic truncate">{e.note}</span>}
               </div>
             ))}

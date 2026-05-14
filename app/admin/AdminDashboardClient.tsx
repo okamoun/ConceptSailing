@@ -2,12 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import {
-  getAllBookings,
+  getAllCharters,
+  deleteCharter,
+  updateCharter,
+  type Charter,
+  type CharterStatus,
+  CHARTER_STATUS_LABEL,
+  CHARTER_STATUS_PRIORITY,
+} from '../../lib/availability';
+import {
   getAllContacts,
-  deleteBooking,
   deleteContact,
-  updateBookingLocations,
-  type BookingSubmission,
   type ContactSubmission,
 } from '../../lib/submissions';
 import { getAllReviews, adminDeleteReview, updateReviewOrder } from '../../lib/reviews';
@@ -16,56 +21,75 @@ import StarRating from '../components/StarRating';
 import MarinaMap from './MarinaMap';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
 
-type Tab = 'bookings' | 'contacts' | 'reviews';
+type Tab = 'charters' | 'contacts' | 'reviews';
+
+const STATUS_BADGE: Record<CharterStatus, string> = {
+  web_request:     'bg-sky-500/30 text-sky-200',
+  broker_request:  'bg-amber-500/30 text-amber-200',
+  serious_request: 'bg-orange-500/30 text-orange-200',
+  confirmed:       'bg-emerald-500/30 text-emerald-200',
+  signed:          'bg-emerald-800/30 text-emerald-100',
+  canceled:        'bg-gray-500/30 text-gray-300',
+  owner_use:       'bg-purple-500/30 text-purple-200',
+  maintenance:     'bg-red-500/30 text-red-200',
+};
 
 export default function AdminDashboardClient() {
-  const [tab, setTab] = useState<Tab>('bookings');
+  const [tab, setTab] = useState<Tab>('charters');
 
-  const [bookings, setBookings] = useState<BookingSubmission[]>([]);
+  const [charters, setCharters] = useState<Charter[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
 
-  const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editDelivery, setEditDelivery] = useState(DEFAULT_MARINA_ID);
   const [editRedelivery, setEditRedelivery] = useState(DEFAULT_MARINA_ID);
   const [savingLocations, setSavingLocations] = useState(false);
+  const [savingStatus, setSavingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([getAllBookings(), getAllContacts(), getAllReviews()])
-      .then(([b, c, r]) => { setBookings(b); setContacts(c); setReviews(r); })
+    Promise.all([getAllCharters(), getAllContacts(), getAllReviews()])
+      .then(([c, contacts, r]) => { setCharters(c); setContacts(contacts); setReviews(r); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  async function handleDeleteBooking(id: string) {
-    if (!confirm('Delete this booking?')) return;
-    await deleteBooking(id);
-    setBookings(prev => prev.filter(b => b.id !== id));
+  async function handleDeleteCharter(id: string) {
+    if (!confirm('Delete this charter entry?')) return;
+    await deleteCharter(id);
+    setCharters(prev => prev.filter(c => c.id !== id));
   }
 
-  function handleExpandBooking(b: BookingSubmission) {
-    if (expandedBookingId === b.id) {
-      setExpandedBookingId(null);
-      return;
-    }
-    setExpandedBookingId(b.id);
-    setEditDelivery(b.deliveryPoint ?? DEFAULT_MARINA_ID);
-    setEditRedelivery(b.redeliveryPoint ?? b.deliveryPoint ?? DEFAULT_MARINA_ID);
+  function handleExpand(c: Charter) {
+    if (expandedId === c.id) { setExpandedId(null); return; }
+    setExpandedId(c.id);
+    setEditDelivery(c.deliveryPoint ?? DEFAULT_MARINA_ID);
+    setEditRedelivery(c.redeliveryPoint ?? c.deliveryPoint ?? DEFAULT_MARINA_ID);
   }
 
-  async function handleSaveLocations(bookingId: string) {
+  async function handleSaveLocations(charterId: string) {
     setSavingLocations(true);
     try {
-      await updateBookingLocations(bookingId, editDelivery, editRedelivery);
-      setBookings(prev =>
-        prev.map(b => b.id === bookingId ? { ...b, deliveryPoint: editDelivery, redeliveryPoint: editRedelivery } : b)
+      await updateCharter(charterId, { deliveryPoint: editDelivery, redeliveryPoint: editRedelivery });
+      setCharters(prev =>
+        prev.map(c => c.id === charterId ? { ...c, deliveryPoint: editDelivery, redeliveryPoint: editRedelivery } : c)
       );
-      setExpandedBookingId(null);
+      setExpandedId(null);
     } finally {
       setSavingLocations(false);
+    }
+  }
+
+  async function handleStatusChange(charterId: string, newStatus: CharterStatus) {
+    setSavingStatus(charterId);
+    try {
+      await updateCharter(charterId, { status: newStatus });
+      setCharters(prev => prev.map(c => c.id === charterId ? { ...c, status: newStatus } : c));
+    } finally {
+      setSavingStatus(null);
     }
   }
 
@@ -92,8 +116,15 @@ export default function AdminDashboardClient() {
     });
   }
 
+  // Sort charters by priority (highest first) then by date
+  const sortedCharters = [...charters].sort((a, b) => {
+    const pd = CHARTER_STATUS_PRIORITY[b.status] - CHARTER_STATUS_PRIORITY[a.status];
+    if (pd !== 0) return pd;
+    return a.startDate.localeCompare(b.startDate);
+  });
+
   const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: 'bookings', label: 'Bookings', count: bookings.length },
+    { id: 'charters', label: 'Charters', count: charters.length },
     { id: 'contacts', label: 'Contacts', count: contacts.length },
     { id: 'reviews', label: 'Reviews', count: reviews.length },
   ];
@@ -104,13 +135,11 @@ export default function AdminDashboardClient() {
     <main className="px-4 py-6">
       <div className="max-w-5xl mx-auto space-y-6">
 
-        {/* Header */}
         <div>
           <h1 className="text-white font-bold text-2xl">Dashboard</h1>
-          <p className="text-blue-200 text-xs mt-0.5">All form submissions and reviews</p>
+          <p className="text-blue-200 text-xs mt-0.5">All charters, contacts and reviews</p>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-2 border-b border-white/20 pb-0">
           {tabs.map(t => (
             <button
@@ -130,47 +159,68 @@ export default function AdminDashboardClient() {
 
         {loading && <p className="text-blue-200 text-sm text-center animate-pulse">Loading…</p>}
 
-        {/* BOOKINGS TAB */}
-        {!loading && tab === 'bookings' && (
+        {/* CHARTERS TAB */}
+        {!loading && tab === 'charters' && (
           <div className="space-y-3">
-            {bookings.length === 0 && (
-              <p className="text-blue-200 text-sm text-center py-8">No booking submissions yet.</p>
+            {sortedCharters.length === 0 && (
+              <p className="text-blue-200 text-sm text-center py-8">No charter entries yet.</p>
             )}
-            {bookings.map(b => {
-              const deliveryMarina = getMarinaById(b.deliveryPoint ?? '');
-              const redeliveryMarina = getMarinaById(b.redeliveryPoint ?? b.deliveryPoint ?? '');
-              const deliveryLabel = deliveryMarina?.name ?? b.deliveryPoint ?? b.embarkationPoint;
-              const redeliveryLabel = redeliveryMarina?.name ?? b.redeliveryPoint ?? b.deliveryPoint ?? b.embarkationPoint;
-              const isExpanded = expandedBookingId === b.id;
+            {sortedCharters.map(c => {
+              const deliveryMarina = getMarinaById(c.deliveryPoint ?? '');
+              const redeliveryMarina = getMarinaById(c.redeliveryPoint ?? c.deliveryPoint ?? '');
+              const deliveryLabel = deliveryMarina?.name ?? c.deliveryPoint ?? c.embarkationPoint;
+              const redeliveryLabel = redeliveryMarina?.name ?? c.redeliveryPoint ?? c.deliveryPoint ?? c.embarkationPoint;
+              const isExpanded = expandedId === c.id;
 
               return (
-                <div key={b.id} className="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl p-5">
+                <div key={c.id} className="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl p-5">
                   <div className="flex items-start gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="bg-blue-500/30 text-blue-200 text-xs font-semibold px-2 py-0.5 rounded-full">Booking</span>
-                        <span className="text-white font-semibold text-sm">{b.name}</span>
-                        <span className="text-blue-300 text-xs">{b.email}</span>
-                        {b.phone && <span className="text-blue-300 text-xs">{b.phone}</span>}
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_BADGE[c.status]}`}>
+                          {CHARTER_STATUS_LABEL[c.status]}
+                        </span>
+                        {c.name && <span className="text-white font-semibold text-sm">{c.name}</span>}
+                        {c.email && <span className="text-blue-300 text-xs">{c.email}</span>}
+                        {c.phone && <span className="text-blue-300 text-xs">{c.phone}</span>}
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1 mt-2">
-                        <Detail label="Boat" value={b.boat} />
-                        <Detail label="Date" value={b.date} />
-                        <Detail label="Passengers" value={String(b.passengers)} />
-                        <Detail label="Delivery" value={deliveryLabel} />
-                        <Detail label="Redelivery" value={redeliveryLabel} />
-                        {b.selectedTheme && <Detail label="Theme" value={b.selectedTheme} />}
+
+                      {/* Inline status change */}
+                      <div className="mb-2">
+                        <select
+                          value={c.status}
+                          disabled={savingStatus === c.id}
+                          onChange={e => handleStatusChange(c.id, e.target.value as CharterStatus)}
+                          className="bg-white/10 border border-white/20 text-white text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-blue-400 disabled:opacity-50"
+                        >
+                          {(Object.keys(CHARTER_STATUS_LABEL) as CharterStatus[]).map(s => (
+                            <option key={s} value={s} className="bg-blue-900">{CHARTER_STATUS_LABEL[s]}</option>
+                          ))}
+                        </select>
                       </div>
-                      {b.holidayDescription && (
-                        <p className="text-blue-100 text-xs leading-relaxed mt-2 italic">&ldquo;{b.holidayDescription}&rdquo;</p>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1">
+                        <Detail label="Start" value={c.startDate} />
+                        <Detail label="End" value={c.endDate} />
+                        {c.passengers != null && <Detail label="Passengers" value={String(c.passengers)} />}
+                        {deliveryLabel && <Detail label="Delivery" value={deliveryLabel} />}
+                        {redeliveryLabel && redeliveryLabel !== deliveryLabel && <Detail label="Redelivery" value={redeliveryLabel} />}
+                        {c.boat && <Detail label="Boat" value={c.boat} />}
+                        {c.selectedTheme && <Detail label="Theme" value={c.selectedTheme} />}
+                      </div>
+                      {c.holidayDescription && (
+                        <p className="text-blue-100 text-xs leading-relaxed mt-2 italic">&ldquo;{c.holidayDescription}&rdquo;</p>
+                      )}
+                      {c.note && (
+                        <p className="text-blue-300 text-xs mt-1 italic">Note: {c.note}</p>
                       )}
                       <p className="text-blue-400 text-xs mt-2">
-                        Submitted: {b.createdAt?.toDate?.()?.toLocaleString() ?? '—'}
+                        Created: {c.createdAt?.toDate?.()?.toLocaleString() ?? '—'}
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 flex-shrink-0">
                       <button
-                        onClick={() => handleExpandBooking(b)}
+                        onClick={() => handleExpand(c)}
                         className={`w-8 h-8 rounded-lg border text-white flex items-center justify-center transition-colors ${isExpanded ? 'bg-blue-500/50 border-blue-400/50' : 'bg-white/10 hover:bg-white/20 border-white/20'}`}
                         title="Edit delivery locations"
                       >
@@ -180,7 +230,7 @@ export default function AdminDashboardClient() {
                         </svg>
                       </button>
                       <button
-                        onClick={() => handleDeleteBooking(b.id)}
+                        onClick={() => handleDeleteCharter(c.id)}
                         className="w-8 h-8 rounded-lg bg-red-600/50 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
                         title="Delete"
                       >
@@ -204,14 +254,14 @@ export default function AdminDashboardClient() {
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleSaveLocations(b.id)}
+                          onClick={() => handleSaveLocations(c.id)}
                           disabled={savingLocations}
                           className="px-4 py-2 text-xs font-semibold bg-blue-500/60 hover:bg-blue-500/80 text-white rounded-lg transition-colors disabled:opacity-50"
                         >
                           {savingLocations ? 'Saving…' : 'Save'}
                         </button>
                         <button
-                          onClick={() => setExpandedBookingId(null)}
+                          onClick={() => setExpandedId(null)}
                           className="px-4 py-2 text-xs font-semibold bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
                         >
                           Cancel

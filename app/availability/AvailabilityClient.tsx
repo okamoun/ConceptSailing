@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
-import { getAllAvailabilityEntries, type AvailabilityEntry } from '../../lib/availability';
+import { getAllCharters, type Charter } from '../../lib/availability';
 
 const bg = {
   backgroundImage: `linear-gradient(rgba(30,58,138,0.55),rgba(59,130,246,0.65)),url('/images/boats/blueone/External_sailing.jpg')`,
@@ -13,7 +13,7 @@ const bg = {
 };
 
 export default function AvailabilityClient() {
-  const [entries, setEntries] = useState<AvailabilityEntry[]>([]);
+  const [entries, setEntries] = useState<Charter[]>([]);
   const [month, setMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -22,7 +22,7 @@ export default function AvailabilityClient() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    getAllAvailabilityEntries()
+    getAllCharters()
       .then(setEntries)
       .catch(() => setError('Could not load availability. Please try again later.'))
       .finally(() => setLoading(false));

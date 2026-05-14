@@ -2,7 +2,12 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { GoogleMap, Marker, InfoWindow, Polyline, useJsApiLoader } from '@react-google-maps/api';
-import type { AvailabilityEntry } from '@/lib/availability';
+import {
+  type Charter,
+  type CharterStatus,
+  CHARTER_STATUS_PRIORITY,
+  CHARTER_STATUS_LABEL,
+} from '@/lib/availability';
 import { getMarinaById } from '@/app/marinas-data';
 
 type LatLng = { lat: number; lng: number };
@@ -10,10 +15,15 @@ type LatLng = { lat: number; lng: number };
 const MAP_CENTER: LatLng = { lat: 38.2, lng: 24.8 };
 const MAP_ZOOM = 6;
 
-const STATUS_COLOUR: Record<AvailabilityEntry['status'], string> = {
-  booked:    '#16a34a',
-  blocked:   '#dc2626',
-  requested: '#d97706',
+const STATUS_COLOUR: Record<CharterStatus, string> = {
+  web_request:     '#0ea5e9',
+  broker_request:  '#d97706',
+  serious_request: '#f97316',
+  confirmed:       '#16a34a',
+  signed:          '#065f46',
+  canceled:        '#6b7280',
+  owner_use:       '#9333ea',
+  maintenance:     '#dc2626',
 };
 
 function svgMarker(color: string, label: string, size = 34) {
@@ -47,60 +57,56 @@ function polylineOptions(color: string) {
 }
 
 interface Props {
-  availability: AvailabilityEntry[];
+  charters: Charter[];
 }
 
-export default function BookingMapClient({ availability }: Props) {
+export default function BookingMapClient({ charters }: Props) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
   });
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  // --- Availability routes (delivery → redelivery) ---
   const availRoutes = useMemo(() =>
-    availability
-      .filter(e => e.deliveryPoint && e.redeliveryPoint)
-      .map(e => {
-        const from = getMarinaById(e.deliveryPoint!);
-        const to   = getMarinaById(e.redeliveryPoint!);
+    charters
+      .filter(c => c.deliveryPoint && c.redeliveryPoint)
+      .map(c => {
+        const from = getMarinaById(c.deliveryPoint!);
+        const to   = getMarinaById(c.redeliveryPoint!);
         if (!from || !to) return null;
-        return { entry: e, from, to };
+        return { charter: c, from, to };
       })
-      .filter(Boolean) as Array<{ entry: AvailabilityEntry; from: { lat: number; lng: number; name: string }; to: { lat: number; lng: number; name: string } }>,
-    [availability],
+      .filter(Boolean) as Array<{ charter: Charter; from: { lat: number; lng: number; name: string }; to: { lat: number; lng: number; name: string } }>,
+    [charters],
   );
 
-  // Unique delivery marinas with entry lists
   const deliveryGroups = useMemo(() => {
-    const map = new Map<string, { marina: ReturnType<typeof getMarinaById>; entries: AvailabilityEntry[] }>();
-    availability.forEach(e => {
-      if (!e.deliveryPoint) return;
-      const m = getMarinaById(e.deliveryPoint);
+    const map = new Map<string, { marina: ReturnType<typeof getMarinaById>; charters: Charter[] }>();
+    charters.forEach(c => {
+      if (!c.deliveryPoint) return;
+      const m = getMarinaById(c.deliveryPoint);
       if (!m) return;
-      const existing = map.get(e.deliveryPoint);
-      if (existing) existing.entries.push(e);
-      else map.set(e.deliveryPoint, { marina: m, entries: [e] });
+      const existing = map.get(c.deliveryPoint);
+      if (existing) existing.charters.push(c);
+      else map.set(c.deliveryPoint, { marina: m, charters: [c] });
     });
     return Array.from(map.values());
-  }, [availability]);
+  }, [charters]);
 
-  // Unique redelivery marinas (end points)
   const redeliveryGroups = useMemo(() => {
-    const map = new Map<string, { marina: ReturnType<typeof getMarinaById>; entries: AvailabilityEntry[] }>();
-    availability.forEach(e => {
-      const key = e.redeliveryPoint || e.deliveryPoint;
+    const map = new Map<string, { marina: ReturnType<typeof getMarinaById>; charters: Charter[] }>();
+    charters.forEach(c => {
+      const key = c.redeliveryPoint || c.deliveryPoint;
       if (!key) return;
       const m = getMarinaById(key);
       if (!m) return;
-      // Skip if same as delivery (would be a round-trip — already shown as start)
-      if (key === e.deliveryPoint) return;
+      if (key === c.deliveryPoint) return;
       const existing = map.get(key);
-      if (existing) existing.entries.push(e);
-      else map.set(key, { marina: m, entries: [e] });
+      if (existing) existing.charters.push(c);
+      else map.set(key, { marina: m, charters: [c] });
     });
     return Array.from(map.values());
-  }, [availability]);
+  }, [charters]);
 
   const handleClick = useCallback((key: string) =>
     setSelectedKey(prev => prev === key ? null : key), []);
@@ -134,24 +140,23 @@ export default function BookingMapClient({ availability }: Props) {
           ],
         }}
       >
-        {/* Route lines: delivery → redelivery, coloured by status */}
         {availRoutes.map((r, i) => (
           <Polyline
             key={i}
             path={[{ lat: r.from.lat, lng: r.from.lng }, { lat: r.to.lat, lng: r.to.lng }]}
-            options={polylineOptions(STATUS_COLOUR[r.entry.status])}
+            options={polylineOptions(STATUS_COLOUR[r.charter.status])}
           />
         ))}
 
-        {/* Redelivery (end-point) markers — square-ish dot */}
-        {redeliveryGroups.map(({ marina, entries }) => {
+        {redeliveryGroups.map(({ marina, charters: groupCharters }) => {
           if (!marina) return null;
-          const color = STATUS_COLOUR[entries[0].status];
+          const topCharter = groupCharters.reduce((a, b) =>
+            CHARTER_STATUS_PRIORITY[a.status] >= CHARTER_STATUS_PRIORITY[b.status] ? a : b);
           return (
             <Marker
               key={`redeliv-${marina.id}`}
               position={{ lat: marina.lat, lng: marina.lng }}
-              icon={dotMarker(color, 20)}
+              icon={dotMarker(STATUS_COLOUR[topCharter.status], 20)}
               title={`${marina.name} — redelivery`}
               onClick={() => handleClick(marina.id)}
               zIndex={8}
@@ -159,28 +164,23 @@ export default function BookingMapClient({ availability }: Props) {
           );
         })}
 
-        {/* Delivery (start-point) markers — larger circle with count */}
-        {deliveryGroups.map(({ marina, entries }) => {
+        {deliveryGroups.map(({ marina, charters: groupCharters }) => {
           if (!marina) return null;
           const isSelected = selectedKey === marina.id;
-          // Use the highest-priority status colour
-          const priority: Record<AvailabilityEntry['status'], number> = { booked: 3, blocked: 2, requested: 1 };
-          const topEntry = entries.reduce((a, b) =>
-            priority[a.status] >= priority[b.status] ? a : b);
-          const color = STATUS_COLOUR[topEntry.status];
+          const topCharter = groupCharters.reduce((a, b) =>
+            CHARTER_STATUS_PRIORITY[a.status] >= CHARTER_STATUS_PRIORITY[b.status] ? a : b);
           return (
             <Marker
               key={`deliv-${marina.id}`}
               position={{ lat: marina.lat, lng: marina.lng }}
-              icon={svgMarker(isSelected ? '#ffffff' : color, String(entries.length))}
-              title={`${marina.name} — ${entries.length} charter${entries.length !== 1 ? 's' : ''}`}
+              icon={svgMarker(isSelected ? '#ffffff' : STATUS_COLOUR[topCharter.status], String(groupCharters.length))}
+              title={`${marina.name} — ${groupCharters.length} charter${groupCharters.length !== 1 ? 's' : ''}`}
               onClick={() => handleClick(marina.id)}
               zIndex={10}
             />
           );
         })}
 
-        {/* InfoWindow */}
         {selectedKey && selectedGroup?.marina && (
           <InfoWindow
             position={{ lat: selectedGroup.marina.lat, lng: selectedGroup.marina.lng }}
@@ -188,19 +188,17 @@ export default function BookingMapClient({ availability }: Props) {
           >
             <div className="text-xs min-w-[190px] max-w-[240px]">
               <p className="font-bold text-gray-800 mb-1">{selectedGroup.marina.name}</p>
-              {selectedGroup.entries.map((e, i) => {
-                const reMarina = getMarinaById(e.redeliveryPoint ?? e.deliveryPoint ?? '');
+              {selectedGroup.charters.map((c, i) => {
+                const reMarina = getMarinaById(c.redeliveryPoint ?? c.deliveryPoint ?? '');
                 return (
                   <div key={i} className="py-1.5 border-t border-gray-200 first:border-0">
-                    <p className={`font-semibold capitalize ${
-                      e.status === 'booked' ? 'text-green-700' :
-                      e.status === 'blocked' ? 'text-red-600' : 'text-amber-600'
-                    }`}>{e.status}</p>
-                    <p className="text-gray-600">{e.startDate} → {e.endDate}</p>
+                    <p className="font-semibold text-gray-700">{CHARTER_STATUS_LABEL[c.status]}</p>
+                    <p className="text-gray-600">{c.startDate} → {c.endDate}</p>
+                    {c.name && <p className="text-gray-700 font-medium">{c.name}</p>}
                     {reMarina && reMarina.id !== selectedGroup.marina?.id && (
                       <p className="text-gray-500">↑ {reMarina.name}</p>
                     )}
-                    {e.note && <p className="text-gray-400 italic">{e.note}</p>}
+                    {c.note && <p className="text-gray-400 italic">{c.note}</p>}
                   </div>
                 );
               })}
@@ -209,27 +207,16 @@ export default function BookingMapClient({ availability }: Props) {
         )}
       </GoogleMap>
 
-      {/* Legend */}
-      <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 space-y-1.5 text-xs">
-        <div className="flex items-center gap-2 text-white">
-          <span className="w-4 h-4 rounded-full bg-green-600 inline-block flex-shrink-0" />
-          Booked — delivery marina
-        </div>
-        <div className="flex items-center gap-2 text-white">
-          <span className="w-4 h-4 rounded-full bg-red-600 inline-block flex-shrink-0" />
-          Blocked
-        </div>
-        <div className="flex items-center gap-2 text-white">
-          <span className="w-4 h-4 rounded-full bg-amber-500 inline-block flex-shrink-0" />
-          Requested
-        </div>
-        <div className="flex items-center gap-2 text-blue-200">
+      <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 space-y-1 text-xs max-h-[200px] overflow-y-auto">
+        {(Object.entries(STATUS_COLOUR) as [CharterStatus, string][]).map(([status, color]) => (
+          <div key={status} className="flex items-center gap-2 text-white">
+            <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+            {CHARTER_STATUS_LABEL[status]}
+          </div>
+        ))}
+        <div className="flex items-center gap-2 text-blue-200 pt-1 border-t border-white/20">
           <span className="w-3 h-3 rounded-full border-2 border-white/60 inline-block flex-shrink-0" />
-          Redelivery marina (end)
-        </div>
-        <div className="flex items-center gap-2 text-blue-200">
-          <span className="w-4 h-px border-t-2 border-dashed border-white/50 inline-block" />
-          Charter route
+          Redelivery (end)
         </div>
       </div>
     </div>

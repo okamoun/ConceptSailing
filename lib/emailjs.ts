@@ -1,7 +1,8 @@
 import emailjs from '@emailjs/browser';
 import { CONTACT } from '../app/config/contact';
 import { trackEvent } from './analytics';
-import { saveBookingSubmission, saveContactSubmission } from './submissions';
+import { createCharter } from './availability';
+import { saveContactSubmission } from './submissions';
 
 // EmailJS configuration with fallbacks
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'demo_public_key';
@@ -140,20 +141,21 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
 
     if (response.status === 200) {
       trackEvent('booking_submitted', { boat: bookingData.boat, theme: bookingData.selectedTheme || '' });
-      saveBookingSubmission({
-        type: 'booking',
+      createCharter({
+        status: 'web_request',
+        startDate: bookingData.date,
+        endDate: bookingData.date,
         name: bookingData.name,
         email: bookingData.email,
         phone: bookingData.phone,
         boat: bookingData.boat,
-        date: bookingData.date,
         passengers: bookingData.passengers,
         embarkationPoint: bookingData.deliveryPoint || bookingData.embarkationPoint,
         deliveryPoint: bookingData.deliveryPoint,
         redeliveryPoint: bookingData.redeliveryPoint,
         holidayDescription: bookingData.holidayDescription,
         selectedTheme: bookingData.selectedTheme,
-      }).catch(err => console.warn('Failed to save booking to DB:', err));
+      }).catch(err => console.warn('Failed to save charter to DB:', err));
       return {
         status: 'success',
         message: 'Booking email sent successfully to both client and business'
