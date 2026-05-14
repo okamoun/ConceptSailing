@@ -6,9 +6,11 @@ import OpenAI from 'openai';
 const IMAGE_DIR_JPG = path.join(process.cwd(), 'public', 'adventures');
 const IMAGE_DIR_PNG = path.join(process.cwd(), 'public', 'adventures/OpenAI');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
 function sanitizeFilename(name: string): string {
   return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -42,7 +44,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const aiResponse = await openai.images.generate({
+    const aiResponse = await getOpenAI().images.generate({
       prompt,
       n: 1,
       size: '512x512',
