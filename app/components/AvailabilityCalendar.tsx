@@ -127,13 +127,13 @@ export default function AvailabilityCalendar({
             if (status) {
               cellClass += `${ADMIN_CELL[status]} border border-white/20 cursor-pointer hover:opacity-80`;
             } else if (isPast) {
-              cellClass += 'bg-white/5 text-white/30 border border-white/10';
+              cellClass += 'bg-white/5 text-white/30 border border-white/10 cursor-pointer hover:bg-white/10';
             } else {
               cellClass += 'bg-white/10 text-white border border-white/20 cursor-pointer hover:bg-white/20';
             }
           }
 
-          const clickable = mode === 'admin' && !isPast && onDayClick;
+          const clickable = mode === 'admin' && !!onDayClick;
 
           return (
             <div

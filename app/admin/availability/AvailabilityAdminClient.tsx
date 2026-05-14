@@ -178,9 +178,20 @@ export default function AvailabilityAdminClient() {
     <main className="px-4 py-6">
       <div className="max-w-3xl mx-auto space-y-6">
 
-        <div>
-          <h1 className="text-white font-bold text-2xl">Charter Calendar</h1>
-          <p className="text-blue-200 text-xs mt-0.5">Click any future date to add or edit a charter entry</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-white font-bold text-2xl">Charter Calendar</h1>
+            <p className="text-blue-200 text-xs mt-0.5">Click any date on the calendar to add or edit a charter entry</p>
+          </div>
+          <button
+            onClick={() => openAddModal(new Date().toISOString().slice(0, 10))}
+            className="flex-shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors shadow"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            New Entry
+          </button>
         </div>
 
         {error && (
