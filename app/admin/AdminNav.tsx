@@ -7,6 +7,7 @@ import { useAdminAuth } from './AdminAuthContext';
 const NAV_LINKS = [
   { href: '/admin',                   label: 'Dashboard' },
   { href: '/admin/booking-summary',   label: 'Booking Summary' },
+  { href: '/admin/availability',      label: 'Calendar' },
   { href: '/admin/reviews',           label: 'Reviews' },
 ];
 
