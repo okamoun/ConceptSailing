@@ -1,143 +1,160 @@
-'use client';
+import type { Metadata } from 'next'
+import { Inter } from "next/font/google"
+import Script from "next/script"
+import { BlueOneProvider } from "./contexts/BlueOneContext"
+import { AuthProvider } from "./contexts/AuthContext"
+import Navigation from "./components/Navigation"
+import Footer from "./components/Footer"
+import "./globals.css"
+import "./animations.css"
 
-import { Inter } from "next/font/google";
-import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { BlueOneProvider, useBlueOneMode } from "./contexts/BlueOneContext";
-import "./globals.css";
-import "./animations.css";
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] })
 
-function NavigationContent() {
-  const pathname = usePathname();
-  const { isBlueOneMode } = useBlueOneMode();
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const linkClass = (base: string) =>
-    `${base} hover:text-blue-300 transition-colors`;
-
-  const navLinks = (
-    <>
-      <Link href="/blueone" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-200 font-bold' : 'text-blue-400 font-bold')}>BlueOne</Link>
-      <Link href="/experiences" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Experiences</Link>
-      <Link href="/themes" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Adventure Themes</Link>
-      <Link href="/destinations" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Destinations</Link>
-      {pathname !== '/blueone' && !isBlueOneMode && (
-        <Link href="/boats" onClick={() => setMobileOpen(false)} className="hover:text-accent transition-colors">All Boats</Link>
-      )}
-      <Link href="/about" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>About</Link>
-      <Link href="/contact" onClick={() => setMobileOpen(false)} className={linkClass(isBlueOneMode ? 'text-blue-100' : 'text-gray-300')}>Contact</Link>
-    </>
-  );
-
-  return (
-    <nav className={`sticky top-0 z-50 shadow-lg border-b backdrop-blur-sm ${isBlueOneMode ? 'bg-gradient-to-r from-blue-900/95 to-blue-800/95 border-blue-400/30' : 'bg-gradient-to-r from-[#101824]/95 to-[#1f2937]/95 border-accent/20'}`}>
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="flex flex-col items-center gap-2 group">
-          <Image
-            src={isBlueOneMode ? "/images/boats/blueone/logo_blueone.png" : "/logo_cms.svg"}
-            alt={isBlueOneMode ? "BlueOne Logo" : "Concept Sailing Logo"}
-            width={isBlueOneMode ? 120 : 160}
-            height={isBlueOneMode ? 60 : 100}
-            className={`h-24 w-auto drop-shadow-lg transition-transform group-hover:scale-105 ${isBlueOneMode ? 'object-contain' : ''}`}
-            style={{maxHeight:'120px'}}
-            priority
-          />
-          <span className={`${isBlueOneMode ? 'text-blue-300' : 'text-accent'} font-semibold text-xs mt-1`}>
-            {isBlueOneMode ? 'BlueOne Luxury Yacht' : 'Premium Sailing Adventures'}
-          </span>
-        </Link>
-
-        {/* Desktop nav */}
-        <div className="hidden md:flex space-x-8 text-lg font-semibold">
-          {navLinks}
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden flex flex-col gap-1.5 p-2 text-white"
-          onClick={() => setMobileOpen(o => !o)}
-          aria-label="Toggle menu"
-        >
-          <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileOpen ? 'translate-y-2 rotate-45' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-current transition-opacity ${mobileOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-current transition-transform ${mobileOpen ? '-translate-y-2 -rotate-45' : ''}`} />
-        </button>
-      </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className={`md:hidden px-6 pb-6 flex flex-col gap-4 text-lg font-semibold ${isBlueOneMode ? 'bg-blue-900/95' : 'bg-[#101824]/95'}`}>
-          {navLinks}
-        </div>
-      )}
-    </nav>
-  );
+export const metadata: Metadata = {
+  metadataBase: new URL('https://www.blueoneyacht.com'),
+  title: {
+    default: 'BlueOne Luxury Yacht Charters | Sailing Adventures in Greece',
+    template: '%s | BlueOne Luxury Yacht Charters'
+  },
+  description: 'Experience luxury sailing adventures in Greece aboard the BlueOne catamaran. Premium yacht charters with island hopping, sunset cruises, and all-inclusive experiences.',
+  keywords: ['luxury yacht charter Greece', 'BlueOne catamaran', 'sailing holidays Greece', 'Greek islands sailing', 'premium yacht experiences', 'Athens yacht charter'],
+  authors: [{ name: 'BlueOne Luxury Yacht Charters' }],
+  creator: 'BlueOne Luxury Yacht Charters',
+  publisher: 'BlueOne Luxury Yacht Charters',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://www.blueoneyacht.com',
+    siteName: 'BlueOne Luxury Yacht Charters',
+    title: 'BlueOne Luxury Yacht Charters | Sailing Adventures in Greece',
+    description: 'Experience luxury sailing adventures in Greece aboard the BlueOne catamaran. Premium yacht charters with island hopping, sunset cruises, and all-inclusive experiences.',
+    images: [
+      {
+        url: '/images/boats/blueone/External_sailing.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'BlueOne Luxury Catamaran Sailing in Greece',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'BlueOne Luxury Yacht Charters | Sailing Adventures in Greece',
+    description: 'Experience luxury sailing adventures in Greece aboard the BlueOne catamaran. Premium yacht charters with island hopping, sunset cruises, and all-inclusive experiences.',
+    images: ['/images/boats/blueone/External_sailing.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
-function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isBlueOneMode } = useBlueOneMode();
-  
-  return (
-    <body className={inter.className + " min-h-screen " + (isBlueOneMode ? "bg-gradient-to-br from-blue-50 to-white" : "bg-gradient-to-br from-[#101824] to-[#1f2937]")}>
-      <NavigationContent />
-      <main className="pt-6">{children}</main>
-      <footer className={`mt-16 border-t py-10 ${isBlueOneMode ? 'bg-blue-900 border-blue-400/30' : 'bg-[#1f2937] border-accent/30'}`}>
-        <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div>
-            <h3 className={`flex items-center gap-2 text-2xl font-extrabold mb-4 ${isBlueOneMode ? 'text-blue-300' : 'text-accent'}`}>
-              <Image 
-                src={isBlueOneMode ? "/images/boats/blueone/logo_blueone.png" : "/logo_cms.svg"} 
-                alt={isBlueOneMode ? "BlueOne Logo" : "Concept Sailing Logo"} 
-                width={100} 
-                height={64} 
-                className="h-20 w-auto inline-block align-middle" 
-                style={{maxHeight:'100px'}} 
-                priority 
-              />
-              {isBlueOneMode ? 'BlueOne Luxury Yacht' : 'Concept Sailing'}
-            </h3>
-            <p className={`text-lg ${isBlueOneMode ? 'text-blue-100' : 'text-gray-200'}`}>
-              Your gateway to exclusive, unforgettable sailing adventures in Greece.
-            </p>
-          </div>
-          <div>
-            <h3 className={`text-xl font-bold mb-4 ${isBlueOneMode ? 'text-blue-300' : 'text-accent'}`}>Quick Links</h3>
-            <ul className="space-y-2 text-lg">
-              <li><Link href="/destinations" className={`hover:${isBlueOneMode ? 'text-blue-300' : 'text-accent'} transition-colors`}>Destinations</Link></li>
-              {!isBlueOneMode && <li><Link href="/boats" className="hover:text-accent transition-colors">Our Boats</Link></li>}
-              <li><Link href="/about" className={`hover:${isBlueOneMode ? 'text-blue-300' : 'text-accent'} transition-colors`}>About Us</Link></li>
-              <li><Link href="/contact" className={`hover:${isBlueOneMode ? 'text-blue-300' : 'text-accent'} transition-colors`}>Contact</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className={`text-xl font-bold mb-4 ${isBlueOneMode ? 'text-blue-300' : 'text-accent'}`}>Contact Us</h3>
-            <p className="text-lg">Email: <a href="mailto:contact@nj3cruises.com" className={`hover:${isBlueOneMode ? 'text-blue-300' : 'text-accent'} transition-colors`}>contact@nj3cruises.com</a></p>
-            <p className="text-lg">Phone: +30 210 123 4567</p>
-            <div className="mt-4">
-              <p className={`text-lg font-bold ${isBlueOneMode ? 'text-blue-300' : 'text-accent'}`}>Concept Sailing</p>
-              <p className="text-sm text-gray-400">Athens, Greece</p>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </body>
-  );
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'TouristInformationCenter',
+      '@id': 'https://www.blueoneyacht.com/#organization',
+      name: 'BlueOne Luxury Yacht Charters',
+      url: 'https://www.blueoneyacht.com',
+      logo: 'https://www.blueoneyacht.com/images/boats/blueone/logo_blueone.png',
+      image: 'https://www.blueoneyacht.com/images/boats/blueone/External_sailing.jpg',
+      description: 'Premium luxury yacht charter company offering curated sailing experiences across the Greek islands aboard the BlueOne Fountaine Pajot Aura 51 catamaran.',
+      telephone: '+33675604532',
+      email: 'contact@nj3cruises.com',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Alimos Marina',
+        addressLocality: 'Athens',
+        addressCountry: 'GR',
+      },
+      areaServed: {
+        '@type': 'Country',
+        name: 'Greece',
+      },
+      priceRange: '$$$',
+      openingHoursSpecification: [
+        {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+          opens: '09:00',
+          closes: '18:00',
+        },
+      ],
+      sameAs: [],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://www.blueoneyacht.com/#website',
+      url: 'https://www.blueoneyacht.com',
+      name: 'BlueOne Luxury Yacht Charters',
+      publisher: { '@id': 'https://www.blueoneyacht.com/#organization' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://www.blueoneyacht.com/experiences?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
 }
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
-    <BlueOneProvider>
-      <html lang="en">
-        <LayoutContent>{children}</LayoutContent>
-      </html>
-    </BlueOneProvider>
-  );
+    <html lang="en" className={inter.className}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}');
+              `}
+            </Script>
+          </>
+        )}
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
+      <body className="min-h-screen bg-blue-900">
+        <AuthProvider>
+          <BlueOneProvider>
+            <Navigation />
+            <main>{children}</main>
+            <Footer />
+          </BlueOneProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  )
 }

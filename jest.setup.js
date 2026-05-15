@@ -1,16 +1,46 @@
 import '@testing-library/jest-dom'
 
+// Mock Firebase Auth
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(() => ({})),
+  onAuthStateChanged: jest.fn((auth, cb) => { cb(null); return jest.fn(); }),
+  signInWithEmailAndPassword: jest.fn(),
+  signOut: jest.fn(),
+}))
+
+// Mock AuthContext so tests don't need a real Firebase connection
+jest.mock('./app/contexts/AuthContext', () => ({
+  AuthProvider: ({ children }) => children,
+  useAuth: () => ({
+    user: null,
+    userProfile: null,
+    loading: false,
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+    hasPermission: jest.fn(() => false),
+  }),
+}))
+
+// Mock Firebase client SDK extras
+jest.mock('./lib/userManagement', () => ({
+  getUserProfile: jest.fn(() => Promise.resolve(null)),
+  setUserProfile: jest.fn(() => Promise.resolve()),
+  updateUserProfile: jest.fn(() => Promise.resolve()),
+  deleteUserProfile: jest.fn(() => Promise.resolve()),
+  getAllUserProfiles: jest.fn(() => Promise.resolve([])),
+}))
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({
+  useRouter: jest.fn(() => ({
     push: jest.fn(),
     replace: jest.fn(),
     prefetch: jest.fn(),
     back: jest.fn(),
     forward: jest.fn(),
     refresh: jest.fn(),
-  }),
-  useSearchParams: () => ({
+  })),
+  useSearchParams: jest.fn(() => ({
     get: jest.fn(),
     entries: jest.fn(),
     forEach: jest.fn(),
@@ -18,8 +48,8 @@ jest.mock('next/navigation', () => ({
     values: jest.fn(),
     has: jest.fn(),
     toString: jest.fn(),
-  }),
-  usePathname: () => '/',
+  })),
+  usePathname: jest.fn(() => '/'),
 }))
 
 // Mock Next.js Image component
@@ -40,9 +70,12 @@ const localStorageMock = {
 global.localStorage = localStorageMock
 
 // Mock window.location
-Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-  },
-  writable: true,
-})
+try {
+  Object.defineProperty(window, 'location', {
+    value: { href: '' },
+    writable: true,
+    configurable: true,
+  })
+} catch {
+  window.location.href = ''
+}
