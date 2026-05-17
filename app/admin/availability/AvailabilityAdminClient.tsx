@@ -11,6 +11,7 @@ import {
   type CharterStatus,
   CHARTER_STATUS_LABEL,
 } from '../../../lib/availability';
+import { deleteField } from 'firebase/firestore';
 import {
   marinas,
   getMarinaById,
@@ -19,6 +20,7 @@ import {
   DEFAULT_MARINA_ID,
 } from '../../marinas-data';
 import MarinaMap from '../MarinaMap';
+import adventures from '../../adventures-data';
 
 const STATUS_BADGE: Record<CharterStatus, string> = {
   web_request:     'bg-sky-400/30 text-sky-200',
@@ -31,9 +33,6 @@ const STATUS_BADGE: Record<CharterStatus, string> = {
   maintenance:     'bg-red-500/30 text-red-200',
 };
 
-const CLIENT_STATUSES: CharterStatus[] = [
-  'web_request', 'broker_request', 'serious_request', 'confirmed', 'signed',
-];
 
 interface ModalState {
   mode: 'add' | 'edit';
@@ -68,6 +67,7 @@ export default function AvailabilityAdminClient() {
   });
 
   const [modal, setModal] = useState<ModalState | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -86,7 +86,7 @@ export default function AvailabilityAdminClient() {
       name: '', email: '', phone: '', passengers: '', boat: '',
       deliveryPoint: DEFAULT_MARINA_ID,
       redeliveryPoint: DEFAULT_MARINA_ID,
-      note: '', selectedTheme: '', holidayDescription: '',
+      note: '', selectedTheme: '', holidayDescription: ''
     });
   }
 
@@ -116,39 +116,42 @@ export default function AvailabilityAdminClient() {
     else openAddModal(dateStr);
   }
 
-  function modalToData(m: ModalState): Omit<Charter, 'id' | 'createdAt'> {
-    const hasClient = CLIENT_STATUSES.includes(m.status);
+  function modalToData(m: ModalState): Record<string, unknown> {
     return {
       status: m.status,
       startDate: m.startDate,
       endDate: m.endDate,
-      ...(hasClient && m.name ? { name: m.name } : {}),
-      ...(hasClient && m.email ? { email: m.email } : {}),
-      ...(hasClient && m.phone ? { phone: m.phone } : {}),
-      ...(hasClient && m.passengers ? { passengers: Number(m.passengers) } : {}),
-      ...(m.boat ? { boat: m.boat } : {}),
-      deliveryPoint: m.deliveryPoint,
-      redeliveryPoint: m.redeliveryPoint,
-      ...(m.note ? { note: m.note } : {}),
-      ...(m.selectedTheme ? { selectedTheme: m.selectedTheme } : {}),
-      ...(m.holidayDescription ? { holidayDescription: m.holidayDescription } : {}),
+      name:               m.name        ? m.name              : deleteField(),
+      email:              m.email       ? m.email             : deleteField(),
+      phone:              m.phone       ? m.phone             : deleteField(),
+      passengers:         m.passengers  ? Number(m.passengers): deleteField(),
+      boat:               m.boat                    ? m.boat              : deleteField(),
+      deliveryPoint:      m.deliveryPoint,
+      redeliveryPoint:    m.redeliveryPoint,
+      note:               m.note                    ? m.note              : deleteField(),
+      selectedTheme:      m.selectedTheme            ? m.selectedTheme     : deleteField(),
+      holidayDescription: m.holidayDescription       ? m.holidayDescription: deleteField(),
     };
   }
 
   async function handleSave() {
     if (!modal) return;
-    if (!modal.startDate || !modal.endDate) return;
+    setSubmitted(true);
+    if (!modal.startDate || !modal.endDate || !modal.name || !modal.email || !modal.phone) {
+      setError('Please fill in all required fields.');
+      return;
+    }
     if (modal.endDate < modal.startDate) { setError('End date must be on or after start date.'); return; }
     setSaving(true);
     setError('');
     try {
       const data = modalToData(modal);
       if (modal.mode === 'add') {
-        const id = await createCharter(data);
-        setEntries(prev => [...prev, { id, ...data, createdAt: null }]
+        const id = await createCharter(data as Omit<Charter, 'id' | 'createdAt'>);
+        setEntries(prev => [...prev, { id, ...(data as Omit<Charter, 'id' | 'createdAt'>), createdAt: null }]
           .sort((a, b) => a.startDate.localeCompare(b.startDate)));
       } else if (modal.entry) {
-        await updateCharter(modal.entry.id, data);
+        await updateCharter(modal.entry.id, data as Partial<Omit<Charter, 'id' | 'createdAt'>>);
         setEntries(prev =>
           prev.map(e => e.id === modal.entry!.id ? { ...e, ...data } : e)
         );
@@ -172,7 +175,6 @@ export default function AvailabilityAdminClient() {
     }
   }
 
-  const showClientFields = modal ? CLIENT_STATUSES.includes(modal.status) : false;
 
   return (
     <main className="px-4 py-6">
@@ -234,7 +236,9 @@ export default function AvailabilityAdminClient() {
                         {delMarina && relMarina && delMarina.id !== relMarina.id ? ` · ↑ ${relMarina.name}` : ''}
                       </p>
                     )}
-                    {e.note && <p className="text-blue-300 text-xs italic truncate">{e.note}</p>}
+                    {e.selectedTheme && <p className="text-yellow-300 text-xs truncate">🎯 {e.selectedTheme}</p>}
+                    {e.holidayDescription && <p className="text-blue-200 text-xs italic truncate">{e.holidayDescription}</p>}
+                    {e.note && <p className="text-blue-300 text-xs italic truncate">📝 {e.note}</p>}
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
                     <button
@@ -300,7 +304,7 @@ export default function AvailabilityAdminClient() {
                   type="date"
                   value={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, startDate: e.target.value } : m)}
-                  className="w-full bg-blue-800 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark]"
+                  className={`w-full bg-blue-800 border text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark] ${submitted && !modal.startDate ? 'border-red-400 bg-red-900/20' : 'border-white/25'}`}
                 />
               </div>
               <MarinaSelectWithInfo
@@ -315,7 +319,7 @@ export default function AvailabilityAdminClient() {
                   value={modal.endDate}
                   min={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, endDate: e.target.value } : m)}
-                  className="w-full bg-blue-800 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark]"
+                  className={`w-full bg-blue-800 border text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark] ${submitted && !modal.endDate ? 'border-red-400 bg-red-900/20' : 'border-white/25'}`}
                 />
               </div>
               <MarinaSelectWithInfo
@@ -325,17 +329,30 @@ export default function AvailabilityAdminClient() {
               />
             </div>
 
-            {/* Client fields — shown for charter statuses with a client */}
-            {showClientFields && (
+            {/* Client Info */}
+            {true && (
               <div className="space-y-3 pt-1 border-t border-white/10">
                 <p className="text-blue-300 text-xs font-semibold uppercase tracking-wide">Client Info</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Name" value={modal.name} onChange={v => setModal(m => m ? { ...m, name: v } : m)} />
-                  <Field label="Email" type="email" value={modal.email} onChange={v => setModal(m => m ? { ...m, email: v } : m)} />
-                  <Field label="Phone" type="tel" value={modal.phone} onChange={v => setModal(m => m ? { ...m, phone: v } : m)} />
+                  <Field label="Name *" value={modal.name} onChange={v => setModal(m => m ? { ...m, name: v } : m)} required={submitted && !modal.name} />
+                  <Field label="Email *" type="email" value={modal.email} onChange={v => setModal(m => m ? { ...m, email: v } : m)} required={submitted && !modal.email} />
+                  <Field label="Phone *" type="tel" value={modal.phone} onChange={v => setModal(m => m ? { ...m, phone: v } : m)} required={submitted && !modal.phone} />
                   <Field label="Passengers" type="number" value={modal.passengers} onChange={v => setModal(m => m ? { ...m, passengers: v } : m)} />
                   <div className="col-span-2">
                     <Field label="Boat" value={modal.boat} onChange={v => setModal(m => m ? { ...m, boat: v } : m)} />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-blue-200 text-xs font-medium block mb-1">Selected Theme</label>
+                    <select
+                      value={modal.selectedTheme}
+                      onChange={e => setModal(m => m ? { ...m, selectedTheme: e.target.value } : m)}
+                      className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+                    >
+                      <option value="">— No theme —</option>
+                      {adventures.map(a => (
+                        <option key={a.id} value={a.name}>{a.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div>
@@ -390,7 +407,7 @@ export default function AvailabilityAdminClient() {
                 </button>
               )}
               <button
-                onClick={() => { setModal(null); setError(''); }}
+                onClick={() => { setModal(null); setError(''); setSubmitted(false); }}
                 className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
               >
                 Cancel
@@ -409,20 +426,22 @@ function Field({
   value,
   onChange,
   type = 'text',
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
+  required?: boolean;
 }) {
   return (
     <div>
-      <label className="text-blue-200 text-xs font-medium block mb-1">{label}</label>
+      <label className={`text-xs font-medium block mb-1 ${required ? 'text-red-300' : 'text-blue-200'}`}>{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+        className={`w-full border text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 ${required ? 'bg-red-900/20 border-red-400' : 'bg-white/10 border-white/25'}`}
       />
     </div>
   );

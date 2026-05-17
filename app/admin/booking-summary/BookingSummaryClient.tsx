@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import {
   getAllCharters,
+  updateCharter,
   type Charter,
   type CharterStatus,
   CHARTER_STATUS_LABEL,
@@ -45,6 +46,26 @@ export default function BookingSummaryClient() {
   const [charters, setCharters] = useState<Charter[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeStatuses, setActiveStatuses] = useState<Set<CharterStatus>>(new Set(DEFAULT_STATUSES));
+  const [selected, setSelected] = useState<Charter | null>(null);
+  const [editNote, setEditNote] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+
+  function openDetail(c: Charter) {
+    setSelected(c);
+    setEditNote(c.note ?? '');
+  }
+
+  async function saveNote() {
+    if (!selected) return;
+    setSavingNote(true);
+    try {
+      await updateCharter(selected.id, { note: editNote || undefined });
+      setCharters(prev => prev.map(c => c.id === selected.id ? { ...c, note: editNote || undefined } : c));
+      setSelected(prev => prev ? { ...prev, note: editNote || undefined } : prev);
+    } finally {
+      setSavingNote(false);
+    }
+  }
 
   function toggleStatus(s: CharterStatus) {
     setActiveStatuses(prev => {
@@ -160,46 +181,109 @@ export default function BookingSummaryClient() {
 
         {!loading && filteredCharters.length > 0 && (
           <section>
-            <h2 className="text-white font-semibold text-base mb-3">All Charters</h2>
+            <h2 className="text-white font-semibold text-base mb-3">
+              All Charters
+              <span className="ml-2 text-blue-300 text-xs font-normal">Click a row to view details</span>
+            </h2>
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-white/20">
-                      {['Status', 'Name', 'Start', 'End', 'Pax', 'Delivery', 'Boat'].map(h => (
-                        <th key={h} className="text-left text-blue-200 font-semibold px-3 py-2.5 whitespace-nowrap">
-                          {h}
-                        </th>
+                      {['Status','Name','Email','Phone','Start','End','Nights','Pax','Theme','Delivery','Redelivery','Boat','Note'].map(h => (
+                        <th key={h} className="text-left text-blue-200 font-semibold px-3 py-2.5 whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {[...filteredCharters]
                       .sort((a, b) => a.startDate.localeCompare(b.startDate))
-                      .map((c, i) => (
-                        <tr key={c.id ?? i} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                          <td className="px-3 py-2 whitespace-nowrap">
-                            <StatusBadge status={c.status} />
-                          </td>
-                          <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{c.name || '—'}</td>
-                          <td className="px-3 py-2 text-blue-200 whitespace-nowrap">
-                            {new Date(`${c.startDate}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                          </td>
-                          <td className="px-3 py-2 text-blue-200 whitespace-nowrap">
-                            {c.endDate !== c.startDate
-                              ? new Date(`${c.endDate}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                              : '—'}
-                          </td>
-                          <td className="px-3 py-2 text-blue-200 text-center">{c.passengers ?? '—'}</td>
-                          <td className="px-3 py-2 text-blue-200 whitespace-nowrap">{c.embarkationPoint || c.deliveryPoint || '—'}</td>
-                          <td className="px-3 py-2 text-blue-200 whitespace-nowrap">{c.boat || '—'}</td>
-                        </tr>
-                      ))}
+                      .map((c, i) => {
+                        const nights = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86400000);
+                        return (
+                          <tr
+                            key={c.id ?? i}
+                            onClick={() => openDetail(c)}
+                            className="border-b border-white/10 hover:bg-white/10 cursor-pointer transition-colors"
+                          >
+                            <td className="px-3 py-2 whitespace-nowrap"><StatusBadge status={c.status} /></td>
+                            <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{c.name || '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 whitespace-nowrap">{c.email || '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 whitespace-nowrap">{c.phone || '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 whitespace-nowrap">
+                              {new Date(`${c.startDate}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </td>
+                            <td className="px-3 py-2 text-blue-200 whitespace-nowrap">
+                              {c.endDate !== c.startDate ? new Date(`${c.endDate}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                            </td>
+                            <td className="px-3 py-2 text-blue-200 text-center">{nights > 0 ? nights : '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 text-center">{c.passengers ?? '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 max-w-[120px] truncate">{c.selectedTheme || '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 whitespace-nowrap">{c.deliveryPoint || '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 whitespace-nowrap">{c.redeliveryPoint || '—'}</td>
+                            <td className="px-3 py-2 text-blue-200 whitespace-nowrap">{c.boat || '—'}</td>
+                            <td className="px-3 py-2 text-blue-300 italic max-w-[120px] truncate">{c.note || '—'}</td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
             </div>
           </section>
+        )}
+
+        {/* Detail modal */}
+        {selected && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelected(null)}>
+            <div className="w-full max-w-lg bg-blue-900/95 border border-white/20 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4" onClick={e => e.stopPropagation()}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-white font-bold text-lg">{selected.name || 'Charter Detail'}</h2>
+                  <StatusBadge status={selected.status} />
+                </div>
+                <button onClick={() => setSelected(null)} className="text-blue-300 hover:text-white text-lg leading-none">✕</button>
+              </div>
+
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <DetailRow label="Start" value={new Date(`${selected.startDate}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })} />
+                <DetailRow label="End" value={selected.endDate !== selected.startDate ? new Date(`${selected.endDate}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} />
+                <DetailRow label="Nights" value={String(Math.round((new Date(selected.endDate).getTime() - new Date(selected.startDate).getTime()) / 86400000) || '—')} />
+                <DetailRow label="Passengers" value={String(selected.passengers ?? '—')} />
+                <DetailRow label="Email" value={selected.email || '—'} />
+                <DetailRow label="Phone" value={selected.phone || '—'} />
+                <DetailRow label="Boat" value={selected.boat || '—'} />
+                <DetailRow label="Delivery" value={selected.deliveryPoint || '—'} />
+                <DetailRow label="Redelivery" value={selected.redeliveryPoint || '—'} />
+                <DetailRow label="Theme" value={selected.selectedTheme || '—'} />
+              </dl>
+
+              {selected.holidayDescription && (
+                <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+                  <p className="text-blue-300 text-xs font-medium mb-1">Holiday Description</p>
+                  <p className="text-white text-xs leading-relaxed">{selected.holidayDescription}</p>
+                </div>
+              )}
+
+              <div className="border-t border-white/10 pt-4 space-y-2">
+                <label className="text-blue-200 text-xs font-semibold uppercase tracking-wide block">Internal Note</label>
+                <textarea
+                  value={editNote}
+                  onChange={e => setEditNote(e.target.value)}
+                  rows={3}
+                  placeholder="Add internal comments…"
+                  className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 resize-none"
+                />
+                <button
+                  onClick={saveNote}
+                  disabled={savingNote}
+                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                  {savingNote ? 'Saving…' : 'Save Note'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {!loading && filteredCharters.length === 0 && (
@@ -231,5 +315,14 @@ function StatusBadge({ status }: { status: string }) {
     <span className={`px-1.5 py-0.5 rounded-full font-semibold ${STATUS_BADGE_CLS[status] ?? 'bg-white/20 text-white'}`}>
       {CHARTER_STATUS_LABEL[status as keyof typeof CHARTER_STATUS_LABEL] ?? status}
     </span>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <dt className="text-blue-300 font-medium">{label}</dt>
+      <dd className="text-white">{value}</dd>
+    </>
   );
 }
