@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['openai', 'firebase', 'firebase-admin'],
+  outputFileTracingExcludes: {
+    '*': [
+      './public/**/*',
+      './.next/cache/**/*',
+    ],
+  },
   experimental: {
     forceSwcTransforms: true,
   },

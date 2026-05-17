@@ -1,21 +1,22 @@
 import { NextResponse } from 'next/server';
 import adventures from '../../adventures-data';
 import { getAdventureImageUrl } from '../../getAdventureImageUrl';
-import path from 'path';
-import fs from 'fs';
-
-function isImageMissing(imagePath: string | undefined): boolean {
-  if (!imagePath) return true;
-  if (!imagePath.startsWith('/')) return true;
-  const publicPath = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''));
-  try {
-    return !fs.existsSync(publicPath);
-  } catch {
-    return true;
-  }
-}
 
 export async function GET(request: Request) {
+  const fs = await import('fs');
+  const path = await import('path');
+
+  function isImageMissing(imagePath: string | undefined): boolean {
+    if (!imagePath) return true;
+    if (!imagePath.startsWith('/')) return true;
+    const publicPath = path.join(process.cwd(), 'public', imagePath.replace(/^\//, ''));
+    try {
+      return !fs.existsSync(publicPath);
+    } catch {
+      return true;
+    }
+  }
+
   const url = new URL(request.url);
   const onlyId = url.searchParams.get('id') ?? undefined;
   const promptOverride = url.searchParams.get('prompt') ?? undefined;
