@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 
 export default function AwardBanner() {
   const [dismissed, setDismissed] = useState(false);
@@ -12,13 +11,6 @@ export default function AwardBanner() {
     <div className="relative z-50 bg-gradient-to-r from-yellow-900 via-amber-800 to-yellow-900 border-b-2 border-yellow-500/60">
       <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-center gap-3">
         <div className="flex items-center gap-3">
-          <Image
-            src="/price_chef.jpg"
-            alt="EMMY's Charter Show 2026 Best Chef Award"
-            width={36}
-            height={36}
-            className="rounded-full object-cover border-2 border-yellow-400 shadow-lg flex-shrink-0"
-          />
           <div className="flex items-center gap-2 flex-wrap justify-center">
             <span className="text-yellow-300 text-lg">🏆</span>
             <span className="text-yellow-100 font-bold text-sm tracking-wide uppercase">
