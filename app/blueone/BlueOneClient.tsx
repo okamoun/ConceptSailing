@@ -9,7 +9,8 @@ import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
 import MiniCalendar from '../components/MiniCalendar';
 import { boats } from '../boats-data';
 import { getAllCharters, type Charter } from '../../lib/availability';
-import { getAllPhotoMeta } from '../../lib/photos';
+import { getAllPhotoMeta, type PhotoMeta } from '../../lib/photos';
+import type { ImageCategory } from '../constants/boat-images';
 
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
@@ -23,7 +24,7 @@ export default function BlueOneClient() {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
-  const [keyPhotoUrls, setKeyPhotoUrls] = useState<string[] | null>(null);
+  const [keyPhotosByCat, setKeyPhotosByCat] = useState<Partial<Record<ImageCategory, string[]>>>({});
 
   useEffect(() => {
     const blueOneBoat = boats.find((b) => b.name === "BlueOne");
@@ -32,11 +33,16 @@ export default function BlueOneClient() {
     setIsBlueOneMode(true);
     getAllCharters().then(setCharters).catch(() => {});
     getAllPhotoMeta()
-      .then(overrides => {
-        const keys = overrides.filter(p => p.keyPhoto === true).map(p => p.src);
-        if (keys.length > 0) setKeyPhotoUrls(keys);
+      .then((overrides: PhotoMeta[]) => {
+        const keyOnes = overrides.filter(p => p.keyPhoto === true);
+        const byCat: Partial<Record<ImageCategory, string[]>> = {};
+        for (const p of keyOnes) {
+          if (!byCat[p.category]) byCat[p.category] = [];
+          byCat[p.category]!.push(p.src);
+        }
+        setKeyPhotosByCat(byCat);
       })
-      .catch(() => {});
+      .catch(err => { console.error('[photos] Firestore error:', JSON.stringify(err), err); });
   }, [setIsBlueOneMode]);
 
   // BlueOne specific images - Real boat photos (100+ total: 54 original + 22 new + 17 drone)
@@ -265,7 +271,7 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Exterior Excellence</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {blueOneExteriorImages.slice(0, 4).map((image, index) => (
+              {(keyPhotosByCat.exterior ?? blueOneExteriorImages.slice(0, 4)).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -286,7 +292,7 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Luxurious Interiors</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {blueOneInteriorImages.slice(0, 4).map((image, index) => (
+              {(keyPhotosByCat.interior ?? blueOneInteriorImages.slice(0, 4)).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -307,7 +313,7 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Cockpit & Dining</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {blueOneCockpitImages.slice(0, 4).map((image, index) => (
+              {(keyPhotosByCat.cockpit ?? blueOneCockpitImages.slice(0, 4)).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -352,7 +358,7 @@ export default function BlueOneClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blueOneActivityImages.map((image, index) => (
+              {(keyPhotosByCat.activities ?? blueOneActivityImages).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -373,7 +379,7 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Culinary Excellence</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {blueOneFoodImages.map((image, index) => (
+              {(keyPhotosByCat.food ?? blueOneFoodImages).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -743,7 +749,12 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Complete Gallery</h2>
             <BlueOneGallerySlideshow
-              images={keyPhotoUrls ?? [...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages, ...blueOneDroneImages]}
+              images={[
+                ...(keyPhotosByCat.exterior ?? blueOneExteriorImages.slice(0, 4)),
+                ...(keyPhotosByCat.interior ?? blueOneInteriorImages.slice(0, 4)),
+                ...(keyPhotosByCat.cockpit ?? blueOneCockpitImages.slice(0, 4)),
+                ...(keyPhotosByCat.drone ?? blueOneDroneImages.slice(0, 4)),
+              ]}
             />
           </div>
         </section>
