@@ -10,7 +10,7 @@ import { sendBookingEmail, BookingEmailData } from '../../lib/emailjs';
 import adventures from '../adventures-data';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
 import MiniCalendar from '../components/MiniCalendar';
-import { getAllCharters, type Charter } from '../../lib/availability';
+import { getAllCharters, createCharter, type Charter } from '../../lib/availability';
 
 const MarinaMap = dynamic(() => import('../components/MarinaMap'), { ssr: false });
 
@@ -143,15 +143,30 @@ export default function BookingPageContent() {
         timestamp: new Date().toISOString()
       };
 
+      // Always save to Firestore first, regardless of email outcome
+      const charterData: Parameters<typeof createCharter>[0] = {
+        status: 'web_request',
+        startDate: selectedDate,
+        endDate: endDate || selectedDate,
+        name,
+        email,
+        phone,
+        boat: blueOneBoat.name,
+        passengers,
+        embarkationPoint: getMarinaById(deliveryPoint)?.name || deliveryPoint,
+        deliveryPoint: getMarinaById(deliveryPoint)?.name || deliveryPoint,
+        redeliveryPoint: getMarinaById(actualRedelivery)?.name || actualRedelivery,
+      };
+      if (holidayDescription) charterData.holidayDescription = holidayDescription;
+      if (selectedTheme) charterData.selectedTheme = adventures.find(a => a.id === selectedTheme)?.name;
+      await createCharter(charterData);
+
+      // Send email notification (non-blocking — DB save already done)
       const emailResponse = await sendBookingEmail(bookingData);
 
-      if (emailResponse.status === 'success') {
-        localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
-        localStorage.setItem('emailStatus', JSON.stringify({ status: emailResponse.status, message: emailResponse.message }));
-        window.location.href = '/booking-confirmation';
-      } else {
-        alert(`There was an error sending your request: ${emailResponse.message}. Please try again or contact us directly.`);
-      }
+      localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
+      localStorage.setItem('emailStatus', JSON.stringify({ status: emailResponse.status, message: emailResponse.message }));
+      window.location.href = '/booking-confirmation';
     } catch (error) {
       console.error('Error submitting booking:', error);
       alert('An unexpected error occurred. Please try again or contact us directly.');
@@ -273,7 +288,10 @@ export default function BookingPageContent() {
                           rangeEnd={endDate}
                           onDayClick={(date) => {
                             setSelectedDate(date);
-                            if (endDate && endDate <= date) setEndDate('');
+                            const d = new Date(date + 'T12:00:00');
+                            d.setDate(d.getDate() + 7);
+                            const defaultEnd = d.toISOString().split('T')[0];
+                            if (!endDate || endDate <= date) setEndDate(defaultEnd);
                             const [y, mo] = date.split('-').map(Number);
                             setCalMonth(new Date(y, mo - 1, 1));
                             setStartCalOpen(false);

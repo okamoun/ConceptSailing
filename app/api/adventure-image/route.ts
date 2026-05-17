@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import OpenAI from 'openai';
-
-const IMAGE_DIR_JPG = path.join(process.cwd(), 'public', 'adventures');
-const IMAGE_DIR_PNG = path.join(process.cwd(), 'public', 'adventures/OpenAI');
-
-let _openai: OpenAI | null = null;
-function getOpenAI(): OpenAI {
-  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  return _openai;
-}
 
 function sanitizeFilename(name: string): string {
   return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 }
 
 export async function GET(request: NextRequest) {
+  const fs = await import('fs');
+  const path = await import('path');
+  const { default: OpenAI } = await import('openai');
+
+  const IMAGE_DIR_JPG = path.join(process.cwd(), 'public', 'adventures');
+  const IMAGE_DIR_PNG = path.join(process.cwd(), 'public', 'adventures/OpenAI');
+
   const { searchParams } = new URL(request.url);
   const adventureId = searchParams.get('adventureId');
   const prompt = searchParams.get('prompt');
@@ -44,7 +39,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const aiResponse = await getOpenAI().images.generate({
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const aiResponse = await openai.images.generate({
       prompt,
       n: 1,
       size: '512x512',

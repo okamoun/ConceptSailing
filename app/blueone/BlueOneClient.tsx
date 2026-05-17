@@ -9,6 +9,8 @@ import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
 import MiniCalendar from '../components/MiniCalendar';
 import { boats } from '../boats-data';
 import { getAllCharters, type Charter } from '../../lib/availability';
+import { getAllPhotoMeta, type PhotoMeta } from '../../lib/photos';
+import type { ImageCategory } from '../constants/boat-images';
 
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
@@ -22,6 +24,7 @@ export default function BlueOneClient() {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  const [keyPhotosByCat, setKeyPhotosByCat] = useState<Partial<Record<ImageCategory, string[]>>>({});
 
   useEffect(() => {
     const blueOneBoat = boats.find((b) => b.name === "BlueOne");
@@ -29,34 +32,138 @@ export default function BlueOneClient() {
     setIsLoading(false);
     setIsBlueOneMode(true);
     getAllCharters().then(setCharters).catch(() => {});
+    getAllPhotoMeta()
+      .then((overrides: PhotoMeta[]) => {
+        const keyOnes = overrides.filter(p => p.keyPhoto === true);
+        const byCat: Partial<Record<ImageCategory, string[]>> = {};
+        for (const p of keyOnes) {
+          if (!byCat[p.category]) byCat[p.category] = [];
+          byCat[p.category]!.push(p.src);
+        }
+        setKeyPhotosByCat(byCat);
+      })
+      .catch(err => { console.error('[photos] Firestore error:', JSON.stringify(err), err); });
   }, [setIsBlueOneMode]);
 
-  // BlueOne specific images from the blueone folder - organized by content
+  // BlueOne specific images - Real boat photos (100+ total: 54 original + 22 new + 17 drone)
+  // Featured 4 (shown in curated section) are first; rest fill the complete gallery
   const blueOneExteriorImages = [
-    "/images/boats/blueone/IMG_7667.jpeg", // Main exterior shot
-    "/images/boats/blueone/External_reading.jpg", // Exterior reading area
-    "/images/boats/blueone/External_sailing.jpg", // Sailing exterior view
-    "/images/boats/blueone/IMG_8914.jpeg", // Exterior view
-    "/images/boats/blueone/IMG_8917.jpeg", // Another exterior view
-    "/images/boats/blueone/277080815_7549724425052761_8631137394407809070_n.jpeg", // Exterior photo
+    // === FEATURED 4 (Best exterior shots - high water/sky content) ===
+    "/images/boat/IMG_0025_NEW.JPG",  // 90% blue - pristine water/sky
+    "/images/boat/IMG_0026_NEW.JPG",  // 89% blue - exterior sailing view
+    "/images/boat/IMG_9965_NEW.JPG",  // 89% blue - exterior detail
+    "/images/boat/IMG_9970_NEW.JPG",  // 88% blue - exterior profile
+    // === GALLERY FILL (Original collection) ===
+    "/images/boat/IMG_7545.JPG",
+    "/images/boat/IMG_7546.JPG",
+    "/images/boat/IMG_7547.JPG",
+    "/images/boat/IMG_7549.JPG",
+    "/images/boat/IMG_7553.JPG",
+    "/images/boat/IMG_7554.JPG",
+    "/images/boat/IMG_7555.JPG",
+    "/images/boat/IMG_7556.JPG",
+    "/images/boat/IMG_7557.JPG",
+    "/images/boat/IMG_7559.JPG",
+    "/images/boat/IMG_7561.JPG",
+    "/images/boat/IMG_7562.JPG",
+    "/images/boat/IMG_7563.JPG",
+    "/images/boat/IMG_7564.JPG",
+    "/images/boat/IMG_7565.JPG",
+    "/images/boat/IMG_7566.JPG",
+    "/images/boat/IMG_7567.JPG",
+    "/images/boat/IMG_7568.JPG",
+    // === ADDITIONAL NEW EXTERIOR ===
+    "/images/boat/IMG_0027_NEW.JPG",
+    "/images/boat/IMG_0028_NEW.JPG",
+    "/images/boat/IMG_9968_NEW.JPG",
   ];
 
   const blueOneInteriorImages = [
-    "/images/boats/blueone/Interior_table.jpg", // Interior dining table area
-    "/images/boats/blueone/kitchen.jpg", // Kitchen/galley area
-    "/images/boats/blueone/Actu-3-Aura51-Maestro-Bed.jpg.avif", // Master bedroom
-    "/images/boats/blueone/Actu-4-Aura51-Cabine-Bed.jpg.avif", // Cabin bedroom
+    // === FEATURED 4 (Best cabin/interior shots) ===
+    "/images/boat/IMG_7569.JPG",
+    "/images/boat/IMG_7570.JPG",
+    "/images/boat/IMG_7571.JPG",
+    "/images/boat/IMG_7572.JPG",
+    // === GALLERY FILL (Original proven collection) ===
+    "/images/boat/IMG_7573.JPG",
+    "/images/boat/IMG_7579.JPG",
+    "/images/boat/IMG_7580.JPG",
+    "/images/boat/IMG_7581.JPG",
+    "/images/boat/IMG_7582.JPG",
+    "/images/boat/IMG_7584.JPG",
+    "/images/boat/IMG_7585.JPG",
+    "/images/boat/IMG_7586.JPG",
+    "/images/boat/IMG_7587.JPG",
+    "/images/boat/IMG_7588.JPG",
+    "/images/boat/IMG_7589.JPG",
+    "/images/boat/IMG_7590.JPG",
+    "/images/boat/IMG_7591.JPG",
+    "/images/boat/IMG_7592.JPG",
   ];
 
   const blueOneCockpitImages = [
-    "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif", // Cockpit dining table
-    "/images/boats/blueone/Actu-8-Aura51-Front-Cockpit.avif", // Front cockpit seating
-    "/images/boats/blueone/IMG_8677.jpeg", // Cockpit or deck area
+    // === FEATURED 4 (Best cockpit/dining/entertaining shots) ===
+    "/images/boat/IMG_0012_NEW.JPG",  // 79% mixed - premium deck view
+    "/images/boat/IMG_0013_NEW.JPG",  // 80% mixed - dining ambiance
+    "/images/boat/IMG_0014_NEW.JPG",  // 80% mixed - seating area
+    "/images/boat/IMG_0010_NEW.JPG",  // 72% mixed - outdoor dining
+    // === GALLERY FILL (Original collection) ===
+    "/images/boat/IMG_7593.JPG",
+    "/images/boat/IMG_7594.JPG",
+    "/images/boat/IMG_7595.JPG",
+    "/images/boat/IMG_7596.JPG",
+    "/images/boat/IMG_7600.JPG",
+    "/images/boat/IMG_7601.JPG",
+    "/images/boat/IMG_7602.JPG",
+    "/images/boat/IMG_7603.JPG",
+    "/images/boat/IMG_7604.JPG",
+    "/images/boat/IMG_7605.JPG",
+    "/images/boat/IMG_7606.JPG",
+    "/images/boat/IMG_7607.JPG",
+    "/images/boat/IMG_7608.JPG",
+    "/images/boat/IMG_7609.JPG",
+    "/images/boat/IMG_7610.JPG",
+    "/images/boat/IMG_7611.JPG",
+    "/images/boat/IMG_7612.JPG",
+    "/images/boat/IMG_7613.JPG",
+    // === ADDITIONAL NEW COCKPIT/DINING (11 more) ===
+    "/images/boat/IMG_0001_NEW.JPG",
+    "/images/boat/IMG_0004_NEW.JPG",
+    "/images/boat/IMG_0005_NEW.JPG",
+    "/images/boat/IMG_0006_NEW.JPG",
+    "/images/boat/IMG_0007_NEW.JPG",
+    "/images/boat/IMG_0008_NEW.JPG",
+    "/images/boat/IMG_0016_NEW.JPG",
+    "/images/boat/IMG_0019_NEW.JPG",
+    "/images/boat/IMG_0021_NEW.JPG",
+    "/images/boat/IMG_9960_NEW.JPG",
+    "/images/boat/IMG_9961_NEW.JPG",
+  ];
+
+  const blueOneDroneImages = [
+    "/images/boat/DJI_20260511084346_0008_D.JPG",
+    "/images/boat/DJI_20260511084428_0009_D.JPG",
+    "/images/boat/DJI_20260511084433_0010_D.JPG",
+    "/images/boat/DJI_20260511084454_0011_D.JPG",
+    "/images/boat/DJI_20260511084457_0012_D.JPG",
+    "/images/boat/DJI_20260512133237_0013_D.JPG",
+    "/images/boat/DJI_20260512133247_0014_D.JPG",
+    "/images/boat/DJI_20260512133415_0015_D.JPG",
+    "/images/boat/DJI_20260512133432_0016_D.JPG",
+    "/images/boat/DJI_20260512133439_0017_D.JPG",
+    "/images/boat/DJI_20260512133510_0018_D.JPG",
+    "/images/boat/DJI_20260512133513_0019_D.JPG",
+    "/images/boat/DJI_20260512133534_0020_D.JPG",
+    "/images/boat/DJI_20260512133536_0021_D.JPG",
+    "/images/boat/DJI_20260512133553_0022_D.JPG",
+    "/images/boat/DJI_20260512133601_0023_D.JPG",
+    "/images/boat/DJI_20260512133607_0024_D.JPG",
   ];
 
   const blueOneFoodImages = [
-    "/images/boats/blueone/food_1.jpeg", 
-    "/images/boats/blueone/food_2.jpeg", 
+    "/images/boat/culinary_gourmet.jpg", // Chef's gourmet plated dish
+    "/images/boats/blueone/food_1.jpeg",
+    "/images/boats/blueone/food_2.jpeg",
     "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif", // Cockpit dining table
   ];
 
@@ -100,7 +207,7 @@ export default function BlueOneClient() {
   return (
     <>
       <main className="min-h-screen relative" style={{
-        backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boats/blueone/External_sailing.jpg')`,
+        backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boat/DJI_20260512133237_0013_D.JPG')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -163,8 +270,8 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Exterior Excellence</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blueOneExteriorImages.map((image, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(keyPhotosByCat.exterior ?? blueOneExteriorImages.slice(0, 4)).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -184,15 +291,15 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Luxurious Interiors</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {blueOneInteriorImages.map((image, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(keyPhotosByCat.interior ?? blueOneInteriorImages.slice(0, 4)).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
                     alt={`BlueOne interior view ${index + 1}`}
-                    width={600}
-                    height={400}
-                    className="w-full h-96 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
+                    width={400}
+                    height={300}
+                    className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
                 </div>
@@ -205,8 +312,8 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Cockpit & Dining</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {blueOneCockpitImages.map((image, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(keyPhotosByCat.cockpit ?? blueOneCockpitImages.slice(0, 4)).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -251,7 +358,7 @@ export default function BlueOneClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blueOneActivityImages.map((image, index) => (
+              {(keyPhotosByCat.activities ?? blueOneActivityImages).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -272,7 +379,7 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Culinary Excellence</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {blueOneFoodImages.map((image, index) => (
+              {(keyPhotosByCat.food ?? blueOneFoodImages).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -372,7 +479,12 @@ export default function BlueOneClient() {
               </div>
 
               {/* Chef Card */}
-              <div className="bg-white/20 backdrop-blur-md rounded-2xl overflow-hidden border border-white/30 shadow-xl">
+              <div className="bg-white/20 backdrop-blur-md rounded-2xl overflow-hidden border border-white/30 shadow-xl relative">
+                {/* Award Badge */}
+                <div className="absolute top-4 right-4 z-10 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 shadow-lg">
+                  <span className="text-lg">🏆</span>
+                  EMMY Award Winner 2026
+                </div>
                 {/* Card header bar */}
                 <div className="bg-blue-600/80 px-6 py-4 flex items-center gap-3">
                   <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
@@ -397,9 +509,9 @@ export default function BlueOneClient() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">Andreas Tsitsilianis</h3>
-                      <p className="text-blue-200 text-sm font-medium mb-3">Professional Chef</p>
+                      <p className="text-yellow-300 text-sm font-bold mb-1">Chef of the Year • EMMY Award</p>
                       <p className="text-blue-50 text-sm leading-relaxed">
-                        Chef Andreas brings culinary excellence to your sailing experience, specializing in Mediterranean cuisine with fresh, local ingredients.
+                        Award-winning chef bringing Michelin-level precision and Mediterranean excellence to your sailing experience.
                       </p>
                     </div>
                   </div>
@@ -482,6 +594,96 @@ export default function BlueOneClient() {
           </div>
         </section>
 
+        {/* Accolades & Recognition Section */}
+        <section className="py-20 bg-gradient-to-r from-yellow-900/40 via-amber-900/40 to-yellow-900/40 backdrop-blur-sm border-t-2 border-b-2 border-yellow-600/50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-block bg-yellow-400/20 backdrop-blur-sm rounded-full px-6 py-2 border border-yellow-400/50 mb-6">
+                <span className="text-yellow-300 font-semibold text-sm uppercase tracking-widest">Recognition</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Award-Winning Excellence</h2>
+              <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+                Our chef&apos;s commitment to culinary excellence has been honored with prestigious recognition
+              </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-yellow-400/60 overflow-hidden">
+                {/* Award Header */}
+                <div className="bg-gradient-to-r from-yellow-600/60 to-amber-600/60 px-8 py-6 border-b border-yellow-400/40">
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <span className="text-5xl">🏆</span>
+                  </div>
+                  <h3 className="text-3xl font-bold text-white text-center">Chef of the Year</h3>
+                  <p className="text-yellow-200 text-center text-lg font-semibold mt-2">EMMY Pros Chart Show 2026</p>
+                </div>
+
+                {/* Award Details */}
+                <div className="p-10">
+                  <div className="text-center mb-10">
+                    <p className="text-white text-lg leading-relaxed mb-6">
+                      Chef <span className="font-bold text-yellow-300">Andreas Tsitsilianis</span> was honored with the prestigious <span className="font-bold text-yellow-300">EMMY Award for Chef of the Year</span> in the <span className="font-bold">Category Emerald</span>, recognizing his outstanding culinary excellence, innovation, and dedication to Mediterranean gastronomy.
+                    </p>
+                    <div className="inline-block bg-yellow-400/20 backdrop-blur-sm rounded-lg px-6 py-4 border border-yellow-400/50 mb-6">
+                      <p className="text-yellow-300 font-bold text-sm uppercase tracking-widest">Award Details</p>
+                      <p className="text-white text-2xl font-bold mt-2">1st Place • Category Emerald</p>
+                      <p className="text-blue-200 text-sm mt-1">EMMYs - East Mediterranean Culinary Excellence</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-t border-white/10">
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">👨‍🍳</div>
+                      <p className="text-blue-200 text-sm font-semibold uppercase mb-1">Chef</p>
+                      <p className="text-white font-bold">Andreas Tsitsilianis</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">📅</div>
+                      <p className="text-blue-200 text-sm font-semibold uppercase mb-1">Year</p>
+                      <p className="text-white font-bold">2026</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">🌍</div>
+                      <p className="text-blue-200 text-sm font-semibold uppercase mb-1">Organization</p>
+                      <p className="text-white font-bold">EMMYs</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                    <a
+                      href="https://www.emmys.gr"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-yellow-900 font-bold px-8 py-3 rounded-lg transition-colors shadow-lg"
+                    >
+                      Learn More About the Award
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+
+                  {/* Facebook Post Embed */}
+                  <div className="mt-10 pt-6 border-t border-white/10 flex justify-center">
+                    <div className="overflow-hidden rounded-lg">
+                      <iframe
+                        src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fyachtchartershow%2Fposts%2Fpfbid0CFXzmXKNzPs8ZsQZwNhs58q6XfarHVx49P9zbCb79YQ5V2rbrcpQ1iJAD1e2VNRAl&show_text=true&width=500"
+                        width="500"
+                        height="669"
+                        style={{border: 'none', overflow: 'hidden'}}
+                        scrolling="no"
+                        frameBorder="0"
+                        allowFullScreen={true}
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                      ></iframe>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Floor Plan Section */}
         <section className="py-20 bg-black/40 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
@@ -546,8 +748,13 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Complete Gallery</h2>
-            <BlueOneGallerySlideshow 
-              images={[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages]}
+            <BlueOneGallerySlideshow
+              images={[
+                ...(keyPhotosByCat.exterior ?? blueOneExteriorImages.slice(0, 4)),
+                ...(keyPhotosByCat.interior ?? blueOneInteriorImages.slice(0, 4)),
+                ...(keyPhotosByCat.cockpit ?? blueOneCockpitImages.slice(0, 4)),
+                ...(keyPhotosByCat.drone ?? blueOneDroneImages.slice(0, 4)),
+              ]}
             />
           </div>
         </section>
@@ -586,6 +793,25 @@ export default function BlueOneClient() {
                 </Link>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Complete Photo Gallery Link */}
+        <section className="py-16 bg-gradient-to-r from-blue-900/50 via-blue-800/50 to-blue-900/50 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Explore Our Complete Gallery</h2>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+              Browse our extensive collection of over 100 professional photographs showcasing every aspect of BlueOne&apos;s luxury and beauty.
+            </p>
+            <Link
+              href="/blueone/gallery"
+              className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2"
+            >
+              View Full Gallery
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
           </div>
         </section>
 

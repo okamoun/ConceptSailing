@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: '/admin/booking-summary',   label: 'Booking Summary' },
   { href: '/admin/availability',      label: 'Calendar' },
   { href: '/admin/reviews',           label: 'Reviews' },
+  { href: '/admin/photos',            label: 'Photos' },
 ];
 
 export default function AdminNav() {

@@ -1038,17 +1038,28 @@ export type Chef = {
     desserts: { name: string; description: string }[];
     wines: { name: string; description: string }[];
   };
+  awards?: {
+    title: string;
+    category: string;
+    year: number;
+    organization: string;
+    description: string;
+    link?: string;
+    awardImage?: string;
+    awardImages?: string[];
+  }[];
 };
 
 export const chefs: Chef[] = [
   {
     id: "andreas-tsitsilianis",
     name: "Andreas Tsitsilianis",
-    title: "Executive Chef",
-    description: "Andreas brings Michelin-level precision and authentic Mediterranean soul to the sea.",
-    longDescription: "I am Andreas Tsitsilianis, a chef with over 12 years of experience in professional kitchens across Greece and Europe.\n\nComing from a family of cooks, my passion for food was shaped from an early age, with knowledge and values passed down from father to son. This foundation taught me to respect ingredients and focus on simplicity, flavor, and authenticity.\n\nI have worked in France and Italy, as well as in high-end restaurants in Athens, Mykonos, and as a Head Chef in Tinos. These experiences have shaped my culinary identity, combining discipline, creativity, and consistency.\n\nMy cuisine is inspired by modern Mediterranean flavors, with a strong Greek identity. I focus on fresh, seasonal ingredients, seafood, and balanced dishes, combining traditional recipes with refined techniques and subtle international influences.\n\nOn board, my goal is to create a relaxed yet refined dining experience, adapting to guests' preferences while delivering clean, flavorful and memorable dishes.",
+    title: "Executive Chef • EMMY Award Winner",
+    description: "Award-winning chef bringing Michelin-level precision and authentic Mediterranean soul to the sea.",
+    longDescription: "I am Andreas Tsitsilianis, a chef with over 12 years of experience in professional kitchens across Greece and Europe.\n\nComing from a family of cooks, my passion for food was shaped from an early age, with knowledge and values passed down from father to son. This foundation taught me to respect ingredients and focus on simplicity, flavor, and authenticity.\n\nI have worked in France and Italy, as well as in high-end restaurants in Athens, Mykonos, and as a Head Chef in Tinos. These experiences have shaped my culinary identity, combining discipline, creativity, and consistency.\n\nMy cuisine is inspired by modern Mediterranean flavors, with a strong Greek identity. I focus on fresh, seasonal ingredients, seafood, and balanced dishes, combining traditional recipes with refined techniques and subtle international influences.\n\nOn board, my goal is to create a relaxed yet refined dining experience, adapting to guests' preferences while delivering clean, flavorful and memorable dishes. In 2026, I was honored to receive the EMMY Award for Chef of the Year in the Emerald Category, recognition of my commitment to culinary excellence.",
     image: "/images/boats/blueone/profile_andrea_chef.jpg",
     foodImages: [
+      "/images/boat/culinary_gourmet.jpg",
       "/images/boats/blueone/food_1.jpeg",
       "/images/boats/blueone/food_2.jpeg",
       "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif"
@@ -1061,7 +1072,19 @@ export const chefs: Chef[] = [
       "Dietary Accommodations",
       "Wine Pairing Expertise"
     ],
-    experience: "12+ years in luxury hotels across Greece, Italy, and France. Michelin-starred restaurant experience. Private yacht chef for VIP clients.",
+    experience: "12+ years in luxury hotels across Greece, Italy, and France. Michelin-starred restaurant experience. Private yacht chef for VIP clients. 2026 EMMY Award Winner.",
+    awards: [
+      {
+        title: "Chef of the Year",
+        category: "Category Emerald",
+        year: 2026,
+        organization: "EMMY Pros Chart Show",
+        description: "Honored as Chef of the Year for culinary excellence and innovation in Mediterranean gastronomy.",
+        link: "https://www.emmys.gr",
+        awardImage: "/images/boats/blueone/emmy_award_trophy.jpg",
+        awardImages: []
+      }
+    ],
     sampleMenus: {
       appetizers: [
         {
