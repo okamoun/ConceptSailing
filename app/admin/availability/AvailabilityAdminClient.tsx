@@ -67,6 +67,7 @@ export default function AvailabilityAdminClient() {
   });
 
   const [modal, setModal] = useState<ModalState | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -135,7 +136,11 @@ export default function AvailabilityAdminClient() {
 
   async function handleSave() {
     if (!modal) return;
-    if (!modal.startDate || !modal.endDate) return;
+    setSubmitted(true);
+    if (!modal.startDate || !modal.endDate || !modal.name || !modal.email || !modal.phone) {
+      setError('Please fill in all required fields.');
+      return;
+    }
     if (modal.endDate < modal.startDate) { setError('End date must be on or after start date.'); return; }
     setSaving(true);
     setError('');
@@ -299,7 +304,7 @@ export default function AvailabilityAdminClient() {
                   type="date"
                   value={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, startDate: e.target.value } : m)}
-                  className="w-full bg-blue-800 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark]"
+                  className={`w-full bg-blue-800 border text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark] ${submitted && !modal.startDate ? 'border-red-400 bg-red-900/20' : 'border-white/25'}`}
                 />
               </div>
               <MarinaSelectWithInfo
@@ -314,7 +319,7 @@ export default function AvailabilityAdminClient() {
                   value={modal.endDate}
                   min={modal.startDate}
                   onChange={e => setModal(m => m ? { ...m, endDate: e.target.value } : m)}
-                  className="w-full bg-blue-800 border border-white/25 text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark]"
+                  className={`w-full bg-blue-800 border text-white text-xs rounded-lg px-2 py-2 focus:outline-none focus:border-blue-400 [color-scheme:dark] ${submitted && !modal.endDate ? 'border-red-400 bg-red-900/20' : 'border-white/25'}`}
                 />
               </div>
               <MarinaSelectWithInfo
@@ -329,9 +334,9 @@ export default function AvailabilityAdminClient() {
               <div className="space-y-3 pt-1 border-t border-white/10">
                 <p className="text-blue-300 text-xs font-semibold uppercase tracking-wide">Client Info</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Name" value={modal.name} onChange={v => setModal(m => m ? { ...m, name: v } : m)} />
-                  <Field label="Email" type="email" value={modal.email} onChange={v => setModal(m => m ? { ...m, email: v } : m)} />
-                  <Field label="Phone" type="tel" value={modal.phone} onChange={v => setModal(m => m ? { ...m, phone: v } : m)} />
+                  <Field label="Name *" value={modal.name} onChange={v => setModal(m => m ? { ...m, name: v } : m)} required={submitted && !modal.name} />
+                  <Field label="Email *" type="email" value={modal.email} onChange={v => setModal(m => m ? { ...m, email: v } : m)} required={submitted && !modal.email} />
+                  <Field label="Phone *" type="tel" value={modal.phone} onChange={v => setModal(m => m ? { ...m, phone: v } : m)} required={submitted && !modal.phone} />
                   <Field label="Passengers" type="number" value={modal.passengers} onChange={v => setModal(m => m ? { ...m, passengers: v } : m)} />
                   <div className="col-span-2">
                     <Field label="Boat" value={modal.boat} onChange={v => setModal(m => m ? { ...m, boat: v } : m)} />
@@ -402,7 +407,7 @@ export default function AvailabilityAdminClient() {
                 </button>
               )}
               <button
-                onClick={() => { setModal(null); setError(''); }}
+                onClick={() => { setModal(null); setError(''); setSubmitted(false); }}
                 className="flex-1 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
               >
                 Cancel
@@ -421,20 +426,22 @@ function Field({
   value,
   onChange,
   type = 'text',
+  required = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   type?: string;
+  required?: boolean;
 }) {
   return (
     <div>
-      <label className="text-blue-200 text-xs font-medium block mb-1">{label}</label>
+      <label className={`text-xs font-medium block mb-1 ${required ? 'text-red-300' : 'text-blue-200'}`}>{label}</label>
       <input
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+        className={`w-full border text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 ${required ? 'bg-red-900/20 border-red-400' : 'bg-white/10 border-white/25'}`}
       />
     </div>
   );
