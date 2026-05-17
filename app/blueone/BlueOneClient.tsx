@@ -589,7 +589,7 @@ export default function BlueOneClient() {
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Award-Winning Excellence</h2>
               <p className="text-blue-100 text-lg max-w-2xl mx-auto">
-                Our chef's commitment to culinary excellence has been honored with prestigious recognition
+                Our chef&apos;s commitment to culinary excellence has been honored with prestigious recognition
               </p>
             </div>
 
