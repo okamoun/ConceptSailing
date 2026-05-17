@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import Script from "next/script"
 import { BlueOneProvider } from "./contexts/BlueOneContext"
 import Navigation from "./components/Navigation"
+import AwardBanner from "./components/AwardBanner"
 import Footer from "./components/Footer"
 import "./globals.css"
 import "./animations.css"
@@ -147,6 +148,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-blue-900">
         <BlueOneProvider>
+          <AwardBanner />
           <Navigation />
           <main>{children}</main>
           <Footer />
