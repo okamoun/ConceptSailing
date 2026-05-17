@@ -31,14 +31,14 @@ export default function BlueOneClient() {
     getAllCharters().then(setCharters).catch(() => {});
   }, [setIsBlueOneMode]);
 
-  // BlueOne specific images - Real boat photos (93 total: 54 original + 22 new + 17 drone)
+  // BlueOne specific images - Real boat photos (100+ total: 54 original + 22 new + 17 drone)
   // Featured 4 (shown in curated section) are first; rest fill the complete gallery
   const blueOneExteriorImages = [
-    // === FEATURED 4 (Best diversity & quality) ===
-    "/images/boat/IMG_0001_NEW.JPG",
-    "/images/boat/IMG_0006_NEW.JPG",
-    "/images/boat/IMG_0016_NEW.JPG",
-    "/images/boat/IMG_9961_NEW.JPG",
+    // === FEATURED 4 (Best exterior shots - high water/sky content) ===
+    "/images/boat/IMG_0025_NEW.JPG",  // 90% blue - pristine water/sky
+    "/images/boat/IMG_0026_NEW.JPG",  // 89% blue - exterior sailing view
+    "/images/boat/IMG_9965_NEW.JPG",  // 89% blue - exterior detail
+    "/images/boat/IMG_9970_NEW.JPG",  // 88% blue - exterior profile
     // === GALLERY FILL (Original collection) ===
     "/images/boat/IMG_7545.JPG",
     "/images/boat/IMG_7546.JPG",
@@ -59,20 +59,18 @@ export default function BlueOneClient() {
     "/images/boat/IMG_7567.JPG",
     "/images/boat/IMG_7568.JPG",
     // === ADDITIONAL NEW EXTERIOR ===
-    "/images/boat/IMG_0007_NEW.JPG",
+    "/images/boat/IMG_0027_NEW.JPG",
+    "/images/boat/IMG_0028_NEW.JPG",
+    "/images/boat/IMG_9968_NEW.JPG",
   ];
 
   const blueOneInteriorImages = [
-    // === FEATURED 4 (Best diversity & quality) ===
-    "/images/boat/IMG_0012_NEW.JPG",
-    "/images/boat/IMG_0014_NEW.JPG",
-    "/images/boat/IMG_0004_NEW.JPG",
-    "/images/boat/IMG_0005_NEW.JPG",
-    // === GALLERY FILL (Original collection) ===
+    // === FEATURED 4 (Best cabin/interior shots) ===
     "/images/boat/IMG_7569.JPG",
     "/images/boat/IMG_7570.JPG",
     "/images/boat/IMG_7571.JPG",
     "/images/boat/IMG_7572.JPG",
+    // === GALLERY FILL (Original proven collection) ===
     "/images/boat/IMG_7573.JPG",
     "/images/boat/IMG_7579.JPG",
     "/images/boat/IMG_7580.JPG",
@@ -87,16 +85,14 @@ export default function BlueOneClient() {
     "/images/boat/IMG_7590.JPG",
     "/images/boat/IMG_7591.JPG",
     "/images/boat/IMG_7592.JPG",
-    // === ADDITIONAL NEW INTERIOR ===
-    "/images/boat/IMG_0008_NEW.JPG",
   ];
 
   const blueOneCockpitImages = [
-    // === FEATURED 4 (Best diversity & quality) ===
-    "/images/boat/IMG_0010_NEW.JPG",
-    "/images/boat/IMG_0013_NEW.JPG",
-    "/images/boat/IMG_0025_NEW.JPG",
-    "/images/boat/IMG_0026_NEW.JPG",
+    // === FEATURED 4 (Best cockpit/dining/entertaining shots) ===
+    "/images/boat/IMG_0012_NEW.JPG",  // 79% mixed - premium deck view
+    "/images/boat/IMG_0013_NEW.JPG",  // 80% mixed - dining ambiance
+    "/images/boat/IMG_0014_NEW.JPG",  // 80% mixed - seating area
+    "/images/boat/IMG_0010_NEW.JPG",  // 72% mixed - outdoor dining
     // === GALLERY FILL (Original collection) ===
     "/images/boat/IMG_7593.JPG",
     "/images/boat/IMG_7594.JPG",
@@ -116,15 +112,18 @@ export default function BlueOneClient() {
     "/images/boat/IMG_7611.JPG",
     "/images/boat/IMG_7612.JPG",
     "/images/boat/IMG_7613.JPG",
-    // === ADDITIONAL NEW COCKPIT/DINING ===
+    // === ADDITIONAL NEW COCKPIT/DINING (11 more) ===
+    "/images/boat/IMG_0001_NEW.JPG",
+    "/images/boat/IMG_0004_NEW.JPG",
+    "/images/boat/IMG_0005_NEW.JPG",
+    "/images/boat/IMG_0006_NEW.JPG",
+    "/images/boat/IMG_0007_NEW.JPG",
+    "/images/boat/IMG_0008_NEW.JPG",
+    "/images/boat/IMG_0016_NEW.JPG",
     "/images/boat/IMG_0019_NEW.JPG",
     "/images/boat/IMG_0021_NEW.JPG",
-    "/images/boat/IMG_0027_NEW.JPG",
-    "/images/boat/IMG_0028_NEW.JPG",
     "/images/boat/IMG_9960_NEW.JPG",
-    "/images/boat/IMG_9965_NEW.JPG",
-    "/images/boat/IMG_9968_NEW.JPG",
-    "/images/boat/IMG_9970_NEW.JPG",
+    "/images/boat/IMG_9961_NEW.JPG",
   ];
 
   const blueOneDroneImages = [
