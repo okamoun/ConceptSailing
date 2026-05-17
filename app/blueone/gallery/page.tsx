@@ -5,33 +5,91 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useBlueOneMode } from '../../contexts/BlueOneContext';
 
-// BlueOne gallery images
+// BlueOne gallery images - Real boat photos (54 total)
 const blueOneExteriorImages = [
-  '/images/boats/blueone/External_sailing.jpg',
-  '/images/boats/blueone/External_side.jpg',
-  '/images/boats/blueone/External_rear.jpg',
-  '/images/boats/blueone/External_front.jpg',
-  '/images/boats/blueone/External_deck.jpg',
-  '/images/boats/blueone/External_cockpit.jpg',
+  '/images/boat/IMG_7545.JPG',
+  '/images/boat/IMG_7546.JPG',
+  '/images/boat/IMG_7547.JPG',
+  '/images/boat/IMG_7549.JPG',
+  '/images/boat/IMG_7553.JPG',
+  '/images/boat/IMG_7554.JPG',
+  '/images/boat/IMG_7555.JPG',
+  '/images/boat/IMG_7556.JPG',
+  '/images/boat/IMG_7557.JPG',
+  '/images/boat/IMG_7559.JPG',
+  '/images/boat/IMG_7561.JPG',
+  '/images/boat/IMG_7562.JPG',
+  '/images/boat/IMG_7563.JPG',
+  '/images/boat/IMG_7564.JPG',
+  '/images/boat/IMG_7565.JPG',
+  '/images/boat/IMG_7566.JPG',
+  '/images/boat/IMG_7567.JPG',
+  '/images/boat/IMG_7568.JPG',
 ];
 
 const blueOneInteriorImages = [
-  '/images/boats/blueone/Interior_saloon.jpg',
-  '/images/boats/blueone/Interior_kitchen.jpg',
-  '/images/boats/blueone/Interior_cabin1.jpg',
-  '/images/boats/blueone/Interior_cabin2.jpg',
-  '/images/boats/blueone/Interior_bathroom.jpg',
-  '/images/boats/blueone/Interior_navigation.jpg',
+  '/images/boat/IMG_7569.JPG',
+  '/images/boat/IMG_7570.JPG',
+  '/images/boat/IMG_7571.JPG',
+  '/images/boat/IMG_7572.JPG',
+  '/images/boat/IMG_7573.JPG',
+  '/images/boat/IMG_7579.JPG',
+  '/images/boat/IMG_7580.JPG',
+  '/images/boat/IMG_7581.JPG',
+  '/images/boat/IMG_7582.JPG',
+  '/images/boat/IMG_7584.JPG',
+  '/images/boat/IMG_7585.JPG',
+  '/images/boat/IMG_7586.JPG',
+  '/images/boat/IMG_7587.JPG',
+  '/images/boat/IMG_7588.JPG',
+  '/images/boat/IMG_7589.JPG',
+  '/images/boat/IMG_7590.JPG',
+  '/images/boat/IMG_7591.JPG',
+  '/images/boat/IMG_7592.JPG',
 ];
 
 const blueOneCockpitImages = [
-  '/images/boats/blueone/Cockpit_dining.jpg',
-  '/images/boats/blueone/Cockpit_relax.jpg',
-  '/images/boats/blueone/Cockpit_sunset.jpg',
-  '/images/boats/blueone/Cockpit_view.jpg',
+  '/images/boat/IMG_7593.JPG',
+  '/images/boat/IMG_7594.JPG',
+  '/images/boat/IMG_7595.JPG',
+  '/images/boat/IMG_7596.JPG',
+  '/images/boat/IMG_7600.JPG',
+  '/images/boat/IMG_7601.JPG',
+  '/images/boat/IMG_7602.JPG',
+  '/images/boat/IMG_7603.JPG',
+  '/images/boat/IMG_7604.JPG',
+  '/images/boat/IMG_7605.JPG',
+  '/images/boat/IMG_7606.JPG',
+  '/images/boat/IMG_7607.JPG',
+  '/images/boat/IMG_7608.JPG',
+  '/images/boat/IMG_7609.JPG',
+  '/images/boat/IMG_7610.JPG',
+  '/images/boat/IMG_7611.JPG',
+  '/images/boat/IMG_7612.JPG',
+  '/images/boat/IMG_7613.JPG',
 ];
 
-const allImages = [...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages];
+const blueOneDroneImages = [
+  '/images/boat/DJI_20260511084346_0008_D.JPG',
+  '/images/boat/DJI_20260511084428_0009_D.JPG',
+  '/images/boat/DJI_20260511084433_0010_D.JPG',
+  '/images/boat/DJI_20260511084454_0011_D.JPG',
+  '/images/boat/DJI_20260511084457_0012_D.JPG',
+  '/images/boat/DJI_20260512133237_0013_D.JPG',
+  '/images/boat/DJI_20260512133247_0014_D.JPG',
+  '/images/boat/DJI_20260512133415_0015_D.JPG',
+  '/images/boat/DJI_20260512133432_0016_D.JPG',
+  '/images/boat/DJI_20260512133439_0017_D.JPG',
+  '/images/boat/DJI_20260512133510_0018_D.JPG',
+  '/images/boat/DJI_20260512133513_0019_D.JPG',
+  '/images/boat/DJI_20260512133534_0020_D.JPG',
+  '/images/boat/DJI_20260512133536_0021_D.JPG',
+  '/images/boat/DJI_20260512133553_0022_D.JPG',
+  '/images/boat/DJI_20260512133601_0023_D.JPG',
+  '/images/boat/DJI_20260512133607_0024_D.JPG',
+];
+
+const allImages = [...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages, ...blueOneDroneImages];
 
 export default function BlueOneGalleryPage() {
   const { setIsBlueOneMode } = useBlueOneMode();
@@ -228,8 +286,8 @@ export default function BlueOneGalleryPage() {
                   key={index}
                   onClick={() => selectImage(blueOneExteriorImages.length + blueOneInteriorImages.length + index)}
                   className={`relative aspect-square rounded-lg overflow-hidden transition-all ${
-                    selectedImageIndex === blueOneExteriorImages.length + blueOneInteriorImages.length + index 
-                      ? 'ring-2 ring-blue-500 scale-105' 
+                    selectedImageIndex === blueOneExteriorImages.length + blueOneInteriorImages.length + index
+                      ? 'ring-2 ring-blue-500 scale-105'
                       : 'hover:scale-105 opacity-80 hover:opacity-100'
                   }`}
                 >
@@ -248,6 +306,36 @@ export default function BlueOneGalleryPage() {
               ))}
             </div>
           </div>
+
+          {/* Drone Aerial Views */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-blue-800 mb-4">Aerial Views</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {blueOneDroneImages.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => selectImage(blueOneExteriorImages.length + blueOneInteriorImages.length + blueOneCockpitImages.length + index)}
+                  className={`relative aspect-square rounded-lg overflow-hidden transition-all ${
+                    selectedImageIndex === blueOneExteriorImages.length + blueOneInteriorImages.length + blueOneCockpitImages.length + index
+                      ? 'ring-2 ring-blue-500 scale-105'
+                      : 'hover:scale-105 opacity-80 hover:opacity-100'
+                  }`}
+                >
+                  <Image
+                    src={image}
+                    alt={`Aerial ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 hover:opacity-100 transition-opacity">
+                    <div className="absolute bottom-2 left-2 right-2 text-white text-xs text-center">
+                      Aerial {index + 1}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Call to Action */}
@@ -259,7 +347,7 @@ export default function BlueOneGalleryPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/booking?boat=BlueOne&brand=Fountaine%20Pajot&length=51%20ft&description=A%20new-generation%20catamaran%20with%20a%20focus%20on%20eco-responsibility,%20solar%20panels,%20and%20hybrid%20systems.&image=/images/boats/blueone/External_sailing.jpg"
+                href="/booking?boat=BlueOne&brand=Fountaine%20Pajot&length=51%20ft&description=A%20new-generation%20catamaran%20with%20a%20focus%20on%20eco-responsibility,%20solar%20panels,%20and%20hybrid%20systems.&image=/images/boat/IMG_7546.JPG"
                 className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
                 Book BlueOne Now

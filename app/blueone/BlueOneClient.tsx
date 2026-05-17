@@ -31,27 +31,88 @@ export default function BlueOneClient() {
     getAllCharters().then(setCharters).catch(() => {});
   }, [setIsBlueOneMode]);
 
-  // BlueOne specific images from the blueone folder - organized by content
+  // BlueOne specific images - Real boat photos (54 total)
   const blueOneExteriorImages = [
-    "/images/boats/blueone/IMG_7667.jpeg", // Main exterior shot
-    "/images/boats/blueone/External_reading.jpg", // Exterior reading area
-    "/images/boats/blueone/External_sailing.jpg", // Sailing exterior view
-    "/images/boats/blueone/IMG_8914.jpeg", // Exterior view
-    "/images/boats/blueone/IMG_8917.jpeg", // Another exterior view
-    "/images/boats/blueone/277080815_7549724425052761_8631137394407809070_n.jpeg", // Exterior photo
+    "/images/boat/IMG_7545.JPG",
+    "/images/boat/IMG_7546.JPG",
+    "/images/boat/IMG_7547.JPG",
+    "/images/boat/IMG_7549.JPG",
+    "/images/boat/IMG_7553.JPG",
+    "/images/boat/IMG_7554.JPG",
+    "/images/boat/IMG_7555.JPG",
+    "/images/boat/IMG_7556.JPG",
+    "/images/boat/IMG_7557.JPG",
+    "/images/boat/IMG_7559.JPG",
+    "/images/boat/IMG_7561.JPG",
+    "/images/boat/IMG_7562.JPG",
+    "/images/boat/IMG_7563.JPG",
+    "/images/boat/IMG_7564.JPG",
+    "/images/boat/IMG_7565.JPG",
+    "/images/boat/IMG_7566.JPG",
+    "/images/boat/IMG_7567.JPG",
+    "/images/boat/IMG_7568.JPG",
   ];
 
   const blueOneInteriorImages = [
-    "/images/boats/blueone/Interior_table.jpg", // Interior dining table area
-    "/images/boats/blueone/kitchen.jpg", // Kitchen/galley area
-    "/images/boats/blueone/Actu-3-Aura51-Maestro-Bed.jpg.avif", // Master bedroom
-    "/images/boats/blueone/Actu-4-Aura51-Cabine-Bed.jpg.avif", // Cabin bedroom
+    "/images/boat/IMG_7569.JPG",
+    "/images/boat/IMG_7570.JPG",
+    "/images/boat/IMG_7571.JPG",
+    "/images/boat/IMG_7572.JPG",
+    "/images/boat/IMG_7573.JPG",
+    "/images/boat/IMG_7579.JPG",
+    "/images/boat/IMG_7580.JPG",
+    "/images/boat/IMG_7581.JPG",
+    "/images/boat/IMG_7582.JPG",
+    "/images/boat/IMG_7584.JPG",
+    "/images/boat/IMG_7585.JPG",
+    "/images/boat/IMG_7586.JPG",
+    "/images/boat/IMG_7587.JPG",
+    "/images/boat/IMG_7588.JPG",
+    "/images/boat/IMG_7589.JPG",
+    "/images/boat/IMG_7590.JPG",
+    "/images/boat/IMG_7591.JPG",
+    "/images/boat/IMG_7592.JPG",
   ];
 
   const blueOneCockpitImages = [
-    "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif", // Cockpit dining table
-    "/images/boats/blueone/Actu-8-Aura51-Front-Cockpit.avif", // Front cockpit seating
-    "/images/boats/blueone/IMG_8677.jpeg", // Cockpit or deck area
+    "/images/boat/IMG_7593.JPG",
+    "/images/boat/IMG_7594.JPG",
+    "/images/boat/IMG_7595.JPG",
+    "/images/boat/IMG_7596.JPG",
+    "/images/boat/IMG_7600.JPG",
+    "/images/boat/IMG_7601.JPG",
+    "/images/boat/IMG_7602.JPG",
+    "/images/boat/IMG_7603.JPG",
+    "/images/boat/IMG_7604.JPG",
+    "/images/boat/IMG_7605.JPG",
+    "/images/boat/IMG_7606.JPG",
+    "/images/boat/IMG_7607.JPG",
+    "/images/boat/IMG_7608.JPG",
+    "/images/boat/IMG_7609.JPG",
+    "/images/boat/IMG_7610.JPG",
+    "/images/boat/IMG_7611.JPG",
+    "/images/boat/IMG_7612.JPG",
+    "/images/boat/IMG_7613.JPG",
+  ];
+
+  const blueOneDroneImages = [
+    "/images/boat/DJI_20260511084346_0008_D.JPG",
+    "/images/boat/DJI_20260511084428_0009_D.JPG",
+    "/images/boat/DJI_20260511084433_0010_D.JPG",
+    "/images/boat/DJI_20260511084454_0011_D.JPG",
+    "/images/boat/DJI_20260511084457_0012_D.JPG",
+    "/images/boat/DJI_20260512133237_0013_D.JPG",
+    "/images/boat/DJI_20260512133247_0014_D.JPG",
+    "/images/boat/DJI_20260512133415_0015_D.JPG",
+    "/images/boat/DJI_20260512133432_0016_D.JPG",
+    "/images/boat/DJI_20260512133439_0017_D.JPG",
+    "/images/boat/DJI_20260512133510_0018_D.JPG",
+    "/images/boat/DJI_20260512133513_0019_D.JPG",
+    "/images/boat/DJI_20260512133534_0020_D.JPG",
+    "/images/boat/DJI_20260512133536_0021_D.JPG",
+    "/images/boat/DJI_20260512133553_0022_D.JPG",
+    "/images/boat/DJI_20260512133601_0023_D.JPG",
+    "/images/boat/DJI_20260512133607_0024_D.JPG",
   ];
 
   const blueOneFoodImages = [
@@ -100,7 +161,7 @@ export default function BlueOneClient() {
   return (
     <>
       <main className="min-h-screen relative" style={{
-        backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boats/blueone/External_sailing.jpg')`,
+        backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boat/DJI_20260512133237_0013_D.JPG')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed'
@@ -546,8 +607,8 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Complete Gallery</h2>
-            <BlueOneGallerySlideshow 
-              images={[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages]}
+            <BlueOneGallerySlideshow
+              images={[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages, ...blueOneDroneImages]}
             />
           </div>
         </section>
