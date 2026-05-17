@@ -11,6 +11,7 @@ import {
   type CharterStatus,
   CHARTER_STATUS_LABEL,
 } from '../../../lib/availability';
+import { deleteField } from 'firebase/firestore';
 import {
   marinas,
   getMarinaById,
@@ -19,6 +20,7 @@ import {
   DEFAULT_MARINA_ID,
 } from '../../marinas-data';
 import MarinaMap from '../MarinaMap';
+import adventures from '../../adventures-data';
 
 const STATUS_BADGE: Record<CharterStatus, string> = {
   web_request:     'bg-sky-400/30 text-sky-200',
@@ -31,9 +33,6 @@ const STATUS_BADGE: Record<CharterStatus, string> = {
   maintenance:     'bg-red-500/30 text-red-200',
 };
 
-const CLIENT_STATUSES: CharterStatus[] = [
-  'web_request', 'broker_request', 'serious_request', 'confirmed', 'signed',
-];
 
 interface ModalState {
   mode: 'add' | 'edit';
@@ -86,7 +85,7 @@ export default function AvailabilityAdminClient() {
       name: '', email: '', phone: '', passengers: '', boat: '',
       deliveryPoint: DEFAULT_MARINA_ID,
       redeliveryPoint: DEFAULT_MARINA_ID,
-      note: '', selectedTheme: '', holidayDescription: '',
+      note: '', selectedTheme: '', holidayDescription: ''
     });
   }
 
@@ -116,22 +115,21 @@ export default function AvailabilityAdminClient() {
     else openAddModal(dateStr);
   }
 
-  function modalToData(m: ModalState): Omit<Charter, 'id' | 'createdAt'> {
-    const hasClient = CLIENT_STATUSES.includes(m.status);
+  function modalToData(m: ModalState): Record<string, unknown> {
     return {
       status: m.status,
       startDate: m.startDate,
       endDate: m.endDate,
-      ...(hasClient && m.name ? { name: m.name } : {}),
-      ...(hasClient && m.email ? { email: m.email } : {}),
-      ...(hasClient && m.phone ? { phone: m.phone } : {}),
-      ...(hasClient && m.passengers ? { passengers: Number(m.passengers) } : {}),
-      ...(m.boat ? { boat: m.boat } : {}),
-      deliveryPoint: m.deliveryPoint,
-      redeliveryPoint: m.redeliveryPoint,
-      ...(m.note ? { note: m.note } : {}),
-      ...(m.selectedTheme ? { selectedTheme: m.selectedTheme } : {}),
-      ...(m.holidayDescription ? { holidayDescription: m.holidayDescription } : {}),
+      name:               m.name        ? m.name              : deleteField(),
+      email:              m.email       ? m.email             : deleteField(),
+      phone:              m.phone       ? m.phone             : deleteField(),
+      passengers:         m.passengers  ? Number(m.passengers): deleteField(),
+      boat:               m.boat                    ? m.boat              : deleteField(),
+      deliveryPoint:      m.deliveryPoint,
+      redeliveryPoint:    m.redeliveryPoint,
+      note:               m.note                    ? m.note              : deleteField(),
+      selectedTheme:      m.selectedTheme            ? m.selectedTheme     : deleteField(),
+      holidayDescription: m.holidayDescription       ? m.holidayDescription: deleteField(),
     };
   }
 
@@ -144,11 +142,11 @@ export default function AvailabilityAdminClient() {
     try {
       const data = modalToData(modal);
       if (modal.mode === 'add') {
-        const id = await createCharter(data);
-        setEntries(prev => [...prev, { id, ...data, createdAt: null }]
+        const id = await createCharter(data as Omit<Charter, 'id' | 'createdAt'>);
+        setEntries(prev => [...prev, { id, ...(data as Omit<Charter, 'id' | 'createdAt'>), createdAt: null }]
           .sort((a, b) => a.startDate.localeCompare(b.startDate)));
       } else if (modal.entry) {
-        await updateCharter(modal.entry.id, data);
+        await updateCharter(modal.entry.id, data as Partial<Omit<Charter, 'id' | 'createdAt'>>);
         setEntries(prev =>
           prev.map(e => e.id === modal.entry!.id ? { ...e, ...data } : e)
         );
@@ -172,7 +170,6 @@ export default function AvailabilityAdminClient() {
     }
   }
 
-  const showClientFields = modal ? CLIENT_STATUSES.includes(modal.status) : false;
 
   return (
     <main className="px-4 py-6">
@@ -234,7 +231,9 @@ export default function AvailabilityAdminClient() {
                         {delMarina && relMarina && delMarina.id !== relMarina.id ? ` · ↑ ${relMarina.name}` : ''}
                       </p>
                     )}
-                    {e.note && <p className="text-blue-300 text-xs italic truncate">{e.note}</p>}
+                    {e.selectedTheme && <p className="text-yellow-300 text-xs truncate">🎯 {e.selectedTheme}</p>}
+                    {e.holidayDescription && <p className="text-blue-200 text-xs italic truncate">{e.holidayDescription}</p>}
+                    {e.note && <p className="text-blue-300 text-xs italic truncate">📝 {e.note}</p>}
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
                     <button
@@ -325,8 +324,8 @@ export default function AvailabilityAdminClient() {
               />
             </div>
 
-            {/* Client fields — shown for charter statuses with a client */}
-            {showClientFields && (
+            {/* Client Info */}
+            {true && (
               <div className="space-y-3 pt-1 border-t border-white/10">
                 <p className="text-blue-300 text-xs font-semibold uppercase tracking-wide">Client Info</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -336,6 +335,19 @@ export default function AvailabilityAdminClient() {
                   <Field label="Passengers" type="number" value={modal.passengers} onChange={v => setModal(m => m ? { ...m, passengers: v } : m)} />
                   <div className="col-span-2">
                     <Field label="Boat" value={modal.boat} onChange={v => setModal(m => m ? { ...m, boat: v } : m)} />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-blue-200 text-xs font-medium block mb-1">Selected Theme</label>
+                    <select
+                      value={modal.selectedTheme}
+                      onChange={e => setModal(m => m ? { ...m, selectedTheme: e.target.value } : m)}
+                      className="w-full bg-white/10 border border-white/25 text-white rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+                    >
+                      <option value="">— No theme —</option>
+                      {adventures.map(a => (
+                        <option key={a.id} value={a.name}>{a.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div>
