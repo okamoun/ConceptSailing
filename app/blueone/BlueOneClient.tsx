@@ -116,8 +116,9 @@ export default function BlueOneClient() {
   ];
 
   const blueOneFoodImages = [
-    "/images/boats/blueone/food_1.jpeg", 
-    "/images/boats/blueone/food_2.jpeg", 
+    "/images/boat/culinary_gourmet.jpg", // Chef's gourmet plated dish
+    "/images/boats/blueone/food_1.jpeg",
+    "/images/boats/blueone/food_2.jpeg",
     "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif", // Cockpit dining table
   ];
 
@@ -224,8 +225,8 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Exterior Excellence</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {blueOneExteriorImages.map((image, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {blueOneExteriorImages.slice(0, 4).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
@@ -245,15 +246,15 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Luxurious Interiors</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {blueOneInteriorImages.map((image, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {blueOneInteriorImages.slice(0, 4).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
                     alt={`BlueOne interior view ${index + 1}`}
-                    width={600}
-                    height={400}
-                    className="w-full h-96 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
+                    width={400}
+                    height={300}
+                    className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
                 </div>
@@ -266,8 +267,8 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Cockpit & Dining</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {blueOneCockpitImages.map((image, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {blueOneCockpitImages.slice(0, 4).map((image, index) => (
                 <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
                   <Image
                     src={image}
