@@ -110,6 +110,48 @@ export default function ChefPage({ params }: ChefPageProps) {
           </div>
         </section>
 
+        {/* Awards Section */}
+        {chef.awards && chef.awards.length > 0 && (
+          <section className="animate-fade-in-up">
+            <h2 className="text-3xl font-bold text-blue-900 mb-2">Recognition & Awards</h2>
+            <div className="w-12 h-1 bg-yellow-500 rounded mb-8"></div>
+            <div className="bg-gradient-to-r from-yellow-50 via-amber-50 to-yellow-50 rounded-2xl shadow-lg border-2 border-yellow-200 p-8">
+              {chef.awards.map((award, index) => (
+                <div key={index} className="flex flex-col md:flex-row gap-8 items-center">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="text-4xl">🏆</div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-blue-900">{award.title}</h3>
+                        <p className="text-yellow-700 font-semibold">{award.category}</p>
+                      </div>
+                    </div>
+                    <p className="text-gray-700 text-lg mb-4 leading-relaxed">{award.description}</p>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="bg-white rounded-lg px-4 py-2 border border-yellow-300">
+                        <p className="text-xs text-gray-500 font-semibold uppercase">Organization</p>
+                        <p className="text-gray-900 font-bold">{award.organization}</p>
+                      </div>
+                      <div className="bg-white rounded-lg px-4 py-2 border border-yellow-300">
+                        <p className="text-xs text-gray-500 font-semibold uppercase">Year</p>
+                        <p className="text-gray-900 font-bold">{award.year}</p>
+                      </div>
+                      {award.link && (
+                        <a href={award.link} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white rounded-lg px-4 py-2 font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2">
+                          Learn More
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Specialties Section */}
         <section className="animate-fade-in-up">
           <h2 className="text-3xl font-bold text-blue-900 mb-2">Culinary Specialties</h2>

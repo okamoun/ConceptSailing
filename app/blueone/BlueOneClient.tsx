@@ -31,8 +31,15 @@ export default function BlueOneClient() {
     getAllCharters().then(setCharters).catch(() => {});
   }, [setIsBlueOneMode]);
 
-  // BlueOne specific images - Real boat photos (54 total)
+  // BlueOne specific images - Real boat photos (93 total: 54 original + 22 new + 17 drone)
+  // Featured 4 (shown in curated section) are first; rest fill the complete gallery
   const blueOneExteriorImages = [
+    // === FEATURED 4 (Best diversity & quality) ===
+    "/images/boat/IMG_0001_NEW.JPG",
+    "/images/boat/IMG_0006_NEW.JPG",
+    "/images/boat/IMG_0016_NEW.JPG",
+    "/images/boat/IMG_9961_NEW.JPG",
+    // === GALLERY FILL (Original collection) ===
     "/images/boat/IMG_7545.JPG",
     "/images/boat/IMG_7546.JPG",
     "/images/boat/IMG_7547.JPG",
@@ -51,9 +58,17 @@ export default function BlueOneClient() {
     "/images/boat/IMG_7566.JPG",
     "/images/boat/IMG_7567.JPG",
     "/images/boat/IMG_7568.JPG",
+    // === ADDITIONAL NEW EXTERIOR ===
+    "/images/boat/IMG_0007_NEW.JPG",
   ];
 
   const blueOneInteriorImages = [
+    // === FEATURED 4 (Best diversity & quality) ===
+    "/images/boat/IMG_0012_NEW.JPG",
+    "/images/boat/IMG_0014_NEW.JPG",
+    "/images/boat/IMG_0004_NEW.JPG",
+    "/images/boat/IMG_0005_NEW.JPG",
+    // === GALLERY FILL (Original collection) ===
     "/images/boat/IMG_7569.JPG",
     "/images/boat/IMG_7570.JPG",
     "/images/boat/IMG_7571.JPG",
@@ -72,9 +87,17 @@ export default function BlueOneClient() {
     "/images/boat/IMG_7590.JPG",
     "/images/boat/IMG_7591.JPG",
     "/images/boat/IMG_7592.JPG",
+    // === ADDITIONAL NEW INTERIOR ===
+    "/images/boat/IMG_0008_NEW.JPG",
   ];
 
   const blueOneCockpitImages = [
+    // === FEATURED 4 (Best diversity & quality) ===
+    "/images/boat/IMG_0010_NEW.JPG",
+    "/images/boat/IMG_0013_NEW.JPG",
+    "/images/boat/IMG_0025_NEW.JPG",
+    "/images/boat/IMG_0026_NEW.JPG",
+    // === GALLERY FILL (Original collection) ===
     "/images/boat/IMG_7593.JPG",
     "/images/boat/IMG_7594.JPG",
     "/images/boat/IMG_7595.JPG",
@@ -93,6 +116,15 @@ export default function BlueOneClient() {
     "/images/boat/IMG_7611.JPG",
     "/images/boat/IMG_7612.JPG",
     "/images/boat/IMG_7613.JPG",
+    // === ADDITIONAL NEW COCKPIT/DINING ===
+    "/images/boat/IMG_0019_NEW.JPG",
+    "/images/boat/IMG_0021_NEW.JPG",
+    "/images/boat/IMG_0027_NEW.JPG",
+    "/images/boat/IMG_0028_NEW.JPG",
+    "/images/boat/IMG_9960_NEW.JPG",
+    "/images/boat/IMG_9965_NEW.JPG",
+    "/images/boat/IMG_9968_NEW.JPG",
+    "/images/boat/IMG_9970_NEW.JPG",
   ];
 
   const blueOneDroneImages = [
@@ -434,7 +466,12 @@ export default function BlueOneClient() {
               </div>
 
               {/* Chef Card */}
-              <div className="bg-white/20 backdrop-blur-md rounded-2xl overflow-hidden border border-white/30 shadow-xl">
+              <div className="bg-white/20 backdrop-blur-md rounded-2xl overflow-hidden border border-white/30 shadow-xl relative">
+                {/* Award Badge */}
+                <div className="absolute top-4 right-4 z-10 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 shadow-lg">
+                  <span className="text-lg">🏆</span>
+                  EMMY Award Winner 2026
+                </div>
                 {/* Card header bar */}
                 <div className="bg-blue-600/80 px-6 py-4 flex items-center gap-3">
                   <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center">
@@ -459,9 +496,9 @@ export default function BlueOneClient() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white mb-1">Andreas Tsitsilianis</h3>
-                      <p className="text-blue-200 text-sm font-medium mb-3">Professional Chef</p>
+                      <p className="text-yellow-300 text-sm font-bold mb-1">Chef of the Year • EMMY Award</p>
                       <p className="text-blue-50 text-sm leading-relaxed">
-                        Chef Andreas brings culinary excellence to your sailing experience, specializing in Mediterranean cuisine with fresh, local ingredients.
+                        Award-winning chef bringing Michelin-level precision and Mediterranean excellence to your sailing experience.
                       </p>
                     </div>
                   </div>
@@ -540,6 +577,96 @@ export default function BlueOneClient() {
                   <p className="text-white text-sm">{item.desc}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Accolades & Recognition Section */}
+        <section className="py-20 bg-gradient-to-r from-yellow-900/40 via-amber-900/40 to-yellow-900/40 backdrop-blur-sm border-t-2 border-b-2 border-yellow-600/50">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-block bg-yellow-400/20 backdrop-blur-sm rounded-full px-6 py-2 border border-yellow-400/50 mb-6">
+                <span className="text-yellow-300 font-semibold text-sm uppercase tracking-widest">Recognition</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Award-Winning Excellence</h2>
+              <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+                Our chef's commitment to culinary excellence has been honored with prestigious recognition
+              </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-yellow-400/60 overflow-hidden">
+                {/* Award Header */}
+                <div className="bg-gradient-to-r from-yellow-600/60 to-amber-600/60 px-8 py-6 border-b border-yellow-400/40">
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <span className="text-5xl">🏆</span>
+                  </div>
+                  <h3 className="text-3xl font-bold text-white text-center">Chef of the Year</h3>
+                  <p className="text-yellow-200 text-center text-lg font-semibold mt-2">EMMY Pros Chart Show 2026</p>
+                </div>
+
+                {/* Award Details */}
+                <div className="p-10">
+                  <div className="text-center mb-10">
+                    <p className="text-white text-lg leading-relaxed mb-6">
+                      Chef <span className="font-bold text-yellow-300">Andreas Tsitsilianis</span> was honored with the prestigious <span className="font-bold text-yellow-300">EMMY Award for Chef of the Year</span> in the <span className="font-bold">Category Emerald</span>, recognizing his outstanding culinary excellence, innovation, and dedication to Mediterranean gastronomy.
+                    </p>
+                    <div className="inline-block bg-yellow-400/20 backdrop-blur-sm rounded-lg px-6 py-4 border border-yellow-400/50 mb-6">
+                      <p className="text-yellow-300 font-bold text-sm uppercase tracking-widest">Award Details</p>
+                      <p className="text-white text-2xl font-bold mt-2">1st Place • Category Emerald</p>
+                      <p className="text-blue-200 text-sm mt-1">EMMYs - East Mediterranean Culinary Excellence</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 border-t border-white/10">
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">👨‍🍳</div>
+                      <p className="text-blue-200 text-sm font-semibold uppercase mb-1">Chef</p>
+                      <p className="text-white font-bold">Andreas Tsitsilianis</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">📅</div>
+                      <p className="text-blue-200 text-sm font-semibold uppercase mb-1">Year</p>
+                      <p className="text-white font-bold">2026</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-4xl mb-2">🌍</div>
+                      <p className="text-blue-200 text-sm font-semibold uppercase mb-1">Organization</p>
+                      <p className="text-white font-bold">EMMYs</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                    <a
+                      href="https://www.emmys.gr"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-yellow-900 font-bold px-8 py-3 rounded-lg transition-colors shadow-lg"
+                    >
+                      Learn More About the Award
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+
+                  {/* Facebook Post Embed */}
+                  <div className="mt-10 pt-6 border-t border-white/10 flex justify-center">
+                    <div className="overflow-hidden rounded-lg">
+                      <iframe
+                        src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fyachtchartershow%2Fposts%2Fpfbid0CFXzmXKNzPs8ZsQZwNhs58q6XfarHVx49P9zbCb79YQ5V2rbrcpQ1iJAD1e2VNRAl&show_text=true&width=500"
+                        width="500"
+                        height="669"
+                        style={{border: 'none', overflow: 'hidden'}}
+                        scrolling="no"
+                        frameBorder="0"
+                        allowFullScreen={true}
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                      ></iframe>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
