@@ -144,7 +144,7 @@ export default function BookingPageContent() {
       };
 
       // Always save to Firestore first, regardless of email outcome
-      await createCharter({
+      const charterData: Parameters<typeof createCharter>[0] = {
         status: 'web_request',
         startDate: selectedDate,
         endDate: endDate || selectedDate,
@@ -156,9 +156,10 @@ export default function BookingPageContent() {
         embarkationPoint: getMarinaById(deliveryPoint)?.name || deliveryPoint,
         deliveryPoint: getMarinaById(deliveryPoint)?.name || deliveryPoint,
         redeliveryPoint: getMarinaById(actualRedelivery)?.name || actualRedelivery,
-        holidayDescription: holidayDescription || undefined,
-        selectedTheme: selectedTheme ? adventures.find(a => a.id === selectedTheme)?.name : undefined,
-      }).catch(err => console.error('Failed to save booking to DB:', err));
+      };
+      if (holidayDescription) charterData.holidayDescription = holidayDescription;
+      if (selectedTheme) charterData.selectedTheme = adventures.find(a => a.id === selectedTheme)?.name;
+      await createCharter(charterData);
 
       // Send email notification (non-blocking — DB save already done)
       const emailResponse = await sendBookingEmail(bookingData);
