@@ -9,6 +9,7 @@ import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
 import MiniCalendar from '../components/MiniCalendar';
 import { boats } from '../boats-data';
 import { getAllCharters, type Charter } from '../../lib/availability';
+import { getAllPhotoMeta, mergeWithDefaults } from '../../lib/photos';
 
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
@@ -22,6 +23,7 @@ export default function BlueOneClient() {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  const [keyPhotoUrls, setKeyPhotoUrls] = useState<string[] | null>(null);
 
   useEffect(() => {
     const blueOneBoat = boats.find((b) => b.name === "BlueOne");
@@ -29,6 +31,13 @@ export default function BlueOneClient() {
     setIsLoading(false);
     setIsBlueOneMode(true);
     getAllCharters().then(setCharters).catch(() => {});
+    getAllPhotoMeta()
+      .then(overrides => {
+        const merged = mergeWithDefaults(overrides);
+        const keys = merged.filter(p => p.keyPhoto).map(p => p.src);
+        if (keys.length > 0) setKeyPhotoUrls(keys);
+      })
+      .catch(() => {});
   }, [setIsBlueOneMode]);
 
   // BlueOne specific images - Real boat photos (100+ total: 54 original + 22 new + 17 drone)
@@ -735,7 +744,7 @@ export default function BlueOneClient() {
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Complete Gallery</h2>
             <BlueOneGallerySlideshow
-              images={[...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages, ...blueOneDroneImages]}
+              images={keyPhotoUrls ?? [...blueOneExteriorImages, ...blueOneInteriorImages, ...blueOneCockpitImages, ...blueOneDroneImages]}
             />
           </div>
         </section>
@@ -782,7 +791,7 @@ export default function BlueOneClient() {
           <div className="max-w-4xl mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Explore Our Complete Gallery</h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Browse our extensive collection of over 100 professional photographs showcasing every aspect of BlueOne's luxury and beauty.
+              Browse our extensive collection of over 100 professional photographs showcasing every aspect of BlueOne&apos;s luxury and beauty.
             </p>
             <Link
               href="/blueone/gallery"

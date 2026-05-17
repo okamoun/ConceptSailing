@@ -37,7 +37,6 @@ export default function BoatGalleryGrid({
   categories = ['exterior', 'interior', 'cockpit', 'drone'],
   enableFiltering = true,
   columns = 4,
-  height = 280,
 }: BoatGalleryGridProps) {
   const [activeCategory, setActiveCategory] = useState<ImageCategory>(initialCategory);
   const [selectedImage, setSelectedImage] = useState<BoatImage | null>(null);
@@ -100,7 +99,7 @@ export default function BoatGalleryGrid({
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => handleImageError(e as any, image.src)}
+                  onError={(e) => handleImageError(e as unknown as Error, image.src)}
                   priority={false}
                   loading="lazy"
                 />
@@ -154,7 +153,7 @@ export default function BoatGalleryGrid({
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
-                onError={(e) => handleImageError(e as any, image.src)}
+                onError={(e) => handleImageError(e as unknown as Error, image.src)}
                 loading="lazy"
               />
             )}
