@@ -9,8 +9,8 @@ export default function Navigation() {
 
   const navLinks = [
     { href: "/experiences", label: "Experiences", bold: true },
-    { href: "/destinations", label: "Destinations", bold: false },
     { href: "/blueone", label: "The Yacht", bold: true },
+    { href: "/destinations", label: "Destinations", bold: false },
     { href: "/about", label: "About", bold: false },
     { href: "/availability", label: "Availability", bold: false },
     { href: "/reviews", label: "Reviews", bold: false },
