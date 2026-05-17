@@ -9,7 +9,7 @@ import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
 import MiniCalendar from '../components/MiniCalendar';
 import { boats } from '../boats-data';
 import { getAllCharters, type Charter } from '../../lib/availability';
-import { getAllPhotoMeta, mergeWithDefaults } from '../../lib/photos';
+import { getAllPhotoMeta } from '../../lib/photos';
 
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
@@ -33,8 +33,7 @@ export default function BlueOneClient() {
     getAllCharters().then(setCharters).catch(() => {});
     getAllPhotoMeta()
       .then(overrides => {
-        const merged = mergeWithDefaults(overrides);
-        const keys = merged.filter(p => p.keyPhoto).map(p => p.src);
+        const keys = overrides.filter(p => p.keyPhoto === true).map(p => p.src);
         if (keys.length > 0) setKeyPhotoUrls(keys);
       })
       .catch(() => {});
