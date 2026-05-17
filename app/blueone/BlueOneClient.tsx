@@ -777,6 +777,25 @@ export default function BlueOneClient() {
           </div>
         </section>
 
+        {/* Complete Photo Gallery Link */}
+        <section className="py-16 bg-gradient-to-r from-blue-900/50 via-blue-800/50 to-blue-900/50 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Explore Our Complete Gallery</h2>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+              Browse our extensive collection of over 100 professional photographs showcasing every aspect of BlueOne's luxury and beauty.
+            </p>
+            <Link
+              href="/blueone/gallery"
+              className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2"
+            >
+              View Full Gallery
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </Link>
+          </div>
+        </section>
+
         {/* Rates Teaser */}
         <section className="py-16 bg-black/30 backdrop-blur-sm">
           <div className="max-w-4xl mx-auto px-4">
