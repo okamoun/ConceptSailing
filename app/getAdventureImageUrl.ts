@@ -1,15 +1,7 @@
 // Remove fs and path imports for browser safety
 
-import OpenAI from 'openai';
-
 function sanitizeFilename(name: string): string {
   return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-}
-
-let _openai: OpenAI | null = null;
-function getOpenAI(): OpenAI {
-  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  return _openai;
 }
 
 export async function getAdventureImageUrl(adventureId: string, prompt: string, name: string): Promise<string> {
@@ -34,7 +26,9 @@ export async function getAdventureImageUrl(adventureId: string, prompt: string, 
   }
 
   try {
-    const aiResponse = await getOpenAI().images.generate({
+    const { default: OpenAI } = await import('openai');
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const aiResponse = await openai.images.generate({
       prompt,
       n: 1,
       size: '512x512',

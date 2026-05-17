@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ['openai', 'firebase', 'firebase-admin'],
   experimental: {
     forceSwcTransforms: true,
   },
