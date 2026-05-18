@@ -145,15 +145,19 @@ export default function AvailabilityAdminClient() {
     setSaving(true);
     setError('');
     try {
-      const data = modalToData(modal);
+      const firestoreData = modalToData(modal);
+      // Strip deleteField sentinels for local React state (they are not plain values)
+      const stateData = Object.fromEntries(
+        Object.entries(firestoreData).filter(([, v]) => v !== null && typeof v === 'object' && '_methodName' in (v as object) ? false : true)
+      ) as Partial<Omit<Charter, 'id' | 'createdAt'>>;
       if (modal.mode === 'add') {
-        const id = await createCharter(data as Omit<Charter, 'id' | 'createdAt'>);
-        setEntries(prev => [...prev, { id, ...(data as Omit<Charter, 'id' | 'createdAt'>), createdAt: null }]
+        const id = await createCharter(firestoreData as Omit<Charter, 'id' | 'createdAt'>);
+        setEntries(prev => [...prev, { id, ...stateData, createdAt: null } as Charter]
           .sort((a, b) => a.startDate.localeCompare(b.startDate)));
       } else if (modal.entry) {
-        await updateCharter(modal.entry.id, data as Partial<Omit<Charter, 'id' | 'createdAt'>>);
+        await updateCharter(modal.entry.id, firestoreData as Partial<Omit<Charter, 'id' | 'createdAt'>>);
         setEntries(prev =>
-          prev.map(e => e.id === modal.entry!.id ? { ...e, ...data } : e)
+          prev.map(e => e.id === modal.entry!.id ? { ...e, ...stateData } : e)
         );
       }
       setModal(null);
