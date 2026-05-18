@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { AdminAuthProvider, useAdminAuth } from './AdminAuthContext';
+import { useAdminAuth } from './AdminAuthContext';
 import AdminNav from './AdminNav';
 
 const bg = {
@@ -19,8 +19,8 @@ function AdminShell({ children }: { children: ReactNode }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const ok = await login(username, password);
-    if (!ok) setError('Incorrect username or password.');
+    const user = await login(username, password);
+    if (!user) setError('Incorrect username or password.');
     else setError('');
   }
 
@@ -74,9 +74,5 @@ function AdminShell({ children }: { children: ReactNode }) {
 }
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  return (
-    <AdminAuthProvider>
-      <AdminShell>{children}</AdminShell>
-    </AdminAuthProvider>
-  );
+  return <AdminShell>{children}</AdminShell>;
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from "next/font/google"
 import Script from "next/script"
 import { BlueOneProvider } from "./contexts/BlueOneContext"
+import { AdminAuthProvider } from "./admin/AdminAuthContext"
 import Navigation from "./components/Navigation"
 import AwardBanner from "./components/AwardBanner"
 import Footer from "./components/Footer"
@@ -147,12 +148,14 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="min-h-screen bg-blue-900">
-        <BlueOneProvider>
-          <AwardBanner />
-          <Navigation />
-          <main>{children}</main>
-          <Footer />
-        </BlueOneProvider>
+        <AdminAuthProvider>
+          <BlueOneProvider>
+            <AwardBanner />
+            <Navigation />
+            <main>{children}</main>
+            <Footer />
+          </BlueOneProvider>
+        </AdminAuthProvider>
       </body>
     </html>
   )

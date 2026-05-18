@@ -12,7 +12,7 @@ interface AuthCtx {
   currentUser: AdminUser | null;
   allowedPages: AdminPage[];
   isSuperAdmin: boolean;
-  login: (username: string, pw: string) => Promise<boolean>;
+  login: (username: string, pw: string) => Promise<AdminUser | null>;
   logout: () => void;
 }
 
@@ -21,7 +21,7 @@ const AdminAuthContext = createContext<AuthCtx>({
   currentUser: null,
   allowedPages: [],
   isSuperAdmin: false,
-  login: async () => false,
+  login: async () => null,
   logout: () => {},
 });
 
@@ -42,7 +42,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  async function login(username: string, pw: string): Promise<boolean> {
+  async function login(username: string, pw: string): Promise<AdminUser | null> {
     // 1. Try Firestore users first
     try {
       const users = await getAllAdminUsers();
@@ -51,7 +51,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(match));
         setCurrentUser(match);
         setAuthed(true);
-        return true;
+        return match;
       }
     } catch { /* Firestore unavailable — fall through to env fallback */ }
 
@@ -66,10 +66,10 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(superUser));
       setCurrentUser(superUser);
       setAuthed(true);
-      return true;
+      return superUser;
     }
 
-    return false;
+    return null;
   }
 
   function logout() {
