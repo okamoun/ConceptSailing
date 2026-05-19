@@ -13,11 +13,12 @@ import BookingCalendar from './BookingCalendar';
 
 const BookingMap = dynamic(() => import('./BookingMapClient'), { ssr: false });
 
-function StatCard({ label, value }: { label: string; value: string | number }) {
+function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-center">
       <div className="text-white font-bold text-2xl">{value}</div>
       <div className="text-blue-200 text-xs mt-0.5">{label}</div>
+      {sub && <div className="text-blue-300/70 text-xs mt-0.5">{sub}</div>}
     </div>
   );
 }
@@ -110,9 +111,8 @@ export default function BookingSummaryClient() {
         {loading ? (
           <p className="text-blue-200 text-sm animate-pulse">Loading…</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <StatCard label="Total Charters" value={charters.length} />
-            <StatCard label="Days Booked" value={totalDaysBooked} />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <StatCard label="Total Charters" value={charters.length} sub={`${totalDaysBooked} days booked`} />
             <StatCard label="Upcoming" value={upcoming.length} />
             <StatCard label="Web Requests" value={webRequests.length} />
             <StatCard label="Confirmed / Signed" value={confirmed.length} />

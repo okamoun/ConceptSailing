@@ -123,13 +123,8 @@ export default function AdminDashboardClient() {
     return a.startDate.localeCompare(b.startDate);
   });
 
-  const totalDaysBooked = charters.reduce((sum, c) => {
-    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
-    return sum + Math.max(0, days);
-  }, 0);
-
-  const tabs: { id: Tab; label: string; count: number; days?: number }[] = [
-    { id: 'charters', label: 'Charters', count: charters.length, days: totalDaysBooked },
+  const tabs: { id: Tab; label: string; count: number }[] = [
+    { id: 'charters', label: 'Charters', count: charters.length },
     { id: 'contacts', label: 'Contacts', count: contacts.length },
     { id: 'reviews', label: 'Reviews', count: reviews.length },
   ];
@@ -158,9 +153,6 @@ export default function AdminDashboardClient() {
             >
               {t.label}
               <span className="ml-1.5 bg-white/20 text-xs px-1.5 py-0.5 rounded-full">{t.count}</span>
-              {t.days !== undefined && (
-                <span className="ml-1 bg-blue-500/30 text-blue-200 text-xs px-1.5 py-0.5 rounded-full">{t.days}d</span>
-              )}
             </button>
           ))}
         </div>
