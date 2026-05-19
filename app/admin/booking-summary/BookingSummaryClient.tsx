@@ -89,6 +89,10 @@ export default function BookingSummaryClient() {
   const upcoming = charters.filter(c => c.endDate >= todayStr);
   const webRequests = charters.filter(c => c.status === 'web_request');
   const confirmed = charters.filter(c => c.status === 'confirmed' || c.status === 'signed');
+  const totalDaysBooked = charters.reduce((sum, c) => {
+    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+    return sum + Math.max(0, days);
+  }, 0);
 
   const filteredCharters = charters.filter(c => activeStatuses.has(c.status));
 
@@ -106,8 +110,9 @@ export default function BookingSummaryClient() {
         {loading ? (
           <p className="text-blue-200 text-sm animate-pulse">Loading…</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <StatCard label="Total Charters" value={charters.length} />
+            <StatCard label="Days Booked" value={totalDaysBooked} />
             <StatCard label="Upcoming" value={upcoming.length} />
             <StatCard label="Web Requests" value={webRequests.length} />
             <StatCard label="Confirmed / Signed" value={confirmed.length} />
