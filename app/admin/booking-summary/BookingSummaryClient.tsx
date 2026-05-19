@@ -11,7 +11,8 @@ import {
 } from '@/lib/availability';
 import BookingCalendar from './BookingCalendar';
 
-const BookingMap = dynamic(() => import('./BookingMapClient'), { ssr: false });
+const BookingMap  = dynamic(() => import('./BookingMapClient'), { ssr: false });
+const DetailMap   = dynamic(() => import('./DetailMapClient'),  { ssr: false });
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
@@ -48,12 +49,24 @@ export default function BookingSummaryClient() {
   const [loading, setLoading] = useState(false);
   const [activeStatuses, setActiveStatuses] = useState<Set<CharterStatus>>(new Set(DEFAULT_STATUSES));
   const [selected, setSelected] = useState<Charter | null>(null);
+  const [selectedPrev, setSelectedPrev] = useState<Charter | null>(null);
+  const [selectedNext, setSelectedNext] = useState<Charter | null>(null);
   const [editNote, setEditNote] = useState('');
   const [savingNote, setSavingNote] = useState(false);
 
   function openDetail(c: Charter) {
+    const sorted = [...charters].sort((a, b) => a.startDate.localeCompare(b.startDate));
+    const idx = sorted.findIndex(x => x.id === c.id);
     setSelected(c);
+    setSelectedPrev(idx > 0 ? sorted[idx - 1] : null);
+    setSelectedNext(idx < sorted.length - 1 ? sorted[idx + 1] : null);
     setEditNote(c.note ?? '');
+  }
+
+  function closeDetail() {
+    setSelected(null);
+    setSelectedPrev(null);
+    setSelectedNext(null);
   }
 
   async function saveNote() {
@@ -87,31 +100,20 @@ export default function BookingSummaryClient() {
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
 
-  const upcoming = charters.filter(c => c.endDate >= todayStr);
-  const webRequests = charters.filter(c => c.status === 'web_request');
-  const confirmed = charters.filter(c => c.status === 'confirmed' || c.status === 'signed');
-  const totalDaysBooked = charters.reduce((sum, c) => {
-    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
-    return sum + Math.max(0, days);
-  }, 0);
-  const upcomingDays = upcoming.reduce((sum, c) => {
-    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
-    return sum + Math.max(0, days);
-  }, 0);
-  const confirmedDays = confirmed.reduce((sum, c) => {
-    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
-    return sum + Math.max(0, days);
-  }, 0);
+  const upcoming     = charters.filter(c => c.endDate >= todayStr);
+  const webRequests  = charters.filter(c => c.status === 'web_request');
+  const confirmed    = charters.filter(c => c.status === 'confirmed' || c.status === 'signed');
+
+  const totalDaysBooked = charters.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
+  const upcomingDays    = upcoming.reduce((sum, c)  => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
+  const confirmedDays   = confirmed.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
 
   const filteredCharters = charters.filter(c => activeStatuses.has(c.status));
 
   const statusStats = Object.fromEntries(
     ALL_STATUSES.map(s => {
       const group = charters.filter(c => c.status === s);
-      const days = group.reduce((sum, c) => {
-        const d = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
-        return sum + Math.max(0, d);
-      }, 0);
+      const days = group.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
       return [s, { count: group.length, days }];
     })
   ) as Record<CharterStatus, { count: number; days: number }>;
@@ -131,9 +133,9 @@ export default function BookingSummaryClient() {
           <p className="text-blue-200 text-sm animate-pulse">Loading…</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Total Charters" value={charters.length} sub={`${totalDaysBooked} days booked`} />
-            <StatCard label="Upcoming" value={upcoming.length} sub={`${upcomingDays} days booked`} />
-            <StatCard label="Web Requests" value={webRequests.length} />
+            <StatCard label="Total Charters"    value={charters.length}  sub={`${totalDaysBooked} days booked`} />
+            <StatCard label="Upcoming"           value={upcoming.length}  sub={`${upcomingDays} days booked`} />
+            <StatCard label="Web Requests"       value={webRequests.length} />
             <StatCard label="Confirmed / Signed" value={confirmed.length} sub={`${confirmedDays} days booked`} />
           </div>
         )}
@@ -177,10 +179,7 @@ export default function BookingSummaryClient() {
             </div>
             <p className="text-blue-300/60 text-xs">
               {(() => {
-                const filteredDays = filteredCharters.reduce((sum, c) => {
-                  const d = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
-                  return sum + Math.max(0, d);
-                }, 0);
+                const filteredDays = filteredCharters.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
                 return `Showing ${filteredCharters.length} of ${charters.length} charter${charters.length !== 1 ? 's' : ''} · ${filteredDays} days`;
               })()}
             </p>
@@ -267,14 +266,14 @@ export default function BookingSummaryClient() {
 
         {/* Detail modal */}
         {selected && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm" onClick={() => setSelected(null)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm" onClick={closeDetail}>
             <div className="w-full max-w-lg bg-blue-900/95 border border-white/20 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4" onClick={e => e.stopPropagation()}>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-white font-bold text-lg">{selected.name || 'Charter Detail'}</h2>
                   <StatusBadge status={selected.status} />
                 </div>
-                <button onClick={() => setSelected(null)} className="text-blue-300 hover:text-white text-lg leading-none">✕</button>
+                <button onClick={closeDetail} className="text-blue-300 hover:text-white text-lg leading-none">✕</button>
               </div>
 
               <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
@@ -296,6 +295,19 @@ export default function BookingSummaryClient() {
                   <p className="text-white text-xs leading-relaxed">{selected.holidayDescription}</p>
                 </div>
               )}
+
+              {/* Location map with context */}
+              <div className="border-t border-white/10 pt-3 space-y-2">
+                <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide">
+                  Locations
+                  {(selectedPrev || selectedNext) && (
+                    <span className="ml-2 text-blue-400 font-normal normal-case">
+                      {[selectedPrev && `↑ ${selectedPrev.name || 'prev'}`, selectedNext && `↓ ${selectedNext.name || 'next'}`].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                </p>
+                <DetailMap current={selected} prev={selectedPrev} next={selectedNext} />
+              </div>
 
               <div className="border-t border-white/10 pt-4 space-y-2">
                 <label className="text-blue-200 text-xs font-semibold uppercase tracking-wide block">Internal Note</label>
