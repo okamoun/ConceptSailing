@@ -260,7 +260,7 @@ export default function SpecificationsPage() {
       {/* Footer Note */}
       <div className="bg-gray-100 py-8 mt-12 text-center text-gray-600">
         <p>&copy; 2025 BlueOne Luxury Yacht Charters. All rights reserved.</p>
-        <p>Athens, Greece | contact@nj3cruises.com | +33 6 75 60 45 32</p>
+        <p>Athens, Greece |  +33 6 75 60 45 32</p>
       </div>
     </div>
   );
