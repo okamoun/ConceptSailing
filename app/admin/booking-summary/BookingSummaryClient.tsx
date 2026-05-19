@@ -176,7 +176,13 @@ export default function BookingSummaryClient() {
               })}
             </div>
             <p className="text-blue-300/60 text-xs">
-              Showing {filteredCharters.length} of {charters.length} charter{charters.length !== 1 ? 's' : ''}
+              {(() => {
+                const filteredDays = filteredCharters.reduce((sum, c) => {
+                  const d = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+                  return sum + Math.max(0, d);
+                }, 0);
+                return `Showing ${filteredCharters.length} of ${charters.length} charter${charters.length !== 1 ? 's' : ''} · ${filteredDays} days`;
+              })()}
             </p>
           </div>
         )}
