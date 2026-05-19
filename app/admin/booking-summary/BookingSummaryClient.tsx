@@ -105,6 +105,17 @@ export default function BookingSummaryClient() {
 
   const filteredCharters = charters.filter(c => activeStatuses.has(c.status));
 
+  const statusStats = Object.fromEntries(
+    ALL_STATUSES.map(s => {
+      const group = charters.filter(c => c.status === s);
+      const days = group.reduce((sum, c) => {
+        const d = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+        return sum + Math.max(0, d);
+      }, 0);
+      return [s, { count: group.length, days }];
+    })
+  ) as Record<CharterStatus, { count: number; days: number }>;
+
   return (
     <main className="px-4 py-6">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -150,6 +161,7 @@ export default function BookingSummaryClient() {
             <div className="flex flex-wrap gap-1.5">
               {ALL_STATUSES.map(s => {
                 const on = activeStatuses.has(s);
+                const { count, days } = statusStats[s];
                 return (
                   <button
                     key={s}
@@ -157,6 +169,7 @@ export default function BookingSummaryClient() {
                     className={`text-xs font-semibold px-2.5 py-1 rounded-full border transition-all ${on ? STATUS_TOGGLE_CLS[s].on : STATUS_TOGGLE_CLS[s].off}`}
                   >
                     {CHARTER_STATUS_LABEL[s]}
+                    <span className="ml-1.5 font-normal opacity-80">{count} · {days}d</span>
                     {on && <span className="ml-1 opacity-70">✓</span>}
                   </button>
                 );
