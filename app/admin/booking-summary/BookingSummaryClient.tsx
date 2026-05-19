@@ -100,13 +100,21 @@ export default function BookingSummaryClient() {
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
 
-  const upcoming     = charters.filter(c => c.endDate >= todayStr);
-  const webRequests  = charters.filter(c => c.status === 'web_request');
-  const confirmed    = charters.filter(c => c.status === 'confirmed' || c.status === 'signed');
-
-  const totalDaysBooked = charters.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
-  const upcomingDays    = upcoming.reduce((sum, c)  => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
-  const confirmedDays   = confirmed.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
+  const upcoming = charters.filter(c => c.endDate >= todayStr);
+  const webRequests = charters.filter(c => c.status === 'web_request');
+  const confirmed = charters.filter(c => c.status === 'confirmed' || c.status === 'signed');
+  const totalDaysBooked = charters.reduce((sum, c) => {
+    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+    return sum + Math.max(0, days);
+  }, 0);
+  const upcomingDays = upcoming.reduce((sum, c) => {
+    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+    return sum + Math.max(0, days);
+  }, 0);
+  const confirmedDays = confirmed.reduce((sum, c) => {
+    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+    return sum + Math.max(0, days);
+  }, 0);
 
   const filteredCharters = charters.filter(c => activeStatuses.has(c.status));
 
@@ -133,9 +141,9 @@ export default function BookingSummaryClient() {
           <p className="text-blue-200 text-sm animate-pulse">Loading…</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Total Charters"    value={charters.length}  sub={`${totalDaysBooked} days booked`} />
-            <StatCard label="Upcoming"           value={upcoming.length}  sub={`${upcomingDays} days booked`} />
-            <StatCard label="Web Requests"       value={webRequests.length} />
+            <StatCard label="Total Charters" value={charters.length} sub={`${totalDaysBooked} days booked`} />
+            <StatCard label="Upcoming" value={upcoming.length} sub={`${upcomingDays} days booked`} />
+            <StatCard label="Web Requests" value={webRequests.length} />
             <StatCard label="Confirmed / Signed" value={confirmed.length} sub={`${confirmedDays} days booked`} />
           </div>
         )}
