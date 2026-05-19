@@ -94,6 +94,14 @@ export default function BookingSummaryClient() {
     const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
     return sum + Math.max(0, days);
   }, 0);
+  const upcomingDays = upcoming.reduce((sum, c) => {
+    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+    return sum + Math.max(0, days);
+  }, 0);
+  const confirmedDays = confirmed.reduce((sum, c) => {
+    const days = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+    return sum + Math.max(0, days);
+  }, 0);
 
   const filteredCharters = charters.filter(c => activeStatuses.has(c.status));
 
@@ -113,9 +121,9 @@ export default function BookingSummaryClient() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard label="Total Charters" value={charters.length} sub={`${totalDaysBooked} days booked`} />
-            <StatCard label="Upcoming" value={upcoming.length} />
+            <StatCard label="Upcoming" value={upcoming.length} sub={`${upcomingDays} days booked`} />
             <StatCard label="Web Requests" value={webRequests.length} />
-            <StatCard label="Confirmed / Signed" value={confirmed.length} />
+            <StatCard label="Confirmed / Signed" value={confirmed.length} sub={`${confirmedDays} days booked`} />
           </div>
         )}
 
