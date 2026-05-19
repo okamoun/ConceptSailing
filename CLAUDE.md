@@ -10,7 +10,7 @@
 - Admin dashboard for managing bookings, contacts, and reviews
 - AI-generated adventure imagery via OpenAI
 
-Business contact: `contact@nj3cruises.com` — always use `app/config/contact.ts` (`CONTACT`) for any contact info rather than hardcoding.
+Business contact: `contact@nblueoneyacht.com` — always use `app/config/contact.ts` (`CONTACT`) for any contact info rather than hardcoding.
 
 ---
 
