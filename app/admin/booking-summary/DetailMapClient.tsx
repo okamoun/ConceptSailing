@@ -59,17 +59,20 @@ export default function DetailMapClient({ current, prev, next }: Props) {
 
   const points = [prevRedeliv, curDeliv, curRedeliv, nextDeliv].filter((p): p is Marina => !!p);
 
-  type Segment = { from: Marina; to: Marina; nm: number; fromLabel: string; toLabel: string; dashed: boolean };
+  type Segment = { from: Marina; to: Marina; nm: number; fromLabel: string; toLabel: string; dashed: boolean; days?: number };
   const segments: Segment[] = [];
 
+  const gapBefore = prev ? Math.round((new Date(current.startDate).getTime() - new Date(prev.endDate).getTime()) / 86_400_000) : undefined;
+  const gapAfter  = next ? Math.round((new Date(next.startDate).getTime() - new Date(current.endDate).getTime()) / 86_400_000) : undefined;
+
   if (prevRedeliv && curDeliv && prevRedeliv.id !== curDeliv.id)
-    segments.push({ from: prevRedeliv, to: curDeliv, nm: Math.round(haversineNm(prevRedeliv.lat, prevRedeliv.lng, curDeliv.lat, curDeliv.lng)), fromLabel: prevRedeliv.name, toLabel: curDeliv.name, dashed: true });
+    segments.push({ from: prevRedeliv, to: curDeliv, nm: Math.round(haversineNm(prevRedeliv.lat, prevRedeliv.lng, curDeliv.lat, curDeliv.lng)), fromLabel: prevRedeliv.name, toLabel: curDeliv.name, dashed: true, days: gapBefore });
 
   if (curDeliv && curRedeliv && curDeliv.id !== curRedeliv.id)
     segments.push({ from: curDeliv, to: curRedeliv, nm: Math.round(haversineNm(curDeliv.lat, curDeliv.lng, curRedeliv.lat, curRedeliv.lng)), fromLabel: curDeliv.name, toLabel: curRedeliv.name, dashed: false });
 
   if (curRedeliv && nextDeliv && curRedeliv.id !== nextDeliv.id)
-    segments.push({ from: curRedeliv, to: nextDeliv, nm: Math.round(haversineNm(curRedeliv.lat, curRedeliv.lng, nextDeliv.lat, nextDeliv.lng)), fromLabel: curRedeliv.name, toLabel: nextDeliv.name, dashed: true });
+    segments.push({ from: curRedeliv, to: nextDeliv, nm: Math.round(haversineNm(curRedeliv.lat, curRedeliv.lng, nextDeliv.lat, nextDeliv.lng)), fromLabel: curRedeliv.name, toLabel: nextDeliv.name, dashed: true, days: gapAfter });
 
   const onLoad = useCallback((map: google.maps.Map) => {
     if (points.length === 0) return;
@@ -123,7 +126,9 @@ export default function DetailMapClient({ current, prev, next }: Props) {
           {segments.map((seg, i) => (
             <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-1.5 ${seg.dashed ? 'bg-white/5' : 'bg-blue-500/15 border border-blue-500/20'}`}>
               <span className="text-blue-300 text-xs truncate mr-2">{seg.fromLabel} → {seg.toLabel}</span>
-              <span className="text-white text-xs font-semibold whitespace-nowrap">{seg.nm} nm</span>
+              <span className="text-white text-xs font-semibold whitespace-nowrap">
+                {seg.nm} nm{seg.days !== undefined ? ` · ${seg.days}d gap` : ''}
+              </span>
             </div>
           ))}
         </div>
