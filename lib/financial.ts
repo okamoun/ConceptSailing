@@ -40,12 +40,13 @@ export interface CharterFinancials {
   nights:       number;
   weeks:        number;      // nights / 7 (MYBA convention)
   tier:         SeasonTier;
-  baseRate:     number;      // weekly rate for tier
-  charterFee:   number;      // baseRate * weeks
+  baseRate:     number;      // weekly rate for tier (standard pricing)
+  charterFee:   number;      // actual fee used: charter.contractValue ?? baseRate * weeks
   apa:          number;      // charterFee * apaPercent / 100
   vat:          number;      // charterFee * vatPercent / 100
   relocation:   number;      // relocationFee or 0
   totalInvoice: number;      // charterFee + apa + vat + relocation
+  source:       'actual' | 'computed'; // 'actual' when contractValue is set on the charter
 }
 
 export function computeCharterFinancials(
@@ -64,7 +65,8 @@ export function computeCharterFinancials(
     low:  pricing.lowSeasonRate,
   };
   const baseRate = rateMap[tier];
-  const charterFee = baseRate * weeks;
+  const source: 'actual' | 'computed' = charter.contractValue != null ? 'actual' : 'computed';
+  const charterFee = charter.contractValue != null ? charter.contractValue : baseRate * weeks;
   const apa = charterFee * pricing.apaPercent / 100;
   const vat = charterFee * pricing.vatPercent / 100;
 
@@ -84,6 +86,7 @@ export function computeCharterFinancials(
     vat,
     relocation,
     totalInvoice: charterFee + apa + vat + relocation,
+    source,
   };
 }
 

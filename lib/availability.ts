@@ -66,6 +66,9 @@ export interface Charter {
   selectedTheme?: string;
   holidayDescription?: string;
   note?: string;
+  // Financials (optional — override computed season rates)
+  contractValue?: number;      // agreed charter fee in €; if set, used directly instead of rate × weeks
+  brokerCommission?: number;   // broker fee % of contractValue, for reference
   createdAt: Timestamp | null;
 }
 

@@ -50,6 +50,7 @@ function CharterRow({ cf }: { cf: CharterFinancials }) {
   const nights = cf.nights;
   const start = new Date(`${cf.charter.startDate}T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   const end   = new Date(`${cf.charter.endDate  }T12:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const isActual = cf.source === 'actual';
   return (
     <tr className="border-b border-white/10 hover:bg-white/5 transition-colors">
       <td className="px-3 py-2 text-white font-medium whitespace-nowrap">{cf.charter.name || '—'}</td>
@@ -58,7 +59,13 @@ function CharterRow({ cf }: { cf: CharterFinancials }) {
       <td className="px-3 py-2 whitespace-nowrap">
         <span className={`text-xs font-semibold uppercase ${SEASON_TEXT[cf.tier]}`}>{cf.tier}</span>
       </td>
-      <td className="px-3 py-2 text-blue-200 text-right whitespace-nowrap">{fmt(cf.charterFee)}</td>
+      <td className="px-3 py-2 text-right whitespace-nowrap">
+        <span className={isActual ? 'text-white font-semibold' : 'text-blue-200'}>{fmt(cf.charterFee)}</span>
+        {isActual
+          ? <span className="ml-1.5 text-xs text-emerald-400 font-medium">contract</span>
+          : <span className="ml-1.5 text-xs text-blue-400">est.</span>
+        }
+      </td>
       <td className="px-3 py-2 text-blue-200 text-right whitespace-nowrap">{fmt(cf.apa)}</td>
       <td className="px-3 py-2 text-blue-200 text-right whitespace-nowrap">{fmt(cf.vat)}</td>
       <td className="px-3 py-2 text-blue-200 text-right whitespace-nowrap">
@@ -268,10 +275,16 @@ export default function FinancialClient() {
             {/* Charter revenue table */}
             {summary.confirmed.length > 0 && (
               <section>
-                <h2 className="text-white font-semibold text-sm mb-3">
-                  Confirmed Charters
-                  <span className="ml-2 text-blue-300 text-xs font-normal">confirmed + signed</span>
-                </h2>
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                  <h2 className="text-white font-semibold text-sm">
+                    Confirmed Charters
+                    <span className="ml-2 text-blue-300 text-xs font-normal">confirmed + signed</span>
+                  </h2>
+                  <span className="text-xs text-blue-300">
+                    <span className="text-emerald-400 font-medium">contract</span> = actual value entered ·{' '}
+                    <span className="text-blue-400">est.</span> = standard rate × weeks
+                  </span>
+                </div>
                 <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
