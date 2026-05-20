@@ -3,37 +3,24 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  getProposalById,
-  createProposal,
-  updateProposal,
-  markProposalSent,
-  addProposalComment,
+  getCharterById,
+  updateCharter,
+  initCharterProposal,
+  updateCharterProposal,
+  markCharterProposalSent,
+  addCharterProposalComment,
   proposalRef,
   calcTotals,
   DEFAULT_PAYMENT_TERMS,
-  type Proposal,
+  DEFAULT_PRICING,
+  type Charter,
   type ProposalPricing,
   type PaymentTerm,
   type PricingExtra,
   type ProposalStatus,
-} from '../../../../lib/proposals';
-import { getCharterById, type Charter } from '../../../../lib/availability';
+  type ProposalComment,
+} from '../../../../lib/availability';
 import { getMarinaById } from '../../../marinas-data';
-
-const DEFAULT_PRICING: ProposalPricing = {
-  basePrice: 0,
-  currency: 'EUR',
-  apaPercentage: 30,
-  securityDeposit: 2000,
-  discountAmount: 0,
-  extras: [],
-};
-
-function defaultExpiresAt() {
-  const d = new Date();
-  d.setDate(d.getDate() + 30);
-  return d.toISOString().split('T')[0];
-}
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
@@ -56,13 +43,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Field({
-  label, children, hint,
-}: {
-  label: string;
-  children: React.ReactNode;
-  hint?: string;
-}) {
+function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <div>
       <label className="block text-xs font-medium text-blue-200 mb-1">{label}</label>
@@ -75,18 +56,17 @@ function Field({
 const inputCls =
   'w-full bg-white/10 border border-white/20 text-white placeholder-blue-400 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent';
 
-interface Props { id: string; prefillCharterId?: string }
+interface Props { id: string }
 
-export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
+export default function ProposalEditorClient({ id }: Props) {
   const router = useRouter();
-  const isNew = id === 'new';
 
-  const [loading, setLoading] = useState(!isNew);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
-  const [proposalId, setProposalId] = useState<string | null>(isNew ? null : id);
+  const [charter, setCharter] = useState<Charter | null>(null);
   const [proposalToken, setProposalToken] = useState<string | null>(null);
   const [status, setStatus] = useState<ProposalStatus>('draft');
   const [linkCopied, setLinkCopied] = useState(false);
@@ -94,29 +74,27 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
   // Admin comment reply
   const [adminReply, setAdminReply] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
-  const [existingComments, setExistingComments] = useState<Proposal['comments']>([]);
+  const [comments, setComments] = useState<ProposalComment[]>([]);
 
-  // Linked charter
-  const [linkedCharter, setLinkedCharter] = useState<Charter | null>(null);
-  const [linkedCharterId, setLinkedCharterId] = useState<string | undefined>(undefined);
-
-  // Form state
-  const [clientName, setClientName] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
-  const [boatName, setBoatName] = useState('BlueOne — Fountaine Pajot Aura 51');
+  // ── Charter core fields (editable) ──
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [boat, setBoat] = useState('BlueOne — Fountaine Pajot Aura 51');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [embarkationPort, setEmbarkationPort] = useState('');
-  const [disembarkationPort, setDisembarkationPort] = useState('');
+  const [deliveryPoint, setDeliveryPoint] = useState('');
+  const [redeliveryPoint, setRedeliveryPoint] = useState('');
   const [passengers, setPassengers] = useState(2);
   const [selectedTheme, setSelectedTheme] = useState('');
-  const [itinerarySummary, setItinerarySummary] = useState('');
+  const [holidayDescription, setHolidayDescription] = useState('');
+
+  // ── Proposal-only fields ──
   const [pricing, setPricing] = useState<ProposalPricing>(DEFAULT_PRICING);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>(DEFAULT_PAYMENT_TERMS);
   const [specialConditions, setSpecialConditions] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
-  const [expiresAt, setExpiresAt] = useState(defaultExpiresAt());
+  const [expiresAt, setExpiresAt] = useState('');
 
   const totals = useMemo(() => calcTotals(pricing), [pricing]);
 
@@ -124,117 +102,99 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/proposal/${proposalToken}`
     : null;
 
-  const populate = useCallback((p: Proposal) => {
-    setClientName(p.clientName);
-    setClientEmail(p.clientEmail);
-    setClientPhone(p.clientPhone || '');
-    setBoatName(p.boatName);
-    setStartDate(p.startDate);
-    setEndDate(p.endDate);
-    setEmbarkationPort(p.embarkationPort);
-    setDisembarkationPort(p.disembarkationPort);
-    setPassengers(p.passengers);
-    setSelectedTheme(p.selectedTheme || '');
-    setItinerarySummary(p.itinerarySummary || '');
-    setPricing(p.pricing);
-    setPaymentTerms(p.paymentTerms || DEFAULT_PAYMENT_TERMS);
-    setSpecialConditions(p.specialConditions || '');
-    setAdminNotes(p.adminNotes || '');
-    setExpiresAt(p.expiresAt);
-    setProposalToken(p.token);
-    setStatus(p.status);
-    setExistingComments(p.comments || []);
-    if (p.charterId) setLinkedCharterId(p.charterId);
+  // Resolve marina IDs to human-readable labels for display
+  const embarkLabel = useMemo(() => {
+    if (!charter) return '';
+    return getMarinaById(charter.deliveryPoint ?? '')?.name ?? charter.embarkationPoint ?? '';
+  }, [charter]);
+
+  const disembarkLabel = useMemo(() => {
+    if (!charter) return embarkLabel;
+    return getMarinaById(charter.redeliveryPoint ?? '')?.name ?? embarkLabel;
+  }, [charter, embarkLabel]);
+
+  const populate = useCallback((c: Charter) => {
+    setCharter(c);
+    setName(c.name ?? '');
+    setEmail(c.email ?? '');
+    setPhone(c.phone ?? '');
+    setBoat(c.boat ?? 'BlueOne — Fountaine Pajot Aura 51');
+    setStartDate(c.startDate);
+    setEndDate(c.endDate);
+    setDeliveryPoint(c.deliveryPoint ?? '');
+    setRedeliveryPoint(c.redeliveryPoint ?? c.deliveryPoint ?? '');
+    setPassengers(c.passengers ?? 2);
+    setSelectedTheme(c.selectedTheme ?? '');
+    setHolidayDescription(c.holidayDescription ?? '');
+    if (c.proposal) {
+      setPricing(c.proposal.pricing ?? DEFAULT_PRICING);
+      setPaymentTerms(c.proposal.paymentTerms ?? DEFAULT_PAYMENT_TERMS);
+      setSpecialConditions(c.proposal.specialConditions ?? '');
+      setAdminNotes(c.proposal.adminNotes ?? '');
+      setExpiresAt(c.proposal.expiresAt ?? '');
+      setProposalToken(c.proposal.token);
+      setStatus(c.proposal.status);
+      setComments(c.proposal.comments ?? []);
+    } else {
+      // Proposal not yet initialised — set default expiry
+      const d = new Date();
+      d.setDate(d.getDate() + 30);
+      setExpiresAt(d.toISOString().split('T')[0]);
+    }
   }, []);
 
-  // Load existing proposal
   useEffect(() => {
-    if (isNew) return;
-    getProposalById(id)
-      .then(p => { if (p) populate(p); })
+    getCharterById(id)
+      .then(c => { if (c) populate(c); })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [id, isNew, populate]);
-
-  // Pre-fill form from charter when creating a new proposal via ?charterId=
-  useEffect(() => {
-    if (!isNew || !prefillCharterId) return;
-    setLinkedCharterId(prefillCharterId);
-    getCharterById(prefillCharterId).then(charter => {
-      if (!charter) return;
-      setLinkedCharter(charter);
-      if (charter.name) setClientName(charter.name);
-      if (charter.email) setClientEmail(charter.email);
-      if (charter.phone) setClientPhone(charter.phone);
-      if (charter.boat) setBoatName(charter.boat);
-      if (charter.startDate) setStartDate(charter.startDate);
-      if (charter.endDate) setEndDate(charter.endDate);
-      if (charter.passengers) setPassengers(charter.passengers);
-      if (charter.selectedTheme) setSelectedTheme(charter.selectedTheme);
-      if (charter.holidayDescription) setItinerarySummary(charter.holidayDescription);
-      const embark = charter.deliveryPoint
-        ? (getMarinaById(charter.deliveryPoint)?.name ?? charter.embarkationPoint ?? '')
-        : (charter.embarkationPoint ?? '');
-      const disembark = charter.redeliveryPoint
-        ? (getMarinaById(charter.redeliveryPoint)?.name ?? embark)
-        : embark;
-      setEmbarkationPort(embark);
-      setDisembarkationPort(disembark);
-    }).catch(console.error);
-  }, [isNew, prefillCharterId]);
-
-  // Load linked charter for display when editing an existing proposal
-  useEffect(() => {
-    if (isNew || !linkedCharterId) return;
-    getCharterById(linkedCharterId)
-      .then(c => { if (c) setLinkedCharter(c); })
-      .catch(console.error);
-  }, [isNew, linkedCharterId]);
-
-  function buildData() {
-    return {
-      clientName: clientName.trim(),
-      clientEmail: clientEmail.trim(),
-      clientPhone: clientPhone.trim() || undefined,
-      charterId: linkedCharterId,
-      boatName: boatName.trim(),
-      startDate,
-      endDate,
-      embarkationPort: embarkationPort.trim(),
-      disembarkationPort: disembarkationPort.trim(),
-      passengers,
-      selectedTheme: selectedTheme.trim() || undefined,
-      itinerarySummary: itinerarySummary.trim() || undefined,
-      pricing,
-      paymentTerms,
-      specialConditions: specialConditions.trim() || undefined,
-      adminNotes: adminNotes.trim() || undefined,
-      expiresAt,
-      status,
-    };
-  }
+  }, [id, populate]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!clientName || !clientEmail || !startDate || !endDate) {
+    if (!name || !email || !startDate || !endDate) {
       setError('Please fill in client name, email, and charter dates.');
       return;
     }
     setSaving(true);
     setError('');
     try {
-      const data = buildData();
-      if (isNew || !proposalId) {
-        const newId = await createProposal(data as Parameters<typeof createProposal>[0]);
-        setProposalId(newId);
-        // Fetch the token from the new doc
-        const { getProposalById: fetchNew } = await import('../../../../lib/proposals');
-        const fresh = await fetchNew(newId);
-        if (fresh) { setProposalToken(fresh.token); setStatus(fresh.status); }
-        router.replace(`/admin/proposals/${newId}`);
-      } else {
-        await updateProposal(proposalId, data);
+      // Update charter core fields
+      await updateCharter(id, {
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim() || undefined,
+        boat: boat.trim(),
+        startDate,
+        endDate,
+        deliveryPoint: deliveryPoint || undefined,
+        redeliveryPoint: redeliveryPoint || undefined,
+        passengers,
+        selectedTheme: selectedTheme.trim() || undefined,
+        holidayDescription: holidayDescription.trim() || undefined,
+      });
+
+      if (!proposalToken) {
+        // First save — initialise the proposal sub-object
+        const token = await initCharterProposal(id);
+        setProposalToken(token);
+        setStatus('draft');
       }
+
+      // Update proposal-only fields
+      await updateCharterProposal(id, {
+        pricing,
+        paymentTerms,
+        specialConditions: specialConditions.trim() || undefined,
+        adminNotes: adminNotes.trim() || undefined,
+        expiresAt,
+        status,
+      });
+
+      // Refresh charter state
+      const fresh = await getCharterById(id);
+      if (fresh) setCharter(fresh);
+
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
@@ -246,14 +206,26 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
   }
 
   async function handleSend() {
-    if (!proposalId) { setError('Save the proposal first.'); return; }
+    if (!proposalToken) { setError('Save the proposal first.'); return; }
     setSending(true);
     setError('');
     try {
-      // Save current form data first, then mark as sent
-      const data = buildData();
-      await updateProposal(proposalId, data);
-      await markProposalSent(proposalId);
+      // Persist latest form data first
+      await updateCharter(id, {
+        name: name.trim(), email: email.trim(), phone: phone.trim() || undefined,
+        boat: boat.trim(), startDate, endDate, passengers,
+        selectedTheme: selectedTheme.trim() || undefined,
+        holidayDescription: holidayDescription.trim() || undefined,
+        deliveryPoint: deliveryPoint || undefined,
+        redeliveryPoint: redeliveryPoint || undefined,
+      });
+      await updateCharterProposal(id, {
+        pricing, paymentTerms,
+        specialConditions: specialConditions.trim() || undefined,
+        adminNotes: adminNotes.trim() || undefined,
+        expiresAt,
+      });
+      await markCharterProposalSent(id);
       setStatus('sent');
     } catch (err) {
       setError('Failed to send. Please try again.');
@@ -265,15 +237,15 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
 
   async function handleAdminReply(e: React.FormEvent) {
     e.preventDefault();
-    if (!proposalId || !adminReply.trim()) return;
+    if (!adminReply.trim()) return;
     setSendingReply(true);
     try {
-      await addProposalComment(
-        proposalId,
+      await addCharterProposalComment(
+        id,
         { author: 'BlueOne Team', text: adminReply.trim(), isAdmin: true },
         status
       );
-      setExistingComments(prev => [
+      setComments(prev => [
         ...prev,
         { id: Date.now().toString(), author: 'BlueOne Team', text: adminReply.trim(), createdAt: new Date().toISOString(), isAdmin: true },
       ]);
@@ -297,104 +269,57 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
     setPricing(p => ({ ...p, extras }));
   }
 
-  function addExtra() {
-    setPricing(p => ({ ...p, extras: [...p.extras, { label: '', amount: 0 }] }));
-  }
-
-  function removeExtra(i: number) {
-    setPricing(p => ({ ...p, extras: p.extras.filter((_, idx) => idx !== i) }));
-  }
-
   function updateTerm(i: number, field: keyof PaymentTerm, value: string | number) {
     const terms = [...paymentTerms];
     terms[i] = { ...terms[i], [field]: field === 'percentage' ? Number(value) : value };
     setPaymentTerms(terms);
   }
 
-  function addTerm() {
-    setPaymentTerms(prev => [...prev, { label: '', percentage: 0, description: '' }]);
-  }
-
-  function removeTerm(i: number) {
-    setPaymentTerms(prev => prev.filter((_, idx) => idx !== i));
-  }
-
   if (loading) {
     return <div className="p-8 text-blue-300 text-sm">Loading…</div>;
   }
 
-  // Guard: new proposals must be created from a booking
-  if (isNew && !prefillCharterId) {
+  if (!charter) {
     return (
-      <div className="p-6 max-w-2xl mx-auto pt-16 text-center">
-        <div className="text-5xl mb-5">📋</div>
-        <h1 className="text-white text-2xl font-bold mb-3">Start from a Booking</h1>
-        <p className="text-blue-300 text-sm leading-relaxed mb-8">
-          Proposals must be linked to an existing booking. Open a charter from the
-          Dashboard and click <strong className="text-white">+ Create Proposal</strong> to get started.
-        </p>
-        <a
-          href="/admin"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-sm transition-colors"
-        >
-          ← Go to Dashboard
-        </a>
+      <div className="p-8 text-center">
+        <p className="text-red-300 text-sm mb-4">Booking not found.</p>
+        <button onClick={() => router.push('/admin')} className="text-blue-400 hover:text-white text-sm underline">
+          ← Back to Dashboard
+        </button>
       </div>
     );
   }
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      {/* Page header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
         <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/admin/proposals')} className="text-blue-400 hover:text-white text-sm transition-colors">
-              ← Proposals
+          <div className="flex items-center gap-3 flex-wrap">
+            <button onClick={() => router.push('/admin')} className="text-blue-400 hover:text-white text-sm transition-colors">
+              ← Dashboard
             </button>
-            {!isNew && proposalId && (
-              <span className="text-blue-500 text-sm font-mono">{proposalRef(proposalId)}</span>
-            )}
-            {!isNew && (
+            <span className="text-blue-500 text-sm font-mono">{proposalRef(id)}</span>
+            {proposalToken && (
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_BADGE[status]}`}>
                 {status}
               </span>
             )}
           </div>
           <h1 className="text-white text-2xl font-bold mt-2">
-            {isNew ? 'New Proposal' : 'Edit Proposal'}
+            {proposalToken ? 'Edit Proposal' : 'Create Proposal'}
           </h1>
+          {charter.name && (
+            <p className="text-blue-300 text-sm mt-0.5">
+              {charter.name} · {charter.startDate} → {charter.endDate}
+              {embarkLabel && ` · ${embarkLabel}`}
+              {disembarkLabel && disembarkLabel !== embarkLabel && ` → ${disembarkLabel}`}
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Linked booking banner */}
-      {linkedCharter && (
-        <div className="bg-white/10 border border-white/15 rounded-2xl p-5 mb-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">
-                Linked Booking
-              </div>
-              <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-blue-200">
-                {linkedCharter.name && <span className="font-medium text-white">{linkedCharter.name}</span>}
-                {linkedCharter.email && <span>{linkedCharter.email}</span>}
-                {linkedCharter.phone && <span>{linkedCharter.phone}</span>}
-                <span>📅 {linkedCharter.startDate} → {linkedCharter.endDate}</span>
-                {linkedCharter.passengers != null && <span>👥 {linkedCharter.passengers} pax</span>}
-                {linkedCharter.selectedTheme && <span>🏝 {linkedCharter.selectedTheme}</span>}
-              </div>
-            </div>
-            <a
-              href="/admin"
-              className="flex-shrink-0 text-xs text-blue-400 hover:text-blue-200 underline whitespace-nowrap"
-            >
-              ← Back to Dashboard
-            </a>
-          </div>
-        </div>
-      )}
-
-      {/* Shareable link — shown once proposal exists */}
+      {/* Shareable link */}
       {proposalToken && (
         <div className="bg-white/10 border border-white/20 rounded-2xl p-5 mb-6">
           <div className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-3">Client Link</div>
@@ -403,25 +328,19 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
               {proposalUrl}
             </code>
             <div className="flex gap-2 flex-shrink-0">
-              <button
-                onClick={copyLink}
-                className="px-4 py-2 bg-blue-600/60 hover:bg-blue-600 text-white rounded-xl text-xs font-medium transition-colors"
-              >
+              <button onClick={copyLink}
+                className="px-4 py-2 bg-blue-600/60 hover:bg-blue-600 text-white rounded-xl text-xs font-medium transition-colors">
                 {linkCopied ? '✓ Copied' : 'Copy Link'}
               </button>
-              <a
-                href={`/proposal/${proposalToken}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-blue-200 rounded-xl text-xs font-medium transition-colors"
-              >
+              <a href={`/proposal/${proposalToken}`} target="_blank" rel="noopener noreferrer"
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-blue-200 rounded-xl text-xs font-medium transition-colors">
                 Preview
               </a>
             </div>
           </div>
           {status === 'draft' && (
             <p className="text-xs text-amber-300 mt-3">
-              ⚠ This proposal is still a draft. Click <strong>Send to Client</strong> below to activate the link.
+              ⚠ Draft — click <strong>Send to Client</strong> to activate the link.
             </p>
           )}
         </div>
@@ -429,125 +348,112 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
 
       <form onSubmit={handleSave} className="space-y-6">
 
-        {/* Client Information */}
-        <Section title="Client Information">
-          <div className="grid sm:grid-cols-3 gap-4">
-            <Field label="Full Name *">
-              <input type="text" value={clientName} onChange={e => setClientName(e.target.value)}
+        {/* Client & Charter Details — reads from / writes to charter core fields */}
+        <Section title="Client & Charter Details">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+            <Field label="Client Name *">
+              <input type="text" value={name} onChange={e => setName(e.target.value)}
                 placeholder="Jean-Pierre Dupont" className={inputCls} required />
             </Field>
-            <Field label="Email Address *">
-              <input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)}
+            <Field label="Email *">
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="client@example.com" className={inputCls} required />
             </Field>
             <Field label="Phone">
-              <input type="tel" value={clientPhone} onChange={e => setClientPhone(e.target.value)}
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
                 placeholder="+33 6 12 34 56 78" className={inputCls} />
             </Field>
-          </div>
-        </Section>
-
-        {/* Charter Details */}
-        <Section title="Charter Details">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label="Vessel Name">
-              <input type="text" value={boatName} onChange={e => setBoatName(e.target.value)}
+            <Field label="Vessel">
+              <input type="text" value={boat} onChange={e => setBoat(e.target.value)}
                 className={inputCls} />
             </Field>
-            <Field label="Number of Guests">
+            <Field label="Guests">
               <input type="number" value={passengers} onChange={e => setPassengers(Number(e.target.value))}
                 min={1} max={12} className={inputCls} />
             </Field>
-            <Field label="Charter Start Date *">
+            <Field label="Experience Theme">
+              <input type="text" value={selectedTheme} onChange={e => setSelectedTheme(e.target.value)}
+                placeholder="Cyclades Discovery…" className={inputCls} />
+            </Field>
+            <Field label="Start Date *">
               <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
                 className={inputCls} required />
             </Field>
-            <Field label="Charter End Date *">
+            <Field label="End Date *">
               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
                 className={inputCls} required />
             </Field>
-            <Field label="Embarkation Port">
-              <input type="text" value={embarkationPort} onChange={e => setEmbarkationPort(e.target.value)}
-                placeholder="Athens — Alimos Marina" className={inputCls} />
-            </Field>
-            <Field label="Disembarkation Port">
-              <input type="text" value={disembarkationPort} onChange={e => setDisembarkationPort(e.target.value)}
-                placeholder="Athens — Alimos Marina" className={inputCls} />
-            </Field>
-            <Field label="Experience Theme">
-              <input type="text" value={selectedTheme} onChange={e => setSelectedTheme(e.target.value)}
-                placeholder="Cyclades Discovery, Family Adventure…" className={inputCls} />
-            </Field>
-            <Field label="Proposal Expiry Date" hint="Client link becomes invalid after this date">
+            <Field label="Proposal Expiry" hint="Link expires on this date">
               <input type="date" value={expiresAt} onChange={e => setExpiresAt(e.target.value)}
                 className={inputCls} />
             </Field>
           </div>
-          <div className="mt-4">
-            <Field label="Itinerary Overview" hint="Shown to client — describe the route and highlights">
-              <textarea value={itinerarySummary} onChange={e => setItinerarySummary(e.target.value)}
-                rows={5} placeholder="Day 1: Depart Athens (Alimos Marina)…" className={inputCls} />
-            </Field>
-          </div>
+          <Field label="Itinerary / Holiday Description">
+            <textarea value={holidayDescription} onChange={e => setHolidayDescription(e.target.value)}
+              rows={4} placeholder="Day 1: Depart Athens…" className={inputCls} />
+          </Field>
         </Section>
 
         {/* Pricing */}
         <Section title="Pricing">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
             <Field label="Base Charter Fee (€)">
-              <input type="number" value={pricing.basePrice} onChange={e => setPricing(p => ({ ...p, basePrice: Number(e.target.value) }))}
+              <input type="number" value={pricing.basePrice}
+                onChange={e => setPricing(p => ({ ...p, basePrice: Number(e.target.value) }))}
                 min={0} step={100} className={inputCls} />
             </Field>
             <Field label="APA Percentage (%)" hint="Typically 25–35%">
-              <input type="number" value={pricing.apaPercentage} onChange={e => setPricing(p => ({ ...p, apaPercentage: Number(e.target.value) }))}
+              <input type="number" value={pricing.apaPercentage}
+                onChange={e => setPricing(p => ({ ...p, apaPercentage: Number(e.target.value) }))}
                 min={0} max={100} className={inputCls} />
             </Field>
             <Field label="Security Deposit (€)" hint="Refundable">
-              <input type="number" value={pricing.securityDeposit} onChange={e => setPricing(p => ({ ...p, securityDeposit: Number(e.target.value) }))}
+              <input type="number" value={pricing.securityDeposit}
+                onChange={e => setPricing(p => ({ ...p, securityDeposit: Number(e.target.value) }))}
                 min={0} step={100} className={inputCls} />
             </Field>
             <Field label="Discount (€)">
-              <input type="number" value={pricing.discountAmount} onChange={e => setPricing(p => ({ ...p, discountAmount: Number(e.target.value) }))}
+              <input type="number" value={pricing.discountAmount}
+                onChange={e => setPricing(p => ({ ...p, discountAmount: Number(e.target.value) }))}
                 min={0} step={100} className={inputCls} />
             </Field>
           </div>
 
           {/* Extras */}
-          <div className="mb-4">
+          <div className="mb-5">
             <div className="text-xs font-medium text-blue-200 mb-2">Additional Services / Extras</div>
             <div className="space-y-2">
               {pricing.extras.map((extra, i) => (
                 <div key={i} className="flex gap-2 items-center">
                   <input type="text" value={extra.label} onChange={e => updateExtra(i, 'label', e.target.value)}
-                    placeholder="Service description" className={`${inputCls} flex-1`} />
+                    placeholder="Service" className={`${inputCls} flex-1`} />
                   <input type="number" value={extra.amount} onChange={e => updateExtra(i, 'amount', e.target.value)}
-                    placeholder="0" min={0} className={`${inputCls} w-28`} />
-                  <button type="button" onClick={() => removeExtra(i)}
-                    className="text-red-400 hover:text-red-300 text-sm px-2">✕</button>
+                    min={0} className={`${inputCls} w-28`} />
+                  <button type="button" onClick={() => setPricing(p => ({ ...p, extras: p.extras.filter((_, idx) => idx !== i) }))}
+                    className="text-red-400 hover:text-red-300 px-2">✕</button>
                 </div>
               ))}
-              <button type="button" onClick={addExtra}
-                className="text-xs text-blue-400 hover:text-blue-200 underline">
-                + Add extra
-              </button>
+              <button type="button" onClick={() => setPricing(p => ({ ...p, extras: [...p.extras, { label: '', amount: 0 }] }))}
+                className="text-xs text-blue-400 hover:text-blue-200 underline">+ Add extra</button>
             </div>
           </div>
 
-          {/* Computed totals */}
+          {/* Live totals */}
           <div className="bg-black/20 rounded-xl p-4 space-y-2">
             <div className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-3">Totals Preview</div>
-            {[
-              { label: 'Base Charter Fee', value: totals.base },
-              totals.discount > 0 && { label: 'Discount', value: -totals.discount },
-              totals.extrasSum > 0 && { label: 'Extras', value: totals.extrasSum },
-            ].filter(Boolean).map((row, i) => row && (
-              <div key={i} className="flex justify-between text-sm text-blue-200">
-                <span>{row.label}</span>
-                <span className={row.value < 0 ? 'text-emerald-400' : ''}>
-                  {row.value < 0 ? '−' : ''}{fmt(Math.abs(row.value))}
-                </span>
+            <div className="flex justify-between text-sm text-blue-200">
+              <span>Base Charter Fee</span><span>{fmt(totals.base)}</span>
+            </div>
+            {totals.discount > 0 && (
+              <div className="flex justify-between text-sm text-emerald-400">
+                <span>Discount</span><span>− {fmt(totals.discount)}</span>
               </div>
-            ))}
+            )}
+            {totals.extrasSum > 0 && (
+              <div className="flex justify-between text-sm text-blue-200">
+                <span>Extras</span><span>{fmt(totals.extrasSum)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm font-semibold text-white border-t border-white/10 pt-2">
               <span>Charter Fee</span><span>{fmt(totals.charterFee)}</span>
             </div>
@@ -577,14 +483,14 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
                     placeholder="e.g. Deposit — 50%" className={`${inputCls} flex-1`} />
                   <div className="flex items-center gap-1">
                     <input type="number" value={term.percentage} onChange={e => updateTerm(i, 'percentage', e.target.value)}
-                      min={0} max={100} placeholder="50" className={`${inputCls} w-20`} />
+                      min={0} max={100} className={`${inputCls} w-20`} />
                     <span className="text-blue-300 text-sm">%</span>
                   </div>
-                  <button type="button" onClick={() => removeTerm(i)}
-                    className="text-red-400 hover:text-red-300 text-sm px-2">✕</button>
+                  <button type="button" onClick={() => setPaymentTerms(prev => prev.filter((_, idx) => idx !== i))}
+                    className="text-red-400 hover:text-red-300 px-2">✕</button>
                 </div>
                 <input type="text" value={term.description} onChange={e => updateTerm(i, 'description', e.target.value)}
-                  placeholder="Payment condition description…" className={`${inputCls} text-xs`} />
+                  placeholder="Payment condition…" className={`${inputCls} text-xs`} />
                 {totals.charterFee > 0 && (
                   <div className="text-xs text-blue-400 mt-2">
                     = {fmt(Math.round(totals.charterFee * term.percentage / 100))}
@@ -594,89 +500,61 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
             ))}
           </div>
           <div className="flex gap-3">
-            <button type="button" onClick={addTerm}
-              className="text-xs text-blue-400 hover:text-blue-200 underline">
-              + Add payment term
-            </button>
+            <button type="button" onClick={() => setPaymentTerms(prev => [...prev, { label: '', percentage: 0, description: '' }])}
+              className="text-xs text-blue-400 hover:text-blue-200 underline">+ Add term</button>
             <button type="button" onClick={() => setPaymentTerms(DEFAULT_PAYMENT_TERMS)}
-              className="text-xs text-blue-500 hover:text-blue-300 underline">
-              Reset to MYBA defaults
-            </button>
+              className="text-xs text-blue-500 hover:text-blue-300 underline">Reset to MYBA defaults</button>
           </div>
         </Section>
 
         {/* Conditions & Notes */}
         <Section title="Conditions & Notes">
           <div className="space-y-4">
-            <Field
-              label="Special Conditions"
-              hint="Shown to client — any charter-specific terms or inclusions"
-            >
+            <Field label="Special Conditions" hint="Visible to client">
               <textarea value={specialConditions} onChange={e => setSpecialConditions(e.target.value)}
-                rows={4} placeholder="e.g. Skipper and hostess included. Fuel up to 4 hours/day included…"
-                className={inputCls} />
+                rows={4} placeholder="e.g. Skipper included, fuel up to 4 h/day…" className={inputCls} />
             </Field>
-            <Field
-              label="Admin Notes (internal only)"
-              hint="Not shown to client"
-            >
+            <Field label="Admin Notes" hint="Internal only — not shown to client">
               <textarea value={adminNotes} onChange={e => setAdminNotes(e.target.value)}
-                rows={3} placeholder="Internal notes about this client or booking…"
-                className={inputCls} />
+                rows={3} placeholder="Internal notes…" className={inputCls} />
             </Field>
           </div>
         </Section>
 
-        {/* Error */}
         {error && (
-          <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-4 text-red-300 text-sm">
-            {error}
-          </div>
+          <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-4 text-red-300 text-sm">{error}</div>
         )}
 
         {/* Action bar */}
         <div className="flex flex-wrap gap-3 pb-4">
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-sm disabled:opacity-50 transition-colors"
-          >
-            {saving ? 'Saving…' : isNew ? 'Create Proposal' : 'Save Changes'}
+          <button type="submit" disabled={saving}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-sm disabled:opacity-50 transition-colors">
+            {saving ? 'Saving…' : proposalToken ? 'Save Changes' : 'Create Proposal'}
           </button>
-          {saved && (
-            <span className="px-4 py-3 text-emerald-400 text-sm font-medium">✓ Saved</span>
-          )}
+          {saved && <span className="px-4 py-3 text-emerald-400 text-sm font-medium">✓ Saved</span>}
           {proposalToken && status === 'draft' && (
-            <button
-              type="button"
-              onClick={handleSend}
-              disabled={sending}
-              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-sm disabled:opacity-50 transition-colors"
-            >
+            <button type="button" onClick={handleSend} disabled={sending}
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-sm disabled:opacity-50 transition-colors">
               {sending ? 'Sending…' : '📤 Send to Client'}
             </button>
           )}
           {proposalToken && status !== 'draft' && (
-            <button
-              type="button"
-              onClick={handleSend}
-              disabled={sending}
-              className="px-5 py-3 bg-white/10 hover:bg-white/20 text-blue-200 rounded-xl text-sm font-medium disabled:opacity-50 transition-colors"
-            >
+            <button type="button" onClick={handleSend} disabled={sending}
+              className="px-5 py-3 bg-white/10 hover:bg-white/20 text-blue-200 rounded-xl text-sm font-medium disabled:opacity-50 transition-colors">
               {sending ? 'Updating…' : '📤 Resend / Reactivate'}
             </button>
           )}
         </div>
       </form>
 
-      {/* Comments thread — shown for existing proposals */}
-      {!isNew && existingComments.length > 0 && (
+      {/* Comments thread */}
+      {comments.length > 0 && (
         <div className="mt-8 bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-6">
           <h3 className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-5">
-            Client Discussion ({existingComments.length})
+            Client Discussion ({comments.length})
           </h3>
           <div className="space-y-4 mb-6">
-            {existingComments.map(c => (
+            {comments.map(c => (
               <div key={c.id} className={`flex gap-3 ${c.isAdmin ? 'flex-row-reverse' : ''}`}>
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${c.isAdmin ? 'bg-blue-600/50 text-blue-200' : 'bg-white/20 text-white'}`}>
                   {c.author.charAt(0).toUpperCase()}
@@ -687,29 +565,17 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
                     <p className="leading-relaxed whitespace-pre-wrap">{c.text}</p>
                   </div>
                   <div className="text-xs text-blue-500 mt-1 px-1">
-                    {new Date(c.createdAt).toLocaleDateString('en-GB', {
-                      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
-                    })}
+                    {new Date(c.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Admin reply form */}
           <form onSubmit={handleAdminReply} className="flex gap-3">
-            <input
-              type="text"
-              value={adminReply}
-              onChange={e => setAdminReply(e.target.value)}
-              placeholder="Reply to client…"
-              className={`${inputCls} flex-1`}
-            />
-            <button
-              type="submit"
-              disabled={sendingReply || !adminReply.trim()}
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-colors"
-            >
+            <input type="text" value={adminReply} onChange={e => setAdminReply(e.target.value)}
+              placeholder="Reply to client…" className={`${inputCls} flex-1`} />
+            <button type="submit" disabled={sendingReply || !adminReply.trim()}
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-colors">
               {sendingReply ? '…' : 'Reply'}
             </button>
           </form>
