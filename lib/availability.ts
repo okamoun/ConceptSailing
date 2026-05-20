@@ -69,6 +69,8 @@ export interface Charter {
   // Financials (optional — override computed season rates)
   contractValue?: number;      // agreed charter fee in €; if set, used directly instead of rate × weeks
   brokerCommission?: number;   // broker fee % of contractValue, for reference
+  apaAmount?: number;          // actual APA collected from client in €; overrides apaPercent default
+  relocationAmount?: number;   // actual relocation fee in €; overrides config default
   createdAt: Timestamp | null;
 }
 
