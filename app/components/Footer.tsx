@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { CONTACT } from '../config/contact';
 
 export default function Footer() {
   return (
