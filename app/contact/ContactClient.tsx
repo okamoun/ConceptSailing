@@ -172,7 +172,7 @@ export default function ContactClient() {
 
           {/* Contact Information */}
           <div className="mt-10 pt-8 border-t border-blue-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
               <div>
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,6 +205,17 @@ export default function ContactClient() {
                 </div>
                 <p className="text-sm text-gray-500 mb-1">Location</p>
                 <p className="text-blue-600 font-semibold">Athens, Greece</p>
+              </div>
+              <div>
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+                  </svg>
+                </div>
+                <p className="text-sm text-gray-500 mb-1">Facebook</p>
+                <a href="https://www.facebook.com/share/1LhPdDZXd1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold hover:text-blue-800 transition-colors">
+                  Follow us
+                </a>
               </div>
             </div>
 
