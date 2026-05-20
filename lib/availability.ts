@@ -2,6 +2,7 @@ import {
   collection,
   doc,
   addDoc,
+  getDoc,
   getDocs,
   updateDoc,
   deleteDoc,
@@ -93,6 +94,12 @@ export async function updateCharter(
   data: Partial<Omit<Charter, 'id' | 'createdAt'>>
 ): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), data);
+}
+
+export async function getCharterById(id: string): Promise<Charter | null> {
+  const snap = await getDoc(doc(db, COLLECTION, id));
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() } as Charter;
 }
 
 export async function deleteCharter(id: string): Promise<void> {

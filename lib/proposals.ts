@@ -137,6 +137,12 @@ export async function getProposalById(id: string): Promise<Proposal | null> {
   return { id: snap.id, ...snap.data() } as Proposal;
 }
 
+export async function getProposalsByCharterId(charterId: string): Promise<Proposal[]> {
+  const q = query(collection(db, COLLECTION), where('charterId', '==', charterId));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() } as Proposal));
+}
+
 export async function getProposalByToken(token: string): Promise<Proposal | null> {
   const q = query(collection(db, COLLECTION), where('token', '==', token));
   const snap = await getDocs(q);

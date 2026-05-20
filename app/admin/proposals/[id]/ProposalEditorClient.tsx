@@ -17,6 +17,8 @@ import {
   type PricingExtra,
   type ProposalStatus,
 } from '../../../../lib/proposals';
+import { getCharterById, type Charter } from '../../../../lib/availability';
+import { getMarinaById } from '../../../marinas-data';
 
 const DEFAULT_PRICING: ProposalPricing = {
   basePrice: 0,
@@ -73,9 +75,9 @@ function Field({
 const inputCls =
   'w-full bg-white/10 border border-white/20 text-white placeholder-blue-400 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent';
 
-interface Props { id: string }
+interface Props { id: string; prefillCharterId?: string }
 
-export default function ProposalEditorClient({ id }: Props) {
+export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
   const router = useRouter();
   const isNew = id === 'new';
 
@@ -93,6 +95,10 @@ export default function ProposalEditorClient({ id }: Props) {
   const [adminReply, setAdminReply] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
   const [existingComments, setExistingComments] = useState<Proposal['comments']>([]);
+
+  // Linked charter
+  const [linkedCharter, setLinkedCharter] = useState<Charter | null>(null);
+  const [linkedCharterId, setLinkedCharterId] = useState<string | undefined>(undefined);
 
   // Form state
   const [clientName, setClientName] = useState('');
@@ -138,8 +144,10 @@ export default function ProposalEditorClient({ id }: Props) {
     setProposalToken(p.token);
     setStatus(p.status);
     setExistingComments(p.comments || []);
+    if (p.charterId) setLinkedCharterId(p.charterId);
   }, []);
 
+  // Load existing proposal
   useEffect(() => {
     if (isNew) return;
     getProposalById(id)
@@ -148,11 +156,47 @@ export default function ProposalEditorClient({ id }: Props) {
       .finally(() => setLoading(false));
   }, [id, isNew, populate]);
 
+  // Pre-fill form from charter when creating a new proposal via ?charterId=
+  useEffect(() => {
+    if (!isNew || !prefillCharterId) return;
+    setLinkedCharterId(prefillCharterId);
+    getCharterById(prefillCharterId).then(charter => {
+      if (!charter) return;
+      setLinkedCharter(charter);
+      if (charter.name) setClientName(charter.name);
+      if (charter.email) setClientEmail(charter.email);
+      if (charter.phone) setClientPhone(charter.phone);
+      if (charter.boat) setBoatName(charter.boat);
+      if (charter.startDate) setStartDate(charter.startDate);
+      if (charter.endDate) setEndDate(charter.endDate);
+      if (charter.passengers) setPassengers(charter.passengers);
+      if (charter.selectedTheme) setSelectedTheme(charter.selectedTheme);
+      if (charter.holidayDescription) setItinerarySummary(charter.holidayDescription);
+      const embark = charter.deliveryPoint
+        ? (getMarinaById(charter.deliveryPoint)?.name ?? charter.embarkationPoint ?? '')
+        : (charter.embarkationPoint ?? '');
+      const disembark = charter.redeliveryPoint
+        ? (getMarinaById(charter.redeliveryPoint)?.name ?? embark)
+        : embark;
+      setEmbarkationPort(embark);
+      setDisembarkationPort(disembark);
+    }).catch(console.error);
+  }, [isNew, prefillCharterId]);
+
+  // Load linked charter for display when editing an existing proposal
+  useEffect(() => {
+    if (isNew || !linkedCharterId) return;
+    getCharterById(linkedCharterId)
+      .then(c => { if (c) setLinkedCharter(c); })
+      .catch(console.error);
+  }, [isNew, linkedCharterId]);
+
   function buildData() {
     return {
       clientName: clientName.trim(),
       clientEmail: clientEmail.trim(),
       clientPhone: clientPhone.trim() || undefined,
+      charterId: linkedCharterId,
       boatName: boatName.trim(),
       startDate,
       endDate,
@@ -302,6 +346,33 @@ export default function ProposalEditorClient({ id }: Props) {
           </h1>
         </div>
       </div>
+
+      {/* Linked booking banner */}
+      {linkedCharter && (
+        <div className="bg-white/10 border border-white/15 rounded-2xl p-5 mb-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">
+                Linked Booking
+              </div>
+              <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-blue-200">
+                {linkedCharter.name && <span className="font-medium text-white">{linkedCharter.name}</span>}
+                {linkedCharter.email && <span>{linkedCharter.email}</span>}
+                {linkedCharter.phone && <span>{linkedCharter.phone}</span>}
+                <span>📅 {linkedCharter.startDate} → {linkedCharter.endDate}</span>
+                {linkedCharter.passengers != null && <span>👥 {linkedCharter.passengers} pax</span>}
+                {linkedCharter.selectedTheme && <span>🏝 {linkedCharter.selectedTheme}</span>}
+              </div>
+            </div>
+            <a
+              href="/admin"
+              className="flex-shrink-0 text-xs text-blue-400 hover:text-blue-200 underline whitespace-nowrap"
+            >
+              ← Back to Dashboard
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Shareable link — shown once proposal exists */}
       {proposalToken && (

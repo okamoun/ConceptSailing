@@ -2,9 +2,11 @@ import ProposalEditorClient from './ProposalEditorClient';
 
 interface Props {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ charterId?: string }>;
 }
 
-export default async function ProposalEditorPage({ params }: Props) {
+export default async function ProposalEditorPage({ params, searchParams }: Props) {
   const { id } = await params;
-  return <ProposalEditorClient id={id} />;
+  const { charterId } = await searchParams;
+  return <ProposalEditorClient id={id} prefillCharterId={charterId} />;
 }

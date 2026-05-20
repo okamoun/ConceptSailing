@@ -17,9 +17,19 @@ import {
 } from '../../lib/submissions';
 import { getAllReviews, adminDeleteReview, updateReviewOrder } from '../../lib/reviews';
 import type { Review } from '../../lib/reviews';
+import { getProposals, proposalRef, type Proposal, type ProposalStatus } from '../../lib/proposals';
 import StarRating from '../components/StarRating';
 import MarinaMap from './MarinaMap';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
+
+const PROPOSAL_BADGE: Record<ProposalStatus, string> = {
+  draft:     'bg-gray-500/30 text-gray-300',
+  sent:      'bg-sky-500/30 text-sky-200',
+  viewed:    'bg-indigo-500/30 text-indigo-200',
+  commented: 'bg-amber-500/30 text-amber-200',
+  approved:  'bg-emerald-500/30 text-emerald-200',
+  rejected:  'bg-red-500/30 text-red-200',
+};
 
 type Tab = 'charters' | 'contacts' | 'reviews';
 
@@ -40,6 +50,7 @@ export default function AdminDashboardClient() {
   const [charters, setCharters] = useState<Charter[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
 
@@ -51,8 +62,13 @@ export default function AdminDashboardClient() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([getAllCharters(), getAllContacts(), getAllReviews()])
-      .then(([c, contacts, r]) => { setCharters(c); setContacts(contacts); setReviews(r); })
+    Promise.all([getAllCharters(), getAllContacts(), getAllReviews(), getProposals()])
+      .then(([c, contacts, r, p]) => {
+        setCharters(c);
+        setContacts(contacts);
+        setReviews(r);
+        setProposals(p);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -171,6 +187,7 @@ export default function AdminDashboardClient() {
               const deliveryLabel = deliveryMarina?.name ?? c.deliveryPoint ?? c.embarkationPoint;
               const redeliveryLabel = redeliveryMarina?.name ?? c.redeliveryPoint ?? c.deliveryPoint ?? c.embarkationPoint;
               const isExpanded = expandedId === c.id;
+              const charterProposals = proposals.filter(p => p.charterId === c.id);
 
               return (
                 <div key={c.id} className="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl p-5">
@@ -214,6 +231,26 @@ export default function AdminDashboardClient() {
                       {c.note && (
                         <p className="text-blue-300 text-xs mt-1 italic">Note: {c.note}</p>
                       )}
+
+                      {/* Linked proposals */}
+                      <div className="flex flex-wrap items-center gap-2 mt-3">
+                        {charterProposals.map(p => (
+                          <a
+                            key={p.id}
+                            href={`/admin/proposals/${p.id}`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors hover:brightness-125 ${PROPOSAL_BADGE[p.status]}`}
+                          >
+                            📋 {proposalRef(p.id)} · {p.status}
+                          </a>
+                        ))}
+                        <a
+                          href={`/admin/proposals/new?charterId=${c.id}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-300 hover:text-white transition-colors"
+                        >
+                          + {charterProposals.length === 0 ? 'Create Proposal' : 'New Proposal'}
+                        </a>
+                      </div>
+
                       <p className="text-blue-400 text-xs mt-2">
                         Created: {c.createdAt?.toDate?.()?.toLocaleString() ?? '—'}
                       </p>
