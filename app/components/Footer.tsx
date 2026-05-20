@@ -55,6 +55,12 @@ export default function Footer() {
                 </svg>
                 WhatsApp
               </a>
+              <a href="https://www.facebook.com/share/1LhPdDZXd1/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-section-description hover:text-white transition-colors duration-200">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+                </svg>
+                Facebook
+              </a>
             </div>
             <div className="pt-4 border-t border-gray-700">
               <p className="text-sm text-gray-400">Athens, Greece</p>
