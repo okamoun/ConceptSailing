@@ -40,9 +40,14 @@ const localStorageMock = {
 global.localStorage = localStorageMock
 
 // Mock window.location
-Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-  },
-  writable: true,
-})
+// jsdom 26+ defines window.location as non-configurable; reassign via global instead.
+try {
+  Object.defineProperty(window, 'location', {
+    value: { href: '', origin: 'http://localhost' },
+    writable: true,
+    configurable: true,
+  });
+} catch {
+  // Already non-configurable — patch individual properties
+  window.location.href = '';
+}
