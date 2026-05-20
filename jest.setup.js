@@ -39,10 +39,6 @@ const localStorageMock = {
 }
 global.localStorage = localStorageMock
 
-// Mock window.location
-Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-  },
-  writable: true,
-})
+// Mock window.location (compatible with Jest 30 / JSDOM)
+delete window.location
+window.location = { href: '' }
