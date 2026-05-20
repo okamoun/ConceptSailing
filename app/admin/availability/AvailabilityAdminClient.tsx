@@ -53,6 +53,10 @@ interface ModalState {
   note: string;
   selectedTheme: string;
   holidayDescription: string;
+  contractValue: string;
+  brokerCommission: string;
+  apaAmount: string;
+  relocationAmount: string;
 }
 
 export default function AvailabilityAdminClient() {
@@ -86,7 +90,8 @@ export default function AvailabilityAdminClient() {
       name: '', email: '', phone: '', passengers: '', boat: '',
       deliveryPoint: DEFAULT_MARINA_ID,
       redeliveryPoint: DEFAULT_MARINA_ID,
-      note: '', selectedTheme: '', holidayDescription: ''
+      note: '', selectedTheme: '', holidayDescription: '',
+      contractValue: '', brokerCommission: '', apaAmount: '', relocationAmount: '',
     });
   }
 
@@ -107,6 +112,10 @@ export default function AvailabilityAdminClient() {
       note: entry.note ?? '',
       selectedTheme: entry.selectedTheme ?? '',
       holidayDescription: entry.holidayDescription ?? '',
+      contractValue: entry.contractValue != null ? String(entry.contractValue) : '',
+      brokerCommission: entry.brokerCommission != null ? String(entry.brokerCommission) : '',
+      apaAmount: entry.apaAmount != null ? String(entry.apaAmount) : '',
+      relocationAmount: entry.relocationAmount != null ? String(entry.relocationAmount) : '',
     });
   }
 
@@ -131,6 +140,10 @@ export default function AvailabilityAdminClient() {
       note:               m.note                    ? m.note              : deleteField(),
       selectedTheme:      m.selectedTheme            ? m.selectedTheme     : deleteField(),
       holidayDescription: m.holidayDescription       ? m.holidayDescription: deleteField(),
+      contractValue:      m.contractValue      ? Number(m.contractValue)      : deleteField(),
+      brokerCommission:   m.brokerCommission   ? Number(m.brokerCommission)   : deleteField(),
+      apaAmount:          m.apaAmount          ? Number(m.apaAmount)          : deleteField(),
+      relocationAmount:   m.relocationAmount   ? Number(m.relocationAmount)   : deleteField(),
     };
   }
 
@@ -345,6 +358,72 @@ export default function AvailabilityAdminClient() {
                   <div className="col-span-2">
                     <Field label="Boat" value={modal.boat} onChange={v => setModal(m => m ? { ...m, boat: v } : m)} />
                   </div>
+                </div>
+
+                <div className="pt-2 border-t border-white/10 space-y-2">
+                  <p className="text-blue-300 text-xs font-semibold uppercase tracking-wide">Contract Financials</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-blue-200 text-xs font-medium block mb-1">
+                        Contract Value (€)
+                        <span className="ml-1 text-blue-400 font-normal">· blank = standard rates</span>
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={modal.contractValue}
+                        onChange={e => setModal(m => m ? { ...m, contractValue: e.target.value } : m)}
+                        placeholder="e.g. 22500"
+                        className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-blue-200 text-xs font-medium block mb-1">
+                        Broker Commission (%)
+                        <span className="ml-1 text-blue-400 font-normal">· deducted from revenue</span>
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={modal.brokerCommission}
+                        onChange={e => setModal(m => m ? { ...m, brokerCommission: e.target.value } : m)}
+                        placeholder="e.g. 10"
+                        className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-blue-200 text-xs font-medium block mb-1">
+                        APA Amount (€)
+                        <span className="ml-1 text-blue-400 font-normal">· blank = default %</span>
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={modal.apaAmount}
+                        onChange={e => setModal(m => m ? { ...m, apaAmount: e.target.value } : m)}
+                        placeholder="e.g. 5500"
+                        className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-blue-200 text-xs font-medium block mb-1">
+                        Relocation Fee (€)
+                        <span className="ml-1 text-blue-400 font-normal">· blank = auto from marinas</span>
+                      </label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={modal.relocationAmount}
+                        onChange={e => setModal(m => m ? { ...m, relocationAmount: e.target.value } : m)}
+                        placeholder="e.g. 1000"
+                        className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <label className="text-blue-200 text-xs font-medium block mb-1">Selected Theme</label>
                     <select
