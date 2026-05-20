@@ -323,6 +323,26 @@ export default function ProposalEditorClient({ id, prefillCharterId }: Props) {
     return <div className="p-8 text-blue-300 text-sm">Loading…</div>;
   }
 
+  // Guard: new proposals must be created from a booking
+  if (isNew && !prefillCharterId) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto pt-16 text-center">
+        <div className="text-5xl mb-5">📋</div>
+        <h1 className="text-white text-2xl font-bold mb-3">Start from a Booking</h1>
+        <p className="text-blue-300 text-sm leading-relaxed mb-8">
+          Proposals must be linked to an existing booking. Open a charter from the
+          Dashboard and click <strong className="text-white">+ Create Proposal</strong> to get started.
+        </p>
+        <a
+          href="/admin"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-sm transition-colors"
+        >
+          ← Go to Dashboard
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {/* Page header */}

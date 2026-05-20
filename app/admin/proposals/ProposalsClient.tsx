@@ -56,14 +56,12 @@ export default function ProposalsClient() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
         <div className="flex-1">
           <h1 className="text-white text-2xl font-bold">Proposals</h1>
-          <p className="text-blue-300 text-sm mt-1">Create and manage client charter proposals</p>
+          <p className="text-blue-300 text-sm mt-1">
+            To create a proposal, open a booking from the{' '}
+            <a href="/admin" className="underline hover:text-white transition-colors">Dashboard</a>
+            {' '}and click <strong className="text-white">+ Create Proposal</strong>.
+          </p>
         </div>
-        <Link
-          href="/admin/proposals/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-semibold transition-colors"
-        >
-          + New Proposal
-        </Link>
       </div>
 
       {/* Filter pills */}
@@ -93,9 +91,9 @@ export default function ProposalsClient() {
             {filter === 'all' ? 'No proposals yet.' : `No ${filter} proposals.`}
           </p>
           {filter === 'all' && (
-            <Link href="/admin/proposals/new" className="mt-4 inline-block text-blue-400 hover:text-white text-sm underline">
-              Create your first proposal →
-            </Link>
+            <a href="/admin" className="mt-4 inline-block text-blue-400 hover:text-white text-sm underline">
+              Go to Dashboard to create a proposal from a booking →
+            </a>
           )}
         </div>
       ) : (
