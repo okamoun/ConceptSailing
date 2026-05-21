@@ -31,7 +31,7 @@ export const exteriorImages: BoatImage[] = [
   { id: 'ext-010', src: '/images/boat/IMG_7547.JPG', alt: 'BlueOne original exterior 3', category: 'exterior' },
   { id: 'ext-011', src: '/images/boat/IMG_7549.JPG', alt: 'BlueOne original exterior 4', category: 'exterior' },
   { id: 'ext-012', src: '/images/boat/IMG_7553.JPG', alt: 'BlueOne original exterior 5', category: 'exterior' },
-  { id: 'ext-013', src: '/images/boat/IMG_7554.JPG', alt: 'BlueOne original exterior 6', category: 'exterior' },
+  { id: 'ext-013', src: '/images/boat/IMG_7554.jpg', alt: 'BlueOne original exterior 6', category: 'exterior' },
   { id: 'ext-014', src: '/images/boat/IMG_7555.JPG', alt: 'BlueOne original exterior 7', category: 'exterior' },
   { id: 'ext-015', src: '/images/boat/IMG_7556.JPG', alt: 'BlueOne original exterior 8', category: 'exterior' },
   { id: 'ext-016', src: '/images/boat/IMG_7557.JPG', alt: 'BlueOne original exterior 9', category: 'exterior' },

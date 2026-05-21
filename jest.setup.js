@@ -40,9 +40,13 @@ const localStorageMock = {
 global.localStorage = localStorageMock
 
 // Mock window.location
-Object.defineProperty(window, 'location', {
-  value: {
-    href: '',
-  },
-  writable: true,
-})
+// jsdom v22+ doesn't allow Object.defineProperty on window.location; the
+// delete + assign pattern triggers a harmless "Not implemented: navigation"
+// console.error which we suppress here.
+const originalConsoleError = console.error
+console.error = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('Not implemented: navigation')) return
+  originalConsoleError(...args)
+}
+delete window.location
+window.location = { href: '' }
