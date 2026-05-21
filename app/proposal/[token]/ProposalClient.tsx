@@ -160,8 +160,8 @@ export default function ProposalClient({ token }: Props) {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-xl bg-blue-700 flex items-center justify-center flex-shrink-0">
-                  <Image src="/images/logos/blueone-logo.png" alt="BlueOne" width={40} height={40}
-                    className="object-contain" onError={() => {}} />
+                  <Image src="/images/boats/blueone/logo_blueone.png" alt="BlueOne" width={40} height={40}
+                    className="object-contain" />
                 </div>
                 <div>
                   <div className="text-xl font-bold text-blue-800">BlueOne</div>
