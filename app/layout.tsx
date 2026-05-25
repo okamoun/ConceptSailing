@@ -1,15 +1,13 @@
 import type { Metadata } from 'next'
 import { Inter } from "next/font/google"
-import Script from "next/script"
 import { BlueOneProvider } from "./contexts/BlueOneContext"
+import GoogleAnalytics from "./components/GoogleAnalytics"
 import { AdminAuthProvider } from "./admin/AdminAuthContext"
 import Navigation from "./components/Navigation"
 import AwardBanner from "./components/AwardBanner"
 import Footer from "./components/Footer"
 import "./globals.css"
 import "./animations.css"
-
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -125,22 +123,6 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        {GA_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga-init" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA_ID}');
-              `}
-            </Script>
-          </>
-        )}
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -148,6 +130,7 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="min-h-screen bg-blue-900">
+        <GoogleAnalytics />
         <AdminAuthProvider>
           <BlueOneProvider>
             <AwardBanner />
