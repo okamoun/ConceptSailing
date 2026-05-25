@@ -61,9 +61,20 @@ describe('Footer — Contact section', () => {
     expect(screen.getByRole('heading', { name: 'Get in Touch' })).toBeInTheDocument()
   })
 
-  test('renders phone number from CONTACT config', () => {
+  test('renders WhatsApp contact link', () => {
     render(<Footer />)
-    expect(screen.getByText('+33 6 75 60 45 32')).toBeInTheDocument()
+    expect(screen.getByText('WhatsApp')).toBeInTheDocument()
+  })
+
+  test('WhatsApp link has correct href', () => {
+    render(<Footer />)
+    const link = screen.getByRole('link', { name: /WhatsApp/ })
+    expect(link).toHaveAttribute('href', 'https://wa.me/message/FFC4UTH5AZZEC1')
+  })
+
+  test('renders Facebook contact link', () => {
+    render(<Footer />)
+    expect(screen.getByText('Facebook')).toBeInTheDocument()
   })
 
   test('renders Athens, Greece location', () => {
