@@ -130,8 +130,8 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="min-h-screen bg-blue-900">
-        <GoogleAnalytics />
         <AdminAuthProvider>
+          <GoogleAnalytics />
           <BlueOneProvider>
             <AwardBanner />
             <Navigation />
