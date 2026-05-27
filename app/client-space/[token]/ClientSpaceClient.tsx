@@ -780,14 +780,6 @@ function BeveragesStep({ initial, onSave }: {
   const [data, setData] = useState<BeveragePreferences>(initial);
   const [saving, setSaving] = useState(false);
 
-  function toggleWarm(item: string) {
-    const current = data.warmBeverages ?? [];
-    setData(prev => ({
-      ...prev,
-      warmBeverages: current.includes(item) ? current.filter(x => x !== item) : [...current, item],
-    }));
-  }
-
   function updateRow(group: 'sodas' | 'wines' | 'spirits', key: string, val: { preferredBrand?: string; qty?: number; remarks?: string }) {
     setData(prev => ({ ...prev, [group]: { ...(prev[group] ?? {}), [key]: val } }));
   }
