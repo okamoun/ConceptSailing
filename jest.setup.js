@@ -39,6 +39,26 @@ const localStorageMock = {
 }
 global.localStorage = localStorageMock
 
+// Mock window.location
+// jsdom v22+ doesn't allow Object.defineProperty on window.location; the
+// delete + assign pattern triggers a harmless "Not implemented: navigation"
+// console.error which we suppress here.
+const originalConsoleError = console.error
+console.error = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('Not implemented: navigation')) return
+  originalConsoleError(...args)
+}
+// jsdom 26+ defines window.location as non-configurable; reassign via global instead.
+try {
+  Object.defineProperty(window, 'location', {
+    value: { href: '', origin: 'http://localhost' },
+    writable: true,
+    configurable: true,
+  });
+} catch {
+  // Already non-configurable — patch individual properties
+  window.location.href = '';
+}
 // Mock window.location (compatible with Jest 30 / JSDOM)
 delete window.location
 window.location = { href: '' }

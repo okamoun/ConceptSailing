@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '/admin',                   label: 'Dashboard' },
   { href: '/admin/booking-summary',   label: 'Booking Summary' },
   { href: '/admin/availability',      label: 'Calendar' },
+  { href: '/admin/proposals',         label: 'Proposals' },
   { href: '/admin/reviews',           label: 'Reviews' },
   { href: '/admin/photos',            label: 'Photos' },
   { href: '/admin/users',             label: 'Users' },
@@ -28,7 +29,7 @@ export default function AdminNav() {
       {/* Nav links */}
       <div className="flex items-center gap-1 flex-1 overflow-x-auto">
         {NAV_LINKS.filter(({ href }) => allowedPages.includes(href as never)).map(({ href, label }) => {
-          const active = pathname === href;
+          const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
           return (
             <Link
               key={href}

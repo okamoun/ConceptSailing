@@ -180,7 +180,7 @@ export default function ContactClient() {
                   </svg>
                 </div>
                 <p className="text-sm text-gray-500 mb-1">Central Agent</p>
-                <a href="https://athenian-yachts.gr" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold hover:text-blue-800 transition-colors">
+                <a href="https://athenian-yachts.gr/" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold hover:text-blue-800 transition-colors">
                   Athenian Yachts
                 </a>
               </div>

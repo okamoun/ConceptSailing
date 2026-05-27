@@ -78,7 +78,7 @@ export const destinations: Destination[] = [
     id: "rhodes",
     name: "Rhodes",
     description: "A UNESCO World Heritage city and a prime embarkation for the southern Dodecanese.",
-    image: "/destinations/rhodes.jpg",
+    image: "/destinations/Rhodes.jpg",
     lat: 36.4340,
     lng: 28.2170,
     highlights: [
