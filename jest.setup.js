@@ -51,3 +51,6 @@ try {
   // Already non-configurable — patch individual properties
   window.location.href = '';
 }
+// Mock window.location (compatible with Jest 30 / JSDOM)
+delete window.location
+window.location = { href: '' }

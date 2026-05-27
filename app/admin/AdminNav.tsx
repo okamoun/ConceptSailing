@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: '/admin/reviews',           label: 'Reviews' },
   { href: '/admin/photos',            label: 'Photos' },
   { href: '/admin/users',             label: 'Users' },
+  { href: '/admin/financial',         label: 'Financial' },
 ];
 
 export default function AdminNav() {
