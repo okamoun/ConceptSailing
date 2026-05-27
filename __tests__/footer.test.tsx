@@ -84,7 +84,10 @@ describe('Footer — Contact section', () => {
 
   test('renders Central Agent attribution with correct spelling', () => {
     render(<Footer />)
-    expect(screen.getByText('Central Agent : Athenian Yachts')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Athenian Yachts' })).toHaveAttribute(
+      'href',
+      'https://athenian-yachts.gr/'
+    )
   })
 })
 

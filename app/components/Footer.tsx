@@ -64,7 +64,17 @@ export default function Footer() {
             </div>
             <div className="pt-4 border-t border-gray-700">
               <p className="text-sm text-gray-400">Athens, Greece</p>
-              <p className="text-sm text-blue-200 mt-1">Central Agent : Athenian Yachts</p>
+              <p className="text-sm text-blue-200 mt-1">
+                Central Agent :{' '}
+                <a
+                  href="https://athenian-yachts.gr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors duration-200 underline"
+                >
+                  Athenian Yachts
+                </a>
+              </p>
             </div>
           </div>
         </div>
