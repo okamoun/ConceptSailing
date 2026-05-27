@@ -208,6 +208,8 @@ export interface Charter {
   createdAt: Timestamp | null;
   // Proposal sub-object (present once a proposal is created for this charter)
   proposal?: ProposalData;
+  // Client preparation space token (present once the admin generates the link)
+  clientSpaceToken?: string;
 }
 
 // ---------------------------------------------------------------------------

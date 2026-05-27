@@ -22,6 +22,7 @@ import type { Review } from '../../lib/reviews';
 import StarRating from '../components/StarRating';
 import MarinaMap from './MarinaMap';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
+import { initClientSpace } from '../../lib/clientSpace';
 
 type Tab = 'charters' | 'contacts' | 'reviews';
 type SortDir = 'asc' | 'desc';
@@ -77,6 +78,8 @@ export default function AdminDashboardClient() {
   const [editRedelivery, setEditRedelivery] = useState(DEFAULT_MARINA_ID);
   const [savingLocations, setSavingLocations] = useState(false);
   const [savingStatus, setSavingStatus] = useState(false);
+  const [generatingClientSpace, setGeneratingClientSpace] = useState<string | null>(null);
+  const [copiedClientSpace, setCopiedClientSpace] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -196,6 +199,24 @@ export default function AdminDashboardClient() {
     setReviews(prev => {
       const updated = prev.map(r => r.id === id ? { ...r, order: newOrder } : r);
       return [...updated].sort((a, b) => (b.order ?? 0) - (a.order ?? 0));
+    });
+  }
+
+  async function handleGenerateClientSpace(charterId: string) {
+    setGeneratingClientSpace(charterId);
+    try {
+      const token = await initClientSpace(charterId);
+      setCharters(prev => prev.map(c => c.id === charterId ? { ...c, clientSpaceToken: token } : c));
+    } finally {
+      setGeneratingClientSpace(null);
+    }
+  }
+
+  function copyClientSpaceLink(token: string) {
+    const url = `${window.location.origin}/client-space/${token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedClientSpace(token);
+      setTimeout(() => setCopiedClientSpace(null), 2000);
     });
   }
 
@@ -418,6 +439,36 @@ export default function AdminDashboardClient() {
                     >
                       + Create Proposal
                     </a>
+                  )}
+                </div>
+
+                {/* Client Preparation Space */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {currentCharter.clientSpaceToken ? (
+                    <>
+                      <a
+                        href={`/client-space/${currentCharter.clientSpaceToken}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-teal-500/20 text-teal-200 hover:bg-teal-500/30 transition-colors"
+                      >
+                        🧭 Client Space
+                      </a>
+                      <button
+                        onClick={() => copyClientSpaceLink(currentCharter.clientSpaceToken!)}
+                        className="text-xs text-blue-400 hover:text-white transition-colors"
+                      >
+                        {copiedClientSpace === currentCharter.clientSpaceToken ? '✓ Copied' : 'Copy link'}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => handleGenerateClientSpace(currentCharter.id)}
+                      disabled={generatingClientSpace === currentCharter.id}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-300 hover:text-white transition-colors disabled:opacity-50"
+                    >
+                      {generatingClientSpace === currentCharter.id ? '…' : '+ Client Space'}
+                    </button>
                   )}
                 </div>
 
