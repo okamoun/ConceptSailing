@@ -29,9 +29,9 @@ export default function Navigation() {
   const router = useRouter();
 
   const navLinks = [
-    { href: '/experiences', label: 'Experiences', bold: true },
     { href: '/blueone',     label: 'The Yacht',   bold: true },
     { href: '/destinations',label: 'Destinations',bold: false },
+    { href: '/experiences', label: 'Experiences', bold: true },
     { href: '/about',       label: 'About',       bold: false },
     { href: '/availability',label: 'Availability',bold: false },
     { href: '/reviews',     label: 'Reviews',     bold: false },
