@@ -13,6 +13,9 @@ import {
   saveSpecial,
   saveChecklist,
   saveStep,
+  saveSnapshot,
+  getHistory,
+  restoreSnapshot,
   CHECKLIST_CATEGORIES,
   type ClientPreparation,
   type CrewMember,
@@ -21,6 +24,7 @@ import {
   type FoodPreferences,
   type BeveragePreferences,
   type SpecialRequests,
+  type PrepSnapshot,
 } from '../../../lib/clientSpace';
 import type { Charter } from '../../../lib/availability';
 import { getMarinaById } from '../../marinas-data';
@@ -35,6 +39,47 @@ const fmtDate = (iso: string) =>
 
 function nightCount(start: string, end: string) {
   return Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000);
+}
+
+function fmtDateTime(ts: PrepSnapshot['savedAt'] | null | undefined): string {
+  if (!ts) return '—';
+  const d = ts.toDate?.() ?? new Date();
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
+    ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Debounced auto-save hook. Skips the first render. Returns 'idle' | 'saving' | 'saved'.
+function useAutoSave<T>(
+  data: T,
+  saveFn: (data: T) => Promise<void>,
+  delay = 1800
+): 'idle' | 'saving' | 'saved' {
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const dataStr = JSON.stringify(data);
+  const prevStr = useRef(dataStr);
+  const saveFnRef = useRef(saveFn);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  saveFnRef.current = saveFn;
+
+  useEffect(() => {
+    if (dataStr === prevStr.current) return;
+    prevStr.current = dataStr;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setStatus('saving');
+    const snapshot = dataStr;
+    timerRef.current = setTimeout(async () => {
+      try {
+        await saveFnRef.current(JSON.parse(snapshot) as T);
+        setStatus('saved');
+        setTimeout(() => setStatus('idle'), 2500);
+      } catch {
+        setStatus('idle');
+      }
+    }, delay);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [dataStr, delay]);
+
+  return status;
 }
 
 const STEPS = [
@@ -117,7 +162,7 @@ function Toast({ msg, onDone }: { msg: string; onDone: () => void }) {
 // ---------------------------------------------------------------------------
 
 function FieldLabel({ children }: { children: ReactNode }) {
-  return <label className="block text-sm font-medium text-blue-900 mb-1">{children}</label>;
+  return <label className="block text-xs font-semibold text-blue-800 mb-1">{children}</label>;
 }
 
 function TextInput({ value, onChange, placeholder, type = 'text' }: {
@@ -129,7 +174,7 @@ function TextInput({ value, onChange, placeholder, type = 'text' }: {
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full border-2 border-blue-100 rounded-xl px-3 py-2 text-sm text-blue-900 focus:outline-none focus:border-blue-400 bg-white/80"
+      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200 bg-white/90"
     />
   );
 }
@@ -143,7 +188,7 @@ function TextArea({ value, onChange, placeholder, rows = 3 }: {
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full border-2 border-blue-100 rounded-xl px-3 py-2 text-sm text-blue-900 focus:outline-none focus:border-blue-400 bg-white/80 resize-none"
+      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200 bg-white/90 resize-none"
     />
   );
 }
@@ -155,7 +200,7 @@ function SelectInput({ value, onChange, options, placeholder }: {
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="w-full border-2 border-blue-100 rounded-xl px-3 py-2 text-sm text-blue-900 focus:outline-none focus:border-blue-400 bg-white/80"
+      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 bg-white/90"
     >
       {placeholder && <option value="">{placeholder}</option>}
       {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -169,13 +214,13 @@ function PillToggle({ options, value, onChange }: {
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {options.map(o => (
         <button
           key={o.id}
           type="button"
           onClick={() => onChange(value === o.id ? '' : o.id)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all border-2 ${
+          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
             value === o.id
               ? 'bg-blue-600 border-blue-600 text-white'
               : 'bg-white border-blue-200 text-blue-700 hover:border-blue-400'
@@ -197,13 +242,13 @@ function MultiChip({ options, values, onChange }: {
     onChange(values.includes(opt) ? values.filter(v => v !== opt) : [...values, opt]);
   }
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {options.map(o => (
         <button
           key={o}
           type="button"
           onClick={() => toggle(o)}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border-2 ${
+          className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all border ${
             values.includes(o)
               ? 'bg-blue-600 border-blue-600 text-white'
               : 'bg-white border-blue-200 text-blue-600 hover:border-blue-400'
@@ -216,10 +261,22 @@ function MultiChip({ options, values, onChange }: {
   );
 }
 
-function SectionCard({ title, children }: { title: string; children: ReactNode }) {
+function AutoSaveIndicator({ status }: { status: 'idle' | 'saving' | 'saved' }) {
+  if (status === 'idle') return null;
   return (
-    <div className="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-2xl p-5 space-y-4">
-      <h3 className="text-base font-bold text-blue-900">{title}</h3>
+    <span className={`text-[10px] font-medium transition-all ${status === 'saved' ? 'text-emerald-400' : 'text-blue-300 animate-pulse'}`}>
+      {status === 'saving' ? '⟳ saving…' : '✓ saved'}
+    </span>
+  );
+}
+
+function SectionCard({ title, autoSave, children }: { title: string; autoSave?: 'idle' | 'saving' | 'saved'; children: ReactNode }) {
+  return (
+    <div className="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-xl p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-blue-900">{title}</h3>
+        {autoSave && <AutoSaveIndicator status={autoSave} />}
+      </div>
       {children}
     </div>
   );
@@ -233,7 +290,7 @@ function SaveButton({ onClick, saving, label = 'Save & Continue' }: {
       type="button"
       onClick={onClick}
       disabled={saving}
-      className="btn-primary px-8 py-3 text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+      className="btn-primary px-5 py-2 text-xs font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {saving ? 'Saving…' : label}
     </button>
@@ -246,26 +303,20 @@ function SaveButton({ onClick, saving, label = 'Save & Continue' }: {
 
 function StepIndicator({ current }: { current: number }) {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto pb-1">
+    <div className="flex items-center gap-0.5 overflow-x-auto">
       {STEPS.map((label, i) => (
         <div key={i} className="flex items-center flex-shrink-0">
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            i === current
-              ? 'bg-white text-blue-700 shadow-sm font-semibold'
-              : i < current
-              ? 'bg-white/30 text-white'
-              : 'bg-white/10 text-blue-200'
+          <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] transition-all ${
+            i === current ? 'bg-white text-blue-700 font-semibold' : i < current ? 'bg-white/25 text-white' : 'bg-white/8 text-blue-300'
           }`}>
-            <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
-              i < current ? 'bg-emerald-400 text-white' : i === current ? 'bg-blue-600 text-white' : 'bg-white/20 text-blue-300'
+            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
+              i < current ? 'bg-emerald-400 text-white' : i === current ? 'bg-blue-600 text-white' : 'bg-white/15 text-blue-400'
             }`}>
               {i < current ? '✓' : i + 1}
             </span>
-            <span className="hidden sm:inline">{label}</span>
+            <span className="hidden md:inline">{label}</span>
           </div>
-          {i < STEPS.length - 1 && (
-            <div className={`w-4 h-px mx-0.5 ${i < current ? 'bg-emerald-400/60' : 'bg-white/20'}`} />
-          )}
+          {i < STEPS.length - 1 && <div className={`w-3 h-px ${i < current ? 'bg-emerald-400/50' : 'bg-white/15'}`} />}
         </div>
       ))}
     </div>
@@ -282,27 +333,27 @@ function BookingOverview({ charter }: { charter: Charter }) {
   const nights = charter.startDate && charter.endDate ? nightCount(charter.startDate, charter.endDate) : null;
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {[
-          { label: 'Charter Start', value: charter.startDate ? fmtDate(charter.startDate) : '—' },
-          { label: 'Charter End', value: charter.endDate ? `${fmtDate(charter.endDate)}${nights ? ` (${nights} nights)` : ''}` : '—' },
-          { label: 'Vessel', value: charter.boat ?? 'BlueOne — Fountaine Pajot Aura 51' },
-          { label: 'Guests', value: charter.passengers ? `${charter.passengers} passenger${charter.passengers > 1 ? 's' : ''}` : '—' },
+          { label: 'Start', value: charter.startDate ? fmtDate(charter.startDate) : '—' },
+          { label: 'End', value: charter.endDate ? `${fmtDate(charter.endDate)}${nights ? ` · ${nights}n` : ''}` : '—' },
+          { label: 'Vessel', value: charter.boat ?? 'Fountaine Pajot Aura 51' },
+          { label: 'Guests', value: charter.passengers ? `${charter.passengers} pax` : '—' },
           { label: 'Embarkation', value: delivery?.name ?? charter.embarkationPoint ?? '—' },
           { label: 'Disembarkation', value: redelivery?.name ?? delivery?.name ?? '—' },
-          ...(charter.selectedTheme ? [{ label: 'Experience Theme', value: charter.selectedTheme }] : []),
+          ...(charter.selectedTheme ? [{ label: 'Theme', value: charter.selectedTheme }] : []),
         ].map(({ label, value }) => (
-          <div key={label} className="bg-white/60 rounded-xl px-4 py-3">
-            <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-0.5">{label}</p>
-            <p className="text-sm font-medium text-blue-900">{value}</p>
+          <div key={label} className="bg-white/60 rounded-lg px-3 py-2">
+            <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-wide">{label}</p>
+            <p className="text-xs font-medium text-blue-900 mt-0.5">{value}</p>
           </div>
         ))}
       </div>
       {charter.holidayDescription && (
-        <div className="bg-blue-50/60 rounded-xl px-4 py-3">
-          <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide mb-1">Your Holiday Vision</p>
-          <p className="text-sm text-blue-800 italic">&ldquo;{charter.holidayDescription}&rdquo;</p>
+        <div className="bg-blue-50/60 rounded-lg px-3 py-2">
+          <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-wide">Holiday Vision</p>
+          <p className="text-xs text-blue-800 italic mt-0.5">&ldquo;{charter.holidayDescription}&rdquo;</p>
         </div>
       )}
     </div>
@@ -313,10 +364,11 @@ function BookingOverview({ charter }: { charter: Charter }) {
 // Step 1: Crew
 // ---------------------------------------------------------------------------
 
-function CrewStep({ count, initial, onSave }: {
+function CrewStep({ count, initial, onSave, onAutoSave }: {
   count: number;
   initial: CrewMember[];
   onSave: (crew: CrewMember[]) => Promise<void>;
+  onAutoSave: (crew: CrewMember[]) => Promise<void>;
 }) {
   const empty = (): CrewMember => ({
     firstName: '', lastName: '', gender: '', dateOfBirth: '',
@@ -329,6 +381,7 @@ function CrewStep({ count, initial, onSave }: {
   });
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState(0);
+  const autoStatus = useAutoSave(crew, onAutoSave);
 
   function update(i: number, field: keyof CrewMember, val: string) {
     setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
@@ -340,33 +393,29 @@ function CrewStep({ count, initial, onSave }: {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
+      <div className="flex justify-end mb-1"><AutoSaveIndicator status={autoStatus} /></div>
       {crew.map((m, i) => (
-        <div key={i} className="bg-white/70 border border-blue-100 rounded-2xl overflow-hidden">
+        <div key={i} className="bg-white/70 border border-blue-100 rounded-xl overflow-hidden">
           <button
             type="button"
             onClick={() => setExpanded(expanded === i ? -1 : i)}
-            className="w-full flex items-center justify-between px-5 py-4 text-left"
+            className="w-full flex items-center justify-between px-4 py-3 text-left"
           >
             <div>
-              <span className="text-xs font-semibold text-blue-400 uppercase tracking-wide">
-                Passenger {i + 1}
-              </span>
-              <p className="text-sm font-semibold text-blue-900 mt-0.5">
+              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wide">Passenger {i + 1}</span>
+              <p className="text-xs font-semibold text-blue-900 mt-0.5">
                 {m.firstName || m.lastName ? `${m.firstName} ${m.lastName}`.trim() : 'Fill in details below'}
               </p>
             </div>
-            <svg
-              className={`w-5 h-5 text-blue-400 transition-transform ${expanded === i ? 'rotate-180' : ''}`}
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
+            <svg className={`w-4 h-4 text-blue-400 transition-transform ${expanded === i ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           {expanded === i && (
-            <div className="px-5 pb-5 space-y-4 border-t border-blue-100">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+            <div className="px-4 pb-4 space-y-3 border-t border-blue-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
                 <div>
                   <FieldLabel>First Name</FieldLabel>
                   <TextInput value={m.firstName} onChange={v => update(i, 'firstName', v)} placeholder="First name" />
@@ -425,21 +474,23 @@ function CrewStep({ count, initial, onSave }: {
 // Step 2: Travel & Logistics
 // ---------------------------------------------------------------------------
 
-function TravelStep({ initial, onSave }: {
+function TravelStep({ initial, onSave, onAutoSave }: {
   initial: TravelLogistics;
   onSave: (travel: TravelLogistics) => Promise<void>;
+  onAutoSave: (travel: TravelLogistics) => Promise<void>;
 }) {
   const [data, setData] = useState<TravelLogistics>(initial);
   const [saving, setSaving] = useState(false);
+  const autoStatus = useAutoSave(data, onAutoSave);
   function set<K extends keyof TravelLogistics>(k: K, v: TravelLogistics[K]) {
     setData(prev => ({ ...prev, [k]: v }));
   }
   async function handleSave() { setSaving(true); try { await onSave(data); } finally { setSaving(false); } }
 
   return (
-    <div className="space-y-4">
-      <SectionCard title="Arrival">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="space-y-3">
+      <SectionCard title="Arrival" autoSave={autoStatus}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <FieldLabel>Arrival Date</FieldLabel>
             <TextInput value={data.arrivalDate ?? ''} onChange={v => set('arrivalDate', v)} type="date" />
@@ -478,7 +529,7 @@ function TravelStep({ initial, onSave }: {
       </SectionCard>
 
       <SectionCard title="Departure">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <FieldLabel>Departure Date</FieldLabel>
             <TextInput value={data.departureDate ?? ''} onChange={v => set('departureDate', v)} type="date" />
@@ -513,20 +564,22 @@ function TravelStep({ initial, onSave }: {
 // Step 3: Activities & Health
 // ---------------------------------------------------------------------------
 
-function ActivitiesStep({ initial, onSave }: {
+function ActivitiesStep({ initial, onSave, onAutoSave }: {
   initial: ActivityPreferences;
   onSave: (data: ActivityPreferences) => Promise<void>;
+  onAutoSave: (data: ActivityPreferences) => Promise<void>;
 }) {
   const [data, setData] = useState<ActivityPreferences>(initial);
   const [saving, setSaving] = useState(false);
+  const autoStatus = useAutoSave(data, onAutoSave);
   function set<K extends keyof ActivityPreferences>(k: K, v: ActivityPreferences[K]) {
     setData(prev => ({ ...prev, [k]: v }));
   }
   async function handleSave() { setSaving(true); try { await onSave(data); } finally { setSaving(false); } }
 
   return (
-    <div className="space-y-4">
-      <SectionCard title="Group Style">
+    <div className="space-y-3">
+      <SectionCard title="Group Style" autoSave={autoStatus}>
         <PillToggle
           options={[
             { id: 'active', label: 'Active & on the go' },
@@ -587,12 +640,14 @@ function ActivitiesStep({ initial, onSave }: {
 // Step 4: Food preferences
 // ---------------------------------------------------------------------------
 
-function FoodStep({ initial, onSave }: {
+function FoodStep({ initial, onSave, onAutoSave }: {
   initial: FoodPreferences;
   onSave: (food: FoodPreferences) => Promise<void>;
+  onAutoSave: (food: FoodPreferences) => Promise<void>;
 }) {
   const [data, setData] = useState<FoodPreferences>(initial);
   const [saving, setSaving] = useState(false);
+  const autoStatus = useAutoSave(data, onAutoSave);
 
   function setCategory(cat: string, field: 'likes' | 'dislikes' | 'allergies', val: string) {
     setData(prev => ({
@@ -620,17 +675,17 @@ function FoodStep({ initial, onSave }: {
   type CatKey = Lowercase<typeof FOOD_CATEGORIES[number]>;
 
   return (
-    <div className="space-y-4">
-      <SectionCard title="Food Preferences by Category">
+    <div className="space-y-3">
+      <SectionCard title="Food Preferences by Category" autoSave={autoStatus}>
         <p className="text-xs text-blue-500">Help us plan menus tailored to your group</p>
-        <div className="space-y-4">
+        <div className="space-y-2">
           {FOOD_CATEGORIES.map(cat => {
             const key = cat.toLowerCase() as CatKey;
             const catData = (data[key as keyof FoodPreferences] as { likes?: string; dislikes?: string; allergies?: string }) ?? {};
             return (
-              <div key={cat} className="border border-blue-100 rounded-xl p-4 space-y-3">
-                <p className="text-sm font-semibold text-blue-800">{cat}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div key={cat} className="border border-blue-100 rounded-lg p-3 space-y-2">
+                <p className="text-xs font-bold text-blue-800">{cat}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <FieldLabel>Likes</FieldLabel>
                     <TextInput value={catData.likes ?? ''} onChange={v => setCategory(key, 'likes', v)} placeholder="e.g. grilled fish" />
@@ -773,12 +828,14 @@ function BeverageRow({ label, item, onChange }: {
   );
 }
 
-function BeveragesStep({ initial, onSave }: {
+function BeveragesStep({ initial, onSave, onAutoSave }: {
   initial: BeveragePreferences;
   onSave: (bev: BeveragePreferences) => Promise<void>;
+  onAutoSave: (bev: BeveragePreferences) => Promise<void>;
 }) {
   const [data, setData] = useState<BeveragePreferences>(initial);
   const [saving, setSaving] = useState(false);
+  const autoStatus = useAutoSave(data, onAutoSave);
 
   function updateRow(group: 'sodas' | 'wines' | 'spirits', key: string, val: { preferredBrand?: string; qty?: number; remarks?: string }) {
     setData(prev => ({ ...prev, [group]: { ...(prev[group] ?? {}), [key]: val } }));
@@ -787,8 +844,8 @@ function BeveragesStep({ initial, onSave }: {
   async function handleSave() { setSaving(true); try { await onSave(data); } finally { setSaving(false); } }
 
   return (
-    <div className="space-y-4">
-      <SectionCard title="Hot Beverages">
+    <div className="space-y-3">
+      <SectionCard title="Hot Beverages" autoSave={autoStatus}>
         <MultiChip
           options={WARM_BEVERAGES}
           values={data.warmBeverages ?? []}
@@ -837,15 +894,17 @@ function BeveragesStep({ initial, onSave }: {
 // Step 6: Special requests + checklist
 // ---------------------------------------------------------------------------
 
-function SpecialStep({ initial, checklistInit, onSave, onChecklistChange }: {
+function SpecialStep({ initial, checklistInit, onSave, onAutoSave, onChecklistChange }: {
   initial: SpecialRequests;
   checklistInit: Record<string, boolean>;
   onSave: (data: SpecialRequests) => Promise<void>;
+  onAutoSave: (data: SpecialRequests) => Promise<void>;
   onChecklistChange: (checklist: Record<string, boolean>) => void;
 }) {
   const [data, setData] = useState<SpecialRequests>(initial);
   const [checklist, setChecklist] = useState<Record<string, boolean>>(checklistInit);
   const [saving, setSaving] = useState(false);
+  const autoStatus = useAutoSave(data, onAutoSave);
 
   function set<K extends keyof SpecialRequests>(k: K, v: SpecialRequests[K]) {
     setData(prev => ({ ...prev, [k]: v }));
@@ -863,9 +922,9 @@ function SpecialStep({ initial, checklistInit, onSave, onChecklistChange }: {
   async function handleSave() { setSaving(true); try { await onSave(data); } finally { setSaving(false); } }
 
   return (
-    <div className="space-y-4">
-      <SectionCard title="Special Requests">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="space-y-3">
+      <SectionCard title="Special Requests" autoSave={autoStatus}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <FieldLabel>Special Occasion</FieldLabel>
             <TextInput
@@ -974,6 +1033,10 @@ export default function ClientSpaceClient({ token }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const checklistRef = useRef<Record<string, boolean>>({});
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [history, setHistory] = useState<PrepSnapshot[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [restoring, setRestoring] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -993,9 +1056,38 @@ export default function ClientSpaceClient({ token }: Props) {
 
   const showToast = useCallback((msg: string) => setToast(msg), []);
 
-  async function handleSaveCrew(crew: CrewMember[]) {
+  // Auto-save (no snapshot, no step advance, no toast)
+  async function autoSaveCrew(crew: CrewMember[]) {
     await saveCrew(token, crew);
     setPrep(prev => prev ? { ...prev, crew } : prev);
+  }
+  async function autoSaveTravel(travel: TravelLogistics) {
+    await saveTravel(token, travel);
+    setPrep(prev => prev ? { ...prev, travel } : prev);
+  }
+  async function autoSaveActivities(activities: ActivityPreferences) {
+    await saveActivities(token, activities);
+    setPrep(prev => prev ? { ...prev, activities } : prev);
+  }
+  async function autoSaveFood(food: FoodPreferences) {
+    await saveFood(token, food);
+    setPrep(prev => prev ? { ...prev, food } : prev);
+  }
+  async function autoSaveBeverages(beverages: BeveragePreferences) {
+    await saveBeverages(token, beverages);
+    setPrep(prev => prev ? { ...prev, beverages } : prev);
+  }
+  async function autoSaveSpecial(special: SpecialRequests) {
+    await saveSpecial(token, special);
+    setPrep(prev => prev ? { ...prev, special } : prev);
+  }
+
+  // Manual save (snapshot + step advance + toast)
+  async function handleSaveCrew(crew: CrewMember[]) {
+    await saveCrew(token, crew);
+    const updated = prep ? { ...prep, crew } : null;
+    setPrep(updated);
+    if (updated) await saveSnapshot(token, updated, 'Crew details');
     await saveStep(token, Math.max(currentStep, 1));
     setCurrentStep(s => Math.max(s, 1));
     showToast('Crew details saved ✓');
@@ -1003,7 +1095,9 @@ export default function ClientSpaceClient({ token }: Props) {
 
   async function handleSaveTravel(travel: TravelLogistics) {
     await saveTravel(token, travel);
-    setPrep(prev => prev ? { ...prev, travel } : prev);
+    const updated = prep ? { ...prep, travel } : null;
+    setPrep(updated);
+    if (updated) await saveSnapshot(token, updated, 'Travel & logistics');
     await saveStep(token, Math.max(currentStep, 2));
     setCurrentStep(s => Math.max(s, 2));
     showToast('Travel details saved ✓');
@@ -1011,7 +1105,9 @@ export default function ClientSpaceClient({ token }: Props) {
 
   async function handleSaveActivities(activities: ActivityPreferences) {
     await saveActivities(token, activities);
-    setPrep(prev => prev ? { ...prev, activities } : prev);
+    const updated = prep ? { ...prep, activities } : null;
+    setPrep(updated);
+    if (updated) await saveSnapshot(token, updated, 'Activities & health');
     await saveStep(token, Math.max(currentStep, 3));
     setCurrentStep(s => Math.max(s, 3));
     showToast('Activities & health saved ✓');
@@ -1019,7 +1115,9 @@ export default function ClientSpaceClient({ token }: Props) {
 
   async function handleSaveFood(food: FoodPreferences) {
     await saveFood(token, food);
-    setPrep(prev => prev ? { ...prev, food } : prev);
+    const updated = prep ? { ...prep, food } : null;
+    setPrep(updated);
+    if (updated) await saveSnapshot(token, updated, 'Food preferences');
     await saveStep(token, Math.max(currentStep, 4));
     setCurrentStep(s => Math.max(s, 4));
     showToast('Food preferences saved ✓');
@@ -1027,7 +1125,9 @@ export default function ClientSpaceClient({ token }: Props) {
 
   async function handleSaveBeverages(beverages: BeveragePreferences) {
     await saveBeverages(token, beverages);
-    setPrep(prev => prev ? { ...prev, beverages } : prev);
+    const updated = prep ? { ...prep, beverages } : null;
+    setPrep(updated);
+    if (updated) await saveSnapshot(token, updated, 'Beverages & bar');
     await saveStep(token, Math.max(currentStep, 5));
     setCurrentStep(s => Math.max(s, 5));
     showToast('Beverage preferences saved ✓');
@@ -1035,7 +1135,9 @@ export default function ClientSpaceClient({ token }: Props) {
 
   async function handleSaveSpecial(special: SpecialRequests) {
     await saveSpecial(token, special);
-    setPrep(prev => prev ? { ...prev, special } : prev);
+    const updated = prep ? { ...prep, special } : null;
+    setPrep(updated);
+    if (updated) await saveSnapshot(token, updated, 'Special requests');
     await saveStep(token, 6);
     setCurrentStep(6);
     showToast('All details saved — thank you! ✓');
@@ -1044,6 +1146,34 @@ export default function ClientSpaceClient({ token }: Props) {
   function handleChecklistChange(checklist: Record<string, boolean>) {
     checklistRef.current = checklist;
     saveChecklist(token, checklist).catch(console.error);
+  }
+
+  async function openHistory() {
+    setHistoryOpen(true);
+    setLoadingHistory(true);
+    try {
+      const h = await getHistory(token);
+      setHistory(h);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }
+
+  async function handleRestore(snapshot: PrepSnapshot) {
+    if (!window.confirm('Restore this version? Your current data will be replaced.')) return;
+    setRestoring(snapshot.id);
+    try {
+      await restoreSnapshot(token, snapshot);
+      const p = await getClientPreparation(token);
+      if (p) {
+        setPrep(p);
+        checklistRef.current = p.checklist ?? {};
+      }
+      setHistoryOpen(false);
+      showToast('Previous version restored ✓');
+    } finally {
+      setRestoring(null);
+    }
   }
 
   // Loading
@@ -1089,16 +1219,29 @@ export default function ClientSpaceClient({ token }: Props) {
               <p className="text-white text-sm font-semibold leading-tight">Holiday Preparation</p>
               {charter.name && <p className="text-blue-300 text-xs truncate">Welcome, {charter.name}</p>}
             </div>
-            <a
-              href={`/client-space/${token}/summary`}
-              className="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors flex items-center gap-1.5"
-              title="View full summary"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Summary
-            </a>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={openHistory}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors flex items-center gap-1.5"
+                title="View edit history"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                History
+              </button>
+              <a
+                href={`/client-space/${token}/summary`}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors flex items-center gap-1.5"
+                title="View full summary"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Summary
+              </a>
+            </div>
           </div>
           <StepIndicator current={currentStep} />
         </div>
@@ -1152,23 +1295,23 @@ export default function ClientSpaceClient({ token }: Props) {
         )}
 
         {currentStep === 1 && (
-          <CrewStep count={passengerCount} initial={prep.crew} onSave={handleSaveCrew} />
+          <CrewStep count={passengerCount} initial={prep.crew} onSave={handleSaveCrew} onAutoSave={autoSaveCrew} />
         )}
 
         {currentStep === 2 && (
-          <TravelStep initial={prep.travel} onSave={handleSaveTravel} />
+          <TravelStep initial={prep.travel} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
         )}
 
         {currentStep === 3 && (
-          <ActivitiesStep initial={prep.activities} onSave={handleSaveActivities} />
+          <ActivitiesStep initial={prep.activities} onSave={handleSaveActivities} onAutoSave={autoSaveActivities} />
         )}
 
         {currentStep === 4 && (
-          <FoodStep initial={prep.food} onSave={handleSaveFood} />
+          <FoodStep initial={prep.food} onSave={handleSaveFood} onAutoSave={autoSaveFood} />
         )}
 
         {currentStep === 5 && (
-          <BeveragesStep initial={prep.beverages} onSave={handleSaveBeverages} />
+          <BeveragesStep initial={prep.beverages} onSave={handleSaveBeverages} onAutoSave={autoSaveBeverages} />
         )}
 
         {currentStep === 6 && (
@@ -1176,6 +1319,7 @@ export default function ClientSpaceClient({ token }: Props) {
             initial={prep.special}
             checklistInit={prep.checklist ?? {}}
             onSave={handleSaveSpecial}
+            onAutoSave={autoSaveSpecial}
             onChecklistChange={handleChecklistChange}
           />
         )}
@@ -1227,6 +1371,66 @@ export default function ClientSpaceClient({ token }: Props) {
       </div>
 
       {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
+
+      {/* History drawer */}
+      {historyOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            onClick={() => setHistoryOpen(false)}
+          />
+          {/* Panel */}
+          <div className="fixed top-0 right-0 h-full w-full max-w-sm z-50 bg-[#002a5a] border-l border-white/10 shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <div>
+                <h2 className="text-white font-bold text-base">Edit History</h2>
+                <p className="text-blue-300 text-xs mt-0.5">Restore any previous version</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHistoryOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {loadingHistory && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin w-6 h-6 border-2 border-white/20 border-t-white rounded-full" />
+                </div>
+              )}
+              {!loadingHistory && history.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-4xl mb-3">📋</p>
+                  <p className="text-blue-300 text-sm">No history yet.</p>
+                  <p className="text-blue-400 text-xs mt-1">Snapshots are saved each time you click &ldquo;Save&rdquo;.</p>
+                </div>
+              )}
+              {!loadingHistory && history.map(snap => (
+                <div key={snap.id} className="bg-white/8 border border-white/10 rounded-xl p-3.5 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-white text-xs font-semibold truncate">{snap.label}</p>
+                      <p className="text-blue-400 text-[10px] mt-0.5">{fmtDateTime(snap.savedAt)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRestore(snap)}
+                      disabled={restoring === snap.id}
+                      className="flex-shrink-0 px-3 py-1 rounded-lg text-[11px] font-semibold bg-blue-500/30 hover:bg-blue-500/50 text-blue-200 border border-blue-400/30 transition-colors disabled:opacity-50"
+                    >
+                      {restoring === snap.id ? 'Restoring…' : 'Restore'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

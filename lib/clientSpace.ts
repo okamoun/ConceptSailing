@@ -4,10 +4,13 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  addDoc,
   updateDoc,
   serverTimestamp,
   query,
   where,
+  orderBy,
+  limit,
   type Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -111,6 +114,13 @@ export interface ClientPreparation {
   updatedAt: Timestamp | null;
   completedAt?: Timestamp | null;
 }
+
+export type PrepSnapshot = {
+  id: string;
+  label: string;
+  savedAt: Timestamp;
+  data: Pick<ClientPreparation, 'crew' | 'travel' | 'activities' | 'food' | 'beverages' | 'special' | 'checklist' | 'lastSavedStep'>;
+};
 
 // ---------------------------------------------------------------------------
 // Pre-departure checklist definition
@@ -277,4 +287,46 @@ export async function saveChecklist(token: string, checklist: Record<string, boo
 
 export async function saveStep(token: string, step: number): Promise<void> {
   await updateDoc(doc(db, COLLECTION, token), { lastSavedStep: step, updatedAt: serverTimestamp() });
+}
+
+// ---------------------------------------------------------------------------
+// History (subcollection: clientPreparations/{token}/history)
+// ---------------------------------------------------------------------------
+
+const HISTORY_LIMIT = 30;
+
+export async function saveSnapshot(
+  token: string,
+  prep: ClientPreparation,
+  label: string
+): Promise<void> {
+  const historyCol = collection(db, COLLECTION, token, 'history');
+  await addDoc(historyCol, {
+    label,
+    savedAt: serverTimestamp(),
+    data: {
+      crew: prep.crew,
+      travel: prep.travel,
+      activities: prep.activities,
+      food: prep.food,
+      beverages: prep.beverages,
+      special: prep.special,
+      checklist: prep.checklist,
+      lastSavedStep: prep.lastSavedStep,
+    },
+  });
+}
+
+export async function getHistory(token: string): Promise<PrepSnapshot[]> {
+  const historyCol = collection(db, COLLECTION, token, 'history');
+  const q = query(historyCol, orderBy('savedAt', 'desc'), limit(HISTORY_LIMIT));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() } as PrepSnapshot));
+}
+
+export async function restoreSnapshot(token: string, snapshot: PrepSnapshot): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, token), {
+    ...snapshot.data,
+    updatedAt: serverTimestamp(),
+  });
 }
