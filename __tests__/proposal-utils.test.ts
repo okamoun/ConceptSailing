@@ -32,6 +32,7 @@ describe('calcTotals', () => {
     basePrice: 10000,
     currency: 'EUR',
     apaPercentage: 30,
+    vatPercentage: 0,
     securityDeposit: 2000,
     discountAmount: 0,
     extras: [],
@@ -91,6 +92,7 @@ describe('calcTotals', () => {
       basePrice: 0,
       currency: 'EUR',
       apaPercentage: 0,
+      vatPercentage: 0,
       securityDeposit: 0,
       discountAmount: 0,
       extras: [],
@@ -99,6 +101,17 @@ describe('calcTotals', () => {
     expect(result.apa).toBe(0);
     expect(result.charterFee).toBe(0);
     expect(result.grandTotal).toBe(0);
+  });
+
+  it('computes VAT on charter fee only (not on APA)', () => {
+    const { vat, grandTotal } = calcTotals({ ...base, vatPercentage: 13 });
+    expect(vat).toBe(1300); // 13% of 10 000
+    expect(grandTotal).toBe(16300); // 10 000 + 1 300 + 3 000 + 2 000
+  });
+
+  it('excludes VAT when vatPercentage is 0', () => {
+    const { vat } = calcTotals({ ...base, vatPercentage: 0 });
+    expect(vat).toBe(0);
   });
 });
 
@@ -181,6 +194,10 @@ describe('DEFAULT_PRICING', () => {
 
   it('sets APA to 30% by default', () => {
     expect(DEFAULT_PRICING.apaPercentage).toBe(30);
+  });
+
+  it('sets VAT to 13% by default', () => {
+    expect(DEFAULT_PRICING.vatPercentage).toBe(13);
   });
 
   it('has an empty extras array', () => {

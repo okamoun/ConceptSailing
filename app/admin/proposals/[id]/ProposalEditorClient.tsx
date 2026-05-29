@@ -407,6 +407,11 @@ export default function ProposalEditorClient({ id }: Props) {
                 onChange={e => setPricing(p => ({ ...p, apaPercentage: Number(e.target.value) }))}
                 min={0} max={100} className={inputCls} />
             </Field>
+            <Field label="VAT on Charter (%)" hint="Greek VAT — applies to charter fee only">
+              <input type="number" value={pricing.vatPercentage ?? 13}
+                onChange={e => setPricing(p => ({ ...p, vatPercentage: Number(e.target.value) }))}
+                min={0} max={100} className={inputCls} />
+            </Field>
             <Field label="Security Deposit (€)" hint="Refundable">
               <input type="number" value={pricing.securityDeposit}
                 onChange={e => setPricing(p => ({ ...p, securityDeposit: Number(e.target.value) }))}
@@ -457,6 +462,11 @@ export default function ProposalEditorClient({ id }: Props) {
             <div className="flex justify-between text-sm font-semibold text-white border-t border-white/10 pt-2">
               <span>Charter Fee</span><span>{fmt(totals.charterFee)}</span>
             </div>
+            {totals.vat > 0 && (
+              <div className="flex justify-between text-sm text-blue-200">
+                <span>VAT ({pricing.vatPercentage ?? 13}%)</span><span>{fmt(totals.vat)}</span>
+              </div>
+            )}
             {totals.apa > 0 && (
               <div className="flex justify-between text-sm text-blue-200">
                 <span>APA ({pricing.apaPercentage}%)</span><span>{fmt(totals.apa)}</span>
