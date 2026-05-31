@@ -19,6 +19,7 @@ const STATUS_COLOUR: Record<CharterStatus, string> = {
   web_request:     '#0ea5e9',
   broker_request:  '#d97706',
   serious_request: '#f97316',
+  proposal_sent:   '#7c3aed',
   confirmed:       '#16a34a',
   signed:          '#065f46',
   canceled:        '#6b7280',

@@ -7,15 +7,15 @@ jest.mock('../lib/availability', () => ({
   addCharterProposalComment: jest.fn().mockResolvedValue(undefined),
   proposalRef: jest.fn().mockReturnValue('PROP-CHARTER1'),
   calcTotals: jest.fn().mockReturnValue({
-    base: 0, apa: 0, extrasSum: 0, discount: 0, charterFee: 0, grandTotal: 0,
+    base: 0, apa: 0, vat: 0, extrasSum: 0, discount: 0, charterFee: 0, grandTotal: 0,
   }),
   DEFAULT_PAYMENT_TERMS: [
     { label: 'Deposit — 50%', percentage: 50, description: 'MYBA: 50% deposit on signing.' },
     { label: 'Balance — 50%', percentage: 50, description: 'MYBA: 50% balance 28 days before.' },
   ],
   DEFAULT_PRICING: {
-    basePrice: 0, currency: 'EUR', apaPercentage: 30, vatPercentage: 13,
-    securityDeposit: 2000, discountPercentage: 0, extras: [],
+    basePrice: 0, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
+    securityDeposit: 2000, discountAmount: 0, extras: [],
   },
 }));
 
@@ -54,8 +54,8 @@ const DRAFT_PROPOSAL = {
   token: 'tok-draft-abc123',
   status: 'draft' as const,
   pricing: {
-    basePrice: 8000, currency: 'EUR', apaPercentage: 30,
-    securityDeposit: 2000, discountPercentage: 0, extras: [],
+    basePrice: 8000, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
+    securityDeposit: 2000, discountAmount: 0, extras: [],
   },
   paymentTerms: [
     { label: 'Custom Term 1', percentage: 60, description: 'Custom 60% up front.' },
