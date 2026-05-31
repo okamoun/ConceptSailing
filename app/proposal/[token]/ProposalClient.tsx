@@ -145,23 +145,78 @@ export default function ProposalClient({ token }: Props) {
   return (
     <>
       <style>{`
+        /* ── Print layout ───────────────────────────────────────────── */
         @media print {
-          @page { size: A4; margin: 18mm 15mm; }
+          @page { size: A4 portrait; margin: 11mm 13mm; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .no-print { display: none !important; }
-          body { background: white !important; }
-          .bg-gray-50 { background: white !important; }
+          body { background: white !important; margin: 0 !important; }
+
+          #proot { min-height: unset !important; background: white !important; padding: 0 !important; }
+          #pcont { max-width: 100% !important; }
+
+          /* Compact all section cards */
+          .pc {
+            padding: 9px 12px !important;
+            margin-bottom: 5px !important;
+            border-radius: 5px !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+          }
+          .pc, .pc * { font-size: 9.5px !important; line-height: 1.35 !important; }
+
+          /* Section labels */
+          .plab { font-size: 7.5px !important; margin-bottom: 5px !important; letter-spacing: 0.05em !important; }
+
+          /* Details + Pricing side by side */
+          .pcols { display: grid !important; grid-template-columns: 52% 47% !important; gap: 5px !important; margin-bottom: 5px !important; }
+          .pcols .pc { margin-bottom: 0 !important; }
+
+          /* Header specifics */
+          #phdr { padding: 8px 12px !important; }
+          #phdr .plogowrap { width: 28px !important; height: 28px !important; border-radius: 4px !important; }
+          #phdr .pref { font-size: 13px !important; }
+          #phdr .pstatus { font-size: 7.5px !important; padding: 1px 5px !important; margin-top: 2px !important; }
+          #phdr .grid { margin-top: 7px !important; padding-top: 7px !important; gap: 8px !important; }
+
+          /* Charter details grid */
+          .det-grid { gap: 6px 16px !important; }
+
+          /* Itinerary */
+          .pitin-wrap { margin-top: 7px !important; padding-top: 7px !important; }
+          .pitin-text { font-size: 8.5px !important; line-height: 1.3 !important; }
+
+          /* Pricing rows */
+          #pprx .space-y-3 > * + * { margin-top: 3px !important; }
+          #pprx .border-t { padding-top: 5px !important; }
+          #pprx .border-t-2 { padding-top: 5px !important; }
+          .pgrand { font-size: 11px !important; }
+          .papa-note { font-size: 8px !important; margin-top: 3px !important; }
+
+          /* Payment terms */
+          #ppay .space-y-4 > * + * { margin-top: 3px !important; }
+          .pterm { padding: 5px 8px !important; gap: 5px !important; border-radius: 4px !important; }
+          .pterm-num { width: 18px !important; height: 18px !important; font-size: 8px !important; flex-shrink: 0 !important; }
+
+          /* MYBA box */
+          #pmyba { padding: 6px 10px !important; margin-bottom: 5px !important; border-radius: 4px !important; }
+          #pmyba * { font-size: 8.5px !important; line-height: 1.3 !important; }
+          #pmyba h3 { font-size: 9px !important; margin-bottom: 2px !important; }
+          #pmyba .text-lg { font-size: 10px !important; }
+
+          /* Footer */
+          #pftr { margin-top: 5px !important; padding-bottom: 0 !important; font-size: 8px !important; }
         }
       `}</style>
 
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
+      <div id="proot" className="min-h-screen bg-gray-50 py-8 px-4">
+        <div id="pcont" className="max-w-4xl mx-auto">
 
-          {/* Header */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+          {/* ── Header ── */}
+          <div id="phdr" className="pc bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-blue-700 flex items-center justify-center flex-shrink-0">
+                <div className="plogowrap w-14 h-14 rounded-xl bg-blue-700 flex items-center justify-center flex-shrink-0">
                   <Image src="/images/boats/blueone/logo_blueone.png" alt="BlueOne" width={40} height={40}
                     className="object-contain" />
                 </div>
@@ -172,11 +227,11 @@ export default function ProposalClient({ token }: Props) {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-gray-900">{proposalRef(charter.id)}</div>
+                <div className="pref text-2xl font-bold text-gray-900">{proposalRef(charter.id)}</div>
                 <div className="text-xs text-gray-500 mt-1">
                   Valid until: {fmtDate(proposal.expiresAt)}
                 </div>
-                <span className={`inline-block mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCfg.bg} ${statusCfg.color}`}>
+                <span className={`pstatus inline-block mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCfg.bg} ${statusCfg.color}`}>
                   {statusCfg.label}
                 </span>
               </div>
@@ -184,13 +239,13 @@ export default function ProposalClient({ token }: Props) {
 
             <div className="mt-6 pt-6 border-t border-gray-100 grid sm:grid-cols-2 gap-4">
               <div>
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Prepared for</div>
+                <div className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Prepared for</div>
                 <div className="font-semibold text-gray-900">{charter.name}</div>
                 <div className="text-sm text-gray-600">{charter.email}</div>
                 {charter.phone && <div className="text-sm text-gray-500">{charter.phone}</div>}
               </div>
               <div>
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">From</div>
+                <div className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">From</div>
                 <div className="font-semibold text-gray-900">{CONTACT.company.name}</div>
                 <div className="text-sm text-gray-600">{CONTACT.email}</div>
                 <div className="text-sm text-gray-500">{CONTACT.phone.formatted}</div>
@@ -198,9 +253,9 @@ export default function ProposalClient({ token }: Props) {
             </div>
           </div>
 
-          {/* Status banners */}
+          {/* Status banners (screen only) */}
           {proposal.status === 'approved' && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 mb-6 text-center no-print">
+            <div className="no-print bg-emerald-50 border border-emerald-200 rounded-2xl p-5 mb-6 text-center">
               <div className="text-3xl mb-2">✓</div>
               <div className="font-semibold text-emerald-800 text-lg">Proposal Approved</div>
               <p className="text-emerald-700 text-sm mt-1">
@@ -209,129 +264,125 @@ export default function ProposalClient({ token }: Props) {
             </div>
           )}
           {proposal.status === 'rejected' && (
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-5 mb-6 text-center no-print">
+            <div className="no-print bg-red-50 border border-red-200 rounded-2xl p-5 mb-6 text-center">
               <div className="text-3xl mb-2">✗</div>
               <div className="font-semibold text-red-800 text-lg">Proposal Declined</div>
-              <p className="text-red-700 text-sm mt-1">
-                Please contact us to discuss alternatives.
-              </p>
+              <p className="text-red-700 text-sm mt-1">Please contact us to discuss alternatives.</p>
             </div>
           )}
 
-          {/* Charter Details */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Charter Details</h2>
-            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
-              <div>
-                <div className="text-xs text-gray-400 mb-0.5">Vessel</div>
-                <div className="font-semibold text-gray-900">{charter.boat}</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400 mb-0.5">Guests</div>
-                <div className="font-semibold text-gray-900">{charter.passengers} passengers</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400 mb-0.5">Charter Period</div>
-                <div className="font-semibold text-gray-900">
-                  {fmtDate(charter.startDate)} → {fmtDate(charter.endDate)}
+          {/* ── Charter Details + Pricing (2-col in print) ── */}
+          <div className="pcols">
+
+            {/* Charter Details */}
+            <div id="pdet" className="pc bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+              <h2 className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Charter Details</h2>
+              <div className="det-grid grid sm:grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                  <div className="text-xs text-gray-400 mb-0.5">Vessel</div>
+                  <div className="font-semibold text-gray-900">{charter.boat}</div>
                 </div>
-                <div className="text-sm text-gray-500">{nights} night{nights !== 1 ? 's' : ''}</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400 mb-0.5">Embarkation / Disembarkation</div>
-                <div className="font-semibold text-gray-900">{embarkLabel || '—'}</div>
-                {disembarkLabel && disembarkLabel !== embarkLabel && (
-                  <div className="text-sm text-gray-500">↩ {disembarkLabel}</div>
+                <div>
+                  <div className="text-xs text-gray-400 mb-0.5">Guests</div>
+                  <div className="font-semibold text-gray-900">{charter.passengers} passengers</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-400 mb-0.5">Charter Period</div>
+                  <div className="font-semibold text-gray-900">
+                    {fmtDate(charter.startDate)} → {fmtDate(charter.endDate)}
+                  </div>
+                  <div className="text-sm text-gray-500">{nights} night{nights !== 1 ? 's' : ''}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-400 mb-0.5">Embarkation / Disembarkation</div>
+                  <div className="font-semibold text-gray-900">{embarkLabel || '—'}</div>
+                  {disembarkLabel && disembarkLabel !== embarkLabel && (
+                    <div className="text-sm text-gray-500">↩ {disembarkLabel}</div>
+                  )}
+                </div>
+                {charter.selectedTheme && (
+                  <div>
+                    <div className="text-xs text-gray-400 mb-0.5">Experience Theme</div>
+                    <div className="font-semibold text-gray-900">{charter.selectedTheme}</div>
+                  </div>
                 )}
               </div>
-              {charter.selectedTheme && (
-                <div>
-                  <div className="text-xs text-gray-400 mb-0.5">Experience Theme</div>
-                  <div className="font-semibold text-gray-900">{charter.selectedTheme}</div>
+              {charter.holidayDescription && (
+                <div className="pitin-wrap mt-6 pt-6 border-t border-gray-100">
+                  <div className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Itinerary Overview</div>
+                  <p className="pitin-text text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{charter.holidayDescription}</p>
                 </div>
               )}
             </div>
-            {charter.holidayDescription && (
-              <div className="mt-6 pt-6 border-t border-gray-100">
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Itinerary Overview</div>
-                <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{charter.holidayDescription}</p>
-              </div>
-            )}
-          </div>
 
-          {/* Pricing */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Pricing Breakdown</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Base Charter Fee</span>
-                <span className="font-medium text-gray-900">{fmt(totals.base, currency)}</span>
-              </div>
-              {totals.discount > 0 && (
+            {/* Pricing */}
+            <div id="pprx" className="pc bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+              <h2 className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Pricing Breakdown</h2>
+              <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-emerald-600">Discount ({proposal.pricing.discountPercentage}%)</span>
-                  <span className="font-medium text-emerald-600">− {fmt(totals.discount, currency)}</span>
+                  <span className="text-gray-600">Base Charter Fee</span>
+                  <span className="font-medium text-gray-900">{fmt(totals.base, currency)}</span>
                 </div>
-              )}
-              {(proposal.pricing.extras || []).map((extra, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <span className="text-gray-600">{extra.label}</span>
-                  <span className="font-medium text-gray-900">{fmt(extra.amount, currency)}</span>
+                {totals.discount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-emerald-600">Discount ({proposal.pricing.discountPercentage}%)</span>
+                    <span className="font-medium text-emerald-600">− {fmt(totals.discount, currency)}</span>
+                  </div>
+                )}
+                {(proposal.pricing.extras || []).map((extra, i) => (
+                  <div key={i} className="flex justify-between text-sm">
+                    <span className="text-gray-600">{extra.label}</span>
+                    <span className="font-medium text-gray-900">{fmt(extra.amount, currency)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm font-semibold border-t border-gray-100 pt-3">
+                  <span className="text-gray-800">Charter Fee Total</span>
+                  <span className="text-gray-900">{fmt(totals.charterFee, currency)}</span>
                 </div>
-              ))}
-              <div className="flex justify-between text-sm font-semibold border-t border-gray-100 pt-3">
-                <span className="text-gray-800">Charter Fee Total</span>
-                <span className="text-gray-900">{fmt(totals.charterFee, currency)}</span>
+                {totals.vat > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">VAT ({proposal.pricing.vatPercentage ?? 13}%)</span>
+                    <span className="font-medium text-gray-900">{fmt(totals.vat, currency)}</span>
+                  </div>
+                )}
+                {totals.apa > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">APA ({proposal.pricing.apaPercentage}%)</span>
+                    <span className="font-medium text-gray-900">{fmt(totals.apa, currency)}</span>
+                  </div>
+                )}
+                {(proposal.pricing.securityDeposit || 0) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Security Deposit (refundable)</span>
+                    <span className="font-medium text-gray-900">{fmt(proposal.pricing.securityDeposit, currency)}</span>
+                  </div>
+                )}
+                <div className="pgrand flex justify-between font-bold text-base border-t-2 border-gray-200 pt-3">
+                  <span className="text-gray-900">Grand Total</span>
+                  <span className="text-blue-800">{fmt(totals.grandTotal, currency)}</span>
+                </div>
               </div>
-              {totals.vat > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">VAT ({proposal.pricing.vatPercentage ?? 13}%) — on charter fee</span>
-                  <span className="font-medium text-gray-900">{fmt(totals.vat, currency)}</span>
-                </div>
-              )}
               {totals.apa > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">APA — Additional Provisioning Allowance ({proposal.pricing.apaPercentage}%)</span>
-                  <span className="font-medium text-gray-900">{fmt(totals.apa, currency)}</span>
-                </div>
+                <p className="papa-note mt-4 text-xs text-gray-400 leading-relaxed">
+                  APA covers fuel, port fees, provisions, crew gratuities, and running expenses.
+                  Any unspent balance is returned at charter end.
+                </p>
               )}
-              {totals.vat > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">VAT ({proposal.pricing.vatPercentage ?? 13}%)</span>
-                  <span className="font-medium text-gray-900">{fmt(totals.vat, currency)}</span>
-                </div>
-              )}
-              {(proposal.pricing.securityDeposit || 0) > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Security Deposit (refundable)</span>
-                  <span className="font-medium text-gray-900">{fmt(proposal.pricing.securityDeposit, currency)}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-base border-t-2 border-gray-200 pt-3">
-                <span className="text-gray-900">Grand Total</span>
-                <span className="text-blue-800">{fmt(totals.grandTotal, currency)}</span>
-              </div>
             </div>
-            {totals.apa > 0 && (
-              <p className="mt-4 text-xs text-gray-400 leading-relaxed">
-                The APA (Additional Provisioning Allowance) is an advance held by the captain to cover fuel,
-                port fees, provisions, crew gratuities, and other running expenses. Any unspent balance is
-                returned at charter end.
-              </p>
-            )}
-          </div>
 
-          {/* Payment Schedule */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Payment Schedule</h2>
+          </div>{/* end .pcols */}
+
+          {/* ── Payment Schedule ── */}
+          <div id="ppay" className="pc bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+            <h2 className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Payment Schedule</h2>
             <div className="space-y-4">
               {(proposal.paymentTerms || []).map((term, i) => {
                 const isLast = i === (proposal.paymentTerms || []).length - 1;
                 const termBase = Math.round(totals.charterFee * term.percentage / 100);
                 const amount = isLast ? termBase + totals.apa + totals.vat : termBase;
                 return (
-                  <div key={i} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm font-bold text-blue-700">
+                  <div key={i} className="pterm flex gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="pterm-num w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm font-bold text-blue-700">
                       {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -345,8 +396,8 @@ export default function ProposalClient({ token }: Props) {
                 );
               })}
               {(proposal.pricing.securityDeposit || 0) > 0 && (
-                <div className="flex gap-4 p-4 bg-gray-50 rounded-xl">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 text-sm font-bold text-gray-500">↩</div>
+                <div className="pterm flex gap-4 p-4 bg-gray-50 rounded-xl">
+                  <div className="pterm-num w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 text-sm font-bold text-gray-500">↩</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <span className="font-semibold text-gray-900 text-sm">Security Deposit (refundable)</span>
@@ -361,8 +412,8 @@ export default function ProposalClient({ token }: Props) {
             </div>
           </div>
 
-          {/* MYBA Contract Reference */}
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-6">
+          {/* ── MYBA Clause ── */}
+          <div id="pmyba" className="bg-blue-50 border border-blue-200 rounded-2xl p-6 mb-6">
             <div className="flex gap-3">
               <div className="text-blue-600 mt-0.5 text-lg flex-shrink-0">⚖</div>
               <div>
@@ -377,16 +428,16 @@ export default function ProposalClient({ token }: Props) {
             </div>
           </div>
 
-          {/* Special Conditions */}
+          {/* ── Special Conditions ── */}
           {proposal.specialConditions && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Special Conditions</h2>
+            <div id="pcond" className="pc bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+              <h2 className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Special Conditions</h2>
               <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{proposal.specialConditions}</p>
             </div>
           )}
 
-          {/* Print / PDF button */}
-          <div className="flex flex-col items-center gap-2 mb-8 no-print">
+          {/* ── Download PDF (screen only) ── */}
+          <div className="no-print flex flex-col items-center gap-2 mb-8">
             <button onClick={() => window.print()}
               className="flex items-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm">
               ⬇ Download PDF
@@ -396,9 +447,8 @@ export default function ProposalClient({ token }: Props) {
             </p>
           </div>
 
-          {/* Comments & Approval */}
+          {/* ── Comments & Actions (screen only) ── */}
           <div className="no-print">
-            {/* Existing comments */}
             {localComments.length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Discussion</h2>
@@ -425,7 +475,6 @@ export default function ProposalClient({ token }: Props) {
               </div>
             )}
 
-            {/* Comment form */}
             {proposal.status !== 'draft' && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
@@ -460,7 +509,6 @@ export default function ProposalClient({ token }: Props) {
               </div>
             )}
 
-            {/* Approve / Reject */}
             {canAct && (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Proposal Decision</h2>
@@ -510,11 +558,12 @@ export default function ProposalClient({ token }: Props) {
             )}
           </div>
 
-          {/* Footer */}
-          <div className="text-center text-xs text-gray-400 pb-8">
+          {/* ── Footer ── */}
+          <div id="pftr" className="text-center text-xs text-gray-400 pb-8">
             <p>{CONTACT.company.name} · {CONTACT.email} · {CONTACT.phone.formatted}</p>
             <p className="mt-1">This proposal is confidential and intended solely for the named recipient.</p>
           </div>
+
         </div>
       </div>
     </>
