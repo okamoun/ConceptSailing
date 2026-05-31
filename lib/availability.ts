@@ -22,6 +22,7 @@ export type CharterStatus =
   | 'web_request'
   | 'broker_request'
   | 'serious_request'
+  | 'proposal_sent'
   | 'confirmed'
   | 'signed'
   | 'canceled'
@@ -33,16 +34,18 @@ export const CHARTER_STATUS_PRIORITY: Record<CharterStatus, number> = {
   confirmed:       7,
   owner_use:       6,
   maintenance:     5,
-  serious_request: 4,
-  broker_request:  3,
-  web_request:     2,
-  canceled:        1,
+  proposal_sent:   4,
+  serious_request: 3,
+  broker_request:  2,
+  web_request:     1,
+  canceled:        0,
 };
 
 export const CHARTER_STATUS_LABEL: Record<CharterStatus, string> = {
   web_request:     'Web Request',
   broker_request:  'Broker Request',
   serious_request: 'Serious Request',
+  proposal_sent:   'Proposal Sent',
   confirmed:       'Confirmed',
   signed:          'Signed',
   canceled:        'Canceled',
@@ -115,14 +118,14 @@ export const DEFAULT_PAYMENT_TERMS: PaymentTerm[] = [
     label: 'Balance — 50%',
     percentage: 50,
     description:
-      '50% balance of the total charter fee is due 28 days prior to the charter commencement date.',
+      '50% balance of the charter fee plus APA and VAT is due 28 days prior to the charter commencement date.',
   },
 ];
 
 export const DEFAULT_PRICING: ProposalPricing = {
   basePrice: 0,
   currency: 'EUR',
-  apaPercentage: 30,
+  apaPercentage: 25,
   vatPercentage: 13,
   securityDeposit: 2000,
   discountPercentage: 0,
@@ -131,13 +134,13 @@ export const DEFAULT_PRICING: ProposalPricing = {
 
 export function calcTotals(pricing: ProposalPricing) {
   const base = pricing.basePrice || 0;
-  const apa = Math.round(base * (pricing.apaPercentage || 0) / 100);
   const extrasSum = (pricing.extras || []).reduce((s, e) => s + (e.amount || 0), 0);
   const discount = Math.round(base * (pricing.discountPercentage || 0) / 100);
   const charterFee = base - discount + extrasSum;
-  const vat = Math.round(charterFee * (pricing.vatPercentage ?? 13) / 100);
-  const grandTotal = charterFee + vat + apa + (pricing.securityDeposit || 0);
-  return { base, apa, extrasSum, discount, charterFee, vat, grandTotal };
+  const apa = Math.round(charterFee * (pricing.apaPercentage || 0) / 100);
+  const vat = Math.round(charterFee * (pricing.vatPercentage || 0) / 100);
+  const grandTotal = charterFee + apa + vat + (pricing.securityDeposit || 0);
+  return { base, apa, vat, extrasSum, discount, charterFee, grandTotal };
 }
 
 export function proposalRef(charterId: string): string {
@@ -198,8 +201,15 @@ const COLLECTION = 'availability';
 export async function createCharter(
   data: Omit<Charter, 'id' | 'createdAt'>
 ): Promise<string> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    // addDoc does not support undefined values or FieldValue.delete() sentinels
+    if (v !== undefined && !(v !== null && typeof v === 'object' && '_methodName' in (v as object))) {
+      clean[k] = v;
+    }
+  }
   const ref = await addDoc(collection(db, COLLECTION), {
-    ...data,
+    ...clean,
     createdAt: serverTimestamp(),
   });
   return ref.id;
@@ -222,7 +232,11 @@ export async function updateCharter(
   id: string,
   data: Partial<Omit<Charter, 'id' | 'createdAt'>>
 ): Promise<void> {
-  await updateDoc(doc(db, COLLECTION, id), data as Record<string, unknown>);
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  await updateDoc(doc(db, COLLECTION, id), clean);
 }
 
 export async function deleteCharter(id: string): Promise<void> {
@@ -260,7 +274,7 @@ export async function updateCharterProposal(
 ): Promise<void> {
   const updates: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) {
-    updates[`proposal.${k}`] = v;
+    if (v !== undefined) updates[`proposal.${k}`] = v;
   }
   await updateDoc(doc(db, COLLECTION, charterId), updates);
 }
@@ -289,6 +303,7 @@ export async function getChartersWithProposals(): Promise<Charter[]> {
 
 export async function markCharterProposalSent(charterId: string): Promise<void> {
   await updateDoc(doc(db, COLLECTION, charterId), {
+    status: 'proposal_sent',
     'proposal.status': 'sent',
     'proposal.sentAt': serverTimestamp(),
   });

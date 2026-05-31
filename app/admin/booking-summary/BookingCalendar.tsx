@@ -23,6 +23,7 @@ const STATUS_BG: Record<CharterStatus, string> = {
   web_request:     'bg-sky-400/70',
   broker_request:  'bg-amber-400/70',
   serious_request: 'bg-orange-500/70',
+  proposal_sent:   'bg-violet-500/70',
   confirmed:       'bg-emerald-500/70',
   signed:          'bg-emerald-800/70',
   canceled:        'bg-gray-500/50',

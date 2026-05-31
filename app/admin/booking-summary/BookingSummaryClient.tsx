@@ -25,18 +25,19 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 }
 
 const ALL_STATUSES: CharterStatus[] = [
-  'web_request', 'broker_request', 'serious_request', 'confirmed',
-  'signed', 'canceled', 'owner_use', 'maintenance',
+  'web_request', 'broker_request', 'serious_request', 'proposal_sent',
+  'confirmed', 'signed', 'canceled', 'owner_use', 'maintenance',
 ];
 
 const DEFAULT_STATUSES = new Set<CharterStatus>([
-  'broker_request', 'serious_request', 'confirmed', 'signed', 'owner_use', 'maintenance',
+  'broker_request', 'serious_request', 'proposal_sent', 'confirmed', 'signed', 'owner_use', 'maintenance',
 ]);
 
 const STATUS_TOGGLE_CLS: Record<CharterStatus, { on: string; off: string }> = {
   web_request:     { on: 'bg-sky-400/80 text-sky-900 border-sky-400/80',         off: 'bg-sky-400/10 text-sky-400 border-sky-400/30' },
   broker_request:  { on: 'bg-amber-400/80 text-amber-900 border-amber-400/80',   off: 'bg-amber-400/10 text-amber-400 border-amber-400/30' },
   serious_request: { on: 'bg-orange-500/80 text-white border-orange-500/80',     off: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
+  proposal_sent:   { on: 'bg-violet-500/80 text-white border-violet-500/80',     off: 'bg-violet-500/10 text-violet-400 border-violet-500/30' },
   confirmed:       { on: 'bg-emerald-500/80 text-white border-emerald-500/80',   off: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' },
   signed:          { on: 'bg-emerald-800/80 text-white border-emerald-800/80',   off: 'bg-emerald-800/10 text-emerald-400 border-emerald-800/30' },
   canceled:        { on: 'bg-gray-500/70 text-white border-gray-500/70',         off: 'bg-gray-500/10 text-gray-400 border-gray-500/30' },
@@ -347,6 +348,7 @@ const STATUS_BADGE_CLS: Record<string, string> = {
   web_request:     'bg-sky-500/30 text-sky-200',
   broker_request:  'bg-amber-500/30 text-amber-200',
   serious_request: 'bg-orange-500/30 text-orange-200',
+  proposal_sent:   'bg-violet-500/30 text-violet-200',
   confirmed:       'bg-emerald-500/30 text-emerald-200',
   signed:          'bg-emerald-800/30 text-emerald-100',
   canceled:        'bg-gray-500/30 text-gray-300',

@@ -254,6 +254,7 @@ export default function ProposalEditorClient({ id }: Props) {
       });
       await markCharterProposalSent(id);
       setStatus('sent');
+      setCharter(prev => prev ? { ...prev, status: 'proposal_sent' } : prev);
     } catch (err) {
       setError('Failed to send. Please try again.');
       console.error(err);
@@ -457,7 +458,7 @@ export default function ProposalEditorClient({ id }: Props) {
                 onChange={e => setPricing(p => ({ ...p, apaPercentage: Number(e.target.value) }))}
                 min={0} max={100} className={inputCls} />
             </Field>
-            <Field label="VAT on Charter (%)" hint="Greek VAT — applies to charter fee only">
+            <Field label="VAT (%)" hint="Applied to charter fee">
               <input type="number" value={pricing.vatPercentage ?? 13}
                 onChange={e => setPricing(p => ({ ...p, vatPercentage: Number(e.target.value) }))}
                 min={0} max={100} className={inputCls} />
@@ -517,6 +518,11 @@ export default function ProposalEditorClient({ id }: Props) {
                 <span>APA ({pricing.apaPercentage}%)</span><span>{fmt(totals.apa)}</span>
               </div>
             )}
+            {totals.vat > 0 && (
+              <div className="flex justify-between text-sm text-blue-200">
+                <span>VAT ({pricing.vatPercentage ?? 13}%)</span><span>{fmt(totals.vat)}</span>
+              </div>
+            )}
             {pricing.securityDeposit > 0 && (
               <div className="flex justify-between text-sm text-blue-200">
                 <span>Security Deposit</span><span>{fmt(pricing.securityDeposit)}</span>
@@ -531,28 +537,38 @@ export default function ProposalEditorClient({ id }: Props) {
         {/* Payment Terms */}
         <Section title="Payment Schedule (MYBA)">
           <div className="space-y-4 mb-4">
-            {paymentTerms.map((term, i) => (
-              <div key={i} className="bg-black/10 rounded-xl p-4">
-                <div className="flex gap-2 mb-2">
-                  <input type="text" value={term.label} onChange={e => updateTerm(i, 'label', e.target.value)}
-                    placeholder="e.g. Deposit — 50%" className={`${inputCls} flex-1`} />
-                  <div className="flex items-center gap-1">
-                    <input type="number" value={term.percentage} onChange={e => updateTerm(i, 'percentage', e.target.value)}
-                      min={0} max={100} className={`${inputCls} w-20`} />
-                    <span className="text-blue-300 text-sm">%</span>
+            {paymentTerms.map((term, i) => {
+              const isLast = i === paymentTerms.length - 1;
+              const termBase = Math.round(totals.charterFee * term.percentage / 100);
+              const termTotal = isLast ? termBase + totals.apa + totals.vat : termBase;
+              return (
+                <div key={i} className="bg-black/10 rounded-xl p-4">
+                  <div className="flex gap-2 mb-2">
+                    <input type="text" value={term.label} onChange={e => updateTerm(i, 'label', e.target.value)}
+                      placeholder="e.g. Deposit — 50%" className={`${inputCls} flex-1`} />
+                    <div className="flex items-center gap-1">
+                      <input type="number" value={term.percentage} onChange={e => updateTerm(i, 'percentage', e.target.value)}
+                        min={0} max={100} className={`${inputCls} w-20`} />
+                      <span className="text-blue-300 text-sm">%</span>
+                    </div>
+                    <button type="button" onClick={() => setPaymentTerms(prev => prev.filter((_, idx) => idx !== i))}
+                      className="text-red-400 hover:text-red-300 px-2">✕</button>
                   </div>
-                  <button type="button" onClick={() => setPaymentTerms(prev => prev.filter((_, idx) => idx !== i))}
-                    className="text-red-400 hover:text-red-300 px-2">✕</button>
+                  <input type="text" value={term.description} onChange={e => updateTerm(i, 'description', e.target.value)}
+                    placeholder="Payment condition…" className={`${inputCls} text-xs`} />
+                  {totals.charterFee > 0 && (
+                    <div className="text-xs text-blue-400 mt-2">
+                      = {fmt(termTotal)}
+                      {isLast && (totals.apa > 0 || totals.vat > 0) && (
+                        <span className="text-blue-500 ml-1">
+                          ({fmt(termBase)} + APA {fmt(totals.apa)}{totals.vat > 0 ? ` + VAT ${fmt(totals.vat)}` : ''})
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <input type="text" value={term.description} onChange={e => updateTerm(i, 'description', e.target.value)}
-                  placeholder="Payment condition…" className={`${inputCls} text-xs`} />
-                {totals.charterFee > 0 && (
-                  <div className="text-xs text-blue-400 mt-2">
-                    = {fmt(Math.round(totals.charterFee * term.percentage / 100))}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="flex gap-3">
             <button type="button" onClick={() => setPaymentTerms(prev => [...prev, { label: '', percentage: 0, description: '' }])}

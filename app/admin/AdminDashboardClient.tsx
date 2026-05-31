@@ -31,6 +31,7 @@ const STATUS_BADGE: Record<CharterStatus, string> = {
   web_request:     'bg-sky-500/30 text-sky-200',
   broker_request:  'bg-amber-500/30 text-amber-200',
   serious_request: 'bg-orange-500/30 text-orange-200',
+  proposal_sent:   'bg-violet-500/30 text-violet-200',
   confirmed:       'bg-emerald-500/30 text-emerald-200',
   signed:          'bg-emerald-800/40 text-emerald-100',
   canceled:        'bg-gray-500/30 text-gray-300',
