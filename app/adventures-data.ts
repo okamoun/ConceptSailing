@@ -16,6 +16,8 @@ export type Adventure = {
   experience: string;
   itinerary: AdventureItineraryDay[];
   features?: string[];
+  partnerName?: string;
+  partnerUrl?: string;
 };
 
 const adventures: Adventure[] = [
@@ -1018,7 +1020,68 @@ const adventures: Adventure[] = [
         lng: 25.4615,
       },
     ],
-  }
+  },
+  {
+    id: "18",
+    name: "The Ultimate Cigar Experience",
+    description: "Sail the Greek islands in search of the world's finest cigars, curated in collaboration with Meerapfel.",
+    image: "/images/cigars.jpg",
+    partnerName: "Meerapfel",
+    partnerUrl: "https://meerapfel.com/meerapfel-cigar/",
+    experience: "A one-of-a-kind voyage for connoisseurs: seven days at sea discovering the world's most celebrated cigars aboard a luxury catamaran. In partnership with Meerapfel — one of Europe's most storied cigar houses — this journey pairs handpicked premium cigars with the dramatic scenery of the Greek archipelago. Each evening, a cigar sommelier guides you through a tasting flight on deck, matching selections from Meerapfel's legendary collection with the local cuisine and sea air. From Hydra to Monemvasia, Spetses to Elafonisos, every island anchorage becomes a setting for exceptional smoke, story, and conversation.",
+    itinerary: [
+      {
+        title: "Athens — Welcome Tasting",
+        description: "Arrive in Piraeus, settle aboard, and join an introductory cigar tasting led by a Meerapfel sommelier. Explore the curated humidor and learn the language of premium tobacco over a gourmet welcome dinner.",
+        features: ["Welcome tasting", "Cigar sommelier", "Gourmet dinner"],
+        lat: 37.9477,
+        lng: 23.6472,
+      },
+      {
+        title: "Hydra — Cuban Classics",
+        description: "Anchor off car-free Hydra. The afternoon session focuses on Cuban Habanos from Meerapfel's historic collection, enjoyed on the sun deck with local mezze and the island's timeless harbour views.",
+        features: ["Cuban cigars", "Island walk", "Sunset on deck"],
+        lat: 37.3489,
+        lng: 23.4756,
+      },
+      {
+        title: "Spetses — Dominican & Nicaraguan Flight",
+        description: "Morning swim in crystal waters followed by a comparative tasting of Dominican and Nicaraguan cigars — contrasting terroirs and fermentation styles explained by the sommelier, paired with crafted cocktails.",
+        features: ["Comparative tasting", "Swimming", "Paired cocktails"],
+        lat: 37.2601,
+        lng: 23.1574,
+      },
+      {
+        title: "Monemvasia — Rare Reserve Cigars",
+        description: "The medieval sea-rock of Monemvasia sets the stage for Meerapfel's rarest aged reserves. A private pairing dinner is held in a restored Byzantine courtyard with sweeping views of the Laconian Gulf.",
+        features: ["Rare reserves", "Medieval village", "Private dinner"],
+        lat: 36.6863,
+        lng: 23.0530,
+      },
+      {
+        title: "Gytheio — Cigar & Local Spirits Pairing",
+        description: "Discover the Mani peninsula's dramatic coastline, then pair Honduran and Cameroon-wrapped cigars with Greek tsipouro and aged wine sourced from local producers in the shadow of the Taygetos mountains.",
+        features: ["Spirits pairing", "Local wine", "Coastline cruise"],
+        lat: 36.7608,
+        lng: 22.5649,
+      },
+      {
+        title: "Elafonisos — Masterclass at Sea",
+        description: "Anchor in the turquoise lagoon of Elafonisos. The day's highlight is an open-air rolling masterclass: learn the fundamentals of cigar craftsmanship from the Meerapfel team on one of Greece's most beautiful beaches.",
+        features: ["Rolling masterclass", "Lagoon swim", "White sand beach"],
+        lat: 36.4915,
+        lng: 22.9558,
+      },
+      {
+        title: "Return to Athens — Farewell Smoke",
+        description: "Sail back toward Piraeus with one final tasting flight — guests choose their personal favourite from the week and receive a curated Meerapfel gift box to take home, along with a certificate of connoisseurship.",
+        features: ["Farewell tasting", "Meerapfel gift box", "Certificate"],
+        lat: 37.9477,
+        lng: 23.6472,
+      },
+    ],
+    features: ["Cigar tasting", "Sommelier", "Gourmet dining", "Island hopping", "Meerapfel collaboration"],
+  },
 ];
 
 // Chef data structure
