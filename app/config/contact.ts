@@ -1,6 +1,6 @@
 // Centralized contact configuration
 export const CONTACT = {
-  email: 'contact@nj3cruises.com',
+  email: 'contact@blueoneyacht.com',
   phone: {
     formatted: '+33 6 75 60 45 32',
     href: 'tel:+33675604532',

@@ -8,6 +8,7 @@ import { LocalBusinessStructuredData, TouristTripStructuredData } from './compon
 import { getConfirmedReviews } from '../lib/reviews';
 import type { Review } from '../lib/reviews';
 import ReviewCard from './components/ReviewCard';
+import { CONTACT } from './config/contact';
 
 export default function HomeClient() {
   const { resetTheme } = useBlueOneMode();
@@ -31,7 +32,7 @@ export default function HomeClient() {
         description="Experience luxury sailing adventures in Greece aboard the BlueOne catamaran. Premium yacht charters with island hopping, sunset cruises, and all-inclusive experiences."
         url="https://www.blueoneyacht.com"
         telephone="+30 210 1234567"
-        email="contact@nj3cruises.com"
+        email={CONTACT.email}
         address={{
           streetAddress: "Alimos Marina",
           addressLocality: "Athens",
@@ -198,7 +199,7 @@ export default function HomeClient() {
             <Link href="/booking" className="btn-primary bg-white text-blue-600 hover:bg-gray-50">
               Booking Request
             </Link>
-            <Link href="/booking" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+            <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
               Contact Us
             </Link>
           </div>

@@ -22,11 +22,14 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/',
 }))
 
-// Mock Next.js Image component
+// Mock Next.js Image component — strip Next.js-only props so React doesn't
+// warn about unknown boolean attributes on the underlying <img> element.
 jest.mock('next/image', () => ({
   __esModule: true,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: (props: any) => <img {...props} />,
+  default: ({ src, alt, fill, priority, sizes, quality, placeholder, blurDataURL, loader, onLoadingComplete, objectFit, objectPosition, ...rest }: any) =>
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    <img src={src} alt={alt} {...rest} />,
 }))
 
 // Mock localStorage

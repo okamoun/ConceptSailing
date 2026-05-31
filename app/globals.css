@@ -32,6 +32,10 @@
   --text-secondary: var(--gray-600);
   --text-muted: var(--gray-400);
   
+  /* Radius tokens */
+  --radius-card: 1.5rem;
+  --radius-btn: 1rem;
+
   /* Modern Glass Effect */
   --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(255, 255, 255, 0.2);
@@ -93,7 +97,7 @@ footer {
   background: var(--glass-bg);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 1.5rem;
+  border-radius: var(--radius-card);
   border: 1px solid var(--glass-border);
   box-shadow: 0 8px 32px var(--glass-shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -107,7 +111,7 @@ footer {
 /* Modern Card Component */
 .card-modern {
   background: var(--surface);
-  border-radius: 1.5rem;
+  border-radius: var(--radius-card);
   border: 1px solid var(--border);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -125,7 +129,7 @@ footer {
   background: linear-gradient(135deg, var(--blueone-primary) 0%, var(--blueone-primary-dark) 100%);
   color: var(--white);
   font-weight: 600;
-  border-radius: 1rem;
+  border-radius: var(--radius-btn);
   padding: 0.875rem 2rem;
   border: none;
   box-shadow: 0 4px 16px rgba(0, 102, 204, 0.25);
@@ -148,7 +152,7 @@ footer {
   background: var(--surface);
   color: var(--blueone-primary);
   font-weight: 600;
-  border-radius: 1rem;
+  border-radius: var(--radius-btn);
   padding: 0.875rem 2rem;
   border: 2px solid var(--blueone-primary);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -241,7 +245,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .animate-slide-in-left {
@@ -375,7 +381,7 @@ input:focus, textarea:focus, select:focus {
   background: linear-gradient(135deg, var(--blueone-primary) 0%, var(--blueone-primary-dark) 100%);
   color: var(--white);
   font-weight: 600;
-  border-radius: 1rem;
+  border-radius: var(--radius-btn);
   padding: 0.875rem 2rem;
   border: none;
   box-shadow: 0 4px 16px rgba(0, 102, 204, 0.25);

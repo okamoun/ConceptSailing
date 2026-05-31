@@ -18,6 +18,12 @@ jest.mock('../lib/availability', () => ({
     basePrice: 0, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
     securityDeposit: 2000, discountPercentage: 0, extras: [],
   },
+  DEFAULT_INCLUSIONS: [
+    'Professional skipper & crew',
+    'Breakfast, lunch & dinner prepared daily by the crew',
+    'Bed linen & bath towels',
+    'Paddleboards & water sports equipment',
+  ],
 }));
 
 jest.mock('../lib/financial', () => ({
@@ -62,6 +68,7 @@ const DRAFT_PROPOSAL = {
     { label: 'Custom Term 1', percentage: 60, description: 'Custom 60% up front.' },
     { label: 'Custom Term 2', percentage: 40, description: 'Custom 40% later.' },
   ],
+  inclusions: ['Professional skipper & crew', 'Bed linen & bath towels'],
   comments: [],
   expiresAt: '2026-06-15',
   sentAt: null,
@@ -112,7 +119,6 @@ const CHARTER_WITH_COMMENTS = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  // Default: second getCharterById call (refresh after save) returns same charter
   mockGetCharter.mockResolvedValue(CHARTER_WITH_DRAFT as any);
 });
 
@@ -134,7 +140,6 @@ describe('ProposalEditorClient — create vs edit mode', () => {
   it('shows "Create Proposal" heading and submit button when no proposal exists', async () => {
     mockGetCharter.mockResolvedValue(CHARTER_NO_PROPOSAL as any);
     render(<ProposalEditorClient id="charter-new" />);
-    // Both the heading and the submit button show "Create Proposal"
     const headings = await screen.findAllByText('Create Proposal');
     expect(headings.length).toBeGreaterThanOrEqual(1);
   });
@@ -205,7 +210,6 @@ describe('ProposalEditorClient — shareable link', () => {
 
 describe('ProposalEditorClient — save flow', () => {
   it('calls initCharterProposal on the first save (no existing proposal)', async () => {
-    // Return no-proposal charter for both initial load and the refresh after save
     mockGetCharter.mockResolvedValue(CHARTER_NO_PROPOSAL as any);
     mockInitProposal.mockResolvedValue('new-proposal-token');
 
@@ -239,8 +243,6 @@ describe('ProposalEditorClient — save flow', () => {
     const { container } = render(<ProposalEditorClient id="charter-new" />);
     await screen.findAllByText('Create Proposal');
 
-    // Use fireEvent.submit directly to bypass jsdom's HTML5 required-field validation,
-    // so the component's own JS validation runs and sets the error state.
     fireEvent.submit(container.querySelector('form')!);
 
     expect(await screen.findByText('Please fill in client name, email, and charter dates.')).toBeInTheDocument();

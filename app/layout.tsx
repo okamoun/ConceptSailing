@@ -4,8 +4,8 @@ import { BlueOneProvider } from "./contexts/BlueOneContext"
 import GoogleAnalytics from "./components/GoogleAnalytics"
 import { AdminAuthProvider } from "./admin/AdminAuthContext"
 import SiteChrome from "./components/SiteChrome"
+import { CONTACT } from "./config/contact"
 import "./globals.css"
-import "./animations.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -72,7 +72,7 @@ const jsonLd = {
       image: 'https://www.blueoneyacht.com/images/boats/blueone/External_sailing.jpg',
       description: 'Premium luxury yacht charter company offering curated sailing experiences across the Greek islands aboard the BlueOne Fountaine Pajot Aura 51 catamaran.',
       telephone: '+33675604532',
-      email: 'contact@nj3cruises.com',
+      email: CONTACT.email,
       address: {
         '@type': 'PostalAddress',
         streetAddress: 'Alimos Marina',
