@@ -86,7 +86,15 @@ export default function ExperiencesPage() {
       {/* Hero Section for Experiences */}
       <section className="relative min-h-screen flex items-center justify-center">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-blue-800/80 to-blue-900/70"></div>
+          <Image
+            src="/images/boats/blueone/External_sailing.jpg"
+            alt="Greek Sailing Adventures"
+            fill
+            className="object-cover"
+            priority
+            style={{ objectPosition: 'center' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-blue-900/50 to-blue-900/70"></div>
         </div>
         
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
@@ -126,7 +134,7 @@ export default function ExperiencesPage() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {category.themes.map((adv) => (
-                  <div key={adv.id} className="card-modern p-8 text-center animate-fade-in-up hover:bg-white/15 transition-all duration-300" style={{animationDelay:`${0.1 + Number(adv.id) * 0.07}s`,animationFillMode:'both'}}>
+                  <div key={adv.id} className="card-modern p-8 text-center animate-fade-in-up hover:bg-white/15 transition-all duration-300" style={{animationDelay:`${Math.min(0.1 + Number(adv.id) * 0.07, 0.35)}s`}}>
                     <div className="relative h-56 w-full mb-6">
                       <Image
                         src={adv.image}
