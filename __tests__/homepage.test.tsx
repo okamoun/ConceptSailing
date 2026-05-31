@@ -31,24 +31,20 @@ describe('HomeClient — Hero Section', () => {
 
   test('renders main heading with correct spelling', () => {
     render(<HomeClient />)
-    expect(screen.getByRole('heading', { level: 1, name: 'BlueOne Experiences' })).toBeInTheDocument()
+    // h1 contains both "BlueOne" and "Experiences" as spans
+    const h1 = screen.getByRole('heading', { level: 1 })
+    expect(h1).toHaveTextContent('BlueOne')
+    expect(h1).toHaveTextContent('Experiences')
   })
 
-  test('renders subtitle with correct spelling', () => {
+  test('renders hero description mentioning electric engines', () => {
     render(<HomeClient />)
-    expect(screen.getByText('Luxury Sailing Adventures in Greece')).toBeInTheDocument()
+    expect(screen.getByText(/electric engines in complete silence/)).toBeInTheDocument()
   })
 
-  test('renders hero description mentioning electric catamaran', () => {
+  test('hero description mentions Fountaine Pajot catamaran', () => {
     render(<HomeClient />)
-    expect(
-      screen.getByText(/Discover extraordinary sailing experiences aboard the BlueOne electric catamaran/)
-    ).toBeInTheDocument()
-  })
-
-  test('hero description mentions island hopping and sunset cruises', () => {
-    render(<HomeClient />)
-    expect(screen.getByText(/island hopping to sunset cruises/)).toBeInTheDocument()
+    expect(screen.getByText(/Fountaine Pajot Aura 51 catamaran/)).toBeInTheDocument()
   })
 
   test('Explore Experiences link points to /experiences', () => {
@@ -72,10 +68,10 @@ describe('HomeClient — Features Section', () => {
     expect(screen.getByRole('heading', { name: 'Why Choose BlueOne?' })).toBeInTheDocument()
   })
 
-  test('renders section subheading about luxury and comfort', () => {
+  test('renders section subheading about luxury and silence', () => {
     render(<HomeClient />)
     expect(
-      screen.getByText(/Experience the perfect blend of luxury, comfort, and adventure/)
+      screen.getByText(/perfect blend of luxury, silence, and adventure/)
     ).toBeInTheDocument()
   })
 
@@ -86,17 +82,17 @@ describe('HomeClient — Features Section', () => {
 
   test('Premium Comfort description mentions spacious cabins', () => {
     render(<HomeClient />)
-    expect(screen.getByText(/Spacious cabins, modern amenities/)).toBeInTheDocument()
+    expect(screen.getByText(/Spacious cabins, luxurious furnishings/)).toBeInTheDocument()
   })
 
-  test('renders Eco-Friendly feature card heading', () => {
+  test('renders Silent Electric feature card heading', () => {
     render(<HomeClient />)
-    expect(screen.getByRole('heading', { name: 'Eco-Friendly' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Silent Electric' })).toBeInTheDocument()
   })
 
-  test('Eco-Friendly description mentions solar panels', () => {
+  test('Silent Electric description mentions solar-powered', () => {
     render(<HomeClient />)
-    expect(screen.getByText(/Solar panels, hybrid systems/)).toBeInTheDocument()
+    expect(screen.getByText(/Solar-powered hybrid engines/)).toBeInTheDocument()
   })
 
   test('renders All-Inclusive feature card heading', () => {
@@ -120,10 +116,10 @@ describe('HomeClient — CTA Section', () => {
     ).toBeInTheDocument()
   })
 
-  test('renders CTA subtext about luxury experience', () => {
+  test('renders CTA subtext about booking a sailing experience', () => {
     render(<HomeClient />)
     expect(
-      screen.getByText(/Request a quote for your luxury sailing experience/)
+      screen.getByText(/Request a quote and we.ll craft a sailing experience/)
     ).toBeInTheDocument()
   })
 

@@ -10,12 +10,21 @@ import type { Review } from '../lib/reviews';
 import ReviewCard from './components/ReviewCard';
 import { CONTACT } from './config/contact';
 
+function GoldDivider({ className = '' }: { className?: string }) {
+  return (
+    <div className={`flex items-center justify-center gap-3 ${className}`}>
+      <div className="h-px w-10 opacity-50" style={{ background: 'var(--gold)' }} />
+      <div className="w-1 h-1 rounded-full opacity-70" style={{ background: 'var(--gold)' }} />
+      <div className="h-px w-10 opacity-50" style={{ background: 'var(--gold)' }} />
+    </div>
+  );
+}
+
 export default function HomeClient() {
   const { resetTheme } = useBlueOneMode();
   const [topReviews, setTopReviews] = useState<Review[]>([]);
 
   useEffect(() => {
-    // Reset theme when entering through main entry point
     resetTheme();
   }, [resetTheme]);
 
@@ -43,7 +52,7 @@ export default function HomeClient() {
         image="/images/boats/blueone/External_sailing.jpg"
         priceRange="$$$"
       />
-      
+
       <TouristTripStructuredData
         name="Greek Islands Sailing Adventure"
         description="Luxury sailing experience aboard BlueOne catamaran exploring the beautiful Greek islands with premium amenities and professional crew."
@@ -53,129 +62,200 @@ export default function HomeClient() {
         image="/images/boats/blueone/External_sailing.jpg"
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Hero Section - Modern BlueOne Experience */}
+      {/* ── Hero ── */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/boats/blueone/External_sailing.jpg"
-            alt="BlueOne Sailing Experience"
-            fill
-            className="object-cover"
-            priority
-            style={{ objectPosition: 'center' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-blue-900/50 to-blue-900/70"></div>
+        <Image
+          src="/images/boats/blueone/External_sailing.jpg"
+          alt="BlueOne Sailing Experience"
+          fill
+          className="object-cover scale-105"
+          priority
+          style={{ objectPosition: 'center 40%' }}
+        />
+        {/* Gradient overlay — more image visible at top, deeper at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/75" />
+        {/* Subtle vignette on sides */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
+
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto animate-fade-in-up">
+          {/* Eyebrow */}
+          <p
+            className="text-xs tracking-[0.4em] uppercase font-medium mb-7"
+            style={{ color: 'var(--gold)' }}
+          >
+            Luxury Sailing · Greek Islands
+          </p>
+
+          {/* Display heading — single h1 preserves accessible name "BlueOne Experiences" */}
+          <h1 className="font-display font-bold text-white leading-none mb-8">
+            <span className="block text-6xl md:text-8xl lg:text-9xl">BlueOne</span>
+            <span
+              className="block text-3xl md:text-5xl lg:text-6xl font-normal tracking-wide mt-2"
+              style={{ color: 'var(--gold-light)' }}
+            >
+              Experiences
+            </span>
+          </h1>
+
+          <GoldDivider className="mb-8" />
+
+          <p
+            className="text-lg md:text-xl font-light mb-12 max-w-xl mx-auto leading-relaxed"
+            style={{ color: 'rgba(255,255,255,0.78)' }}
+          >
+            Sail the Aegean aboard our Fountaine Pajot Aura 51 catamaran.
+            Curated adventures, exceptional crew, electric engines in complete silence.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/experiences" className="btn-primary text-sm px-8 py-4">
+              Explore Experiences
+            </Link>
+            <Link href="/blueone" className="btn-secondary text-sm px-8 py-4">
+              Discover The Yacht
+            </Link>
+          </div>
         </div>
-        
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <div className="glass p-8 md:p-16 max-w-4xl mx-auto animate-fade-in-up">
-            <div className="mb-8">
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gradient mb-6">
-                BlueOne Experiences
-              </h1>
-              <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 font-medium mb-6">
-                Luxury Sailing Adventures in Greece
-              </p>
-            </div>
-            
-            <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Discover extraordinary sailing experiences aboard the BlueOne electric catamaran. 
-              From island hopping to sunset cruises, create your perfect Greek adventure with premium comfort and service and silence of electric engines.
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            style={{ color: 'rgba(255,255,255,0.35)' }}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </section>
+
+      {/* ── Why BlueOne ── */}
+      <section className="py-32 px-6" style={{ background: 'var(--ocean-mid)' }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <p
+              className="text-xs tracking-[0.35em] uppercase font-medium mb-4"
+              style={{ color: 'var(--gold)' }}
+            >
+              The BlueOne Difference
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link 
-                href="/experiences" 
-                className="btn-primary text-lg px-8 py-4"
-              >
-                Explore Experiences
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-              <Link 
-                href="/blueone" 
-                className="btn-secondary text-lg px-8 py-4"
-              >
-                Discover The Yacht
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </Link>
-            </div>
+            <h2 className="font-display text-4xl md:text-5xl text-white mb-5">
+              Why Choose BlueOne?
+            </h2>
+            <p className="text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              The perfect blend of luxury, silence, and adventure — tailored around you
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2v1a2 2 0 002 2 2.5 2.5 0 012.5 2.5v.5M21 12.5A9.5 9.5 0 1111.5 3a9.5 9.5 0 019.5 9.5z" />
+                ),
+                title: 'Premium Comfort',
+                desc: 'Spacious cabins, luxurious furnishings, and a professional crew dedicated to your every need.',
+              },
+              {
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                ),
+                title: 'Silent Electric',
+                desc: 'Solar-powered hybrid engines deliver the Greek islands in complete silence — a truly immersive experience.',
+              },
+              {
+                icon: (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                ),
+                title: 'All-Inclusive',
+                desc: 'Professional crew, gourmet meals, water toys, and curated adventures — everything included.',
+              },
+            ].map(({ icon, title, desc }, i) => (
+              <div key={i} className="card-dark p-8 text-center">
+                <div
+                  className="w-14 h-14 mx-auto mb-6 rounded-full flex items-center justify-center"
+                  style={{ border: '1px solid var(--gold-dim)', background: 'rgba(201,169,110,0.06)' }}
+                >
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--gold)' }}>
+                    {icon}
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-3">{title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.58)' }}>
+                  {desc}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-gradient-to-b from-white to-blue-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">Why Choose BlueOne?</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience the perfect blend of luxury, comfort, and adventure aboard our premium catamaran
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="card-modern p-8 text-center animate-slide-in-left">
-              <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2v1a2 2 0 002 2 2.5 2.5 0 012.5 2.5v.5M21 12.5A9.5 9.5 0 1111.5 3a9.5 9.5 0 019.5 9.5z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Premium Comfort</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Spacious cabins, modern amenities, and luxurious furnishings ensure your comfort throughout the journey
+      {/* ── Stats strip ── */}
+      <section className="py-14 px-6" style={{ background: 'var(--ocean-surface)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { value: '51 ft', label: 'Catamaran' },
+            { value: '8', label: 'Guests Max' },
+            { value: '100%', label: 'Electric Ready' },
+            { value: 'All-in', label: 'Inclusive' },
+          ].map(({ value, label }) => (
+            <div key={label}>
+              <p className="font-display text-3xl md:text-4xl font-bold mb-1" style={{ color: 'var(--gold)' }}>
+                {value}
+              </p>
+              <p className="text-xs tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {label}
               </p>
             </div>
-            
-            <div className="card-modern p-8 text-center animate-fade-in-up">
-              <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Eco-Friendly</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Solar panels, hybrid systems, and sustainable practices make your adventure environmentally responsible
-              </p>
-            </div>
-            
-            <div className="card-modern p-8 text-center animate-slide-in-right">
-              <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">All-Inclusive</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Professional crew, gourmet meals, water toys, and equipment included for a complete luxury experience
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Guest Reviews Preview */}
+      {/* ── Guest Reviews ── */}
       {topReviews.length > 0 && (
-        <section className="py-16 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-15" style={{ backgroundImage: `url('/images/boats/blueone/External_sailing.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-          <div className="relative max-w-5xl mx-auto px-4">
-            <div className="text-center mb-8">
-              <p className="text-blue-300 uppercase tracking-widest text-xs font-semibold mb-2">Testimonials</p>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">What Our Guests Say</h2>
-              <p className="text-blue-200 text-sm">Real experiences from real sailors</p>
+        <section className="py-28 px-6 relative overflow-hidden" style={{ background: 'var(--ocean-deep)' }}>
+          {/* Subtle background texture */}
+          <div
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: `url('/images/boats/blueone/External_sailing.jpg')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
+          <div className="relative max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <p
+                className="text-xs tracking-[0.35em] uppercase font-medium mb-4"
+                style={{ color: 'var(--gold)' }}
+              >
+                Testimonials
+              </p>
+              <h2 className="font-display text-4xl md:text-5xl text-white mb-3">
+                What Our Guests Say
+              </h2>
+              <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Real experiences from real sailors
+              </p>
+              <GoldDivider />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
               {topReviews.map(r => (
                 <ReviewCard key={r.id} review={r} compact />
               ))}
             </div>
+
             <div className="text-center">
-              <Link href="/reviews" className="inline-flex items-center gap-2 text-blue-200 hover:text-white text-sm font-medium transition-colors border border-white/25 px-5 py-2.5 rounded-xl hover:bg-white/10">
+              <Link
+                href="/reviews"
+                className="inline-flex items-center gap-2 text-sm font-medium transition-all"
+                style={{ color: 'var(--gold)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold-light)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--gold)')}
+              >
                 See All Reviews
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -186,26 +266,38 @@ export default function HomeClient() {
         </section>
       )}
 
-      {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+      {/* ── Call to Action ── */}
+      <section className="relative py-32 px-6 overflow-hidden" style={{ background: 'var(--ocean-mid)' }}>
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: 'radial-gradient(ellipse at center, rgba(201,169,110,0.12) 0%, transparent 65%)',
+          }}
+        />
+        <div className="relative max-w-2xl mx-auto text-center">
+          <p
+            className="text-xs tracking-[0.35em] uppercase font-medium mb-5"
+            style={{ color: 'var(--gold)' }}
+          >
+            Begin Your Journey
+          </p>
+          <h2 className="font-display text-4xl md:text-5xl text-white mb-6 leading-tight">
             Ready for Your BlueOne Adventure?
           </h2>
-          <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
-            Request a quote for your luxury sailing experience and create memories that will last a lifetime
+          <GoldDivider className="mb-8" />
+          <p className="text-lg mb-12 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+            Request a quote and we&apos;ll craft a sailing experience perfectly suited to you and your guests.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/booking" className="btn-primary bg-white text-blue-600 hover:bg-gray-50">
+            <Link href="/booking" className="btn-primary px-10 py-4">
               Booking Request
             </Link>
-            <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+            <Link href="/contact" className="btn-secondary px-10 py-4">
               Contact Us
             </Link>
           </div>
         </div>
       </section>
-    </div>
     </>
   );
 }
