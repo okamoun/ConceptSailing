@@ -25,7 +25,8 @@ jest.mock('next/navigation', () => ({
 // Mock Next.js Image component
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props) => <img {...props} />,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  default: (props: any) => <img {...props} />,
 }))
 
 // Mock localStorage
@@ -39,16 +40,13 @@ const localStorageMock = {
 }
 global.localStorage = localStorageMock
 
-// Mock window.location
-// jsdom v22+ doesn't allow Object.defineProperty on window.location; the
-// delete + assign pattern triggers a harmless "Not implemented: navigation"
-// console.error which we suppress here.
+// jsdom v22+ doesn't allow Object.defineProperty on window.location; suppress
+// the "Not implemented: navigation" noise it emits.
 const originalConsoleError = console.error
-console.error = (...args) => {
+console.error = (...args: unknown[]) => {
   if (typeof args[0] === 'string' && args[0].includes('Not implemented: navigation')) return
   originalConsoleError(...args)
 }
-// jsdom 26+ defines window.location as non-configurable; reassign via global instead.
 try {
   Object.defineProperty(window, 'location', {
     value: { href: '', origin: 'http://localhost' },
@@ -56,9 +54,5 @@ try {
     configurable: true,
   });
 } catch {
-  // Already non-configurable — patch individual properties
   window.location.href = '';
 }
-// Mock window.location (compatible with Jest 30 / JSDOM)
-delete window.location
-window.location = { href: '' }

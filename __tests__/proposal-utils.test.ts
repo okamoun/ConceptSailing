@@ -34,7 +34,7 @@ describe('calcTotals', () => {
     apaPercentage: 30,
     vatPercentage: 13,
     securityDeposit: 2000,
-    discountAmount: 0,
+    discountPercentage: 0,
     extras: [],
   };
 
@@ -60,8 +60,8 @@ describe('calcTotals', () => {
   });
 
   it('subtracts discount from the charter fee', () => {
-    const { charterFee, discount } = calcTotals({ ...base, discountAmount: 1000 });
-    expect(discount).toBe(1000);
+    const { charterFee, discount } = calcTotals({ ...base, discountPercentage: 10 });
+    expect(discount).toBe(1000); // 10% of 10 000
     expect(charterFee).toBe(9000);
   });
 
@@ -80,10 +80,10 @@ describe('calcTotals', () => {
   it('combines discount and extras correctly', () => {
     const { charterFee } = calcTotals({
       ...base,
-      discountAmount: 500,
+      discountPercentage: 5,
       extras: [{ label: 'Transfer', amount: 200 }],
     });
-    expect(charterFee).toBe(9700); // 10 000 - 500 + 200
+    expect(charterFee).toBe(9700); // 10 000 - 500 (5%) + 200
   });
 
   it('handles zero APA percentage', () => {
@@ -105,7 +105,7 @@ describe('calcTotals', () => {
       apaPercentage: 0,
       vatPercentage: 0,
       securityDeposit: 0,
-      discountAmount: 0,
+      discountPercentage: 0,
       extras: [],
     });
     expect(result.base).toBe(0);
@@ -113,6 +113,17 @@ describe('calcTotals', () => {
     expect(result.vat).toBe(0);
     expect(result.charterFee).toBe(0);
     expect(result.grandTotal).toBe(0);
+  });
+
+  it('computes VAT on charter fee only (not on APA)', () => {
+    const { vat, grandTotal } = calcTotals({ ...base, vatPercentage: 13 });
+    expect(vat).toBe(1300); // 13% of 10 000
+    expect(grandTotal).toBe(16300); // 10 000 + 1 300 + 3 000 + 2 000
+  });
+
+  it('excludes VAT when vatPercentage is 0', () => {
+    const { vat } = calcTotals({ ...base, vatPercentage: 0 });
+    expect(vat).toBe(0);
   });
 });
 
@@ -195,6 +206,10 @@ describe('DEFAULT_PRICING', () => {
 
   it('sets APA to 25% by default', () => {
     expect(DEFAULT_PRICING.apaPercentage).toBe(25);
+  });
+
+  it('sets VAT to 13% by default', () => {
+    expect(DEFAULT_PRICING.vatPercentage).toBe(13);
   });
 
   it('sets VAT to 13% by default', () => {

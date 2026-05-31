@@ -20,6 +20,7 @@ import {
   type ProposalStatus,
   type ProposalComment,
 } from '../../../../lib/availability';
+import { getPricingConfig, getSeasonTier, type PricingConfig } from '../../../../lib/financial';
 import { getMarinaById } from '../../../marinas-data';
 
 const fmt = (n: number) =>
@@ -96,7 +97,22 @@ export default function ProposalEditorClient({ id }: Props) {
   const [adminNotes, setAdminNotes] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
 
+  const [financialPricing, setFinancialPricing] = useState<PricingConfig | null>(null);
+
   const totals = useMemo(() => calcTotals(pricing), [pricing]);
+
+  const nights = useMemo(() => {
+    if (!startDate || !endDate) return 0;
+    return Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000);
+  }, [startDate, endDate]);
+
+  const standardRate = useMemo(() => {
+    if (!startDate || nights <= 0 || !financialPricing) return null;
+    const tier = getSeasonTier(startDate);
+    const weekly = { high: financialPricing.highSeasonRate, mid: financialPricing.midSeasonRate, low: financialPricing.lowSeasonRate }[tier];
+    const tierLabel = { high: 'High Season (Jul–Aug)', mid: 'Mid Season (Jun & Sep)', low: 'Low Season' }[tier];
+    return { tier, tierLabel, weekly, total: Math.round(weekly * nights / 7) };
+  }, [startDate, nights, financialPricing]);
 
   const proposalUrl = proposalToken
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/proposal/${proposalToken}`
@@ -149,6 +165,17 @@ export default function ProposalEditorClient({ id }: Props) {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id, populate]);
+
+  useEffect(() => {
+    getPricingConfig().then(setFinancialPricing).catch(console.error);
+  }, []);
+
+  // Auto-fill base price from standard rates when creating a new proposal
+  useEffect(() => {
+    if (!proposalToken && standardRate && pricing.basePrice === 0) {
+      setPricing(p => ({ ...p, basePrice: standardRate.total }));
+    }
+  }, [proposalToken, standardRate, pricing.basePrice]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -397,11 +424,34 @@ export default function ProposalEditorClient({ id }: Props) {
 
         {/* Pricing */}
         <Section title="Pricing">
+          {/* Standard rate reference */}
+          {standardRate && (
+            <div className="bg-blue-900/30 border border-blue-400/20 rounded-xl px-4 py-3 mb-5 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+              <span className="text-blue-300 font-medium">{standardRate.tierLabel}</span>
+              <span className="text-blue-200">{fmt(standardRate.weekly)}<span className="text-blue-400 text-xs">/week</span></span>
+              <span className="text-blue-400">×</span>
+              <span className="text-blue-200">{nights} nights ({(nights / 7).toFixed(2)} wks)</span>
+              <span className="text-blue-400">=</span>
+              <span className="text-white font-semibold">{fmt(standardRate.total)}</span>
+              {pricing.basePrice !== standardRate.total && (
+                <button type="button" onClick={() => setPricing(p => ({ ...p, basePrice: standardRate.total }))}
+                  className="ml-auto text-xs text-blue-400 hover:text-blue-200 underline">
+                  Use standard rate
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
             <Field label="Base Charter Fee (€)">
               <input type="number" value={pricing.basePrice}
                 onChange={e => setPricing(p => ({ ...p, basePrice: Number(e.target.value) }))}
                 min={0} step={100} className={inputCls} />
+            </Field>
+            <Field label="Discount (%)" hint={totals.discount > 0 ? `= ${fmt(totals.discount)} off` : 'Applied to base fee'}>
+              <input type="number" value={pricing.discountPercentage}
+                onChange={e => setPricing(p => ({ ...p, discountPercentage: Number(e.target.value) }))}
+                min={0} max={100} className={inputCls} />
             </Field>
             <Field label="APA Percentage (%)" hint="Typically 25–35%">
               <input type="number" value={pricing.apaPercentage}
@@ -416,11 +466,6 @@ export default function ProposalEditorClient({ id }: Props) {
             <Field label="Security Deposit (€)" hint="Refundable">
               <input type="number" value={pricing.securityDeposit}
                 onChange={e => setPricing(p => ({ ...p, securityDeposit: Number(e.target.value) }))}
-                min={0} step={100} className={inputCls} />
-            </Field>
-            <Field label="Discount (€)">
-              <input type="number" value={pricing.discountAmount}
-                onChange={e => setPricing(p => ({ ...p, discountAmount: Number(e.target.value) }))}
                 min={0} step={100} className={inputCls} />
             </Field>
           </div>
@@ -452,7 +497,7 @@ export default function ProposalEditorClient({ id }: Props) {
             </div>
             {totals.discount > 0 && (
               <div className="flex justify-between text-sm text-emerald-400">
-                <span>Discount</span><span>− {fmt(totals.discount)}</span>
+                <span>Discount ({pricing.discountPercentage}%)</span><span>− {fmt(totals.discount)}</span>
               </div>
             )}
             {totals.extrasSum > 0 && (
@@ -463,6 +508,11 @@ export default function ProposalEditorClient({ id }: Props) {
             <div className="flex justify-between text-sm font-semibold text-white border-t border-white/10 pt-2">
               <span>Charter Fee</span><span>{fmt(totals.charterFee)}</span>
             </div>
+            {totals.vat > 0 && (
+              <div className="flex justify-between text-sm text-blue-200">
+                <span>VAT ({pricing.vatPercentage ?? 13}%)</span><span>{fmt(totals.vat)}</span>
+              </div>
+            )}
             {totals.apa > 0 && (
               <div className="flex justify-between text-sm text-blue-200">
                 <span>APA ({pricing.apaPercentage}%)</span><span>{fmt(totals.apa)}</span>

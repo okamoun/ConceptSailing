@@ -43,7 +43,7 @@ const BASE_PROPOSAL = {
   token: 'abc123def456',
   status: 'sent' as const,
   pricing: {
-    basePrice: 10000, currency: 'EUR', apaPercentage: 30, vatPercentage: 13,
+    basePrice: 10000, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
     securityDeposit: 2000, discountAmount: 0, extras: [],
   },
   paymentTerms: [

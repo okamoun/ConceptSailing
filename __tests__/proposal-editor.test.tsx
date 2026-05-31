@@ -19,6 +19,14 @@ jest.mock('../lib/availability', () => ({
   },
 }));
 
+jest.mock('../lib/financial', () => ({
+  getPricingConfig: jest.fn().mockResolvedValue({
+    highSeasonRate: 24000, midSeasonRate: 21000, lowSeasonRate: 18000,
+    apaPercent: 25, vatPercent: 13, relocationFee: 1000,
+  }),
+  getSeasonTier: jest.fn().mockReturnValue('mid'),
+}));
+
 jest.mock('../app/marinas-data', () => ({
   getMarinaById: jest.fn().mockReturnValue(null),
 }));
@@ -46,7 +54,7 @@ const DRAFT_PROPOSAL = {
   token: 'tok-draft-abc123',
   status: 'draft' as const,
   pricing: {
-    basePrice: 8000, currency: 'EUR', apaPercentage: 30, vatPercentage: 13,
+    basePrice: 8000, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
     securityDeposit: 2000, discountAmount: 0, extras: [],
   },
   paymentTerms: [
