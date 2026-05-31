@@ -146,9 +146,11 @@ export default function ProposalClient({ token }: Props) {
     <>
       <style>{`
         @media print {
+          @page { size: A4; margin: 18mm 15mm; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .no-print { display: none !important; }
           body { background: white !important; }
-          nav, footer { display: none !important; }
+          .bg-gray-50 { background: white !important; }
         }
       `}</style>
 
@@ -383,12 +385,15 @@ export default function ProposalClient({ token }: Props) {
             </div>
           )}
 
-          {/* Print button */}
-          <div className="flex justify-center mb-8 no-print">
+          {/* Print / PDF button */}
+          <div className="flex flex-col items-center gap-2 mb-8 no-print">
             <button onClick={() => window.print()}
-              className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm">
+              className="flex items-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm">
               ⬇ Download PDF
             </button>
+            <p className="text-xs text-gray-400">
+              In the print dialog, choose <strong>Save as PDF</strong> as the destination.
+            </p>
           </div>
 
           {/* Comments & Approval */}
