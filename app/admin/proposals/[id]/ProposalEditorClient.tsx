@@ -22,6 +22,7 @@ import {
 } from '../../../../lib/availability';
 import { getPricingConfig, getSeasonTier, type PricingConfig } from '../../../../lib/financial';
 import { getMarinaById } from '../../../marinas-data';
+import { CONTACT } from '../../../config/contact';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
@@ -255,6 +256,36 @@ export default function ProposalEditorClient({ id }: Props) {
       await markCharterProposalSent(id);
       setStatus('sent');
       setCharter(prev => prev ? { ...prev, status: 'proposal_sent' } : prev);
+
+      // Open local mail client with pre-filled proposal email
+      const url = proposalUrl ?? '';
+      const firstName = name.trim().split(' ')[0];
+      const ref = proposalRef(id);
+      const subject = `Your Charter Proposal — ${ref}`;
+      const body = [
+        `Dear ${firstName},`,
+        '',
+        `Thank you for your interest in chartering with BlueOne. We are delighted to present your personalised charter proposal.`,
+        '',
+        `Please find your proposal at the link below:`,
+        url,
+        '',
+        `The proposal covers your charter aboard ${boat.trim()} from ${startDate} to ${endDate}. It includes full pricing, payment schedule, and terms. You can approve or ask questions directly from the proposal page.`,
+        '',
+        `This proposal is valid until ${expiresAt || 'the expiry date shown in the proposal'}.`,
+        '',
+        `Should you have any questions, please do not hesitate to contact us at ${CONTACT.email} or ${CONTACT.phone.formatted}.`,
+        '',
+        `We look forward to welcoming you aboard.`,
+        '',
+        `Warm regards,`,
+        `The BlueOne Team`,
+        CONTACT.email,
+        CONTACT.phone.formatted,
+      ].join('\n');
+
+      const mailto = `mailto:${encodeURIComponent(email.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
     } catch (err) {
       setError('Failed to send. Please try again.');
       console.error(err);
