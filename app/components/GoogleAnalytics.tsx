@@ -8,7 +8,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 export default function GoogleAnalytics() {
   const pathname = usePathname();
   const { authed } = useAdminAuth();
-  if (!GA_ID || pathname.startsWith('/admin') || authed) return null;
+  if (!GA_ID || pathname?.startsWith('/admin') || authed) return null;
 
   return (
     <>
