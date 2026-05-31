@@ -122,7 +122,7 @@ export const DEFAULT_PAYMENT_TERMS: PaymentTerm[] = [
 export const DEFAULT_PRICING: ProposalPricing = {
   basePrice: 0,
   currency: 'EUR',
-  apaPercentage: 30,
+  apaPercentage: 25,
   vatPercentage: 13,
   securityDeposit: 2000,
   discountAmount: 0,

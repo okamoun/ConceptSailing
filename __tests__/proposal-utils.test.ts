@@ -193,8 +193,8 @@ describe('DEFAULT_PRICING', () => {
     expect(DEFAULT_PRICING.currency).toBe('EUR');
   });
 
-  it('sets APA to 30% by default', () => {
-    expect(DEFAULT_PRICING.apaPercentage).toBe(30);
+  it('sets APA to 25% by default', () => {
+    expect(DEFAULT_PRICING.apaPercentage).toBe(25);
   });
 
   it('sets VAT to 13% by default', () => {

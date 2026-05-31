@@ -14,7 +14,7 @@ jest.mock('../lib/availability', () => ({
     { label: 'Balance — 50%', percentage: 50, description: 'MYBA: 50% balance 28 days before.' },
   ],
   DEFAULT_PRICING: {
-    basePrice: 0, currency: 'EUR', apaPercentage: 30, vatPercentage: 13,
+    basePrice: 0, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
     securityDeposit: 2000, discountAmount: 0, extras: [],
   },
 }));
