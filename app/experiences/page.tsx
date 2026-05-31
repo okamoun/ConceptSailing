@@ -77,6 +77,12 @@ const adventureCategories = [
       adventures.find(a => a.id === "17"),
     ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
   },
+  {
+    category: "Lifestyle & Connoisseur",
+    themes: [
+      adventures.find(a => a.id === "18"),
+    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+  },
 ];
 
 export default function ExperiencesPage() {
