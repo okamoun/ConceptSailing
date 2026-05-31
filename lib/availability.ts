@@ -70,8 +70,9 @@ export interface ProposalPricing {
   basePrice: number;
   currency: string;
   apaPercentage: number;
+  vatPercentage: number;
   securityDeposit: number;
-  discountAmount: number;
+  discountPercentage: number;
   extras: PricingExtra[];
 }
 
@@ -122,8 +123,9 @@ export const DEFAULT_PRICING: ProposalPricing = {
   basePrice: 0,
   currency: 'EUR',
   apaPercentage: 30,
+  vatPercentage: 13,
   securityDeposit: 2000,
-  discountAmount: 0,
+  discountPercentage: 0,
   extras: [],
 };
 
@@ -131,10 +133,11 @@ export function calcTotals(pricing: ProposalPricing) {
   const base = pricing.basePrice || 0;
   const apa = Math.round(base * (pricing.apaPercentage || 0) / 100);
   const extrasSum = (pricing.extras || []).reduce((s, e) => s + (e.amount || 0), 0);
-  const discount = pricing.discountAmount || 0;
+  const discount = Math.round(base * (pricing.discountPercentage || 0) / 100);
   const charterFee = base - discount + extrasSum;
-  const grandTotal = charterFee + apa + (pricing.securityDeposit || 0);
-  return { base, apa, extrasSum, discount, charterFee, grandTotal };
+  const vat = Math.round(charterFee * (pricing.vatPercentage ?? 13) / 100);
+  const grandTotal = charterFee + vat + apa + (pricing.securityDeposit || 0);
+  return { base, apa, extrasSum, discount, charterFee, vat, grandTotal };
 }
 
 export function proposalRef(charterId: string): string {
@@ -195,8 +198,15 @@ const COLLECTION = 'availability';
 export async function createCharter(
   data: Omit<Charter, 'id' | 'createdAt'>
 ): Promise<string> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    // addDoc does not support undefined values or FieldValue.delete() sentinels
+    if (v !== undefined && !(v !== null && typeof v === 'object' && '_methodName' in (v as object))) {
+      clean[k] = v;
+    }
+  }
   const ref = await addDoc(collection(db, COLLECTION), {
-    ...data,
+    ...clean,
     createdAt: serverTimestamp(),
   });
   return ref.id;
@@ -219,7 +229,11 @@ export async function updateCharter(
   id: string,
   data: Partial<Omit<Charter, 'id' | 'createdAt'>>
 ): Promise<void> {
-  await updateDoc(doc(db, COLLECTION, id), data as Record<string, unknown>);
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  await updateDoc(doc(db, COLLECTION, id), clean);
 }
 
 export async function deleteCharter(id: string): Promise<void> {
@@ -257,7 +271,7 @@ export async function updateCharterProposal(
 ): Promise<void> {
   const updates: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) {
-    updates[`proposal.${k}`] = v;
+    if (v !== undefined) updates[`proposal.${k}`] = v;
   }
   await updateDoc(doc(db, COLLECTION, charterId), updates);
 }

@@ -267,7 +267,7 @@ export default function ProposalClient({ token }: Props) {
               </div>
               {totals.discount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-emerald-600">Discount</span>
+                  <span className="text-emerald-600">Discount ({proposal.pricing.discountPercentage}%)</span>
                   <span className="font-medium text-emerald-600">− {fmt(totals.discount, currency)}</span>
                 </div>
               )}
@@ -281,6 +281,12 @@ export default function ProposalClient({ token }: Props) {
                 <span className="text-gray-800">Charter Fee Total</span>
                 <span className="text-gray-900">{fmt(totals.charterFee, currency)}</span>
               </div>
+              {totals.vat > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">VAT ({proposal.pricing.vatPercentage ?? 13}%) — on charter fee</span>
+                  <span className="font-medium text-gray-900">{fmt(totals.vat, currency)}</span>
+                </div>
+              )}
               {totals.apa > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">APA — Additional Provisioning Allowance ({proposal.pricing.apaPercentage}%)</span>
