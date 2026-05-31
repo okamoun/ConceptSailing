@@ -44,7 +44,7 @@ const BASE_PROPOSAL = {
   status: 'sent' as const,
   pricing: {
     basePrice: 10000, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
-    securityDeposit: 2000, discountAmount: 0, extras: [],
+    securityDeposit: 2000, discountPercentage: 0, extras: [],
   },
   paymentTerms: [
     { label: 'Deposit — 50%', percentage: 50, description: '50% due on signing of MYBA.' },
@@ -58,7 +58,7 @@ const BASE_PROPOSAL = {
 
 const BASE_CHARTER = {
   id: 'charter-123',
-  status: 'booked' as const,
+  status: 'confirmed' as const,
   startDate: '2026-07-01',
   endDate: '2026-07-08',
   name: 'Jean Dupont',
