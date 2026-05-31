@@ -37,7 +37,11 @@ export async function getAllAdminUsers(): Promise<AdminUser[]> {
 }
 
 export async function saveAdminUser(user: Omit<AdminUser, 'updatedAt'>): Promise<void> {
-  await setDoc(doc(db, COL, user.username), { ...user, updatedAt: serverTimestamp() }, { merge: true });
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(user as Record<string, unknown>)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  await setDoc(doc(db, COL, user.username), { ...clean, updatedAt: serverTimestamp() }, { merge: true });
 }
 
 export async function deleteAdminUser(username: string): Promise<void> {

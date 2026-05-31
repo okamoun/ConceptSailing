@@ -195,8 +195,15 @@ const COLLECTION = 'availability';
 export async function createCharter(
   data: Omit<Charter, 'id' | 'createdAt'>
 ): Promise<string> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    // addDoc does not support undefined values or FieldValue.delete() sentinels
+    if (v !== undefined && !(v !== null && typeof v === 'object' && '_methodName' in (v as object))) {
+      clean[k] = v;
+    }
+  }
   const ref = await addDoc(collection(db, COLLECTION), {
-    ...data,
+    ...clean,
     createdAt: serverTimestamp(),
   });
   return ref.id;

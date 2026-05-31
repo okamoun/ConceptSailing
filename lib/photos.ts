@@ -29,7 +29,11 @@ export async function getAllPhotoMeta(): Promise<PhotoMeta[]> {
 }
 
 export async function savePhotoMeta(meta: Omit<PhotoMeta, 'updatedAt'>): Promise<void> {
-  await setDoc(doc(db, COL, meta.id), { ...meta, updatedAt: serverTimestamp() }, { merge: true });
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(meta as Record<string, unknown>)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  await setDoc(doc(db, COL, meta.id), { ...clean, updatedAt: serverTimestamp() }, { merge: true });
 }
 
 export async function deletePhotoMeta(id: string): Promise<void> {
