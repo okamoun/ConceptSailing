@@ -48,12 +48,13 @@ function toDateKey(year: number, month: number, day: number) {
 
 export default function BookingCalendar({ charters }: Props) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [monthOffset, setMonthOffset] = useState(0);
 
   const today = new Date();
   const todayKey = toDateKey(today.getFullYear(), today.getMonth(), today.getDate());
 
   const months = Array.from({ length: 4 }, (_, i) => {
-    const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    const d = new Date(today.getFullYear(), today.getMonth() + monthOffset + i, 1);
     return { year: d.getFullYear(), month: d.getMonth() };
   });
 
@@ -63,6 +64,34 @@ export default function BookingCalendar({ charters }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Month navigation */}
+      <div className="grid grid-cols-3 items-center">
+        <button
+          onClick={() => setMonthOffset(o => o - 1)}
+          className="flex items-center gap-1 text-blue-200 hover:text-white text-sm px-3 py-1 rounded-lg hover:bg-white/10 transition-colors justify-self-start"
+        >
+          ← Prev
+        </button>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-blue-200 text-xs text-center">
+            {MONTH_NAMES[months[0].month]} {months[0].year} – {MONTH_NAMES[months[3].month]} {months[3].year}
+          </span>
+          {monthOffset !== 0 && (
+            <button
+              onClick={() => setMonthOffset(0)}
+              className="text-blue-400 hover:text-white text-[10px] px-2 py-0.5 rounded border border-blue-400/40 hover:bg-white/10 transition-colors"
+            >
+              Today
+            </button>
+          )}
+        </div>
+        <button
+          onClick={() => setMonthOffset(o => o + 1)}
+          className="flex items-center gap-1 text-blue-200 hover:text-white text-sm px-3 py-1 rounded-lg hover:bg-white/10 transition-colors justify-self-end"
+        >
+          Next →
+        </button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {months.map(({ year, month }) => {
           const daysInMonth = new Date(year, month + 1, 0).getDate();
