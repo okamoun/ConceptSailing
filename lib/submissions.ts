@@ -24,8 +24,12 @@ const CONTACTS_COL = 'contacts';
 export async function saveContactSubmission(
   data: Omit<ContactSubmission, 'id' | 'createdAt'>
 ): Promise<void> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (v !== undefined) clean[k] = v;
+  }
   await addDoc(collection(db, CONTACTS_COL), {
-    ...data,
+    ...clean,
     createdAt: serverTimestamp(),
   });
 }

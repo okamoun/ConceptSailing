@@ -198,8 +198,15 @@ const COLLECTION = 'availability';
 export async function createCharter(
   data: Omit<Charter, 'id' | 'createdAt'>
 ): Promise<string> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    // addDoc does not support undefined values or FieldValue.delete() sentinels
+    if (v !== undefined && !(v !== null && typeof v === 'object' && '_methodName' in (v as object))) {
+      clean[k] = v;
+    }
+  }
   const ref = await addDoc(collection(db, COLLECTION), {
-    ...data,
+    ...clean,
     createdAt: serverTimestamp(),
   });
   return ref.id;
@@ -222,7 +229,11 @@ export async function updateCharter(
   id: string,
   data: Partial<Omit<Charter, 'id' | 'createdAt'>>
 ): Promise<void> {
-  await updateDoc(doc(db, COLLECTION, id), data as Record<string, unknown>);
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  await updateDoc(doc(db, COLLECTION, id), clean);
 }
 
 export async function deleteCharter(id: string): Promise<void> {
@@ -260,7 +271,7 @@ export async function updateCharterProposal(
 ): Promise<void> {
   const updates: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) {
-    updates[`proposal.${k}`] = v;
+    if (v !== undefined) updates[`proposal.${k}`] = v;
   }
   await updateDoc(doc(db, COLLECTION, charterId), updates);
 }
