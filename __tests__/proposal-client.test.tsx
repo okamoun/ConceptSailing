@@ -58,7 +58,7 @@ const BASE_PROPOSAL = {
 
 const BASE_CHARTER = {
   id: 'charter-123',
-  status: 'booked' as const,
+  status: 'confirmed' as const,
   startDate: '2026-07-01',
   endDate: '2026-07-08',
   name: 'Jean Dupont',

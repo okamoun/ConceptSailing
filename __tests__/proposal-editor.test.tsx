@@ -69,7 +69,7 @@ const DRAFT_PROPOSAL = {
 
 const CHARTER_NO_PROPOSAL = {
   id: 'charter-new',
-  status: 'booked' as const,
+  status: 'confirmed' as const,
   startDate: '2026-07-01',
   endDate: '2026-07-08',
   name: 'Marie Martin',
@@ -82,7 +82,7 @@ const CHARTER_NO_PROPOSAL = {
 
 const CHARTER_WITH_DRAFT = {
   id: 'charter-draft',
-  status: 'booked' as const,
+  status: 'confirmed' as const,
   startDate: '2026-07-01',
   endDate: '2026-07-08',
   name: 'Pierre Blanc',
