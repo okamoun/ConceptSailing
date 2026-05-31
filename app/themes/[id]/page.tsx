@@ -113,6 +113,22 @@ export default async function ThemePage({ params }: ThemePageProps) {
         <section className="bg-white/15 backdrop-blur-sm rounded-xl border border-white/25 p-6">
           <h2 className="text-xl font-bold text-white mb-3">About This Experience</h2>
           <p className="text-blue-50 leading-relaxed text-sm">{adventure.experience}</p>
+          {adventure.partnerUrl && adventure.partnerName && (
+            <div className="mt-4 pt-4 border-t border-white/20 flex items-center gap-3">
+              <span className="text-blue-200 text-xs">In collaboration with</span>
+              <a
+                href={adventure.partnerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
+              >
+                {adventure.partnerName}
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+          )}
         </section>
 
         {/* Map + Itinerary side by side */}
