@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   getAllCharters,
   deleteCharter,
@@ -23,6 +23,22 @@ import StarRating from '../components/StarRating';
 import MarinaMap from './MarinaMap';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
 
+type Tab = 'charters' | 'contacts' | 'reviews';
+type SortDir = 'asc' | 'desc';
+type CharterSortCol = 'status' | 'name' | 'startDate' | 'passengers' | 'createdAt';
+
+const STATUS_BADGE: Record<CharterStatus, string> = {
+  web_request:     'bg-sky-500/30 text-sky-200',
+  broker_request:  'bg-amber-500/30 text-amber-200',
+  serious_request: 'bg-orange-500/30 text-orange-200',
+  proposal_sent:   'bg-violet-500/30 text-violet-200',
+  confirmed:       'bg-emerald-500/30 text-emerald-200',
+  signed:          'bg-emerald-800/40 text-emerald-100',
+  canceled:        'bg-gray-500/30 text-gray-300',
+  owner_use:       'bg-purple-500/30 text-purple-200',
+  maintenance:     'bg-red-500/30 text-red-200',
+};
+
 const PROPOSAL_BADGE: Record<ProposalStatus, string> = {
   draft:     'bg-gray-500/30 text-gray-300',
   sent:      'bg-sky-500/30 text-sky-200',
@@ -32,19 +48,6 @@ const PROPOSAL_BADGE: Record<ProposalStatus, string> = {
   rejected:  'bg-red-500/30 text-red-200',
 };
 
-type Tab = 'charters' | 'contacts' | 'reviews';
-
-const STATUS_BADGE: Record<CharterStatus, string> = {
-  web_request:     'bg-sky-500/30 text-sky-200',
-  broker_request:  'bg-amber-500/30 text-amber-200',
-  serious_request: 'bg-orange-500/30 text-orange-200',
-  confirmed:       'bg-emerald-500/30 text-emerald-200',
-  signed:          'bg-emerald-800/30 text-emerald-100',
-  canceled:        'bg-gray-500/30 text-gray-300',
-  owner_use:       'bg-purple-500/30 text-purple-200',
-  maintenance:     'bg-red-500/30 text-red-200',
-};
-
 export default function AdminDashboardClient() {
   const [tab, setTab] = useState<Tab>('charters');
 
@@ -52,55 +55,122 @@ export default function AdminDashboardClient() {
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Selected row IDs
+  const [selectedCharterId, setSelectedCharterId] = useState<string | null>(null);
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
+  const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
+
+  // Charter filter / sort
+  const [charterSearch, setCharterSearch] = useState('');
+  const [charterStatusFilter, setCharterStatusFilter] = useState<CharterStatus | 'all'>('all');
+  const [charterSort, setCharterSort] = useState<{ col: CharterSortCol; dir: SortDir }>({ col: 'startDate', dir: 'asc' });
+
+  // Contact search
+  const [contactSearch, setContactSearch] = useState('');
+
+  // Review filter
   const [reviewFilter, setReviewFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
 
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  // Charter detail edit state
   const [editDelivery, setEditDelivery] = useState(DEFAULT_MARINA_ID);
   const [editRedelivery, setEditRedelivery] = useState(DEFAULT_MARINA_ID);
   const [savingLocations, setSavingLocations] = useState(false);
-  const [savingStatus, setSavingStatus] = useState<string | null>(null);
+  const [savingStatus, setSavingStatus] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     Promise.all([getAllCharters(), getAllContacts(), getAllReviews()])
-      .then(([c, contacts, r]) => { setCharters(c); setContacts(contacts); setReviews(r); })
+      .then(([c, ct, r]) => { setCharters(c); setContacts(ct); setReviews(r); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  // Derived selected items (always in sync with latest data)
+  const currentCharter = charters.find(c => c.id === selectedCharterId) ?? null;
+  const currentContact = contacts.find(c => c.id === selectedContactId) ?? null;
+  const currentReview  = reviews.find(r => r.id === selectedReviewId)   ?? null;
+
+  // Filtered + sorted charters
+  const filteredCharters = useMemo(() => {
+    let rows = [...charters];
+    if (charterStatusFilter !== 'all') rows = rows.filter(c => c.status === charterStatusFilter);
+    if (charterSearch) {
+      const q = charterSearch.toLowerCase();
+      rows = rows.filter(c =>
+        c.name?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q) ||
+        c.phone?.toLowerCase().includes(q)
+      );
+    }
+    rows.sort((a, b) => {
+      let va: string | number = 0, vb: string | number = 0;
+      switch (charterSort.col) {
+        case 'status':     va = CHARTER_STATUS_PRIORITY[a.status]; vb = CHARTER_STATUS_PRIORITY[b.status]; break;
+        case 'name':       va = (a.name ?? '').toLowerCase();       vb = (b.name ?? '').toLowerCase();      break;
+        case 'passengers': va = a.passengers ?? 0;                  vb = b.passengers ?? 0;                 break;
+        case 'createdAt':  va = a.createdAt?.toMillis() ?? 0;       vb = b.createdAt?.toMillis() ?? 0;      break;
+        default:           va = a.startDate;                        vb = b.startDate;
+      }
+      if (va < vb) return charterSort.dir === 'asc' ? -1 : 1;
+      if (va > vb) return charterSort.dir === 'asc' ?  1 : -1;
+      return 0;
+    });
+    return rows;
+  }, [charters, charterStatusFilter, charterSearch, charterSort]);
+
+  const filteredContacts = useMemo(() => {
+    if (!contactSearch) return contacts;
+    const q = contactSearch.toLowerCase();
+    return contacts.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q) ||
+      c.message.toLowerCase().includes(q)
+    );
+  }, [contacts, contactSearch]);
+
+  const filteredReviews = useMemo(() =>
+    reviews.filter(r => reviewFilter === 'all' || r.status === reviewFilter),
+    [reviews, reviewFilter]
+  );
+
+  function toggleCharterSort(col: CharterSortCol) {
+    setCharterSort(s => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' });
+  }
+
+  function selectCharter(c: Charter) {
+    if (selectedCharterId === c.id) { setSelectedCharterId(null); return; }
+    setSelectedCharterId(c.id);
+    setEditDelivery(c.deliveryPoint ?? DEFAULT_MARINA_ID);
+    setEditRedelivery(c.redeliveryPoint ?? c.deliveryPoint ?? DEFAULT_MARINA_ID);
+  }
 
   async function handleDeleteCharter(id: string) {
     if (!confirm('Delete this charter entry?')) return;
     await deleteCharter(id);
     setCharters(prev => prev.filter(c => c.id !== id));
-  }
-
-  function handleExpand(c: Charter) {
-    if (expandedId === c.id) { setExpandedId(null); return; }
-    setExpandedId(c.id);
-    setEditDelivery(c.deliveryPoint ?? DEFAULT_MARINA_ID);
-    setEditRedelivery(c.redeliveryPoint ?? c.deliveryPoint ?? DEFAULT_MARINA_ID);
+    if (selectedCharterId === id) setSelectedCharterId(null);
   }
 
   async function handleSaveLocations(charterId: string) {
     setSavingLocations(true);
     try {
       await updateCharter(charterId, { deliveryPoint: editDelivery, redeliveryPoint: editRedelivery });
-      setCharters(prev =>
-        prev.map(c => c.id === charterId ? { ...c, deliveryPoint: editDelivery, redeliveryPoint: editRedelivery } : c)
-      );
-      setExpandedId(null);
+      setCharters(prev => prev.map(c =>
+        c.id === charterId ? { ...c, deliveryPoint: editDelivery, redeliveryPoint: editRedelivery } : c
+      ));
     } finally {
       setSavingLocations(false);
     }
   }
 
   async function handleStatusChange(charterId: string, newStatus: CharterStatus) {
-    setSavingStatus(charterId);
+    setSavingStatus(true);
     try {
       await updateCharter(charterId, { status: newStatus });
       setCharters(prev => prev.map(c => c.id === charterId ? { ...c, status: newStatus } : c));
     } finally {
-      setSavingStatus(null);
+      setSavingStatus(false);
     }
   }
 
@@ -108,12 +178,14 @@ export default function AdminDashboardClient() {
     if (!confirm('Delete this contact submission?')) return;
     await deleteContact(id);
     setContacts(prev => prev.filter(c => c.id !== id));
+    if (selectedContactId === id) setSelectedContactId(null);
   }
 
   async function handleDeleteReview(id: string) {
     if (!confirm('Delete this review permanently?')) return;
     await adminDeleteReview(id);
     setReviews(prev => prev.filter(r => r.id !== id));
+    if (selectedReviewId === id) setSelectedReviewId(null);
   }
 
   async function handleOrderChange(id: string, delta: number) {
@@ -127,31 +199,23 @@ export default function AdminDashboardClient() {
     });
   }
 
-  // Sort charters by priority (highest first) then by date
-  const sortedCharters = [...charters].sort((a, b) => {
-    const pd = CHARTER_STATUS_PRIORITY[b.status] - CHARTER_STATUS_PRIORITY[a.status];
-    if (pd !== 0) return pd;
-    return a.startDate.localeCompare(b.startDate);
-  });
-
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: 'charters', label: 'Charters', count: charters.length },
     { id: 'contacts', label: 'Contacts', count: contacts.length },
-    { id: 'reviews', label: 'Reviews', count: reviews.length },
+    { id: 'reviews',  label: 'Reviews',  count: reviews.length  },
   ];
 
-  const visibleReviews = reviews.filter(r => reviewFilter === 'all' || r.status === reviewFilter);
-
   return (
-    <main className="px-4 py-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <main className="px-4 py-6 min-h-screen">
+      <div className="max-w-screen-xl mx-auto space-y-4">
 
         <div>
           <h1 className="text-white font-bold text-2xl">Dashboard</h1>
           <p className="text-blue-200 text-xs mt-0.5">All charters, contacts and reviews</p>
         </div>
 
-        <div className="flex gap-2 border-b border-white/20 pb-0">
+        {/* Tabs */}
+        <div className="flex gap-2 border-b border-white/20">
           {tabs.map(t => (
             <button
               key={t.id}
@@ -168,234 +232,409 @@ export default function AdminDashboardClient() {
           ))}
         </div>
 
-        {loading && <p className="text-blue-200 text-sm text-center animate-pulse">Loading…</p>}
+        {loading && <p className="text-blue-200 text-sm text-center animate-pulse py-12">Loading…</p>}
 
-        {/* CHARTERS TAB */}
+        {/* ── CHARTERS TAB ── */}
         {!loading && tab === 'charters' && (
-          <div className="space-y-3">
-            {sortedCharters.length === 0 && (
-              <p className="text-blue-200 text-sm text-center py-8">No charter entries yet.</p>
-            )}
-            {sortedCharters.map(c => {
-              const deliveryMarina = getMarinaById(c.deliveryPoint ?? '');
-              const redeliveryMarina = getMarinaById(c.redeliveryPoint ?? c.deliveryPoint ?? '');
-              const deliveryLabel = deliveryMarina?.name ?? c.deliveryPoint ?? c.embarkationPoint;
-              const redeliveryLabel = redeliveryMarina?.name ?? c.redeliveryPoint ?? c.deliveryPoint ?? c.embarkationPoint;
-              const isExpanded = expandedId === c.id;
-              const charterProposal = c.proposal;
+          <div className="flex gap-4 items-start">
 
-              return (
-                <div key={c.id} className="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl p-5">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_BADGE[c.status]}`}>
-                          {CHARTER_STATUS_LABEL[c.status]}
-                        </span>
-                        {c.name && <span className="text-white font-semibold text-sm">{c.name}</span>}
-                        {c.email && <span className="text-blue-300 text-xs">{c.email}</span>}
-                        {c.phone && <span className="text-blue-300 text-xs">{c.phone}</span>}
-                      </div>
+            {/* Table side */}
+            <div className="flex-1 min-w-0 space-y-3">
+              {/* Filter bar */}
+              <div className="flex gap-2 flex-wrap">
+                <input
+                  type="text"
+                  placeholder="Search name, email, phone…"
+                  value={charterSearch}
+                  onChange={e => setCharterSearch(e.target.value)}
+                  className="bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-1.5 flex-1 min-w-40 placeholder:text-blue-400/70 focus:outline-none focus:border-blue-400"
+                />
+                <select
+                  value={charterStatusFilter}
+                  onChange={e => setCharterStatusFilter(e.target.value as CharterStatus | 'all')}
+                  className="bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-400"
+                >
+                  <option value="all" className="bg-blue-900">All statuses</option>
+                  {(Object.keys(CHARTER_STATUS_LABEL) as CharterStatus[]).map(s => (
+                    <option key={s} value={s} className="bg-blue-900">{CHARTER_STATUS_LABEL[s]}</option>
+                  ))}
+                </select>
+              </div>
 
-                      {/* Inline status change */}
-                      <div className="mb-2">
-                        <select
-                          value={c.status}
-                          disabled={savingStatus === c.id}
-                          onChange={e => handleStatusChange(c.id, e.target.value as CharterStatus)}
-                          className="bg-white/10 border border-white/20 text-white text-xs rounded-lg px-2 py-1 focus:outline-none focus:border-blue-400 disabled:opacity-50"
+              {/* Table */}
+              <div className="rounded-xl border border-white/20 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-white/10 text-blue-300 text-xs uppercase tracking-wide">
+                        <SortTh col="status"     current={charterSort} onSort={toggleCharterSort}>Status</SortTh>
+                        <SortTh col="name"       current={charterSort} onSort={toggleCharterSort}>Client</SortTh>
+                        <SortTh col="startDate"  current={charterSort} onSort={toggleCharterSort}>Dates</SortTh>
+                        <SortTh col="passengers" current={charterSort} onSort={toggleCharterSort}>Pax</SortTh>
+                        <th className="px-3 py-2.5 text-left">Proposal</th>
+                        <SortTh col="createdAt"  current={charterSort} onSort={toggleCharterSort}>Received</SortTh>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCharters.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="text-center text-blue-300 text-sm py-10">No charters match the current filter.</td>
+                        </tr>
+                      )}
+                      {filteredCharters.map(c => (
+                        <tr
+                          key={c.id}
+                          onClick={() => selectCharter(c)}
+                          className={`border-t border-white/10 cursor-pointer transition-colors ${
+                            selectedCharterId === c.id ? 'bg-blue-500/20' : 'hover:bg-white/5'
+                          }`}
                         >
-                          {(Object.keys(CHARTER_STATUS_LABEL) as CharterStatus[]).map(s => (
-                            <option key={s} value={s} className="bg-blue-900">{CHARTER_STATUS_LABEL[s]}</option>
-                          ))}
-                        </select>
-                      </div>
+                          <td className="px-3 py-2.5">
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${STATUS_BADGE[c.status]}`}>
+                              {CHARTER_STATUS_LABEL[c.status]}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 max-w-36">
+                            <div className="text-white font-medium truncate">{c.name ?? <span className="text-blue-500 italic text-xs">—</span>}</div>
+                            {c.email && <div className="text-blue-400 text-xs truncate">{c.email}</div>}
+                          </td>
+                          <td className="px-3 py-2.5 text-blue-200 text-xs whitespace-nowrap">
+                            {c.startDate}
+                            <span className="text-blue-400 block">→ {c.endDate}</span>
+                          </td>
+                          <td className="px-3 py-2.5 text-blue-200 text-center">{c.passengers ?? '—'}</td>
+                          <td className="px-3 py-2.5">
+                            {c.proposal ? (
+                              <a
+                                href={`/admin/proposals/${c.id}`}
+                                onClick={e => e.stopPropagation()}
+                                className={`text-xs font-medium px-2 py-0.5 rounded-full hover:brightness-125 transition-colors ${PROPOSAL_BADGE[c.proposal.status]}`}
+                              >
+                                {c.proposal.status}
+                              </a>
+                            ) : (
+                              <a
+                                href={`/admin/proposals/${c.id}`}
+                                onClick={e => e.stopPropagation()}
+                                className="text-xs text-blue-400 hover:text-blue-200 transition-colors"
+                              >
+                                + create
+                              </a>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 text-blue-400 text-xs whitespace-nowrap">
+                            {c.createdAt?.toDate?.()?.toLocaleDateString() ?? '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <p className="text-blue-400 text-xs">{filteredCharters.length} of {charters.length} charters</p>
+            </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1">
-                        <Detail label="Start" value={c.startDate} />
-                        <Detail label="End" value={c.endDate} />
-                        {c.passengers != null && <Detail label="Passengers" value={String(c.passengers)} />}
-                        {deliveryLabel && <Detail label="Delivery" value={deliveryLabel} />}
-                        {redeliveryLabel && redeliveryLabel !== deliveryLabel && <Detail label="Redelivery" value={redeliveryLabel} />}
-                        {c.boat && <Detail label="Boat" value={c.boat} />}
-                        {c.selectedTheme && <Detail label="Theme" value={c.selectedTheme} />}
-                      </div>
-                      {c.holidayDescription && (
-                        <p className="text-blue-100 text-xs leading-relaxed mt-2 italic">&ldquo;{c.holidayDescription}&rdquo;</p>
-                      )}
-                      {c.note && (
-                        <p className="text-blue-300 text-xs mt-1 italic">Note: {c.note}</p>
-                      )}
-
-                      {/* Proposal */}
-                      <div className="flex flex-wrap items-center gap-2 mt-3">
-                        {charterProposal ? (
-                          <a
-                            href={`/admin/proposals/${c.id}`}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-colors hover:brightness-125 ${PROPOSAL_BADGE[charterProposal.status]}`}
-                          >
-                            📋 {proposalRef(c.id)} · {charterProposal.status}
-                          </a>
-                        ) : (
-                          <a
-                            href={`/admin/proposals/${c.id}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-300 hover:text-white transition-colors"
-                          >
-                            + Create Proposal
-                          </a>
-                        )}
-                      </div>
-
-                      <p className="text-blue-400 text-xs mt-2">
-                        Created: {c.createdAt?.toDate?.()?.toLocaleString() ?? '—'}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => handleExpand(c)}
-                        className={`w-8 h-8 rounded-lg border text-white flex items-center justify-center transition-colors ${isExpanded ? 'bg-blue-500/50 border-blue-400/50' : 'bg-white/10 hover:bg-white/20 border-white/20'}`}
-                        title="Edit delivery locations"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCharter(c.id)}
-                        className="w-8 h-8 rounded-lg bg-red-600/50 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
-                        title="Delete"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0a1 1 0 01-1-1V5a1 1 0 011-1h8a1 1 0 011 1v1a1 1 0 01-1 1H9z" />
-                        </svg>
-                      </button>
-                    </div>
+            {/* Charter detail panel */}
+            {currentCharter && (
+              <div className="w-96 flex-shrink-0 bg-white/10 border border-white/20 rounded-xl p-5 space-y-4 sticky top-6">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_BADGE[currentCharter.status]}`}>
+                      {CHARTER_STATUS_LABEL[currentCharter.status]}
+                    </span>
+                    <h2 className="text-white font-semibold mt-1 truncate">{currentCharter.name ?? 'Unknown client'}</h2>
                   </div>
+                  <button onClick={() => setSelectedCharterId(null)} className="text-blue-400 hover:text-white transition-colors flex-shrink-0 text-lg leading-none">✕</button>
+                </div>
 
-                  {isExpanded && (
-                    <div className="mt-4 pt-4 border-t border-white/15 space-y-3">
-                      <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide">Edit Delivery Locations</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <MarinaSelectField label="Place of Delivery" value={editDelivery} onChange={setEditDelivery} />
-                        <MarinaSelectField label="Place of Redelivery" value={editRedelivery} onChange={setEditRedelivery} />
-                      </div>
-                      <MarinaMap
-                        delivery={getMarinaById(editDelivery)}
-                        redelivery={getMarinaById(editRedelivery)}
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleSaveLocations(c.id)}
-                          disabled={savingLocations}
-                          className="px-4 py-2 text-xs font-semibold bg-blue-500/60 hover:bg-blue-500/80 text-white rounded-lg transition-colors disabled:opacity-50"
-                        >
-                          {savingLocations ? 'Saving…' : 'Save'}
-                        </button>
-                        <button
-                          onClick={() => setExpandedId(null)}
-                          className="px-4 py-2 text-xs font-semibold bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
+                {/* Info grid */}
+                <div className="space-y-1.5">
+                  {currentCharter.email    && <DRow label="Email"      value={currentCharter.email} />}
+                  {currentCharter.phone    && <DRow label="Phone"      value={currentCharter.phone} />}
+                  <DRow label="Dates"      value={`${currentCharter.startDate} → ${currentCharter.endDate}`} />
+                  {currentCharter.passengers != null && <DRow label="Passengers" value={String(currentCharter.passengers)} />}
+                  {currentCharter.boat     && <DRow label="Boat"       value={currentCharter.boat} />}
+                  {currentCharter.selectedTheme && <DRow label="Theme" value={currentCharter.selectedTheme} />}
+                  {getMarinaById(currentCharter.deliveryPoint ?? '') && (
+                    <DRow label="Delivery" value={getMarinaById(currentCharter.deliveryPoint!)!.name} />
+                  )}
+                  {getMarinaById(currentCharter.redeliveryPoint ?? '') && (
+                    <DRow label="Redelivery" value={getMarinaById(currentCharter.redeliveryPoint!)!.name} />
                   )}
                 </div>
-              );
-            })}
-          </div>
-        )}
 
-        {/* CONTACTS TAB */}
-        {!loading && tab === 'contacts' && (
-          <div className="space-y-3">
-            {contacts.length === 0 && (
-              <p className="text-blue-200 text-sm text-center py-8">No contact submissions yet.</p>
-            )}
-            {contacts.map(c => (
-              <div key={c.id} className="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl p-5">
-                <div className="flex items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="bg-purple-500/30 text-purple-200 text-xs font-semibold px-2 py-0.5 rounded-full">Contact</span>
-                      <span className="text-white font-semibold text-sm">{c.name}</span>
-                      <span className="text-blue-300 text-xs">{c.email}</span>
-                      {c.phone && <span className="text-blue-300 text-xs">{c.phone}</span>}
-                    </div>
-                    <p className="text-blue-100 text-sm leading-relaxed mt-2">{c.message}</p>
-                    <p className="text-blue-400 text-xs mt-2">
-                      Submitted: {c.createdAt?.toDate?.()?.toLocaleString() ?? '—'}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteContact(c.id)}
-                    className="w-8 h-8 rounded-lg bg-red-600/50 hover:bg-red-500 text-white flex items-center justify-center transition-colors flex-shrink-0"
-                    title="Delete"
+                {currentCharter.holidayDescription && (
+                  <p className="text-blue-100 text-xs italic leading-relaxed border-l-2 border-blue-500/40 pl-3">
+                    &ldquo;{currentCharter.holidayDescription}&rdquo;
+                  </p>
+                )}
+                {currentCharter.note && (
+                  <p className="text-blue-300 text-xs italic">Note: {currentCharter.note}</p>
+                )}
+
+                {/* Status change */}
+                <div>
+                  <label className="text-blue-400 text-xs block mb-1">Status</label>
+                  <select
+                    value={currentCharter.status}
+                    disabled={savingStatus}
+                    onChange={e => handleStatusChange(currentCharter.id, e.target.value as CharterStatus)}
+                    className="w-full bg-slate-800 border border-white/25 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400 disabled:opacity-50"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0a1 1 0 01-1-1V5a1 1 0 011-1h8a1 1 0 011 1v1a1 1 0 01-1 1H9z" />
-                    </svg>
+                    {(Object.keys(CHARTER_STATUS_LABEL) as CharterStatus[]).map(s => (
+                      <option key={s} value={s} className="bg-blue-900">{CHARTER_STATUS_LABEL[s]}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Delivery locations */}
+                <div className="space-y-2">
+                  <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide">Delivery Locations</p>
+                  <MarinaSelectField label="Delivery" value={editDelivery} onChange={setEditDelivery} />
+                  <MarinaSelectField label="Redelivery" value={editRedelivery} onChange={setEditRedelivery} />
+                  <MarinaMap delivery={getMarinaById(editDelivery)} redelivery={getMarinaById(editRedelivery)} />
+                  <button
+                    onClick={() => handleSaveLocations(currentCharter.id)}
+                    disabled={savingLocations}
+                    className="w-full py-2 text-xs font-semibold bg-blue-500/60 hover:bg-blue-500/80 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {savingLocations ? 'Saving…' : 'Save Locations'}
+                  </button>
+                </div>
+
+                {/* Proposal link */}
+                <div>
+                  {currentCharter.proposal ? (
+                    <a
+                      href={`/admin/proposals/${currentCharter.id}`}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium hover:brightness-125 transition-colors ${PROPOSAL_BADGE[currentCharter.proposal.status]}`}
+                    >
+                      📋 {proposalRef(currentCharter.id)} · {currentCharter.proposal.status}
+                    </a>
+                  ) : (
+                    <a
+                      href={`/admin/proposals/${currentCharter.id}`}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-300 hover:text-white transition-colors"
+                    >
+                      + Create Proposal
+                    </a>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <p className="text-blue-400 text-xs">Created: {currentCharter.createdAt?.toDate?.()?.toLocaleString() ?? '—'}</p>
+                  <button
+                    onClick={() => handleDeleteCharter(currentCharter.id)}
+                    className="px-3 py-1.5 text-xs font-medium bg-red-600/50 hover:bg-red-500 text-white rounded-lg transition-colors"
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         )}
 
-        {/* REVIEWS TAB */}
-        {!loading && tab === 'reviews' && (
-          <div className="space-y-3">
-            <div className="flex gap-2">
-              {(['all', 'pending', 'confirmed'] as const).map(f => (
-                <button
-                  key={f}
-                  onClick={() => setReviewFilter(f)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${reviewFilter === f ? 'bg-white/25 text-white' : 'text-blue-200 hover:text-white border border-white/20'}`}
-                >
-                  {f}
-                </button>
-              ))}
+        {/* ── CONTACTS TAB ── */}
+        {!loading && tab === 'contacts' && (
+          <div className="flex gap-4 items-start">
+
+            <div className="flex-1 min-w-0 space-y-3">
+              <input
+                type="text"
+                placeholder="Search name, email or message…"
+                value={contactSearch}
+                onChange={e => setContactSearch(e.target.value)}
+                className="w-full bg-white/10 border border-white/20 text-white text-sm rounded-lg px-3 py-1.5 placeholder:text-blue-400/70 focus:outline-none focus:border-blue-400"
+              />
+
+              <div className="rounded-xl border border-white/20 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-white/10 text-blue-300 text-xs uppercase tracking-wide">
+                      <th className="px-3 py-2.5 text-left">Name</th>
+                      <th className="px-3 py-2.5 text-left">Email</th>
+                      <th className="px-3 py-2.5 text-left hidden sm:table-cell">Phone</th>
+                      <th className="px-3 py-2.5 text-left hidden md:table-cell">Received</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredContacts.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="text-center text-blue-300 text-sm py-10">No contacts found.</td>
+                      </tr>
+                    )}
+                    {filteredContacts.map(c => (
+                      <tr
+                        key={c.id}
+                        onClick={() => setSelectedContactId(selectedContactId === c.id ? null : c.id)}
+                        className={`border-t border-white/10 cursor-pointer transition-colors ${
+                          selectedContactId === c.id ? 'bg-blue-500/20' : 'hover:bg-white/5'
+                        }`}
+                      >
+                        <td className="px-3 py-2.5 text-white font-medium">{c.name}</td>
+                        <td className="px-3 py-2.5 text-blue-300">{c.email}</td>
+                        <td className="px-3 py-2.5 text-blue-400 hidden sm:table-cell">{c.phone ?? '—'}</td>
+                        <td className="px-3 py-2.5 text-blue-400 text-xs hidden md:table-cell">
+                          {c.createdAt?.toDate?.()?.toLocaleDateString() ?? '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-blue-400 text-xs">{filteredContacts.length} of {contacts.length} contacts</p>
             </div>
 
-            {visibleReviews.length === 0 && (
-              <p className="text-blue-200 text-sm text-center py-8">No reviews found.</p>
-            )}
-            {visibleReviews.map(r => (
-              <div key={r.id} className="bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl p-5">
-                <div className="flex items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.status === 'confirmed' ? 'bg-green-500/30 text-green-200' : 'bg-yellow-500/30 text-yellow-200'}`}>
-                        {r.status}
-                      </span>
-                      <StarRating value={r.rating} readonly size="sm" />
-                      <span className="text-blue-300 text-xs">{r.name} · {r.email}</span>
-                    </div>
-                    <p className="text-white text-sm font-semibold">{r.title}</p>
-                    <p className="text-blue-100 text-xs leading-relaxed mt-1 line-clamp-3">{r.description}</p>
-                    {r.photos && r.photos.length > 0 && (
-                      <p className="text-blue-300 text-xs mt-1">{r.photos.length} photo{r.photos.length > 1 ? 's' : ''}</p>
-                    )}
-                    <p className="text-blue-400 text-xs mt-1">
-                      Created: {r.createdAt?.toDate?.()?.toLocaleString() ?? '—'} · Order: {r.order ?? 0}
-                    </p>
+            {/* Contact detail panel */}
+            {currentContact && (
+              <div className="w-96 flex-shrink-0 bg-white/10 border border-white/20 rounded-xl p-5 space-y-4 sticky top-6">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="bg-purple-500/30 text-purple-200 text-xs font-semibold px-2 py-0.5 rounded-full">Contact</span>
+                    <h2 className="text-white font-semibold mt-1 truncate">{currentContact.name}</h2>
                   </div>
-                  <div className="flex flex-col gap-2 flex-shrink-0">
-                    <button onClick={() => handleOrderChange(r.id, 1)} title="Increase order"
-                      className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm flex items-center justify-center border border-white/20 transition-colors">↑</button>
-                    <button onClick={() => handleOrderChange(r.id, -1)} title="Decrease order"
-                      className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm flex items-center justify-center border border-white/20 transition-colors">↓</button>
-                    <button onClick={() => handleDeleteReview(r.id)} title="Delete"
-                      className="w-8 h-8 rounded-lg bg-red-600/50 hover:bg-red-500 text-white flex items-center justify-center transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0a1 1 0 01-1-1V5a1 1 0 011-1h8a1 1 0 011 1v1a1 1 0 01-1 1H9z" />
-                      </svg>
-                    </button>
-                  </div>
+                  <button onClick={() => setSelectedContactId(null)} className="text-blue-400 hover:text-white transition-colors flex-shrink-0 text-lg leading-none">✕</button>
+                </div>
+
+                <div className="space-y-1.5">
+                  <DRow label="Email" value={currentContact.email} />
+                  {currentContact.phone && <DRow label="Phone" value={currentContact.phone} />}
+                  <DRow label="Received" value={currentContact.createdAt?.toDate?.()?.toLocaleString() ?? '—'} />
+                </div>
+
+                <div>
+                  <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide mb-2">Message</p>
+                  <p className="text-blue-100 text-sm leading-relaxed">{currentContact.message}</p>
+                </div>
+
+                <div className="flex justify-end pt-2 border-t border-white/10">
+                  <button
+                    onClick={() => handleDeleteContact(currentContact.id)}
+                    className="px-3 py-1.5 text-xs font-medium bg-red-600/50 hover:bg-red-500 text-white rounded-lg transition-colors"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-            ))}
+            )}
+          </div>
+        )}
+
+        {/* ── REVIEWS TAB ── */}
+        {!loading && tab === 'reviews' && (
+          <div className="flex gap-4 items-start">
+
+            <div className="flex-1 min-w-0 space-y-3">
+              <div className="flex gap-2">
+                {(['all', 'pending', 'confirmed'] as const).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setReviewFilter(f)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors ${
+                      reviewFilter === f ? 'bg-white/25 text-white' : 'text-blue-200 hover:text-white border border-white/20'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+
+              <div className="rounded-xl border border-white/20 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-white/10 text-blue-300 text-xs uppercase tracking-wide">
+                      <th className="px-3 py-2.5 text-left">Status</th>
+                      <th className="px-3 py-2.5 text-left">Rating</th>
+                      <th className="px-3 py-2.5 text-left">Name</th>
+                      <th className="px-3 py-2.5 text-left hidden md:table-cell">Title</th>
+                      <th className="px-3 py-2.5 text-center">Order</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredReviews.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="text-center text-blue-300 text-sm py-10">No reviews found.</td>
+                      </tr>
+                    )}
+                    {filteredReviews.map(r => (
+                      <tr
+                        key={r.id}
+                        onClick={() => setSelectedReviewId(selectedReviewId === r.id ? null : r.id)}
+                        className={`border-t border-white/10 cursor-pointer transition-colors ${
+                          selectedReviewId === r.id ? 'bg-blue-500/20' : 'hover:bg-white/5'
+                        }`}
+                      >
+                        <td className="px-3 py-2.5">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                            r.status === 'confirmed' ? 'bg-green-500/30 text-green-200' : 'bg-yellow-500/30 text-yellow-200'
+                          }`}>
+                            {r.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5"><StarRating value={r.rating} readonly size="sm" /></td>
+                        <td className="px-3 py-2.5 text-white">{r.name}</td>
+                        <td className="px-3 py-2.5 text-blue-200 hidden md:table-cell truncate max-w-48">{r.title}</td>
+                        <td className="px-3 py-2.5 text-blue-400 text-center text-xs">{r.order ?? 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-blue-400 text-xs">{filteredReviews.length} of {reviews.length} reviews</p>
+            </div>
+
+            {/* Review detail panel */}
+            {currentReview && (
+              <div className="w-96 flex-shrink-0 bg-white/10 border border-white/20 rounded-xl p-5 space-y-4 sticky top-6">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        currentReview.status === 'confirmed' ? 'bg-green-500/30 text-green-200' : 'bg-yellow-500/30 text-yellow-200'
+                      }`}>
+                        {currentReview.status}
+                      </span>
+                      <StarRating value={currentReview.rating} readonly size="sm" />
+                    </div>
+                    <h2 className="text-white font-semibold mt-1 truncate">{currentReview.name}</h2>
+                    <p className="text-blue-300 text-xs">{currentReview.email}</p>
+                  </div>
+                  <button onClick={() => setSelectedReviewId(null)} className="text-blue-400 hover:text-white transition-colors flex-shrink-0 text-lg leading-none">✕</button>
+                </div>
+
+                <div>
+                  <p className="text-white font-medium text-sm">{currentReview.title}</p>
+                  <p className="text-blue-100 text-xs leading-relaxed mt-2">{currentReview.description}</p>
+                </div>
+
+                {currentReview.photos && currentReview.photos.length > 0 && (
+                  <p className="text-blue-300 text-xs">{currentReview.photos.length} photo{currentReview.photos.length > 1 ? 's' : ''}</p>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <p className="text-blue-400 text-xs flex-1">Display order: {currentReview.order ?? 0}</p>
+                  <button onClick={() => handleOrderChange(currentReview.id, 1)}
+                    className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm flex items-center justify-center border border-white/20 transition-colors">
+                    ↑
+                  </button>
+                  <button onClick={() => handleOrderChange(currentReview.id, -1)}
+                    className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm flex items-center justify-center border border-white/20 transition-colors">
+                    ↓
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                  <p className="text-blue-400 text-xs">{currentReview.createdAt?.toDate?.()?.toLocaleDateString() ?? '—'}</p>
+                  <button
+                    onClick={() => handleDeleteReview(currentReview.id)}
+                    className="px-3 py-1.5 text-xs font-medium bg-red-600/50 hover:bg-red-500 text-white rounded-lg transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -404,11 +643,35 @@ export default function AdminDashboardClient() {
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function SortTh({
+  children, col, current, onSort,
+}: {
+  children: React.ReactNode;
+  col: CharterSortCol;
+  current: { col: CharterSortCol; dir: SortDir };
+  onSort: (col: CharterSortCol) => void;
+}) {
+  const active = current.col === col;
   return (
-    <div>
-      <span className="text-blue-400 text-xs">{label}: </span>
-      <span className="text-white text-xs font-medium">{value}</span>
+    <th
+      className="px-3 py-2.5 text-left cursor-pointer select-none hover:text-white transition-colors"
+      onClick={() => onSort(col)}
+    >
+      <span className="flex items-center gap-1">
+        {children}
+        <span className={active ? 'text-blue-300' : 'text-blue-600'}>
+          {active ? (current.dir === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </span>
+    </th>
+  );
+}
+
+function DRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex gap-2 text-xs">
+      <span className="text-blue-400 w-20 flex-shrink-0">{label}</span>
+      <span className="text-white font-medium break-all">{value}</span>
     </div>
   );
 }
@@ -417,7 +680,7 @@ function MarinaSelectField({ label, value, onChange }: { label: string; value: s
   const grouped = marinasByRegion();
   return (
     <div>
-      <label className="text-blue-300 text-xs block mb-1">{label}</label>
+      <label className="text-blue-400 text-xs block mb-1">{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}

@@ -13,6 +13,7 @@ import {
   calcTotals,
   DEFAULT_PAYMENT_TERMS,
   DEFAULT_PRICING,
+  DEFAULT_INCLUSIONS,
   type Charter,
   type ProposalPricing,
   type PaymentTerm,
@@ -22,6 +23,7 @@ import {
 } from '../../../../lib/availability';
 import { getPricingConfig, getSeasonTier, type PricingConfig } from '../../../../lib/financial';
 import { getMarinaById } from '../../../marinas-data';
+import { CONTACT } from '../../../config/contact';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
@@ -93,6 +95,7 @@ export default function ProposalEditorClient({ id }: Props) {
   // ── Proposal-only fields ──
   const [pricing, setPricing] = useState<ProposalPricing>(DEFAULT_PRICING);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>(DEFAULT_PAYMENT_TERMS);
+  const [inclusions, setInclusions] = useState<string[]>(DEFAULT_INCLUSIONS);
   const [specialConditions, setSpecialConditions] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
@@ -145,6 +148,7 @@ export default function ProposalEditorClient({ id }: Props) {
     if (c.proposal) {
       setPricing(c.proposal.pricing ?? DEFAULT_PRICING);
       setPaymentTerms(c.proposal.paymentTerms ?? DEFAULT_PAYMENT_TERMS);
+      setInclusions(c.proposal.inclusions ?? DEFAULT_INCLUSIONS);
       setSpecialConditions(c.proposal.specialConditions ?? '');
       setAdminNotes(c.proposal.adminNotes ?? '');
       setExpiresAt(c.proposal.expiresAt ?? '');
@@ -212,6 +216,7 @@ export default function ProposalEditorClient({ id }: Props) {
       await updateCharterProposal(id, {
         pricing,
         paymentTerms,
+        inclusions,
         specialConditions: specialConditions.trim() || undefined,
         adminNotes: adminNotes.trim() || undefined,
         expiresAt,
@@ -247,13 +252,47 @@ export default function ProposalEditorClient({ id }: Props) {
         redeliveryPoint: redeliveryPoint || undefined,
       });
       await updateCharterProposal(id, {
-        pricing, paymentTerms,
+        pricing, paymentTerms, inclusions,
         specialConditions: specialConditions.trim() || undefined,
         adminNotes: adminNotes.trim() || undefined,
         expiresAt,
       });
       await markCharterProposalSent(id);
       setStatus('sent');
+      setCharter(prev => prev ? { ...prev, status: 'proposal_sent' } : prev);
+
+      // Open local mail client with pre-filled proposal email
+      const url = proposalUrl ?? '';
+      const firstName = name.trim().split(' ')[0];
+      const ref = proposalRef(id);
+      const subject = `Your Charter Proposal — ${ref}`;
+      const body = [
+        `Dear ${firstName},`,
+        '',
+        `Thank you for your interest in chartering with BlueOne. We are delighted to present your personalised charter proposal.`,
+        '',
+        `Please find your proposal at the link below:`,
+        url,
+        '',
+        `The proposal covers your charter aboard ${boat.trim()} from ${startDate} to ${endDate}. It includes full pricing, payment schedule, and terms. You can approve or ask questions directly from the proposal page.`,
+        '',
+        `This proposal is valid until ${expiresAt || 'the expiry date shown in the proposal'}.`,
+        '',
+        `Should you have any questions, please do not hesitate to contact us:`,
+        `  Email: ${CONTACT.email}`,
+        `  Phone / WhatsApp: ${CONTACT.phone.formatted}`,
+        `  WhatsApp: https://wa.me/${CONTACT.phone.formatted.replace(/\D/g, '').replace(/^0/, '33')}`,
+        '',
+        `We look forward to welcoming you aboard.`,
+        '',
+        `Warm regards,`,
+        `The BlueOne Team`,
+        CONTACT.email,
+        CONTACT.phone.formatted,
+      ].join('\n');
+
+      const mailto = `mailto:${encodeURIComponent(email.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
     } catch (err) {
       setError('Failed to send. Please try again.');
       console.error(err);
@@ -396,7 +435,7 @@ export default function ProposalEditorClient({ id }: Props) {
             </Field>
             <Field label="Guests">
               <input type="number" value={passengers} onChange={e => setPassengers(Number(e.target.value))}
-                min={1} max={12} className={inputCls} />
+                onFocus={e => e.target.select()} min={1} max={12} className={inputCls} />
             </Field>
             <Field label="Experience Theme">
               <input type="text" value={selectedTheme} onChange={e => setSelectedTheme(e.target.value)}
@@ -445,27 +484,27 @@ export default function ProposalEditorClient({ id }: Props) {
             <Field label="Base Charter Fee (€)">
               <input type="number" value={pricing.basePrice}
                 onChange={e => setPricing(p => ({ ...p, basePrice: Number(e.target.value) }))}
-                min={0} step={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} step={100} className={inputCls} />
             </Field>
             <Field label="Discount (%)" hint={totals.discount > 0 ? `= ${fmt(totals.discount)} off` : 'Applied to base fee'}>
               <input type="number" value={pricing.discountPercentage}
                 onChange={e => setPricing(p => ({ ...p, discountPercentage: Number(e.target.value) }))}
-                min={0} max={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} max={100} className={inputCls} />
             </Field>
             <Field label="APA Percentage (%)" hint="Typically 25–35%">
               <input type="number" value={pricing.apaPercentage}
                 onChange={e => setPricing(p => ({ ...p, apaPercentage: Number(e.target.value) }))}
-                min={0} max={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} max={100} className={inputCls} />
             </Field>
-            <Field label="VAT on Charter (%)" hint="Greek VAT — applies to charter fee only">
+            <Field label="VAT (%)" hint="Applied to charter fee">
               <input type="number" value={pricing.vatPercentage ?? 13}
                 onChange={e => setPricing(p => ({ ...p, vatPercentage: Number(e.target.value) }))}
-                min={0} max={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} max={100} className={inputCls} />
             </Field>
             <Field label="Security Deposit (€)" hint="Refundable">
               <input type="number" value={pricing.securityDeposit}
                 onChange={e => setPricing(p => ({ ...p, securityDeposit: Number(e.target.value) }))}
-                min={0} step={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} step={100} className={inputCls} />
             </Field>
           </div>
 
@@ -478,7 +517,7 @@ export default function ProposalEditorClient({ id }: Props) {
                   <input type="text" value={extra.label} onChange={e => updateExtra(i, 'label', e.target.value)}
                     placeholder="Service" className={`${inputCls} flex-1`} />
                   <input type="number" value={extra.amount} onChange={e => updateExtra(i, 'amount', e.target.value)}
-                    min={0} className={`${inputCls} w-28`} />
+                    onFocus={e => e.target.select()} min={0} className={`${inputCls} w-28`} />
                   <button type="button" onClick={() => setPricing(p => ({ ...p, extras: p.extras.filter((_, idx) => idx !== i) }))}
                     className="text-red-400 hover:text-red-300 px-2">✕</button>
                 </div>
@@ -528,31 +567,85 @@ export default function ProposalEditorClient({ id }: Props) {
           </div>
         </Section>
 
+        {/* Inclusions */}
+        <Section title="What's Included">
+          <div className="space-y-2 mb-4">
+            {inclusions.map((item, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <span className="text-emerald-400 flex-shrink-0">✓</span>
+                <input
+                  type="text"
+                  value={item}
+                  onChange={e => {
+                    const next = [...inclusions];
+                    next[i] = e.target.value;
+                    setInclusions(next);
+                  }}
+                  className={`${inputCls} flex-1`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setInclusions(prev => prev.filter((_, idx) => idx !== i))}
+                  className="text-red-400 hover:text-red-300 px-2 flex-shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => setInclusions(prev => [...prev, ''])}
+              className="text-xs text-blue-400 hover:text-blue-200 underline"
+            >
+              + Add item
+            </button>
+            <button
+              type="button"
+              onClick={() => setInclusions(DEFAULT_INCLUSIONS)}
+              className="text-xs text-blue-500 hover:text-blue-300 underline"
+            >
+              Reset to defaults
+            </button>
+          </div>
+        </Section>
+
         {/* Payment Terms */}
         <Section title="Payment Schedule (MYBA)">
           <div className="space-y-4 mb-4">
-            {paymentTerms.map((term, i) => (
-              <div key={i} className="bg-black/10 rounded-xl p-4">
-                <div className="flex gap-2 mb-2">
-                  <input type="text" value={term.label} onChange={e => updateTerm(i, 'label', e.target.value)}
-                    placeholder="e.g. Deposit — 50%" className={`${inputCls} flex-1`} />
-                  <div className="flex items-center gap-1">
-                    <input type="number" value={term.percentage} onChange={e => updateTerm(i, 'percentage', e.target.value)}
-                      min={0} max={100} className={`${inputCls} w-20`} />
-                    <span className="text-blue-300 text-sm">%</span>
+            {paymentTerms.map((term, i) => {
+              const isLast = i === paymentTerms.length - 1;
+              const termBase = Math.round(totals.charterFee * term.percentage / 100);
+              const termTotal = isLast ? termBase + totals.apa + totals.vat : termBase;
+              return (
+                <div key={i} className="bg-black/10 rounded-xl p-4">
+                  <div className="flex gap-2 mb-2">
+                    <input type="text" value={term.label} onChange={e => updateTerm(i, 'label', e.target.value)}
+                      placeholder="e.g. Deposit — 50%" className={`${inputCls} flex-1`} />
+                    <div className="flex items-center gap-1">
+                      <input type="number" value={term.percentage} onChange={e => updateTerm(i, 'percentage', e.target.value)}
+                        onFocus={e => e.target.select()} min={0} max={100} className={`${inputCls} w-20`} />
+                      <span className="text-blue-300 text-sm">%</span>
+                    </div>
+                    <button type="button" onClick={() => setPaymentTerms(prev => prev.filter((_, idx) => idx !== i))}
+                      className="text-red-400 hover:text-red-300 px-2">✕</button>
                   </div>
-                  <button type="button" onClick={() => setPaymentTerms(prev => prev.filter((_, idx) => idx !== i))}
-                    className="text-red-400 hover:text-red-300 px-2">✕</button>
+                  <input type="text" value={term.description} onChange={e => updateTerm(i, 'description', e.target.value)}
+                    placeholder="Payment condition…" className={`${inputCls} text-xs`} />
+                  {totals.charterFee > 0 && (
+                    <div className="text-xs text-blue-400 mt-2">
+                      = {fmt(termTotal)}
+                      {isLast && (totals.apa > 0 || totals.vat > 0) && (
+                        <span className="text-blue-500 ml-1">
+                          ({fmt(termBase)} + APA {fmt(totals.apa)}{totals.vat > 0 ? ` + VAT ${fmt(totals.vat)}` : ''})
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <input type="text" value={term.description} onChange={e => updateTerm(i, 'description', e.target.value)}
-                  placeholder="Payment condition…" className={`${inputCls} text-xs`} />
-                {totals.charterFee > 0 && (
-                  <div className="text-xs text-blue-400 mt-2">
-                    = {fmt(Math.round(totals.charterFee * term.percentage / 100))}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="flex gap-3">
             <button type="button" onClick={() => setPaymentTerms(prev => [...prev, { label: '', percentage: 0, description: '' }])}

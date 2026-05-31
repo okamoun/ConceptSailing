@@ -3,9 +3,7 @@ import { Inter } from "next/font/google"
 import { BlueOneProvider } from "./contexts/BlueOneContext"
 import GoogleAnalytics from "./components/GoogleAnalytics"
 import { AdminAuthProvider } from "./admin/AdminAuthContext"
-import Navigation from "./components/Navigation"
-import AwardBanner from "./components/AwardBanner"
-import Footer from "./components/Footer"
+import SiteChrome from "./components/SiteChrome"
 import "./globals.css"
 import "./animations.css"
 
@@ -133,10 +131,7 @@ export default function RootLayout({
         <AdminAuthProvider>
           <GoogleAnalytics />
           <BlueOneProvider>
-            <AwardBanner />
-            <Navigation />
-            <main>{children}</main>
-            <Footer />
+            <SiteChrome>{children}</SiteChrome>
           </BlueOneProvider>
         </AdminAuthProvider>
       </body>

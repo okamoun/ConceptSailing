@@ -29,7 +29,7 @@ export default function AdminNav() {
       {/* Nav links */}
       <div className="flex items-center gap-1 flex-1 overflow-x-auto">
         {NAV_LINKS.filter(({ href }) => allowedPages.includes(href as never)).map(({ href, label }) => {
-          const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
+          const active = href === '/admin' ? pathname === '/admin' : (pathname?.startsWith(href) ?? false);
           return (
             <Link
               key={href}
