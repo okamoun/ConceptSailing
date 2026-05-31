@@ -133,10 +133,10 @@ describe('HomeClient — CTA Section', () => {
     expect(link).toHaveAttribute('href', '/booking')
   })
 
-  test('Contact Us link in CTA points to /booking', () => {
+  test('Contact Us link in CTA points to /contact', () => {
     render(<HomeClient />)
     const link = screen.getByRole('link', { name: 'Contact Us' })
-    expect(link).toHaveAttribute('href', '/booking')
+    expect(link).toHaveAttribute('href', '/contact')
   })
 })
 

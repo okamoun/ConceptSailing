@@ -14,6 +14,165 @@ import type { ImageCategory } from '../constants/boat-images';
 
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
+// ─── Static image manifests (module scope — not per-render) ──────────────────
+
+const blueOneExteriorImages = [
+  "/images/boat/IMG_0025_NEW.JPG",
+  "/images/boat/IMG_0026_NEW.JPG",
+  "/images/boat/IMG_9965_NEW.JPG",
+  "/images/boat/IMG_9970_NEW.JPG",
+  "/images/boat/IMG_7545.JPG",
+  "/images/boat/IMG_7546.JPG",
+  "/images/boat/IMG_7547.JPG",
+  "/images/boat/IMG_7549.JPG",
+  "/images/boat/IMG_7553.JPG",
+  "/images/boat/IMG_7554.JPG",
+  "/images/boat/IMG_7555.JPG",
+  "/images/boat/IMG_7556.JPG",
+  "/images/boat/IMG_7557.JPG",
+  "/images/boat/IMG_7559.JPG",
+  "/images/boat/IMG_7561.JPG",
+  "/images/boat/IMG_7562.JPG",
+  "/images/boat/IMG_7563.JPG",
+  "/images/boat/IMG_7564.JPG",
+  "/images/boat/IMG_7565.JPG",
+  "/images/boat/IMG_7566.JPG",
+  "/images/boat/IMG_7567.JPG",
+  "/images/boat/IMG_7568.JPG",
+  "/images/boat/IMG_0027_NEW.JPG",
+  "/images/boat/IMG_0028_NEW.JPG",
+  "/images/boat/IMG_9968_NEW.JPG",
+];
+
+const blueOneInteriorImages = [
+  "/images/boat/IMG_7569.JPG",
+  "/images/boat/IMG_7570.JPG",
+  "/images/boat/IMG_7571.JPG",
+  "/images/boat/IMG_7572.JPG",
+  "/images/boat/IMG_7573.JPG",
+  "/images/boat/IMG_7579.JPG",
+  "/images/boat/IMG_7580.JPG",
+  "/images/boat/IMG_7581.JPG",
+  "/images/boat/IMG_7582.JPG",
+  "/images/boat/IMG_7584.JPG",
+  "/images/boat/IMG_7585.JPG",
+  "/images/boat/IMG_7586.JPG",
+  "/images/boat/IMG_7587.JPG",
+  "/images/boat/IMG_7588.JPG",
+  "/images/boat/IMG_7589.JPG",
+  "/images/boat/IMG_7590.JPG",
+  "/images/boat/IMG_7591.JPG",
+  "/images/boat/IMG_7592.JPG",
+];
+
+const blueOneCockpitImages = [
+  "/images/boat/IMG_0012_NEW.JPG",
+  "/images/boat/IMG_0013_NEW.JPG",
+  "/images/boat/IMG_0014_NEW.JPG",
+  "/images/boat/IMG_0010_NEW.JPG",
+  "/images/boat/IMG_7593.JPG",
+  "/images/boat/IMG_7594.JPG",
+  "/images/boat/IMG_7595.JPG",
+  "/images/boat/IMG_7596.JPG",
+  "/images/boat/IMG_7600.JPG",
+  "/images/boat/IMG_7601.JPG",
+  "/images/boat/IMG_7602.JPG",
+  "/images/boat/IMG_7603.JPG",
+  "/images/boat/IMG_7604.JPG",
+  "/images/boat/IMG_7605.JPG",
+  "/images/boat/IMG_7606.JPG",
+  "/images/boat/IMG_7607.JPG",
+  "/images/boat/IMG_7608.JPG",
+  "/images/boat/IMG_7609.JPG",
+  "/images/boat/IMG_7610.JPG",
+  "/images/boat/IMG_7611.JPG",
+  "/images/boat/IMG_7612.JPG",
+  "/images/boat/IMG_7613.JPG",
+  "/images/boat/IMG_0001_NEW.JPG",
+  "/images/boat/IMG_0004_NEW.JPG",
+  "/images/boat/IMG_0005_NEW.JPG",
+  "/images/boat/IMG_0006_NEW.JPG",
+  "/images/boat/IMG_0007_NEW.JPG",
+  "/images/boat/IMG_0008_NEW.JPG",
+  "/images/boat/IMG_0016_NEW.JPG",
+  "/images/boat/IMG_0019_NEW.JPG",
+  "/images/boat/IMG_0021_NEW.JPG",
+  "/images/boat/IMG_9960_NEW.JPG",
+  "/images/boat/IMG_9961_NEW.JPG",
+];
+
+const blueOneDroneImages = [
+  "/images/boat/DJI_20260511084346_0008_D.JPG",
+  "/images/boat/DJI_20260511084428_0009_D.JPG",
+  "/images/boat/DJI_20260511084433_0010_D.JPG",
+  "/images/boat/DJI_20260511084454_0011_D.JPG",
+  "/images/boat/DJI_20260511084457_0012_D.JPG",
+  "/images/boat/DJI_20260512133237_0013_D.JPG",
+  "/images/boat/DJI_20260512133247_0014_D.JPG",
+  "/images/boat/DJI_20260512133415_0015_D.JPG",
+  "/images/boat/DJI_20260512133432_0016_D.JPG",
+  "/images/boat/DJI_20260512133439_0017_D.JPG",
+  "/images/boat/DJI_20260512133510_0018_D.JPG",
+  "/images/boat/DJI_20260512133513_0019_D.JPG",
+  "/images/boat/DJI_20260512133534_0020_D.JPG",
+  "/images/boat/DJI_20260512133536_0021_D.JPG",
+  "/images/boat/DJI_20260512133553_0022_D.JPG",
+  "/images/boat/DJI_20260512133601_0023_D.JPG",
+  "/images/boat/DJI_20260512133607_0024_D.JPG",
+];
+
+const blueOneFoodImages = [
+  "/images/boat/culinary_gourmet.jpg",
+  "/images/boats/blueone/food_1.jpeg",
+  "/images/boats/blueone/food_2.jpeg",
+  "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif",
+];
+
+const blueOneChefImages = ["/images/boats/blueone/profile_andrea_chef.jpg"];
+const blueOneCaptainImages = ["/images/boats/blueone/Cap_alif.jpg"];
+
+const blueOneActivityImages = [
+  "/images/boats/blueone/Seabob_1.jpeg",
+  "/images/boats/blueone/seabob-f5s-pic-1-1.jpg",
+  "/images/boats/blueone/snorkeling.png",
+  "/images/boats/blueone/SUP_Relax.png",
+  "/images/boats/blueone/SUP_Yoga.png",
+];
+
+const blueOneFloorplanImages = ["/images/boats/blueone/floorplan.jpg"];
+
+// ─── Reusable photo grid ─────────────────────────────────────────────────────
+
+function GalleryGrid({
+  images,
+  altPrefix,
+  columns = 4,
+  onClickImage,
+}: {
+  images: string[];
+  altPrefix: string;
+  columns?: 3 | 4;
+  onClickImage: (src: string) => void;
+}) {
+  const colClass = columns === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4';
+  return (
+    <div className={`grid grid-cols-1 md:grid-cols-2 ${colClass} gap-6`}>
+      {images.map((image, index) => (
+        <div key={index} className="relative group cursor-pointer" onClick={() => onClickImage(image)}>
+          <Image
+            src={image}
+            alt={`${altPrefix} ${index + 1}`}
+            width={400}
+            height={300}
+            className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function BlueOneClient() {
   const [boat, setBoat] = useState<typeof boats[0] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,148 +203,6 @@ export default function BlueOneClient() {
       })
       .catch(err => { console.error('[photos] Firestore error:', JSON.stringify(err), err); });
   }, [setIsBlueOneMode]);
-
-  // BlueOne specific images - Real boat photos (100+ total: 54 original + 22 new + 17 drone)
-  // Featured 4 (shown in curated section) are first; rest fill the complete gallery
-  const blueOneExteriorImages = [
-    // === FEATURED 4 (Best exterior shots - high water/sky content) ===
-    "/images/boat/IMG_0025_NEW.JPG",  // 90% blue - pristine water/sky
-    "/images/boat/IMG_0026_NEW.JPG",  // 89% blue - exterior sailing view
-    "/images/boat/IMG_9965_NEW.JPG",  // 89% blue - exterior detail
-    "/images/boat/IMG_9970_NEW.JPG",  // 88% blue - exterior profile
-    // === GALLERY FILL (Original collection) ===
-    "/images/boat/IMG_7545.JPG",
-    "/images/boat/IMG_7546.JPG",
-    "/images/boat/IMG_7547.JPG",
-    "/images/boat/IMG_7549.JPG",
-    "/images/boat/IMG_7553.JPG",
-    "/images/boat/IMG_7554.JPG",
-    "/images/boat/IMG_7555.JPG",
-    "/images/boat/IMG_7556.JPG",
-    "/images/boat/IMG_7557.JPG",
-    "/images/boat/IMG_7559.JPG",
-    "/images/boat/IMG_7561.JPG",
-    "/images/boat/IMG_7562.JPG",
-    "/images/boat/IMG_7563.JPG",
-    "/images/boat/IMG_7564.JPG",
-    "/images/boat/IMG_7565.JPG",
-    "/images/boat/IMG_7566.JPG",
-    "/images/boat/IMG_7567.JPG",
-    "/images/boat/IMG_7568.JPG",
-    // === ADDITIONAL NEW EXTERIOR ===
-    "/images/boat/IMG_0027_NEW.JPG",
-    "/images/boat/IMG_0028_NEW.JPG",
-    "/images/boat/IMG_9968_NEW.JPG",
-  ];
-
-  const blueOneInteriorImages = [
-    // === FEATURED 4 (Best cabin/interior shots) ===
-    "/images/boat/IMG_7569.JPG",
-    "/images/boat/IMG_7570.JPG",
-    "/images/boat/IMG_7571.JPG",
-    "/images/boat/IMG_7572.JPG",
-    // === GALLERY FILL (Original proven collection) ===
-    "/images/boat/IMG_7573.JPG",
-    "/images/boat/IMG_7579.JPG",
-    "/images/boat/IMG_7580.JPG",
-    "/images/boat/IMG_7581.JPG",
-    "/images/boat/IMG_7582.JPG",
-    "/images/boat/IMG_7584.JPG",
-    "/images/boat/IMG_7585.JPG",
-    "/images/boat/IMG_7586.JPG",
-    "/images/boat/IMG_7587.JPG",
-    "/images/boat/IMG_7588.JPG",
-    "/images/boat/IMG_7589.JPG",
-    "/images/boat/IMG_7590.JPG",
-    "/images/boat/IMG_7591.JPG",
-    "/images/boat/IMG_7592.JPG",
-  ];
-
-  const blueOneCockpitImages = [
-    // === FEATURED 4 (Best cockpit/dining/entertaining shots) ===
-    "/images/boat/IMG_0012_NEW.JPG",  // 79% mixed - premium deck view
-    "/images/boat/IMG_0013_NEW.JPG",  // 80% mixed - dining ambiance
-    "/images/boat/IMG_0014_NEW.JPG",  // 80% mixed - seating area
-    "/images/boat/IMG_0010_NEW.JPG",  // 72% mixed - outdoor dining
-    // === GALLERY FILL (Original collection) ===
-    "/images/boat/IMG_7593.JPG",
-    "/images/boat/IMG_7594.JPG",
-    "/images/boat/IMG_7595.JPG",
-    "/images/boat/IMG_7596.JPG",
-    "/images/boat/IMG_7600.JPG",
-    "/images/boat/IMG_7601.JPG",
-    "/images/boat/IMG_7602.JPG",
-    "/images/boat/IMG_7603.JPG",
-    "/images/boat/IMG_7604.JPG",
-    "/images/boat/IMG_7605.JPG",
-    "/images/boat/IMG_7606.JPG",
-    "/images/boat/IMG_7607.JPG",
-    "/images/boat/IMG_7608.JPG",
-    "/images/boat/IMG_7609.JPG",
-    "/images/boat/IMG_7610.JPG",
-    "/images/boat/IMG_7611.JPG",
-    "/images/boat/IMG_7612.JPG",
-    "/images/boat/IMG_7613.JPG",
-    // === ADDITIONAL NEW COCKPIT/DINING (11 more) ===
-    "/images/boat/IMG_0001_NEW.JPG",
-    "/images/boat/IMG_0004_NEW.JPG",
-    "/images/boat/IMG_0005_NEW.JPG",
-    "/images/boat/IMG_0006_NEW.JPG",
-    "/images/boat/IMG_0007_NEW.JPG",
-    "/images/boat/IMG_0008_NEW.JPG",
-    "/images/boat/IMG_0016_NEW.JPG",
-    "/images/boat/IMG_0019_NEW.JPG",
-    "/images/boat/IMG_0021_NEW.JPG",
-    "/images/boat/IMG_9960_NEW.JPG",
-    "/images/boat/IMG_9961_NEW.JPG",
-  ];
-
-  const blueOneDroneImages = [
-    "/images/boat/DJI_20260511084346_0008_D.JPG",
-    "/images/boat/DJI_20260511084428_0009_D.JPG",
-    "/images/boat/DJI_20260511084433_0010_D.JPG",
-    "/images/boat/DJI_20260511084454_0011_D.JPG",
-    "/images/boat/DJI_20260511084457_0012_D.JPG",
-    "/images/boat/DJI_20260512133237_0013_D.JPG",
-    "/images/boat/DJI_20260512133247_0014_D.JPG",
-    "/images/boat/DJI_20260512133415_0015_D.JPG",
-    "/images/boat/DJI_20260512133432_0016_D.JPG",
-    "/images/boat/DJI_20260512133439_0017_D.JPG",
-    "/images/boat/DJI_20260512133510_0018_D.JPG",
-    "/images/boat/DJI_20260512133513_0019_D.JPG",
-    "/images/boat/DJI_20260512133534_0020_D.JPG",
-    "/images/boat/DJI_20260512133536_0021_D.JPG",
-    "/images/boat/DJI_20260512133553_0022_D.JPG",
-    "/images/boat/DJI_20260512133601_0023_D.JPG",
-    "/images/boat/DJI_20260512133607_0024_D.JPG",
-  ];
-
-  const blueOneFoodImages = [
-    "/images/boat/culinary_gourmet.jpg", // Chef's gourmet plated dish
-    "/images/boats/blueone/food_1.jpeg",
-    "/images/boats/blueone/food_2.jpeg",
-    "/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif", // Cockpit dining table
-  ];
-
-  const blueOneChefImages = [
-    "/images/boats/blueone/profile_andrea_chef.jpg", // Chef Andreas Tsitsilianis
-  ];
-
-  const blueOneCaptainImages = [
-    "/images/boats/blueone/Cap_alif.jpg", // Captain Alif
-  ];
-
-  const blueOneActivityImages = [
-    "/images/boats/blueone/Seabob_1.jpeg", // Seabob water toy
-    "/images/boats/blueone/seabob-f5s-pic-1-1.jpg", // Additional Seabob/water toy image
-    "/images/boats/blueone/snorkeling.png", // Snorkeling activity
-    "/images/boats/blueone/SUP_Relax.png", // SUP relaxation
-    "/images/boats/blueone/SUP_Yoga.png", // SUP yoga activity
-  ];
-
-  const blueOneFloorplanImages = [
-    "/images/boats/blueone/floorplan.jpg", // Floor plan image
-  ];
 
   if (isLoading) {
     return (
@@ -270,20 +287,11 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Exterior Excellence</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(keyPhotosByCat.exterior ?? blueOneExteriorImages.slice(0, 4)).map((image, index) => (
-                <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
-                  <Image
-                    src={image}
-                    alt={`BlueOne exterior view ${index + 1}`}
-                    width={400}
-                    height={300}
-                    className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                </div>
-              ))}
-            </div>
+            <GalleryGrid
+              images={keyPhotosByCat.exterior ?? blueOneExteriorImages.slice(0, 4)}
+              altPrefix="BlueOne exterior view"
+              onClickImage={setModalImage}
+            />
           </div>
         </section>
 
@@ -291,20 +299,11 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Luxurious Interiors</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(keyPhotosByCat.interior ?? blueOneInteriorImages.slice(0, 4)).map((image, index) => (
-                <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
-                  <Image
-                    src={image}
-                    alt={`BlueOne interior view ${index + 1}`}
-                    width={400}
-                    height={300}
-                    className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                </div>
-              ))}
-            </div>
+            <GalleryGrid
+              images={keyPhotosByCat.interior ?? blueOneInteriorImages.slice(0, 4)}
+              altPrefix="BlueOne interior view"
+              onClickImage={setModalImage}
+            />
           </div>
         </section>
 
@@ -312,20 +311,11 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Cockpit & Dining</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(keyPhotosByCat.cockpit ?? blueOneCockpitImages.slice(0, 4)).map((image, index) => (
-                <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
-                  <Image
-                    src={image}
-                    alt={`BlueOne cockpit view ${index + 1}`}
-                    width={400}
-                    height={300}
-                    className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                </div>
-              ))}
-            </div>
+            <GalleryGrid
+              images={keyPhotosByCat.cockpit ?? blueOneCockpitImages.slice(0, 4)}
+              altPrefix="BlueOne cockpit view"
+              onClickImage={setModalImage}
+            />
           </div>
         </section>
 
@@ -357,20 +347,12 @@ export default function BlueOneClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(keyPhotosByCat.activities ?? blueOneActivityImages).map((image, index) => (
-                <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
-                  <Image
-                    src={image}
-                    alt={`BlueOne water activity ${index + 1}`}
-                    width={400}
-                    height={300}
-                    className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                </div>
-              ))}
-            </div>
+            <GalleryGrid
+              images={keyPhotosByCat.activities ?? blueOneActivityImages}
+              altPrefix="BlueOne water activity"
+              columns={3}
+              onClickImage={setModalImage}
+            />
           </div>
         </section>
 
@@ -378,20 +360,12 @@ export default function BlueOneClient() {
         <section className="py-20 bg-black/30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-16">Culinary Excellence</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {(keyPhotosByCat.food ?? blueOneFoodImages).map((image, index) => (
-                <div key={index} className="relative group cursor-pointer" onClick={() => setModalImage(image)}>
-                  <Image
-                    src={image}
-                    alt={`BlueOne dining experience ${index + 1}`}
-                    width={400}
-                    height={300}
-                    className="w-full h-64 object-cover rounded-lg shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
-                </div>
-              ))}
-            </div>
+            <GalleryGrid
+              images={keyPhotosByCat.food ?? blueOneFoodImages}
+              altPrefix="BlueOne dining experience"
+              columns={3}
+              onClickImage={setModalImage}
+            />
           </div>
         </section>
 
