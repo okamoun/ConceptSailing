@@ -14,9 +14,17 @@ jest.mock('../lib/availability', () => ({
     { label: 'Balance — 50%', percentage: 50, description: 'MYBA: 50% balance 28 days before.' },
   ],
   DEFAULT_PRICING: {
-    basePrice: 0, currency: 'EUR', apaPercentage: 30,
-    securityDeposit: 2000, discountAmount: 0, extras: [],
+    basePrice: 0, currency: 'EUR', apaPercentage: 30, vatPercentage: 13,
+    securityDeposit: 2000, discountPercentage: 0, extras: [],
   },
+}));
+
+jest.mock('../lib/financial', () => ({
+  getPricingConfig: jest.fn().mockResolvedValue({
+    highSeasonRate: 24000, midSeasonRate: 21000, lowSeasonRate: 18000,
+    apaPercent: 25, vatPercent: 13, relocationFee: 1000,
+  }),
+  getSeasonTier: jest.fn().mockReturnValue('mid'),
 }));
 
 jest.mock('../app/marinas-data', () => ({
@@ -47,7 +55,7 @@ const DRAFT_PROPOSAL = {
   status: 'draft' as const,
   pricing: {
     basePrice: 8000, currency: 'EUR', apaPercentage: 30,
-    securityDeposit: 2000, discountAmount: 0, extras: [],
+    securityDeposit: 2000, discountPercentage: 0, extras: [],
   },
   paymentTerms: [
     { label: 'Custom Term 1', percentage: 60, description: 'Custom 60% up front.' },

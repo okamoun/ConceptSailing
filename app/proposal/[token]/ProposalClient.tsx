@@ -267,7 +267,7 @@ export default function ProposalClient({ token }: Props) {
               </div>
               {totals.discount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-emerald-600">Discount</span>
+                  <span className="text-emerald-600">Discount ({proposal.pricing.discountPercentage}%)</span>
                   <span className="font-medium text-emerald-600">− {fmt(totals.discount, currency)}</span>
                 </div>
               )}

@@ -72,7 +72,7 @@ export interface ProposalPricing {
   apaPercentage: number;
   vatPercentage: number;
   securityDeposit: number;
-  discountAmount: number;
+  discountPercentage: number;
   extras: PricingExtra[];
 }
 
@@ -125,7 +125,7 @@ export const DEFAULT_PRICING: ProposalPricing = {
   apaPercentage: 30,
   vatPercentage: 13,
   securityDeposit: 2000,
-  discountAmount: 0,
+  discountPercentage: 0,
   extras: [],
 };
 
@@ -133,7 +133,7 @@ export function calcTotals(pricing: ProposalPricing) {
   const base = pricing.basePrice || 0;
   const apa = Math.round(base * (pricing.apaPercentage || 0) / 100);
   const extrasSum = (pricing.extras || []).reduce((s, e) => s + (e.amount || 0), 0);
-  const discount = pricing.discountAmount || 0;
+  const discount = Math.round(base * (pricing.discountPercentage || 0) / 100);
   const charterFee = base - discount + extrasSum;
   const vat = Math.round(charterFee * (pricing.vatPercentage ?? 13) / 100);
   const grandTotal = charterFee + vat + apa + (pricing.securityDeposit || 0);

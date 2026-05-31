@@ -34,7 +34,7 @@ describe('calcTotals', () => {
     apaPercentage: 30,
     vatPercentage: 0,
     securityDeposit: 2000,
-    discountAmount: 0,
+    discountPercentage: 0,
     extras: [],
   };
 
@@ -55,8 +55,8 @@ describe('calcTotals', () => {
   });
 
   it('subtracts discount from the charter fee', () => {
-    const { charterFee, discount } = calcTotals({ ...base, discountAmount: 1000 });
-    expect(discount).toBe(1000);
+    const { charterFee, discount } = calcTotals({ ...base, discountPercentage: 10 });
+    expect(discount).toBe(1000); // 10% of 10 000
     expect(charterFee).toBe(9000);
   });
 
@@ -75,10 +75,10 @@ describe('calcTotals', () => {
   it('combines discount and extras correctly', () => {
     const { charterFee } = calcTotals({
       ...base,
-      discountAmount: 500,
+      discountPercentage: 5,
       extras: [{ label: 'Transfer', amount: 200 }],
     });
-    expect(charterFee).toBe(9700); // 10 000 - 500 + 200
+    expect(charterFee).toBe(9700); // 10 000 - 500 (5%) + 200
   });
 
   it('handles zero APA percentage', () => {
@@ -94,7 +94,7 @@ describe('calcTotals', () => {
       apaPercentage: 0,
       vatPercentage: 0,
       securityDeposit: 0,
-      discountAmount: 0,
+      discountPercentage: 0,
       extras: [],
     });
     expect(result.base).toBe(0);
