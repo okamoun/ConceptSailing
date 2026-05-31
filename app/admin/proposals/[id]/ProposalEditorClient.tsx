@@ -431,7 +431,7 @@ export default function ProposalEditorClient({ id }: Props) {
             </Field>
             <Field label="Guests">
               <input type="number" value={passengers} onChange={e => setPassengers(Number(e.target.value))}
-                min={1} max={12} className={inputCls} />
+                onFocus={e => e.target.select()} min={1} max={12} className={inputCls} />
             </Field>
             <Field label="Experience Theme">
               <input type="text" value={selectedTheme} onChange={e => setSelectedTheme(e.target.value)}
@@ -480,27 +480,27 @@ export default function ProposalEditorClient({ id }: Props) {
             <Field label="Base Charter Fee (€)">
               <input type="number" value={pricing.basePrice}
                 onChange={e => setPricing(p => ({ ...p, basePrice: Number(e.target.value) }))}
-                min={0} step={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} step={100} className={inputCls} />
             </Field>
             <Field label="Discount (%)" hint={totals.discount > 0 ? `= ${fmt(totals.discount)} off` : 'Applied to base fee'}>
               <input type="number" value={pricing.discountPercentage}
                 onChange={e => setPricing(p => ({ ...p, discountPercentage: Number(e.target.value) }))}
-                min={0} max={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} max={100} className={inputCls} />
             </Field>
             <Field label="APA Percentage (%)" hint="Typically 25–35%">
               <input type="number" value={pricing.apaPercentage}
                 onChange={e => setPricing(p => ({ ...p, apaPercentage: Number(e.target.value) }))}
-                min={0} max={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} max={100} className={inputCls} />
             </Field>
             <Field label="VAT (%)" hint="Applied to charter fee">
               <input type="number" value={pricing.vatPercentage ?? 13}
                 onChange={e => setPricing(p => ({ ...p, vatPercentage: Number(e.target.value) }))}
-                min={0} max={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} max={100} className={inputCls} />
             </Field>
             <Field label="Security Deposit (€)" hint="Refundable">
               <input type="number" value={pricing.securityDeposit}
                 onChange={e => setPricing(p => ({ ...p, securityDeposit: Number(e.target.value) }))}
-                min={0} step={100} className={inputCls} />
+                onFocus={e => e.target.select()} min={0} step={100} className={inputCls} />
             </Field>
           </div>
 
@@ -513,7 +513,7 @@ export default function ProposalEditorClient({ id }: Props) {
                   <input type="text" value={extra.label} onChange={e => updateExtra(i, 'label', e.target.value)}
                     placeholder="Service" className={`${inputCls} flex-1`} />
                   <input type="number" value={extra.amount} onChange={e => updateExtra(i, 'amount', e.target.value)}
-                    min={0} className={`${inputCls} w-28`} />
+                    onFocus={e => e.target.select()} min={0} className={`${inputCls} w-28`} />
                   <button type="button" onClick={() => setPricing(p => ({ ...p, extras: p.extras.filter((_, idx) => idx !== i) }))}
                     className="text-red-400 hover:text-red-300 px-2">✕</button>
                 </div>
@@ -552,11 +552,6 @@ export default function ProposalEditorClient({ id }: Props) {
                 <span>APA ({pricing.apaPercentage}%)</span><span>{fmt(totals.apa)}</span>
               </div>
             )}
-            {totals.vat > 0 && (
-              <div className="flex justify-between text-sm text-blue-200">
-                <span>VAT ({pricing.vatPercentage ?? 13}%)</span><span>{fmt(totals.vat)}</span>
-              </div>
-            )}
             {pricing.securityDeposit > 0 && (
               <div className="flex justify-between text-sm text-blue-200">
                 <span>Security Deposit</span><span>{fmt(pricing.securityDeposit)}</span>
@@ -582,7 +577,7 @@ export default function ProposalEditorClient({ id }: Props) {
                       placeholder="e.g. Deposit — 50%" className={`${inputCls} flex-1`} />
                     <div className="flex items-center gap-1">
                       <input type="number" value={term.percentage} onChange={e => updateTerm(i, 'percentage', e.target.value)}
-                        min={0} max={100} className={`${inputCls} w-20`} />
+                        onFocus={e => e.target.select()} min={0} max={100} className={`${inputCls} w-20`} />
                       <span className="text-blue-300 text-sm">%</span>
                     </div>
                     <button type="button" onClick={() => setPaymentTerms(prev => prev.filter((_, idx) => idx !== i))}
