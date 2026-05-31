@@ -13,6 +13,7 @@ import {
   calcTotals,
   DEFAULT_PAYMENT_TERMS,
   DEFAULT_PRICING,
+  DEFAULT_INCLUSIONS,
   type Charter,
   type ProposalPricing,
   type PaymentTerm,
@@ -94,6 +95,7 @@ export default function ProposalEditorClient({ id }: Props) {
   // ── Proposal-only fields ──
   const [pricing, setPricing] = useState<ProposalPricing>(DEFAULT_PRICING);
   const [paymentTerms, setPaymentTerms] = useState<PaymentTerm[]>(DEFAULT_PAYMENT_TERMS);
+  const [inclusions, setInclusions] = useState<string[]>(DEFAULT_INCLUSIONS);
   const [specialConditions, setSpecialConditions] = useState('');
   const [adminNotes, setAdminNotes] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
@@ -146,6 +148,7 @@ export default function ProposalEditorClient({ id }: Props) {
     if (c.proposal) {
       setPricing(c.proposal.pricing ?? DEFAULT_PRICING);
       setPaymentTerms(c.proposal.paymentTerms ?? DEFAULT_PAYMENT_TERMS);
+      setInclusions(c.proposal.inclusions ?? DEFAULT_INCLUSIONS);
       setSpecialConditions(c.proposal.specialConditions ?? '');
       setAdminNotes(c.proposal.adminNotes ?? '');
       setExpiresAt(c.proposal.expiresAt ?? '');
@@ -213,6 +216,7 @@ export default function ProposalEditorClient({ id }: Props) {
       await updateCharterProposal(id, {
         pricing,
         paymentTerms,
+        inclusions,
         specialConditions: specialConditions.trim() || undefined,
         adminNotes: adminNotes.trim() || undefined,
         expiresAt,
@@ -248,7 +252,7 @@ export default function ProposalEditorClient({ id }: Props) {
         redeliveryPoint: redeliveryPoint || undefined,
       });
       await updateCharterProposal(id, {
-        pricing, paymentTerms,
+        pricing, paymentTerms, inclusions,
         specialConditions: specialConditions.trim() || undefined,
         adminNotes: adminNotes.trim() || undefined,
         expiresAt,
@@ -562,6 +566,50 @@ export default function ProposalEditorClient({ id }: Props) {
             <div className="flex justify-between text-base font-bold text-white border-t border-white/20 pt-2">
               <span>Grand Total</span><span>{fmt(totals.grandTotal)}</span>
             </div>
+          </div>
+        </Section>
+
+        {/* Inclusions */}
+        <Section title="What's Included">
+          <div className="space-y-2 mb-4">
+            {inclusions.map((item, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <span className="text-emerald-400 flex-shrink-0">✓</span>
+                <input
+                  type="text"
+                  value={item}
+                  onChange={e => {
+                    const next = [...inclusions];
+                    next[i] = e.target.value;
+                    setInclusions(next);
+                  }}
+                  className={`${inputCls} flex-1`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setInclusions(prev => prev.filter((_, idx) => idx !== i))}
+                  className="text-red-400 hover:text-red-300 px-2 flex-shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => setInclusions(prev => [...prev, ''])}
+              className="text-xs text-blue-400 hover:text-blue-200 underline"
+            >
+              + Add item
+            </button>
+            <button
+              type="button"
+              onClick={() => setInclusions(DEFAULT_INCLUSIONS)}
+              className="text-xs text-blue-500 hover:text-blue-300 underline"
+            >
+              Reset to defaults
+            </button>
           </div>
         </Section>
 

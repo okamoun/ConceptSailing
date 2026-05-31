@@ -193,6 +193,10 @@ export default function ProposalClient({ token }: Props) {
           .pgrand { font-size: 11px !important; }
           .papa-note { font-size: 8px !important; margin-top: 3px !important; }
 
+          /* Inclusions */
+          #pinc { margin-bottom: 5px !important; }
+          #pinc .grid { gap: 3px 16px !important; }
+
           /* Payment terms */
           #ppay .space-y-4 > * + * { margin-top: 3px !important; }
           .pterm { padding: 5px 8px !important; gap: 5px !important; border-radius: 4px !important; }
@@ -371,6 +375,25 @@ export default function ProposalClient({ token }: Props) {
             </div>
 
           </div>{/* end .pcols */}
+
+          {/* ── What's Included ── */}
+          {proposal.inclusions && proposal.inclusions.length > 0 && (
+            <div id="pinc" className="pc bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+              <h2 className="plab text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">What&rsquo;s Included</h2>
+              <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
+                {proposal.inclusions.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <div className="mt-0.5 w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-2.5 h-2.5 text-emerald-600" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-gray-700 leading-snug">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ── Payment Schedule ── */}
           <div id="ppay" className="pc bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">

@@ -98,6 +98,7 @@ export interface ProposalData {
   status: ProposalStatus;
   pricing: ProposalPricing;
   paymentTerms: PaymentTerm[];
+  inclusions?: string[];
   specialConditions?: string;
   adminNotes?: string;
   comments: ProposalComment[];
@@ -105,6 +106,19 @@ export interface ProposalData {
   sentAt: Timestamp | null;
   viewedAt: Timestamp | null;
 }
+
+export const DEFAULT_INCLUSIONS: string[] = [
+  'Professional skipper & crew',
+  'Breakfast, lunch & dinner prepared daily by the crew',
+  'Welcome provisions & soft drinks',
+  'Bed linen & bath towels',
+  'Air conditioning',
+  'Snorkelling & diving equipment',
+  'Paddleboards & water sports equipment',
+  'Satellite WiFi',
+  'Fuel for normal cruising (up to 4 h/day engine use)',
+  'Daily boat cleaning & housekeeping',
+];
 
 // MYBA standard payment schedule (editable per charter)
 export const DEFAULT_PAYMENT_TERMS: PaymentTerm[] = [
