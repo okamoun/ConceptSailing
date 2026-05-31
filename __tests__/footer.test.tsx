@@ -95,7 +95,7 @@ describe('Footer — Legal section', () => {
   test('renders copyright notice', () => {
     render(<Footer />)
     expect(
-      screen.getByText('© 2024 BlueOne Luxury Yacht. All rights reserved.')
+      screen.getByText('© 2026 BlueOne Luxury Yacht. All rights reserved.')
     ).toBeInTheDocument()
   })
 
