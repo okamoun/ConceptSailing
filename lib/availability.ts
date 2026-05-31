@@ -219,7 +219,11 @@ export async function updateCharter(
   id: string,
   data: Partial<Omit<Charter, 'id' | 'createdAt'>>
 ): Promise<void> {
-  await updateDoc(doc(db, COLLECTION, id), data as Record<string, unknown>);
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (v !== undefined) clean[k] = v;
+  }
+  await updateDoc(doc(db, COLLECTION, id), clean);
 }
 
 export async function deleteCharter(id: string): Promise<void> {
@@ -257,7 +261,7 @@ export async function updateCharterProposal(
 ): Promise<void> {
   const updates: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) {
-    updates[`proposal.${k}`] = v;
+    if (v !== undefined) updates[`proposal.${k}`] = v;
   }
   await updateDoc(doc(db, COLLECTION, charterId), updates);
 }
