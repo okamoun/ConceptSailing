@@ -16,6 +16,8 @@ export type Adventure = {
   experience: string;
   itinerary: AdventureItineraryDay[];
   features?: string[];
+  partnerName?: string;
+  partnerUrl?: string;
 };
 
 const adventures: Adventure[] = [
@@ -1023,7 +1025,9 @@ const adventures: Adventure[] = [
     id: "18",
     name: "Cigar Discovery Week",
     description: "Sail the Greek islands in search of the world's finest cigars, curated in collaboration with Meerapfel.",
-    image: "/images/gastronomy.jpg",
+    image: "/images/cigars.jpg",
+    partnerName: "Meerapfel",
+    partnerUrl: "https://meerapfel.com/meerapfel-cigar/",
     experience: "A one-of-a-kind voyage for connoisseurs: seven days at sea discovering the world's most celebrated cigars aboard a luxury catamaran. In partnership with Meerapfel — one of Europe's most storied cigar houses — this journey pairs handpicked premium cigars with the dramatic scenery of the Greek archipelago. Each evening, a cigar sommelier guides you through a tasting flight on deck, matching selections from Meerapfel's legendary collection with the local cuisine and sea air. From Hydra to Monemvasia, Spetses to Elafonisos, every island anchorage becomes a setting for exceptional smoke, story, and conversation.",
     itinerary: [
       {
