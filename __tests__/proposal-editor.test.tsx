@@ -13,6 +13,7 @@ jest.mock('../lib/availability', () => ({
     { label: 'Deposit — 50%', percentage: 50, description: 'MYBA: 50% deposit on signing.' },
     { label: 'Balance — 50%', percentage: 50, description: 'MYBA: 50% balance 28 days before.' },
   ],
+  DEFAULT_INCLUSIONS: ['Professional skipper & crew', 'Breakfast, lunch & dinner', 'Welcome provisions'],
   DEFAULT_PRICING: {
     basePrice: 0, currency: 'EUR', apaPercentage: 25, vatPercentage: 13,
     securityDeposit: 2000, discountPercentage: 0, extras: [],
