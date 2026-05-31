@@ -1023,7 +1023,7 @@ const adventures: Adventure[] = [
   },
   {
     id: "18",
-    name: "Cigar Discovery Week",
+    name: "The Ultimate Cigar Experience",
     description: "Sail the Greek islands in search of the world's finest cigars, curated in collaboration with Meerapfel.",
     image: "/images/cigars.jpg",
     partnerName: "Meerapfel",
