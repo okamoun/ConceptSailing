@@ -70,6 +70,7 @@ export interface ProposalPricing {
   basePrice: number;
   currency: string;
   apaPercentage: number;
+  vatPercentage: number;
   securityDeposit: number;
   discountAmount: number;
   extras: PricingExtra[];
@@ -114,7 +115,7 @@ export const DEFAULT_PAYMENT_TERMS: PaymentTerm[] = [
     label: 'Balance — 50%',
     percentage: 50,
     description:
-      '50% balance of the total charter fee is due 28 days prior to the charter commencement date.',
+      '50% balance of the charter fee plus APA and VAT is due 28 days prior to the charter commencement date.',
   },
 ];
 
@@ -122,6 +123,7 @@ export const DEFAULT_PRICING: ProposalPricing = {
   basePrice: 0,
   currency: 'EUR',
   apaPercentage: 30,
+  vatPercentage: 13,
   securityDeposit: 2000,
   discountAmount: 0,
   extras: [],
@@ -129,12 +131,13 @@ export const DEFAULT_PRICING: ProposalPricing = {
 
 export function calcTotals(pricing: ProposalPricing) {
   const base = pricing.basePrice || 0;
-  const apa = Math.round(base * (pricing.apaPercentage || 0) / 100);
   const extrasSum = (pricing.extras || []).reduce((s, e) => s + (e.amount || 0), 0);
   const discount = pricing.discountAmount || 0;
   const charterFee = base - discount + extrasSum;
-  const grandTotal = charterFee + apa + (pricing.securityDeposit || 0);
-  return { base, apa, extrasSum, discount, charterFee, grandTotal };
+  const apa = Math.round(charterFee * (pricing.apaPercentage || 0) / 100);
+  const vat = Math.round(charterFee * (pricing.vatPercentage || 0) / 100);
+  const grandTotal = charterFee + apa + vat + (pricing.securityDeposit || 0);
+  return { base, apa, vat, extrasSum, discount, charterFee, grandTotal };
 }
 
 export function proposalRef(charterId: string): string {

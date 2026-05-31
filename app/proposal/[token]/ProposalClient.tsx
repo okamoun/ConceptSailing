@@ -287,6 +287,12 @@ export default function ProposalClient({ token }: Props) {
                   <span className="font-medium text-gray-900">{fmt(totals.apa, currency)}</span>
                 </div>
               )}
+              {totals.vat > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">VAT ({proposal.pricing.vatPercentage ?? 13}%)</span>
+                  <span className="font-medium text-gray-900">{fmt(totals.vat, currency)}</span>
+                </div>
+              )}
               {(proposal.pricing.securityDeposit || 0) > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Security Deposit (refundable)</span>
@@ -312,7 +318,9 @@ export default function ProposalClient({ token }: Props) {
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-5">Payment Schedule</h2>
             <div className="space-y-4">
               {(proposal.paymentTerms || []).map((term, i) => {
-                const amount = Math.round(totals.charterFee * term.percentage / 100);
+                const isLast = i === (proposal.paymentTerms || []).length - 1;
+                const termBase = Math.round(totals.charterFee * term.percentage / 100);
+                const amount = isLast ? termBase + totals.apa + totals.vat : termBase;
                 return (
                   <div key={i} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm font-bold text-blue-700">

@@ -32,6 +32,7 @@ describe('calcTotals', () => {
     basePrice: 10000,
     currency: 'EUR',
     apaPercentage: 30,
+    vatPercentage: 13,
     securityDeposit: 2000,
     discountAmount: 0,
     extras: [],
@@ -43,14 +44,19 @@ describe('calcTotals', () => {
     expect(charterFee).toBe(10000);
   });
 
-  it('computes APA as a percentage of the base price', () => {
+  it('computes APA as a percentage of the charter fee', () => {
     const { apa } = calcTotals(base);
     expect(apa).toBe(3000); // 30% of 10 000
   });
 
-  it('includes security deposit in the grand total', () => {
+  it('computes VAT as a percentage of the charter fee', () => {
+    const { vat } = calcTotals(base);
+    expect(vat).toBe(1300); // 13% of 10 000
+  });
+
+  it('includes APA, VAT and security deposit in the grand total', () => {
     const { grandTotal } = calcTotals(base);
-    expect(grandTotal).toBe(15000); // 10 000 + 3 000 + 2 000
+    expect(grandTotal).toBe(16300); // 10 000 + 3 000 + 1 300 + 2 000
   });
 
   it('subtracts discount from the charter fee', () => {
@@ -83,7 +89,13 @@ describe('calcTotals', () => {
   it('handles zero APA percentage', () => {
     const { apa, grandTotal } = calcTotals({ ...base, apaPercentage: 0 });
     expect(apa).toBe(0);
-    expect(grandTotal).toBe(12000); // 10 000 + 0 + 2 000
+    expect(grandTotal).toBe(13300); // 10 000 + 0 + 1 300 + 2 000
+  });
+
+  it('handles zero VAT percentage', () => {
+    const { vat, grandTotal } = calcTotals({ ...base, vatPercentage: 0 });
+    expect(vat).toBe(0);
+    expect(grandTotal).toBe(15000); // 10 000 + 3 000 + 0 + 2 000
   });
 
   it('handles all-zero pricing without errors', () => {
@@ -91,12 +103,14 @@ describe('calcTotals', () => {
       basePrice: 0,
       currency: 'EUR',
       apaPercentage: 0,
+      vatPercentage: 0,
       securityDeposit: 0,
       discountAmount: 0,
       extras: [],
     });
     expect(result.base).toBe(0);
     expect(result.apa).toBe(0);
+    expect(result.vat).toBe(0);
     expect(result.charterFee).toBe(0);
     expect(result.grandTotal).toBe(0);
   });
@@ -181,6 +195,10 @@ describe('DEFAULT_PRICING', () => {
 
   it('sets APA to 30% by default', () => {
     expect(DEFAULT_PRICING.apaPercentage).toBe(30);
+  });
+
+  it('sets VAT to 13% by default', () => {
+    expect(DEFAULT_PRICING.vatPercentage).toBe(13);
   });
 
   it('has an empty extras array', () => {

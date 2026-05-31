@@ -5,7 +5,7 @@ jest.mock('../lib/availability', () => ({
   approveCharterProposal: jest.fn().mockResolvedValue(undefined),
   rejectCharterProposal: jest.fn().mockResolvedValue(undefined),
   calcTotals: jest.fn().mockReturnValue({
-    base: 10000, apa: 3000, extrasSum: 0, discount: 0, charterFee: 10000, grandTotal: 15000,
+    base: 10000, apa: 3000, vat: 1300, extrasSum: 0, discount: 0, charterFee: 10000, grandTotal: 16300,
   }),
   proposalRef: jest.fn().mockReturnValue('PROP-CHARTER1'),
 }));
@@ -43,7 +43,7 @@ const BASE_PROPOSAL = {
   token: 'abc123def456',
   status: 'sent' as const,
   pricing: {
-    basePrice: 10000, currency: 'EUR', apaPercentage: 30,
+    basePrice: 10000, currency: 'EUR', apaPercentage: 30, vatPercentage: 13,
     securityDeposit: 2000, discountAmount: 0, extras: [],
   },
   paymentTerms: [
