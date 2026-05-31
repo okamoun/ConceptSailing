@@ -1,7 +1,6 @@
 import emailjs from '@emailjs/browser';
 import { CONTACT } from '../app/config/contact';
 import { trackEvent } from './analytics';
-import { createCharter } from './availability';
 import { saveContactSubmission } from './submissions';
 
 // EmailJS configuration with fallbacks
@@ -145,22 +144,6 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
 
     if (response.status === 200) {
       trackEvent('booking_submitted', { boat: bookingData.boat, theme: bookingData.selectedTheme || '' });
-      const emailCharterData: Parameters<typeof createCharter>[0] = {
-        status: 'web_request',
-        startDate: bookingData.date,
-        endDate: bookingData.endDate || bookingData.date,
-        name: bookingData.name,
-        email: bookingData.email,
-        phone: bookingData.phone,
-        boat: bookingData.boat,
-        passengers: bookingData.passengers,
-        embarkationPoint: bookingData.deliveryPoint || bookingData.embarkationPoint,
-      };
-      if (bookingData.deliveryPoint) emailCharterData.deliveryPoint = bookingData.deliveryPoint;
-      if (bookingData.redeliveryPoint) emailCharterData.redeliveryPoint = bookingData.redeliveryPoint;
-      if (bookingData.holidayDescription) emailCharterData.holidayDescription = bookingData.holidayDescription;
-      if (bookingData.selectedTheme) emailCharterData.selectedTheme = bookingData.selectedTheme;
-      createCharter(emailCharterData).catch(err => console.warn('Failed to save charter to DB:', err));
       return {
         status: 'success',
         message: 'Booking email sent successfully to both client and business'
