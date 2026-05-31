@@ -265,7 +265,7 @@ export default function ProposalEditorClient({ id }: Props) {
       const body = [
         `Dear ${firstName},`,
         '',
-        `Thank you for your interest in chartering with ${CONTACT.company.name}. We are delighted to present your personalised charter proposal.`,
+        `Thank you for your interest in chartering with BlueOne. We are delighted to present your personalised charter proposal.`,
         '',
         `Please find your proposal at the link below:`,
         url,
@@ -279,7 +279,7 @@ export default function ProposalEditorClient({ id }: Props) {
         `We look forward to welcoming you aboard.`,
         '',
         `Warm regards,`,
-        `The ${CONTACT.company.name} Team`,
+        `The BlueOne Team`,
         CONTACT.email,
         CONTACT.phone.formatted,
       ].join('\n');
