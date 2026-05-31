@@ -22,6 +22,7 @@ export type CharterStatus =
   | 'web_request'
   | 'broker_request'
   | 'serious_request'
+  | 'proposal_sent'
   | 'confirmed'
   | 'signed'
   | 'canceled'
@@ -33,16 +34,18 @@ export const CHARTER_STATUS_PRIORITY: Record<CharterStatus, number> = {
   confirmed:       7,
   owner_use:       6,
   maintenance:     5,
-  serious_request: 4,
-  broker_request:  3,
-  web_request:     2,
-  canceled:        1,
+  proposal_sent:   4,
+  serious_request: 3,
+  broker_request:  2,
+  web_request:     1,
+  canceled:        0,
 };
 
 export const CHARTER_STATUS_LABEL: Record<CharterStatus, string> = {
   web_request:     'Web Request',
   broker_request:  'Broker Request',
   serious_request: 'Serious Request',
+  proposal_sent:   'Proposal Sent',
   confirmed:       'Confirmed',
   signed:          'Signed',
   canceled:        'Canceled',
@@ -300,6 +303,7 @@ export async function getChartersWithProposals(): Promise<Charter[]> {
 
 export async function markCharterProposalSent(charterId: string): Promise<void> {
   await updateDoc(doc(db, COLLECTION, charterId), {
+    status: 'proposal_sent',
     'proposal.status': 'sent',
     'proposal.sentAt': serverTimestamp(),
   });

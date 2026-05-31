@@ -227,6 +227,7 @@ export default function ProposalEditorClient({ id }: Props) {
       });
       await markCharterProposalSent(id);
       setStatus('sent');
+      setCharter(prev => prev ? { ...prev, status: 'proposal_sent' } : prev);
     } catch (err) {
       setError('Failed to send. Please try again.');
       console.error(err);
