@@ -6,7 +6,6 @@ import { AdminAuthProvider } from "./admin/AdminAuthContext"
 import SiteChrome from "./components/SiteChrome"
 import { CONTACT } from "./config/contact"
 import "./globals.css"
-import "./animations.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
