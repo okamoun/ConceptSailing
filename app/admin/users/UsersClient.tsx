@@ -19,6 +19,7 @@ const PAGE_LABELS: Record<AdminPage, string> = {
   '/admin/photos': 'Photos',
   '/admin/users': 'Users',
   '/admin/financial': 'Financial',
+  '/admin/themes': 'Themes',
 };
 
 const EMPTY_FORM: Omit<AdminUser, 'updatedAt'> = {

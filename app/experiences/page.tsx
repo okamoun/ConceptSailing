@@ -2,7 +2,11 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from "next/link";
 import adventures from "../adventures-data";
+import type { Adventure } from "../adventures-data";
 import { featureIconMap } from "../feature-icons";
+import { getAllThemeMetadata, THEME_CATEGORIES } from "../../lib/themes";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'Greek Sailing Adventures | Themed Yacht Experiences',
@@ -24,28 +28,28 @@ export const metadata: Metadata = {
   },
 };
 
-const adventureCategories = [
+const HARDCODED_CATEGORIES = [
   {
     category: "Active & Sports",
     themes: [
       adventures.find(a => a.id === "1"),
       adventures.find(a => a.id === "2"),
       adventures.find(a => a.id === "12"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
   {
     category: "Wellness & Relaxation",
     themes: [
       adventures.find(a => a.id === "3"),
       adventures.find(a => a.id === "4"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
   {
     category: "Culture & History",
     themes: [
       adventures.find(a => a.id === "5"),
       adventures.find(a => a.id === "9"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
   {
     category: "Food",
@@ -53,14 +57,14 @@ const adventureCategories = [
       adventures.find(a => a.id === "6"),
       adventures.find(a => a.id === "10"),
       adventures.find(a => a.id === "11"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
   {
     category: "Social & Family",
     themes: [
       adventures.find(a => a.id === "7"),
       adventures.find(a => a.id === "8"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
   {
     category: "Celebrations & Milestones",
@@ -68,24 +72,60 @@ const adventureCategories = [
       adventures.find(a => a.id === "15"),
       adventures.find(a => a.id === "16"),
       adventures.find(a => a.id === "14"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
   {
     category: "Nature & Sea",
     themes: [
       adventures.find(a => a.id === "13"),
       adventures.find(a => a.id === "17"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
   {
     category: "Lifestyle & Connoisseur",
     themes: [
       adventures.find(a => a.id === "18"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
+    ].filter((adv): adv is Adventure => Boolean(adv)),
   },
 ];
 
-export default function ExperiencesPage() {
+export default async function ExperiencesPage() {
+  const themeMetaList = await getAllThemeMetadata();
+
+  let adventureCategories: Array<{ category: string; themes: Adventure[] }>;
+  let featuredIds: Set<string>;
+
+  if (themeMetaList.length === 0) {
+    // Fallback: use hardcoded layout when Firestore has no data yet
+    adventureCategories = HARDCODED_CATEGORIES;
+    featuredIds = new Set();
+  } else {
+    featuredIds = new Set(themeMetaList.filter(m => m.featured).map(m => m.id));
+
+    const adventureMap = new Map(adventures.map(a => [a.id, a]));
+    const grouped = new Map<string, Adventure[]>();
+
+    const sorted = [...themeMetaList]
+      .filter(m => m.visible)
+      .sort((a, b) => {
+        const catDiff = a.category.localeCompare(b.category);
+        if (catDiff !== 0) return catDiff;
+        return a.order - b.order;
+      });
+
+    for (const meta of sorted) {
+      const adv = adventureMap.get(meta.id);
+      if (!adv) continue;
+      if (!grouped.has(meta.category)) grouped.set(meta.category, []);
+      grouped.get(meta.category)!.push(adv);
+    }
+
+    // Preserve canonical category display order
+    adventureCategories = THEME_CATEGORIES
+      .filter(cat => (grouped.get(cat)?.length ?? 0) > 0)
+      .map(cat => ({ category: cat, themes: grouped.get(cat)! }));
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
       {/* Hero Section */}
@@ -151,6 +191,11 @@ export default function ExperiencesPage() {
                         priority
                       />
                     </div>
+                    {featuredIds.has(adv.id) && (
+                      <div className="inline-flex items-center gap-1 bg-yellow-400/20 border border-yellow-400/40 text-yellow-200 text-xs font-semibold px-2 py-0.5 rounded-full mb-2">
+                        ★ Featured
+                      </div>
+                    )}
                     <h3 className="text-2xl font-bold text-gray-900 mb-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                       {adv.name}
                     </h3>
