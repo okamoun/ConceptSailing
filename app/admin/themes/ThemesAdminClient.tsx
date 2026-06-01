@@ -176,7 +176,6 @@ export default function ThemesAdminClient() {
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
       const metaList = await getAllThemeMetadata();
 
       if (metaList.length === 0) {
@@ -234,6 +233,7 @@ export default function ThemesAdminClient() {
   }
 
   async function saveField(id: string, patch: Partial<Omit<ThemeMetadata, 'id' | 'updatedAt'>>) {
+    setError('');
     setRows(prev => prev.map(r => r.id === id ? { ...r, meta: { ...r.meta, ...patch } } : r));
     setSaving(id);
     try {
@@ -248,6 +248,7 @@ export default function ThemesAdminClient() {
   }
 
   async function handleMoveUp(row: ThemeRow) {
+    setError('');
     const sameCat = rows
       .filter(r => r.meta.category === row.meta.category)
       .sort((a, b) => a.meta.order - b.meta.order);
@@ -269,6 +270,7 @@ export default function ThemesAdminClient() {
   }
 
   async function handleMoveDown(row: ThemeRow) {
+    setError('');
     const sameCat = rows
       .filter(r => r.meta.category === row.meta.category)
       .sort((a, b) => a.meta.order - b.meta.order);
@@ -291,6 +293,7 @@ export default function ThemesAdminClient() {
 
   async function handleInitialize() {
     if (!confirm('Seed Firestore with the default category assignments? This only runs if the collection is currently empty.')) return;
+    setError('');
     setInitializing(true);
     try {
       await initializeThemeDefaults();
