@@ -100,30 +100,37 @@ export default async function ExperiencesPage() {
     adventureCategories = HARDCODED_CATEGORIES;
     featuredIds = new Set();
   } else {
-    featuredIds = new Set(themeMetaList.filter(m => m.featured).map(m => m.id));
+    try {
+      featuredIds = new Set(themeMetaList.filter(m => m.featured).map(m => m.id));
 
-    const adventureMap = new Map(adventures.map(a => [a.id, a]));
-    const grouped = new Map<string, Adventure[]>();
+      const adventureMap = new Map(adventures.map(a => [a.id, a]));
+      const grouped = new Map<string, Adventure[]>();
 
-    const sorted = [...themeMetaList]
-      .filter(m => m.visible)
-      .sort((a, b) => {
-        const catDiff = a.category.localeCompare(b.category);
-        if (catDiff !== 0) return catDiff;
-        return a.order - b.order;
-      });
+      const sorted = [...themeMetaList]
+        .filter(m => m.visible)
+        .sort((a, b) => {
+          const catDiff = (a.category ?? '').localeCompare(b.category ?? '');
+          if (catDiff !== 0) return catDiff;
+          return (a.order ?? 0) - (b.order ?? 0);
+        });
 
-    for (const meta of sorted) {
-      const adv = adventureMap.get(meta.id);
-      if (!adv) continue;
-      if (!grouped.has(meta.category)) grouped.set(meta.category, []);
-      grouped.get(meta.category)!.push(adv);
+      for (const meta of sorted) {
+        const adv = adventureMap.get(meta.id);
+        if (!adv || !meta.category) continue;
+        if (!grouped.has(meta.category)) grouped.set(meta.category, []);
+        grouped.get(meta.category)!.push(adv);
+      }
+
+      // Preserve canonical category display order
+      const dynamic = THEME_CATEGORIES
+        .filter(cat => (grouped.get(cat)?.length ?? 0) > 0)
+        .map(cat => ({ category: cat, themes: grouped.get(cat)! }));
+
+      adventureCategories = dynamic.length > 0 ? dynamic : HARDCODED_CATEGORIES;
+    } catch {
+      adventureCategories = HARDCODED_CATEGORIES;
+      featuredIds = new Set();
     }
-
-    // Preserve canonical category display order
-    adventureCategories = THEME_CATEGORIES
-      .filter(cat => (grouped.get(cat)?.length ?? 0) > 0)
-      .map(cat => ({ category: cat, themes: grouped.get(cat)! }));
   }
 
   return (
