@@ -104,6 +104,20 @@ describe('getAllThemeMetadata', () => {
     expect(mockCollection).toHaveBeenCalledWith(expect.anything(), 'theme_metadata')
     expect(mockGetDocs).toHaveBeenCalledWith('mock-collection-ref')
   })
+
+  test('passes through documents with missing fields as-is — callers must handle undefined', async () => {
+    // Firestore does not enforce the TypeScript interface at runtime; a document
+    // may be missing any field. getAllThemeMetadata does NO field validation,
+    // so callers receive objects with undefined fields and must be null-safe.
+    mockGetDocs.mockResolvedValue(makeSnapshot([
+      { id: '1', data: { order: 0, visible: true, featured: false, updatedAt: null } }, // no category
+      { id: '2', data: { category: 'Food', visible: true, featured: false, updatedAt: null } }, // no order
+    ]))
+    const result = await getAllThemeMetadata()
+    expect(result).toHaveLength(2)
+    expect(result[0].category).toBeUndefined()
+    expect(result[1].order).toBeUndefined()
+  })
 })
 
 // ── upsertThemeMetadata ───────────────────────────────────────────────────────

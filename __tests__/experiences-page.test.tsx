@@ -195,8 +195,64 @@ describe('Experiences Page — Firestore error fallback', () => {
     expect(screen.getByRole('heading', { name: 'Wellness & Relaxation' })).toBeInTheDocument()
   })
 
-  test('renders hardcoded layout when getAllThemeMetadata rejects', async () => {
-    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([])
+  test('falls back to hardcoded layout when all metadata IDs are unknown adventures', async () => {
+    // All IDs are unknown → adventureMap.get() returns undefined for each → dynamic groups stay empty
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '999', category: 'Active & Sports', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByRole('heading', { name: 'Active & Sports' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Wellness & Relaxation' })).toBeInTheDocument()
+  })
+})
+
+describe('Experiences Page — Robustness with missing Firestore fields', () => {
+  test('does not crash when some metadata docs are missing the category field', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: undefined, order: 0, visible: true,  featured: false, updatedAt: null },
+      { id: '3', category: 'Wellness & Relaxation', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    // Must not throw — page renders in some valid state
+    render(await ExperiencesPage())
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+  })
+
+  test('does not crash when some metadata docs are missing the order field', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports', order: undefined, visible: true, featured: false, updatedAt: null },
+      { id: '3', category: 'Wellness & Relaxation', order: undefined, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+  })
+
+  test('falls back to hardcoded layout when all visible docs are missing category', async () => {
+    // All docs have category: undefined → dynamic build produces zero groups → fallback
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: undefined, order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '2', category: undefined, order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByRole('heading', { name: 'Active & Sports' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Wellness & Relaxation' })).toBeInTheDocument()
+  })
+
+  test('renders themes with valid category and skips docs with missing category', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports',       order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '2', category: undefined,               order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    // id '1' = 'Wind Sports Adventure' — has valid category, must appear
+    expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument()
+    // id '2' = 'Family Sailing School' — missing category, must be skipped
+    expect(screen.queryByText('Family Sailing School')).not.toBeInTheDocument()
+  })
+
+  test('does not crash when visible=true docs have both category and order missing', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: undefined, order: undefined, visible: true, featured: false, updatedAt: null },
+    ])
     render(await ExperiencesPage())
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
   })
