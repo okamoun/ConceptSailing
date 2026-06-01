@@ -212,13 +212,16 @@ export default function ThemesAdminClient() {
       });
 
       merged.sort((a, b) => {
-        const catDiff = a.meta.category.localeCompare(b.meta.category);
+        const catA = a.meta.category ?? '';
+        const catB = b.meta.category ?? '';
+        const catDiff = catA.localeCompare(catB);
         if (catDiff !== 0) return catDiff;
-        return a.meta.order - b.meta.order;
+        return (a.meta.order ?? 0) - (b.meta.order ?? 0);
       });
 
       setRows(merged);
-    } catch {
+    } catch (e) {
+      console.error('[ThemesAdmin] load failed:', e);
       setError('Failed to load theme metadata.');
     } finally {
       setLoading(false);
@@ -341,8 +344,14 @@ export default function ThemesAdminClient() {
         </div>
 
         {error && (
-          <div className="mb-4 bg-red-900/50 border border-red-500/40 text-red-200 text-sm rounded-lg px-4 py-3">
-            {error}
+          <div className="mb-4 bg-red-900/50 border border-red-500/40 text-red-200 text-sm rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+            <span>{error}</span>
+            <button
+              onClick={() => { setError(''); load(); }}
+              className="text-red-300 hover:text-white text-xs underline whitespace-nowrap flex-shrink-0"
+            >
+              Retry
+            </button>
           </div>
         )}
 

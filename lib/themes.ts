@@ -58,7 +58,8 @@ export async function getAllThemeMetadata(): Promise<ThemeMetadata[]> {
   try {
     const snap = await getDocs(collection(db, COLLECTION));
     return snap.docs.map(d => ({ ...d.data(), id: d.id } as ThemeMetadata));
-  } catch {
+  } catch (e) {
+    console.warn('[themes] getAllThemeMetadata failed (returning empty):', e);
     return [];
   }
 }

@@ -297,6 +297,39 @@ describe('ThemesAdminClient — error handling', () => {
     )
   })
 
+  test('shows a Retry button alongside the error message', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockRejectedValue(new Error('Firestore down'))
+    render(<ThemesAdminClient />)
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
+    )
+  })
+
+  test('Retry button clears error and re-fetches', async () => {
+    ;(getAllThemeMetadata as jest.Mock)
+      .mockRejectedValueOnce(new Error('temporary failure'))
+      .mockResolvedValue(MOCK_META)
+
+    render(<ThemesAdminClient />)
+    const retryBtn = await screen.findByRole('button', { name: 'Retry' })
+    fireEvent.click(retryBtn)
+
+    await waitFor(() => expect(screen.queryByText(/Failed to load/)).not.toBeInTheDocument())
+    expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument()
+  })
+
+  test('handles Firestore docs with missing category field without throwing', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: undefined, order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '3', category: 'Wellness & Relaxation', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(<ThemesAdminClient />)
+    // Should NOT show error — null-safe sort handles missing category
+    await waitFor(() => expect(screen.queryByText('Loading themes…')).not.toBeInTheDocument())
+    expect(screen.queryByText(/Failed to load/)).not.toBeInTheDocument()
+    expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument()
+  })
+
   test('shows error message when upsertThemeMetadata rejects', async () => {
     ;(upsertThemeMetadata as jest.Mock).mockRejectedValueOnce(new Error('write failed'))
     render(<ThemesAdminClient />)
