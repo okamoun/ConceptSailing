@@ -55,13 +55,8 @@ const DEFAULT_ASSIGNMENTS: Array<Pick<ThemeMetadata, 'id' | 'category' | 'order'
 ];
 
 export async function getAllThemeMetadata(): Promise<ThemeMetadata[]> {
-  try {
-    const snap = await getDocs(collection(db, COLLECTION));
-    return snap.docs.map(d => ({ ...d.data(), id: d.id } as ThemeMetadata));
-  } catch (e) {
-    console.warn('[themes] getAllThemeMetadata failed (returning empty):', e);
-    return [];
-  }
+  const snap = await getDocs(collection(db, COLLECTION));
+  return snap.docs.map(d => ({ ...d.data(), id: d.id } as ThemeMetadata));
 }
 
 export async function upsertThemeMetadata(

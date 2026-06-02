@@ -6,7 +6,8 @@ import type { Adventure } from "../adventures-data";
 import { featureIconMap } from "../feature-icons";
 import { getAllThemeMetadata, THEME_CATEGORIES } from "../../lib/themes";
 
-export const revalidate = 60;
+// force-dynamic: admin changes must be reflected immediately — no ISR caching
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Greek Sailing Adventures | Themed Yacht Experiences',
@@ -90,7 +91,12 @@ const HARDCODED_CATEGORIES = [
 ];
 
 export default async function ExperiencesPage() {
-  const themeMetaList = await getAllThemeMetadata();
+  let themeMetaList: Awaited<ReturnType<typeof getAllThemeMetadata>> = [];
+  try {
+    themeMetaList = await getAllThemeMetadata();
+  } catch (e) {
+    console.error('[ExperiencesPage] Firestore read failed — using hardcoded fallback:', e);
+  }
 
   let adventureCategories: Array<{ category: string; themes: Adventure[] }>;
   let featuredIds: Set<string>;

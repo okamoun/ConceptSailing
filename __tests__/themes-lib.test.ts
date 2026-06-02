@@ -73,10 +73,9 @@ describe('getAllThemeMetadata', () => {
     expect(result).toEqual([])
   })
 
-  test('returns empty array when Firestore throws', async () => {
+  test('throws when Firestore rejects', async () => {
     mockGetDocs.mockRejectedValue(new Error('network error'))
-    const result = await getAllThemeMetadata()
-    expect(result).toEqual([])
+    await expect(getAllThemeMetadata()).rejects.toThrow('network error')
   })
 
   test('maps snapshot documents to ThemeMetadata objects', async () => {

@@ -195,6 +195,17 @@ describe('Experiences Page — Firestore error fallback', () => {
     expect(screen.getByRole('heading', { name: 'Wellness & Relaxation' })).toBeInTheDocument()
   })
 
+  test('renders hardcoded layout when getAllThemeMetadata throws (e.g. Firebase SDK fails server-side)', async () => {
+    // This is the scenario that was previously hidden: Firebase client SDK can fail when
+    // called from a Next.js server component. Without this test, the silent try/catch
+    // in the old getAllThemeMetadata masked the problem entirely.
+    ;(getAllThemeMetadata as jest.Mock).mockRejectedValue(new Error('Firebase connection failed'))
+    render(await ExperiencesPage())
+    expect(screen.getByRole('heading', { name: 'Active & Sports' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Wellness & Relaxation' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Greek Sailing Adventures' })).toBeInTheDocument()
+  })
+
   test('falls back to hardcoded layout when all metadata IDs are unknown adventures', async () => {
     // All IDs are unknown → adventureMap.get() returns undefined for each → dynamic groups stay empty
     ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
