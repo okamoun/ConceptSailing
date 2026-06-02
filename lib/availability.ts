@@ -197,7 +197,9 @@ export interface Charter {
   selectedTheme?: string;
   holidayDescription?: string;
   note?: string;
-  externalRef?: string; // URL or ID from external broker platform
+  externalRef?: string;         // URL or ID from external broker platform
+  reconciledAt?: Timestamp;     // timestamp of last successful reconcile
+  reconciledDates?: { startDate: string; endDate: string }; // dates at time of reconcile
   // Financials (optional — override computed season rates)
   contractValue?: number;      // agreed charter fee in €; if set, used directly instead of rate × weeks
   brokerCommission?: number;   // broker fee % of contractValue, for reference

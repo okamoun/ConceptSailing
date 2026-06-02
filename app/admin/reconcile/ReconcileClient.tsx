@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { serverTimestamp } from 'firebase/firestore';
 import {
   getAllCharters,
   createCharter,
@@ -96,14 +97,17 @@ export default function ReconcileClient() {
   async function handleLinkCharter(periodIdx: number, charterId: string, period: BrokerPeriod) {
     setReconcileLoading(periodIdx);
     try {
+      const reconciledDates = { startDate: period.startDate, endDate: period.endDate };
       await updateCharter(charterId, {
         externalRef: brokerRef || undefined,
         disembarkationPort: period.to,
+        reconciledAt: serverTimestamp() as never,
+        reconciledDates,
       });
       setCharters(prev =>
         prev.map(c =>
           c.id === charterId
-            ? { ...c, externalRef: brokerRef || undefined, disembarkationPort: period.to }
+            ? { ...c, externalRef: brokerRef || undefined, disembarkationPort: period.to, reconciledDates }
             : c
         )
       );
@@ -298,6 +302,21 @@ export default function ReconcileClient() {
                                     <span className="ml-1 text-emerald-400">already linked</span>
                                   )}
                                 </div>
+                                {/* Warn if dates changed since the last reconcile snapshot */}
+                                {c.reconciledDates && (
+                                  c.reconciledDates.startDate !== period.startDate ||
+                                  c.reconciledDates.endDate !== period.endDate
+                                ) && (
+                                  <div className="mt-1 flex items-center gap-1.5 text-xs text-red-300">
+                                    <span>⚠</span>
+                                    <span>
+                                      Dates changed since last reconcile —
+                                      was <span className={c.reconciledDates!.startDate !== period.startDate ? 'font-semibold text-red-200' : ''}>{c.reconciledDates!.startDate}</span>
+                                      {' → '}
+                                      <span className={c.reconciledDates!.endDate !== period.endDate ? 'font-semibold text-red-200' : ''}>{c.reconciledDates!.endDate}</span>
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                               <button
                                 disabled={busy}
