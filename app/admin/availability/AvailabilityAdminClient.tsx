@@ -21,6 +21,12 @@ import {
 } from '../../marinas-data';
 import MarinaMap from '../MarinaMap';
 import adventures from '../../adventures-data';
+import {
+  getPricingConfig,
+  DEFAULT_PRICING,
+  getSeasonTier,
+  type PricingConfig,
+} from '../../../lib/financial';
 
 const STATUS_BADGE: Record<CharterStatus, string> = {
   web_request:     'bg-sky-400/30 text-sky-200',
@@ -64,6 +70,7 @@ export default function AvailabilityAdminClient() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [pricing, setPricing] = useState<PricingConfig>(DEFAULT_PRICING);
 
   const [month, setMonth] = useState(() => {
     const now = new Date();
@@ -75,8 +82,11 @@ export default function AvailabilityAdminClient() {
 
   useEffect(() => {
     setLoading(true);
-    getAllCharters()
-      .then(setEntries)
+    Promise.all([
+      getAllCharters(),
+      getPricingConfig(),
+    ])
+      .then(([charters, config]) => { setEntries(charters); setPricing(config); })
       .catch(() => setError('Could not load entries.'))
       .finally(() => setLoading(false));
   }, []);
@@ -145,6 +155,31 @@ export default function AvailabilityAdminClient() {
       apaAmount:          m.apaAmount          ? Number(m.apaAmount)          : deleteField(),
       relocationAmount:   m.relocationAmount   ? Number(m.relocationAmount)   : deleteField(),
     };
+  }
+
+  function fillFromRates() {
+    if (!modal) return;
+    const nights = Math.round(
+      (new Date(modal.endDate).getTime() - new Date(modal.startDate).getTime()) / 86400000,
+    );
+    const weeks = nights / 7;
+    const tier = getSeasonTier(modal.startDate);
+    const rateMap = { high: pricing.highSeasonRate, mid: pricing.midSeasonRate, low: pricing.lowSeasonRate };
+    const computedFee = Math.round(rateMap[tier] * weeks);
+    const atBase =
+      (!modal.deliveryPoint   || modal.deliveryPoint   === DEFAULT_MARINA_ID) &&
+      (!modal.redeliveryPoint || modal.redeliveryPoint === DEFAULT_MARINA_ID);
+
+    setModal(m => {
+      if (!m) return m;
+      const fee = m.contractValue ? Number(m.contractValue) : computedFee;
+      return {
+        ...m,
+        contractValue:    m.contractValue    || String(computedFee),
+        apaAmount:        m.apaAmount        || String(Math.round(fee * pricing.apaPercent / 100)),
+        relocationAmount: m.relocationAmount || (atBase ? '0' : String(pricing.relocationFee)),
+      };
+    });
   }
 
   async function handleSave() {
@@ -361,7 +396,20 @@ export default function AvailabilityAdminClient() {
                 </div>
 
                 <div className="pt-2 border-t border-white/10 space-y-2">
-                  <p className="text-blue-300 text-xs font-semibold uppercase tracking-wide">Contract Financials</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-blue-300 text-xs font-semibold uppercase tracking-wide">Contract Financials</p>
+                    <button
+                      type="button"
+                      onClick={fillFromRates}
+                      className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-blue-600/40 hover:bg-blue-500/60 text-blue-200 hover:text-white border border-blue-500/40 transition-colors"
+                      title="Fill empty fields using season rates from financial config"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Fill from standard rates
+                    </button>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-blue-200 text-xs font-medium block mb-1">
