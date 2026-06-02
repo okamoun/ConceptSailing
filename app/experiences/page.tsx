@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from "next/link";
-import adventures from "../adventures-data";
-import { featureIconMap } from "../feature-icons";
+import Link from 'next/link';
+import ThemeSections from './ThemeSections';
 
 export const metadata: Metadata = {
   title: 'Greek Sailing Adventures | Themed Yacht Experiences',
@@ -23,67 +22,6 @@ export const metadata: Metadata = {
     ],
   },
 };
-
-const adventureCategories = [
-  {
-    category: "Active & Sports",
-    themes: [
-      adventures.find(a => a.id === "1"),
-      adventures.find(a => a.id === "2"),
-      adventures.find(a => a.id === "12"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-  {
-    category: "Wellness & Relaxation",
-    themes: [
-      adventures.find(a => a.id === "3"),
-      adventures.find(a => a.id === "4"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-  {
-    category: "Culture & History",
-    themes: [
-      adventures.find(a => a.id === "5"),
-      adventures.find(a => a.id === "9"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-  {
-    category: "Food",
-    themes: [
-      adventures.find(a => a.id === "6"),
-      adventures.find(a => a.id === "10"),
-      adventures.find(a => a.id === "11"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-  {
-    category: "Social & Family",
-    themes: [
-      adventures.find(a => a.id === "7"),
-      adventures.find(a => a.id === "8"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-  {
-    category: "Celebrations & Milestones",
-    themes: [
-      adventures.find(a => a.id === "15"),
-      adventures.find(a => a.id === "16"),
-      adventures.find(a => a.id === "14"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-  {
-    category: "Nature & Sea",
-    themes: [
-      adventures.find(a => a.id === "13"),
-      adventures.find(a => a.id === "17"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-  {
-    category: "Lifestyle & Connoisseur",
-    themes: [
-      adventures.find(a => a.id === "18"),
-    ].filter((adv): adv is typeof adventures[number] => Boolean(adv)),
-  },
-];
 
 export default function ExperiencesPage() {
   return (
@@ -126,61 +64,8 @@ export default function ExperiencesPage() {
         </div>
       </section>
 
-      {/* Adventure Categories */}
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        {adventureCategories.map((category, index) => (
-          <section key={index} className={`py-16 ${index % 2 === 0 ? 'bg-transparent' : 'bg-white/5'}`}>
-            <div className="container mx-auto px-4">
-              <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-16 text-center animate-fade-in-up">
-                {category.category}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {category.themes.map((adv) => (
-                  <div
-                    key={adv.id}
-                    className="card-modern p-8 text-center animate-fade-in-up hover:bg-white/15 transition-all duration-300"
-                    style={{ animationDelay: `${Math.min(0.1 + Number(adv.id) * 0.07, 0.35)}s` }}
-                  >
-                    <div className="relative h-56 w-full mb-6">
-                      <Image
-                        src={adv.image}
-                        alt={adv.name}
-                        fill
-                        className="object-cover rounded-lg"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        priority
-                      />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                      {adv.name}
-                    </h3>
-                    <p className="mb-6 text-gray-600 text-lg leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.28s' }}>
-                      {adv.description}
-                    </p>
-                    {adv.features && adv.features.length > 0 && (
-                      <ul className="mb-6 flex flex-wrap gap-2 justify-center animate-fade-in-up" style={{ animationDelay: '0.32s' }}>
-                        {adv.features.map((feature: string, idx: number) => (
-                          <li key={idx} className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm font-semibold border border-blue-200">
-                            <span>{featureIconMap[feature]}</span>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    <Link
-                      href={`/themes/${adv.id}`}
-                      className="btn-secondary mt-auto animate-fade-in-up"
-                      style={{ animationDelay: '0.35s' }}
-                    >
-                      View Experience
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        ))}
-      </div>
+      {/* Adventure Categories — client component reads Firestore in the browser */}
+      <ThemeSections />
 
       {/* Destinations Preview */}
       <section className="py-20 bg-gradient-to-b from-white to-blue-50">

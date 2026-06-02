@@ -17,6 +17,7 @@ export const ALL_ADMIN_PAGES = [
   '/admin/users',
   '/admin/proposals',
   '/admin/financial',
+  '/admin/themes',
 ] as const;
 
 export type AdminPage = typeof ALL_ADMIN_PAGES[number];
