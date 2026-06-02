@@ -283,10 +283,19 @@ export default function ReconcileClient() {
                                     {c.name ?? <span className="text-blue-500 italic">No name</span>}
                                   </span>
                                 </div>
-                                <div className="text-blue-400 text-xs mt-0.5">
-                                  {c.startDate} → {c.endDate}
+                                <div className="text-blue-400 text-xs mt-0.5 flex items-center gap-1 flex-wrap">
+                                  <span className={c.startDate !== period.startDate ? 'text-amber-300 font-semibold' : ''}>
+                                    {c.startDate}
+                                  </span>
+                                  <span>→</span>
+                                  <span className={c.endDate !== period.endDate ? 'text-amber-300 font-semibold' : ''}>
+                                    {c.endDate}
+                                  </span>
+                                  {(c.startDate !== period.startDate || c.endDate !== period.endDate) && (
+                                    <span className="text-amber-400/70 italic ml-1">dates differ from broker</span>
+                                  )}
                                   {c.externalRef && (
-                                    <span className="ml-2 text-emerald-400">already linked</span>
+                                    <span className="ml-1 text-emerald-400">already linked</span>
                                   )}
                                 </div>
                               </div>
