@@ -34,7 +34,7 @@ function parseBrokerText(text: string): BrokerPeriod[] {
     const m = lines[i + 2].match(/^(Booked|Hold):\s*(.+?)\*?\s+to\s+(.+)$/i);
     if (!m) continue;
     const parseIso = (s: string) => {
-      const d = new Date(s);
+      const d = new Date(s + ' UTC');
       return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
     };
     const start = parseIso(startStr);
