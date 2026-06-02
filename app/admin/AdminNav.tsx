@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: '/admin/users',             label: 'Users' },
   { href: '/admin/financial',         label: 'Financial' },
   { href: '/admin/themes',            label: 'Themes' },
+  { href: '/admin/reconcile',         label: 'Reconcile' },
 ];
 
 export default function AdminNav() {
