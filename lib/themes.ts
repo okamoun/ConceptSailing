@@ -89,3 +89,17 @@ export async function initializeThemeDefaults(): Promise<void> {
     )
   );
 }
+
+// Overwrites all theme metadata with default assignments regardless of existing data.
+export async function resetThemeDefaults(): Promise<void> {
+  await Promise.all(
+    DEFAULT_ASSIGNMENTS.map(entry =>
+      upsertThemeMetadata(entry.id, {
+        category: entry.category,
+        order: entry.order,
+        visible: true,
+        featured: false,
+      })
+    )
+  );
+}

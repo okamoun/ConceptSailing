@@ -8,6 +8,7 @@ import {
   getAllThemeMetadata,
   upsertThemeMetadata,
   initializeThemeDefaults,
+  resetThemeDefaults,
   THEME_CATEGORIES,
   type ThemeMetadata,
   type ThemeCategory,
@@ -308,6 +309,20 @@ export default function ThemesAdminClient() {
     }
   }
 
+  async function handleReset() {
+    if (!confirm('Reset ALL themes to their default categories, order, visibility, and featured status? This will overwrite your current settings.')) return;
+    setError('');
+    setInitializing(true);
+    try {
+      await resetThemeDefaults();
+      await load();
+    } catch {
+      setError('Reset failed.');
+    } finally {
+      setInitializing(false);
+    }
+  }
+
   const filteredRows = categoryFilter === 'all'
     ? rows
     : rows.filter(r => r.meta.category === categoryFilter);
@@ -332,15 +347,27 @@ export default function ThemesAdminClient() {
               Control visibility, category, display order, and featured status for each experience.
             </p>
           </div>
-          {isUninitialized && (
-            <button
-              onClick={handleInitialize}
-              disabled={initializing}
-              className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex-shrink-0 whitespace-nowrap"
-            >
-              {initializing ? 'Initializing…' : 'Initialize Defaults'}
-            </button>
-          )}
+          <div className="flex gap-2 flex-shrink-0">
+            {isUninitialized && (
+              <button
+                onClick={handleInitialize}
+                disabled={initializing}
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+              >
+                {initializing ? 'Initializing…' : 'Initialize Defaults'}
+              </button>
+            )}
+            {!isUninitialized && (
+              <button
+                onClick={handleReset}
+                disabled={initializing}
+                title="Overwrite all theme assignments with the original defaults"
+                className="bg-orange-700 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+              >
+                {initializing ? 'Resetting…' : 'Reset to Defaults'}
+              </button>
+            )}
+          </div>
         </div>
 
         {error && (

@@ -52,6 +52,7 @@ export default function ThemeSections() {
   useEffect(() => {
     getAllThemeMetadata()
       .then(meta => {
+        console.log('[ThemeSections] loaded', meta.length, 'metadata docs from Firestore');
         if (!meta.length) return;
 
         const newFeaturedIds = new Set(meta.filter(m => m.featured).map(m => m.id));
@@ -84,8 +85,8 @@ export default function ThemeSections() {
           // keep hardcoded categories already in state
         }
       })
-      .catch(() => {
-        // Firebase unavailable — keep hardcoded categories already in state
+      .catch((e) => {
+        console.error('[ThemeSections] Firebase read failed, showing hardcoded fallback:', e);
       });
   }, []);
 
