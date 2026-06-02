@@ -189,13 +189,15 @@ export interface Charter {
   passengers?: number;
   boat?: string;
   // Location
-  embarkationPoint?: string;  // free-text from web form
-  deliveryPoint?: string;     // marina id
-  redeliveryPoint?: string;   // marina id
+  embarkationPoint?: string;   // free-text from web form
+  disembarkationPort?: string; // free-text, broker/manual entry
+  deliveryPoint?: string;      // marina id
+  redeliveryPoint?: string;    // marina id
   // Content
   selectedTheme?: string;
   holidayDescription?: string;
   note?: string;
+  externalRef?: string; // URL or ID from external broker platform
   // Financials (optional — override computed season rates)
   contractValue?: number;      // agreed charter fee in €; if set, used directly instead of rate × weeks
   brokerCommission?: number;   // broker fee % of contractValue, for reference
@@ -255,6 +257,14 @@ export async function updateCharter(
 
 export async function deleteCharter(id: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTION, id));
+}
+
+export function findOverlappingCharters(
+  charters: Charter[],
+  startDate: string,
+  endDate: string,
+): Charter[] {
+  return charters.filter(c => c.startDate <= endDate && c.endDate >= startDate);
 }
 
 // ---------------------------------------------------------------------------
