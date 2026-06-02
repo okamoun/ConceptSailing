@@ -34,7 +34,7 @@ function parseBrokerText(text: string): BrokerPeriod[] {
     const m = lines[i + 2].match(/^(Booked|Hold):\s*(.+?)\*?\s+to\s+(.+)$/i);
     if (!m) continue;
     const parseIso = (s: string) => {
-      const d = new Date(s);
+      const d = new Date(s + ' UTC');
       return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
     };
     const start = parseIso(startStr);
@@ -200,15 +200,15 @@ export default function ReconcileClient() {
           <summary className="cursor-pointer hover:text-blue-200 transition-colors select-none">
             Where to find these fields on cyaeb.com
           </summary>
-          <div className="mt-2 border border-white/10 rounded-xl overflow-hidden">
+          <div className="mt-2 border border-white/20 rounded-xl overflow-hidden">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-white/10">
-                  <th className="px-3 py-2 text-left text-blue-300">Form field</th>
-                  <th className="px-3 py-2 text-left text-blue-300">cyaeb.com location</th>
+                <tr className="bg-white/30">
+                  <th className="px-3 py-2 text-left text-blue-200 font-semibold">Form field</th>
+                  <th className="px-3 py-2 text-left text-blue-200 font-semibold">cyaeb.com location</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-white/10">
                 {[
                   ['Embarkation', 'Charter period — embarkation port'],
                   ['Disembarkation', 'Charter period — disembarkation port'],
@@ -217,9 +217,9 @@ export default function ReconcileClient() {
                   ['Status (Booked)', 'Confirmed charter → saved as Confirmed'],
                   ['Status (Hold)', 'Option / hold → saved as Broker Request'],
                 ].map(([field, loc]) => (
-                  <tr key={field} className="bg-white/5">
-                    <td className="px-3 py-1.5 text-white font-medium">{field}</td>
-                    <td className="px-3 py-1.5 text-blue-300">{loc}</td>
+                  <tr key={field} className="bg-white/[0.15] hover:bg-white/[0.22] transition-colors">
+                    <td className="px-3 py-2 text-white font-medium">{field}</td>
+                    <td className="px-3 py-2 text-blue-100">{loc}</td>
                   </tr>
                 ))}
               </tbody>
