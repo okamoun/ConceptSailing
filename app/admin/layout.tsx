@@ -4,12 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import AdminNav from './AdminNav';
 
-const bg = {
-  backgroundImage: `linear-gradient(rgba(30,58,138,0.5),rgba(59,130,246,0.6)),url('/images/boats/blueone/External_sailing.jpg')`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  backgroundAttachment: 'fixed',
-};
+const bg = 'min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900';
 
 function AdminShell({ children }: { children: ReactNode }) {
   const { authed, login } = useAdminAuth();
@@ -26,7 +21,7 @@ function AdminShell({ children }: { children: ReactNode }) {
 
   if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={bg}>
+      <div className={`flex items-center justify-center px-4 ${bg}`}>
         <form
           onSubmit={handleSubmit}
           className="w-full max-w-sm bg-white/15 backdrop-blur-sm border border-white/25 rounded-2xl p-8 space-y-4"
@@ -63,7 +58,7 @@ function AdminShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen" style={bg}>
+    <div className={bg}>
       <AdminNav />
       {/* pt-12 clears the fixed nav (h-12 = 48px) */}
       <div className="pt-12">
