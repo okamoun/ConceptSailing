@@ -257,3 +257,201 @@ describe('Experiences Page — Robustness with missing Firestore fields', () => 
     expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
   })
 })
+
+// ── Admin change scenarios ────────────────────────────────────────────────────
+// Each test simulates a specific admin action (represented as the resulting
+// Firestore metadata state) and asserts the expected impact on the public page.
+
+describe('Experiences Page — admin hides a theme', () => {
+  test('hidden theme does not appear on the page', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports', order: 0, visible: true,  featured: false, updatedAt: null },
+      { id: '2', category: 'Active & Sports', order: 1, visible: false, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument()
+    expect(screen.queryByText('Family Sailing School')).not.toBeInTheDocument()
+  })
+
+  test('hiding all themes in a category removes the category heading', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1',  category: 'Active & Sports',       order: 0, visible: false, featured: false, updatedAt: null },
+      { id: '2',  category: 'Active & Sports',       order: 1, visible: false, featured: false, updatedAt: null },
+      { id: '12', category: 'Active & Sports',       order: 2, visible: false, featured: false, updatedAt: null },
+      { id: '3',  category: 'Wellness & Relaxation', order: 0, visible: true,  featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.queryByRole('heading', { name: 'Active & Sports' })).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Wellness & Relaxation' })).toBeInTheDocument()
+  })
+})
+
+describe('Experiences Page — admin un-hides a theme', () => {
+  test('previously hidden theme appears after being marked visible', async () => {
+    // Simulates the state after admin flips visible:false → visible:true for id '2'
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '2', category: 'Active & Sports', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByText('Family Sailing School')).toBeInTheDocument()
+  })
+})
+
+describe('Experiences Page — admin changes a theme category', () => {
+  test('theme appears under the new category after reassignment', async () => {
+    // Admin moves 'Wind Sports Adventure' (id '1') from Active & Sports → Food
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Food', order: 2, visible: true, featured: false, updatedAt: null },
+      { id: '6', category: 'Food', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByRole('heading', { name: 'Food' })).toBeInTheDocument()
+    expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument()
+  })
+
+  test('old category heading disappears when its last visible theme is moved away', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Food', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    // 'Active & Sports' now has no themes → section must not appear
+    expect(screen.queryByRole('heading', { name: 'Active & Sports' })).not.toBeInTheDocument()
+  })
+
+  test('theme does not appear under its previous category after reassignment', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Food',            order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '2', category: 'Active & Sports', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    const { container } = render(await ExperiencesPage())
+
+    // Each category renders as a <section> — find by its h2 text
+    const sections = Array.from(container.querySelectorAll('section'))
+    const foodSection   = sections.find(s => s.querySelector('h2')?.textContent?.trim() === 'Food')
+    const activeSection = sections.find(s => s.querySelector('h2')?.textContent?.trim() === 'Active & Sports')
+
+    expect(foodSection).toBeTruthy()
+    expect(activeSection).toBeTruthy()
+
+    // 'Wind Sports Adventure' must be inside the Food section, not Active & Sports
+    expect(foodSection!.textContent).toContain('Wind Sports Adventure')
+    expect(activeSection!.textContent).not.toContain('Wind Sports Adventure')
+    // 'Family Sailing School' stays in Active & Sports
+    expect(activeSection!.textContent).toContain('Family Sailing School')
+  })
+
+  test('assigning multiple themes to same category groups them under one heading', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1',  category: 'Food', order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '6',  category: 'Food', order: 1, visible: true, featured: false, updatedAt: null },
+      { id: '10', category: 'Food', order: 2, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getAllByRole('heading', { name: 'Food' }).length).toBe(1)
+    expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument()
+    expect(screen.getByText('Culinary Traditions')).toBeInTheDocument()
+    expect(screen.getByText('Mediterranean Flavors')).toBeInTheDocument()
+  })
+})
+
+describe('Experiences Page — admin reorders themes', () => {
+  test('order 0 theme renders before order 1 theme in the same category', async () => {
+    // Default order: id '1' first, id '2' second.
+    // After swap:    id '2' order 0, id '1' order 1 → Family Sailing School first
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports', order: 1, visible: true, featured: false, updatedAt: null },
+      { id: '2', category: 'Active & Sports', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    const { container } = render(await ExperiencesPage())
+    const h3s = Array.from(container.querySelectorAll('h3')).map(h => h.textContent?.trim())
+    const idx1 = h3s.indexOf('Wind Sports Adventure')
+    const idx2 = h3s.indexOf('Family Sailing School')
+    expect(idx2).toBeGreaterThan(-1)
+    expect(idx1).toBeGreaterThan(-1)
+    // Family Sailing School (order 0) must appear before Wind Sports Adventure (order 1)
+    expect(idx2).toBeLessThan(idx1)
+  })
+
+  test('order is independent across categories — each category starts from its own order 0', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '3', category: 'Wellness & Relaxation', order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '4', category: 'Wellness & Relaxation', order: 1, visible: true, featured: false, updatedAt: null },
+      { id: '1', category: 'Active & Sports',       order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '2', category: 'Active & Sports',       order: 1, visible: true, featured: false, updatedAt: null },
+    ])
+    const { container } = render(await ExperiencesPage())
+    const h3s = Array.from(container.querySelectorAll('h3')).map(h => h.textContent?.trim())
+    // Active & Sports comes before Wellness & Relaxation in THEME_CATEGORIES
+    const idxWind   = h3s.indexOf('Wind Sports Adventure')
+    const idxFamily = h3s.indexOf('Family Sailing School')
+    const idxYoga   = h3s.indexOf('Yoga & Wellness Retreat')
+    expect(idxWind).toBeLessThan(idxYoga)
+    expect(idxFamily).toBeLessThan(idxYoga)
+  })
+})
+
+describe('Experiences Page — admin changes featured status', () => {
+  test('marking a theme featured adds the ★ Featured badge', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports', order: 0, visible: true, featured: true, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByText(/★ Featured/)).toBeInTheDocument()
+  })
+
+  test('removing featured from all themes removes every ★ Featured badge', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports',       order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '3', category: 'Wellness & Relaxation', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.queryByText(/★ Featured/)).not.toBeInTheDocument()
+  })
+
+  test('multiple themes can be featured simultaneously', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports',       order: 0, visible: true, featured: true, updatedAt: null },
+      { id: '3', category: 'Wellness & Relaxation', order: 0, visible: true, featured: true, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getAllByText(/★ Featured/).length).toBe(2)
+  })
+
+  test('featured badge does not appear for a theme that is hidden', async () => {
+    // featured:true + visible:false → card is not rendered → badge must not appear
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '1', category: 'Active & Sports',       order: 0, visible: false, featured: true,  updatedAt: null },
+      { id: '3', category: 'Wellness & Relaxation', order: 0, visible: true,  featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.queryByText('Wind Sports Adventure')).not.toBeInTheDocument()
+    expect(screen.queryByText(/★ Featured/)).not.toBeInTheDocument()
+  })
+})
+
+describe('Experiences Page — category display order', () => {
+  test('section order follows THEME_CATEGORIES regardless of metadata insertion order', async () => {
+    // Metadata lists Food before Active & Sports, but page must show Active & Sports first
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '6', category: 'Food',            order: 0, visible: true, featured: false, updatedAt: null },
+      { id: '1', category: 'Active & Sports', order: 0, visible: true, featured: false, updatedAt: null },
+    ])
+    const { container } = render(await ExperiencesPage())
+    const h2s = Array.from(container.querySelectorAll('h2')).map(h => h.textContent?.trim())
+    const activeIdx = h2s.indexOf('Active & Sports')
+    const foodIdx   = h2s.indexOf('Food')
+    expect(activeIdx).toBeGreaterThan(-1)
+    expect(foodIdx).toBeGreaterThan(-1)
+    expect(activeIdx).toBeLessThan(foodIdx)
+  })
+
+  test('only categories with at least one visible theme appear as sections', async () => {
+    ;(getAllThemeMetadata as jest.Mock).mockResolvedValue([
+      { id: '5', category: 'Culture & History', order: 0, visible: true,  featured: false, updatedAt: null },
+      { id: '6', category: 'Food',              order: 0, visible: false, featured: false, updatedAt: null },
+    ])
+    render(await ExperiencesPage())
+    expect(screen.getByRole('heading', { name: 'Culture & History' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Food' })).not.toBeInTheDocument()
+  })
+})
