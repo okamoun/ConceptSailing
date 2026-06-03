@@ -18,6 +18,7 @@ export const ALL_ADMIN_PAGES = [
   '/admin/proposals',
   '/admin/financial',
   '/admin/themes',
+  '/admin/experiences',
   '/admin/reconcile',
 ] as const;
 

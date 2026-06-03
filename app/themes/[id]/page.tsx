@@ -6,6 +6,7 @@ import adventures from '../../adventures-data';
 import { featureIconMap } from '../../feature-icons';
 import type { AdventureItineraryDay } from '../../adventures-data';
 import MapLoader from './MapLoader.client';
+import { getExperienceById } from '@/lib/experiences';
 
 interface ThemePageProps {
   params: Promise<{ id: string }>;
@@ -15,9 +16,32 @@ export async function generateStaticParams() {
   return adventures.map((a) => ({ id: a.id }));
 }
 
+async function resolveAdventure(id: string) {
+  // Static adventure
+  const static_ = adventures.find((a) => a.id === id);
+  if (static_) return static_;
+
+  // Custom (Firestore) adventure — id has "custom-" prefix on public URLs
+  const firestoreId = id.startsWith('custom-') ? id.slice('custom-'.length) : id;
+  const custom = await getExperienceById(firestoreId).catch(() => null);
+  if (!custom) return null;
+
+  return {
+    id,
+    name: custom.name,
+    description: custom.description,
+    image: custom.image ?? '/adventures/beach.jpg',
+    experience: custom.experience,
+    itinerary: custom.itinerary,
+    features: custom.features,
+    partnerName: custom.partnerName,
+    partnerUrl: custom.partnerUrl,
+  };
+}
+
 export async function generateMetadata({ params }: ThemePageProps): Promise<Metadata> {
   const { id } = await params;
-  const adventure = adventures.find((a) => a.id === id);
+  const adventure = await resolveAdventure(id);
   if (!adventure) return {};
 
   const title = `${adventure.name} | BlueOne Sailing Adventures Greece`;
@@ -53,7 +77,7 @@ export async function generateMetadata({ params }: ThemePageProps): Promise<Meta
 
 export default async function ThemePage({ params }: ThemePageProps) {
   const { id } = await params;
-  const adventure = adventures.find((a) => a.id === id);
+  const adventure = await resolveAdventure(id);
   if (!adventure) notFound();
 
   const itineraryPoints = (adventure.itinerary as AdventureItineraryDay[])
