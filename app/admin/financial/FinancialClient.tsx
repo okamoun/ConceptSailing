@@ -112,6 +112,9 @@ export default function FinancialClient() {
     );
   }
 
+  const currentYear = new Date().getFullYear();
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     setLoading(true);
@@ -119,11 +122,11 @@ export default function FinancialClient() {
       .then(([charters, cfg]) => {
         setPricing(cfg);
         setDraftPricing(cfg);
-        setSummary(buildYearSummary(charters, year, cfg));
+        setSummary(buildYearSummary(charters, year, cfg, year === currentYear ? todayStr : undefined));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [year]);
+  }, [year]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSavePricing() {
     setSavingPricing(true);
@@ -133,7 +136,7 @@ export default function FinancialClient() {
       setPricing(draftPricing);
       if (summary) {
         const allCharters = await getAllCharters();
-        setSummary(buildYearSummary(allCharters, year, draftPricing));
+        setSummary(buildYearSummary(allCharters, year, draftPricing, year === currentYear ? todayStr : undefined));
       }
       setPricingMsg('Pricing saved.');
       setEditPricing(false);

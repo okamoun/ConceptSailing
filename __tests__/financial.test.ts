@@ -390,6 +390,101 @@ describe('buildYearSummary', () => {
   })
 })
 
+describe('buildYearSummary — toDate (YTD cutoff)', () => {
+  const pricing = DEFAULT_PRICING
+
+  const januaryCharter: Charter = {
+    id: 'ytd-1',
+    startDate: '2026-01-10',
+    endDate: '2026-01-17',
+    status: 'confirmed',
+    createdAt: {} as never,
+  }
+
+  const marchCharter: Charter = {
+    id: 'ytd-2',
+    startDate: '2026-03-01',
+    endDate: '2026-03-08',
+    status: 'confirmed',
+    createdAt: {} as never,
+  }
+
+  const futureConfirmedCharter: Charter = {
+    id: 'ytd-3',
+    startDate: '2026-07-05',
+    endDate: '2026-07-12',
+    status: 'confirmed',
+    createdAt: {} as never,
+  }
+
+  const cutoffDayCharter: Charter = {
+    id: 'ytd-4',
+    startDate: '2026-06-11',
+    endDate: '2026-06-18',
+    status: 'confirmed',
+    createdAt: {} as never,
+  }
+
+  const futurePipelineCharter: Charter = {
+    id: 'ytd-5',
+    startDate: '2026-08-01',
+    endDate: '2026-08-08',
+    status: 'serious_request',
+    createdAt: {} as never,
+  }
+
+  const todayStr = '2026-06-11'
+
+  test('excludes confirmed charters starting after toDate', () => {
+    const summary = buildYearSummary([januaryCharter, futureConfirmedCharter], 2026, pricing, todayStr)
+    expect(summary.confirmed).toHaveLength(1)
+    expect(summary.confirmed[0].charter.id).toBe('ytd-1')
+  })
+
+  test('includes confirmed charters starting on the toDate boundary', () => {
+    const summary = buildYearSummary([cutoffDayCharter], 2026, pricing, todayStr)
+    expect(summary.confirmed).toHaveLength(1)
+    expect(summary.confirmed[0].charter.id).toBe('ytd-4')
+  })
+
+  test('excludes pipeline charters starting after toDate', () => {
+    const summary = buildYearSummary([futurePipelineCharter], 2026, pricing, todayStr)
+    expect(summary.pipeline).toHaveLength(0)
+  })
+
+  test('multiple charters: only those on or before toDate are included', () => {
+    const summary = buildYearSummary(
+      [januaryCharter, marchCharter, cutoffDayCharter, futureConfirmedCharter],
+      2026,
+      pricing,
+      todayStr,
+    )
+    expect(summary.confirmed).toHaveLength(3)
+    const ids = summary.confirmed.map(cf => cf.charter.id)
+    expect(ids).toContain('ytd-1')
+    expect(ids).toContain('ytd-2')
+    expect(ids).toContain('ytd-4')
+    expect(ids).not.toContain('ytd-3')
+  })
+
+  test('without toDate all year charters are included (backward compatible)', () => {
+    const summary = buildYearSummary([januaryCharter, futureConfirmedCharter], 2026, pricing)
+    expect(summary.confirmed).toHaveLength(2)
+  })
+
+  test('monthlyRevenue excludes future months when toDate is supplied', () => {
+    const summary = buildYearSummary([januaryCharter, futureConfirmedCharter], 2026, pricing, todayStr)
+    expect(summary.monthlyRevenue[6]).toBe(0)
+    expect(summary.monthlyRevenue[0]).toBeGreaterThan(0)
+  })
+
+  test('totals reflect only charters on or before toDate', () => {
+    const summaryYtd  = buildYearSummary([januaryCharter, futureConfirmedCharter], 2026, pricing, todayStr)
+    const summaryFull = buildYearSummary([januaryCharter, futureConfirmedCharter], 2026, pricing)
+    expect(summaryYtd.totalNetRevenue).toBeLessThan(summaryFull.totalNetRevenue)
+  })
+})
+
 describe('getPricingConfig', () => {
   beforeEach(() => {
     jest.resetModules()

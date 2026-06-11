@@ -128,8 +128,13 @@ export function buildYearSummary(
   charters: Charter[],
   year: number,
   pricing: PricingConfig,
+  toDate?: string,
 ): YearSummary {
-  const yearCharters = charters.filter(c => c.startDate.startsWith(String(year)));
+  const yearCharters = charters.filter(c => {
+    if (!c.startDate.startsWith(String(year))) return false;
+    if (toDate && c.startDate > toDate) return false;
+    return true;
+  });
 
   const confirmed: CharterFinancials[] = [];
   const pipeline:  CharterFinancials[] = [];
