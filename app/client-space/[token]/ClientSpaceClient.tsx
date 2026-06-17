@@ -161,8 +161,10 @@ function Toast({ msg, onDone }: { msg: string; onDone: () => void }) {
 // Reusable field components
 // ---------------------------------------------------------------------------
 
+const inputBase = 'w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm text-blue-900 placeholder:text-blue-300 transition-all focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200/60 shadow-sm hover:border-blue-300';
+
 function FieldLabel({ children }: { children: ReactNode }) {
-  return <label className="block text-xs font-semibold text-blue-800 mb-1">{children}</label>;
+  return <label className="block text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1.5">{children}</label>;
 }
 
 function TextInput({ value, onChange, placeholder, type = 'text' }: {
@@ -174,7 +176,7 @@ function TextInput({ value, onChange, placeholder, type = 'text' }: {
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200 bg-white/90"
+      className={inputBase}
     />
   );
 }
@@ -188,7 +190,7 @@ function TextArea({ value, onChange, placeholder, rows = 3 }: {
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200 bg-white/90 resize-none"
+      className={`${inputBase} resize-none leading-relaxed`}
     />
   );
 }
@@ -200,7 +202,7 @@ function SelectInput({ value, onChange, options, placeholder }: {
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="w-full border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 bg-white/90"
+      className={inputBase}
     >
       {placeholder && <option value="">{placeholder}</option>}
       {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -214,16 +216,16 @@ function PillToggle({ options, value, onChange }: {
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-2">
       {options.map(o => (
         <button
           key={o.id}
           type="button"
           onClick={() => onChange(value === o.id ? '' : o.id)}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
             value === o.id
-              ? 'bg-blue-600 border-blue-600 text-white'
-              : 'bg-white border-blue-200 text-blue-700 hover:border-blue-400'
+              ? 'bg-blue-600 border-blue-600 text-white shadow-blue-200'
+              : 'bg-white border-blue-200 text-blue-700 hover:border-blue-400 hover:bg-blue-50'
           }`}
         >
           {o.label}
@@ -242,21 +244,68 @@ function MultiChip({ options, values, onChange }: {
     onChange(values.includes(opt) ? values.filter(v => v !== opt) : [...values, opt]);
   }
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-2">
       {options.map(o => (
         <button
           key={o}
           type="button"
           onClick={() => toggle(o)}
-          className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all border ${
+          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
             values.includes(o)
               ? 'bg-blue-600 border-blue-600 text-white'
-              : 'bg-white border-blue-200 text-blue-600 hover:border-blue-400'
+              : 'bg-white border-blue-200 text-blue-600 hover:border-blue-400 hover:bg-blue-50'
           }`}
         >
           {o}
         </button>
       ))}
+    </div>
+  );
+}
+
+function PassengerNotes({ crew, notes, onChange }: {
+  crew: CrewMember[];
+  notes: Record<string, string>;
+  onChange: (notes: Record<string, string>) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  if (crew.length === 0) return null;
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-500 hover:text-blue-700 transition-colors"
+      >
+        <svg className={`w-3 h-3 transition-transform ${open ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+        Per passenger details
+        {Object.values(notes).some(Boolean) && (
+          <span className="ml-1 w-4 h-4 rounded-full bg-blue-500 text-white text-[9px] flex items-center justify-center">
+            {Object.values(notes).filter(Boolean).length}
+          </span>
+        )}
+      </button>
+      {open && (
+        <div className="mt-2 space-y-2 pl-2 border-l-2 border-blue-100">
+          {crew.map((m, i) => {
+            const name = [m.firstName, m.lastName].filter(Boolean).join(' ') || `Passenger ${i + 1}`;
+            return (
+              <div key={i} className="flex items-center gap-2">
+                <span className="text-[11px] font-medium text-blue-600 w-28 flex-shrink-0 truncate">{name}</span>
+                <input
+                  type="text"
+                  value={notes[String(i)] ?? ''}
+                  onChange={e => onChange({ ...notes, [String(i)]: e.target.value })}
+                  placeholder="Specific note…"
+                  className="flex-1 rounded-lg border border-blue-200 bg-white/80 px-2.5 py-1.5 text-xs text-blue-900 placeholder:text-blue-300 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200/60 transition-all"
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -272,9 +321,9 @@ function AutoSaveIndicator({ status }: { status: 'idle' | 'saving' | 'saved' }) 
 
 function SectionCard({ title, autoSave, children }: { title: string; autoSave?: 'idle' | 'saving' | 'saved'; children: ReactNode }) {
   return (
-    <div className="bg-white/70 backdrop-blur-sm border border-blue-100 rounded-xl p-3 space-y-3">
+    <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl p-4 space-y-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-blue-900">{title}</h3>
+        <h3 className="text-sm font-bold text-blue-900 tracking-tight">{title}</h3>
         {autoSave && <AutoSaveIndicator status={autoSave} />}
       </div>
       {children}
@@ -640,8 +689,9 @@ function ActivitiesStep({ initial, onSave, onAutoSave }: {
 // Step 4: Food preferences
 // ---------------------------------------------------------------------------
 
-function FoodStep({ initial, onSave, onAutoSave }: {
+function FoodStep({ initial, crew, onSave, onAutoSave }: {
   initial: FoodPreferences;
+  crew: CrewMember[];
   onSave: (food: FoodPreferences) => Promise<void>;
   onAutoSave: (food: FoodPreferences) => Promise<void>;
 }) {
@@ -649,7 +699,7 @@ function FoodStep({ initial, onSave, onAutoSave }: {
   const [saving, setSaving] = useState(false);
   const autoStatus = useAutoSave(data, onAutoSave);
 
-  function setCategory(cat: string, field: 'likes' | 'dislikes' | 'allergies', val: string) {
+  function setCategory(cat: string, field: 'likes' | 'dislikes' | 'allergies' | 'passengerNotes', val: string | Record<string, string>) {
     setData(prev => ({
       ...prev,
       [cat]: { ...(prev[cat as keyof FoodPreferences] as object ?? {}), [field]: val },
@@ -683,8 +733,8 @@ function FoodStep({ initial, onSave, onAutoSave }: {
             const key = cat.toLowerCase() as CatKey;
             const catData = (data[key as keyof FoodPreferences] as { likes?: string; dislikes?: string; allergies?: string }) ?? {};
             return (
-              <div key={cat} className="border border-blue-100 rounded-lg p-3 space-y-2">
-                <p className="text-xs font-bold text-blue-800">{cat}</p>
+              <div key={cat} className="border border-blue-100 rounded-xl p-3 space-y-3 bg-white/50">
+                <p className="text-xs font-bold text-blue-800 uppercase tracking-wide">{cat}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <div>
                     <FieldLabel>Likes</FieldLabel>
@@ -699,6 +749,11 @@ function FoodStep({ initial, onSave, onAutoSave }: {
                     <TextInput value={catData.allergies ?? ''} onChange={v => setCategory(key, 'allergies', v)} placeholder="e.g. shellfish allergy" />
                   </div>
                 </div>
+                <PassengerNotes
+                  crew={crew}
+                  notes={(catData as { passengerNotes?: Record<string, string> }).passengerNotes ?? {}}
+                  onChange={notes => setCategory(key, 'passengerNotes', notes)}
+                />
               </div>
             );
           })}
@@ -801,35 +856,45 @@ function FoodStep({ initial, onSave, onAutoSave }: {
 // Step 5: Beverages
 // ---------------------------------------------------------------------------
 
-function BeverageRow({ label, item, onChange }: {
+function BeverageRow({ label, item, crew, onChange }: {
   label: string;
-  item: { preferredBrand?: string; qty?: number; remarks?: string };
-  onChange: (v: { preferredBrand?: string; qty?: number; remarks?: string }) => void;
+  item: { preferredBrand?: string; qty?: number; remarks?: string; passengerNotes?: Record<string, string> };
+  crew: CrewMember[];
+  onChange: (v: { preferredBrand?: string; qty?: number; remarks?: string; passengerNotes?: Record<string, string> }) => void;
 }) {
+  const inputCell = 'rounded-lg border border-blue-200 bg-white px-2.5 py-2 text-xs text-blue-900 placeholder:text-blue-300 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200/60 transition-all shadow-sm hover:border-blue-300 w-full';
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-[2fr_1fr_2fr] gap-2 items-center py-2 border-b border-blue-50 last:border-0">
-      <span className="text-xs font-medium text-blue-800">{label}</span>
-      <input
-        type="number"
-        min={0}
-        placeholder="Qty"
-        value={item.qty ?? ''}
-        onChange={e => onChange({ ...item, qty: e.target.value ? Number(e.target.value) : undefined })}
-        className="border border-blue-100 rounded-lg px-2 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 bg-white/80 w-full"
-      />
-      <input
-        type="text"
-        placeholder="Brand / remarks"
-        value={item.preferredBrand ?? ''}
-        onChange={e => onChange({ ...item, preferredBrand: e.target.value })}
-        className="border border-blue-100 rounded-lg px-2 py-1.5 text-xs text-blue-900 focus:outline-none focus:border-blue-400 bg-white/80 w-full"
+    <div className="py-2.5 border-b border-blue-50 last:border-0">
+      <div className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-center">
+        <span className="text-xs font-semibold text-blue-800">{label}</span>
+        <input
+          type="number"
+          min={0}
+          placeholder="Qty"
+          value={item.qty ?? ''}
+          onChange={e => onChange({ ...item, qty: e.target.value ? Number(e.target.value) : undefined })}
+          className={inputCell}
+        />
+        <input
+          type="text"
+          placeholder="Brand / remarks"
+          value={item.preferredBrand ?? ''}
+          onChange={e => onChange({ ...item, preferredBrand: e.target.value })}
+          className={inputCell}
+        />
+      </div>
+      <PassengerNotes
+        crew={crew}
+        notes={item.passengerNotes ?? {}}
+        onChange={notes => onChange({ ...item, passengerNotes: notes })}
       />
     </div>
   );
 }
 
-function BeveragesStep({ initial, onSave, onAutoSave }: {
+function BeveragesStep({ initial, crew, onSave, onAutoSave }: {
   initial: BeveragePreferences;
+  crew: CrewMember[];
   onSave: (bev: BeveragePreferences) => Promise<void>;
   onAutoSave: (bev: BeveragePreferences) => Promise<void>;
 }) {
@@ -877,6 +942,7 @@ function BeveragesStep({ initial, onSave, onAutoSave }: {
               key={t}
               label={t}
               item={(data[group] ?? {})[t] ?? {}}
+              crew={crew}
               onChange={v => updateRow(group, t, v)}
             />
           ))}
@@ -1307,11 +1373,11 @@ export default function ClientSpaceClient({ token }: Props) {
         )}
 
         {currentStep === 4 && (
-          <FoodStep initial={prep.food} onSave={handleSaveFood} onAutoSave={autoSaveFood} />
+          <FoodStep initial={prep.food} crew={prep.crew} onSave={handleSaveFood} onAutoSave={autoSaveFood} />
         )}
 
         {currentStep === 5 && (
-          <BeveragesStep initial={prep.beverages} onSave={handleSaveBeverages} onAutoSave={autoSaveBeverages} />
+          <BeveragesStep initial={prep.beverages} crew={prep.crew} onSave={handleSaveBeverages} onAutoSave={autoSaveBeverages} />
         )}
 
         {currentStep === 6 && (

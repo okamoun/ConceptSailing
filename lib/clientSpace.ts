@@ -49,6 +49,7 @@ export interface FoodCategory {
   likes?: string;
   dislikes?: string;
   allergies?: string;
+  passengerNotes?: Record<string, string>;
 }
 
 export interface FoodPreferences {
@@ -71,6 +72,7 @@ export interface BeverageItem {
   preferredBrand?: string;
   qty?: number;
   remarks?: string;
+  passengerNotes?: Record<string, string>;
 }
 
 export interface BeveragePreferences {
