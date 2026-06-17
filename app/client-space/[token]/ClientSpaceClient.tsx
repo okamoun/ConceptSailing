@@ -162,10 +162,10 @@ function Toast({ msg, onDone }: { msg: string; onDone: () => void }) {
 // Reusable field components
 // ---------------------------------------------------------------------------
 
-const inputBase = 'w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm text-blue-900 placeholder:text-blue-300 transition-all focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200/60 shadow-sm hover:border-blue-300';
+const inputBase = 'w-full rounded-lg border border-blue-200 bg-white px-2.5 py-1.5 text-xs text-blue-900 placeholder:text-blue-300 transition-all focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200/60 shadow-sm hover:border-blue-300';
 
 function FieldLabel({ children }: { children: ReactNode }) {
-  return <label className="block text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1.5">{children}</label>;
+  return <label className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">{children}</label>;
 }
 
 function TextInput({ value, onChange, placeholder, type = 'text' }: {
@@ -217,15 +217,15 @@ function PillToggle({ options, value, onChange }: {
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {options.map(o => (
         <button
           key={o.id}
           type="button"
           onClick={() => onChange(value === o.id ? '' : o.id)}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
+          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
             value === o.id
-              ? 'bg-blue-600 border-blue-600 text-white shadow-blue-200'
+              ? 'bg-blue-600 border-blue-600 text-white'
               : 'bg-white border-blue-200 text-blue-700 hover:border-blue-400 hover:bg-blue-50'
           }`}
         >
@@ -245,13 +245,13 @@ function MultiChip({ options, values, onChange }: {
     onChange(values.includes(opt) ? values.filter(v => v !== opt) : [...values, opt]);
   }
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       {options.map(o => (
         <button
           key={o}
           type="button"
           onClick={() => toggle(o)}
-          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
+          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
             values.includes(o)
               ? 'bg-blue-600 border-blue-600 text-white'
               : 'bg-white border-blue-200 text-blue-600 hover:border-blue-400 hover:bg-blue-50'
@@ -322,9 +322,9 @@ function AutoSaveIndicator({ status }: { status: 'idle' | 'saving' | 'saved' }) 
 
 function SectionCard({ title, autoSave, children }: { title: string; autoSave?: 'idle' | 'saving' | 'saved'; children: ReactNode }) {
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl p-4 space-y-4 shadow-sm">
+    <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-xl p-3 space-y-3 shadow-sm">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-blue-900 tracking-tight">{title}</h3>
+        <h3 className="text-xs font-bold text-blue-900 uppercase tracking-wide">{title}</h3>
         {autoSave && <AutoSaveIndicator status={autoSave} />}
       </div>
       {children}
@@ -450,7 +450,7 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
           <button
             type="button"
             onClick={() => setExpanded(expanded === i ? -1 : i)}
-            className="w-full flex items-center justify-between px-4 py-3 text-left"
+            className="w-full flex items-center justify-between px-3 py-2 text-left"
           >
             <div>
               <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wide">Passenger {i + 1}</span>
@@ -464,8 +464,8 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
           </button>
 
           {expanded === i && (
-            <div className="px-4 pb-4 space-y-3 border-t border-blue-100">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
+            <div className="px-3 pb-3 space-y-2 border-t border-blue-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
                 <div>
                   <FieldLabel>First Name</FieldLabel>
                   <TextInput value={m.firstName} onChange={v => update(i, 'firstName', v)} placeholder="First name" />
@@ -536,7 +536,7 @@ function initGroups(initial: TravelLogistics, passengerCount: number): TravelGro
 function TableRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <tr className="border-t border-blue-100">
-      <td className="py-3 pr-4 text-xs font-semibold text-blue-500 uppercase tracking-wide whitespace-nowrap w-36 align-top pt-3.5">
+      <td className="py-2 pr-3 text-[10px] font-semibold text-blue-500 uppercase tracking-wide whitespace-nowrap w-32 align-top pt-2.5">
         {label}
       </td>
       {children}
@@ -620,13 +620,13 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
         </button>
       </div>
 
-      <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-sm overflow-x-auto">
+      <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-xl shadow-sm overflow-x-auto">
         <table className="w-full min-w-[480px]">
           <thead>
             <tr className="border-b border-blue-100">
               <th className="py-3 pr-4 w-36" />
               {groups.map((g, gi) => (
-                <th key={g.id} className="py-3 px-3 text-left">
+                <th key={g.id} className="py-2 px-2 text-left">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-bold text-blue-900">Group {gi + 1}</span>
                     {colCount > 1 && (
@@ -654,7 +654,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
             {/* Members row */}
             <TableRow label="Members">
               {groups.map(g => (
-                <td key={g.id} className="py-3 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <div className="flex flex-wrap gap-1.5">
                     {Array.from({ length: passengerCount }, (_, idx) => {
                       const selected = g.memberIndices.includes(idx);
@@ -687,7 +687,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Date">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalDate ?? ''} onChange={v => updateGroup(g.id, { arrivalDate: v })} type="date" />
                 </td>
               ))}
@@ -695,7 +695,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Time">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalTime ?? ''} onChange={v => updateGroup(g.id, { arrivalTime: v })} type="time" />
                 </td>
               ))}
@@ -703,7 +703,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Flight No.">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
                 </td>
               ))}
@@ -726,7 +726,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Transfer to marina?">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <PillToggle
                     options={[{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }]}
                     value={g.transferFromAirport ? 'yes' : g.transferFromAirport === false ? 'no' : ''}
@@ -745,7 +745,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Date">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureDate ?? ''} onChange={v => updateGroup(g.id, { departureDate: v })} type="date" />
                 </td>
               ))}
@@ -753,7 +753,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Time">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureTime ?? ''} onChange={v => updateGroup(g.id, { departureTime: v })} type="time" />
                 </td>
               ))}
@@ -761,7 +761,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Flight No.">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
                 </td>
               ))}
@@ -769,7 +769,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
             <TableRow label="Transfer to airport?">
               {groups.map(g => (
-                <td key={g.id} className="py-2 px-3 align-top">
+                <td key={g.id} className="py-1.5 px-2 align-top">
                   <PillToggle
                     options={[{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }]}
                     value={g.transferToAirport ? 'yes' : g.transferToAirport === false ? 'no' : ''}
@@ -914,9 +914,9 @@ function FoodStep({ initial, crew, onSave, onAutoSave }: {
             const key = cat.toLowerCase() as CatKey;
             const catData = (data[key as keyof FoodPreferences] as { likes?: string; dislikes?: string; allergies?: string }) ?? {};
             return (
-              <div key={cat} className="border border-blue-100 rounded-xl p-3 space-y-3 bg-white/50">
-                <p className="text-xs font-bold text-blue-800 uppercase tracking-wide">{cat}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div key={cat} className="border border-blue-100 rounded-lg p-2.5 space-y-2 bg-white/50">
+                <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wide">{cat}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
                   <div>
                     <FieldLabel>Likes</FieldLabel>
                     <TextInput value={catData.likes ?? ''} onChange={v => setCategory(key, 'likes', v)} placeholder="e.g. grilled fish" />
@@ -1043,7 +1043,7 @@ function BeverageRow({ label, item, crew, onChange }: {
   crew: CrewMember[];
   onChange: (v: { preferredBrand?: string; qty?: number; remarks?: string; passengerNotes?: Record<string, string> }) => void;
 }) {
-  const inputCell = 'rounded-lg border border-blue-200 bg-white px-2.5 py-2 text-xs text-blue-900 placeholder:text-blue-300 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200/60 transition-all shadow-sm hover:border-blue-300 w-full';
+  const inputCell = 'rounded-lg border border-blue-200 bg-white px-2 py-1.5 text-xs text-blue-900 placeholder:text-blue-300 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200/60 transition-all shadow-sm hover:border-blue-300 w-full';
   return (
     <div className="py-2.5 border-b border-blue-50 last:border-0">
       <div className="grid grid-cols-[2fr_1fr_2fr] gap-2 items-center">
