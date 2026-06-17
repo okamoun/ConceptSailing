@@ -20,6 +20,7 @@ import {
   type ClientPreparation,
   type CrewMember,
   type TravelLogistics,
+  type TravelGroup,
   type ActivityPreferences,
   type FoodPreferences,
   type BeveragePreferences,
@@ -523,84 +524,264 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
 // Step 2: Travel & Logistics
 // ---------------------------------------------------------------------------
 
-function TravelStep({ initial, onSave, onAutoSave }: {
+function newGroup(id: string, memberIndices: number[]): TravelGroup {
+  return { id, memberIndices };
+}
+
+function initGroups(initial: TravelLogistics, passengerCount: number): TravelGroup[] {
+  if (initial.groups && initial.groups.length > 0) return initial.groups;
+  return [newGroup('g1', Array.from({ length: passengerCount }, (_, i) => i))];
+}
+
+function TableRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <tr className="border-t border-blue-100">
+      <td className="py-3 pr-4 text-xs font-semibold text-blue-500 uppercase tracking-wide whitespace-nowrap w-36 align-top pt-3.5">
+        {label}
+      </td>
+      {children}
+    </tr>
+  );
+}
+
+function TravelStep({ initial, crew, onSave, onAutoSave }: {
   initial: TravelLogistics;
+  crew: CrewMember[];
   onSave: (travel: TravelLogistics) => Promise<void>;
   onAutoSave: (travel: TravelLogistics) => Promise<void>;
 }) {
-  const [data, setData] = useState<TravelLogistics>(initial);
+  const passengerCount = Math.max(crew.length, 1);
+  const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount));
   const [saving, setSaving] = useState(false);
+
+  const data: TravelLogistics = { groups };
   const autoStatus = useAutoSave(data, onAutoSave);
-  function set<K extends keyof TravelLogistics>(k: K, v: TravelLogistics[K]) {
-    setData(prev => ({ ...prev, [k]: v }));
+
+  function updateGroup(id: string, patch: Partial<TravelGroup>) {
+    setGroups(prev => prev.map(g => g.id === id ? { ...g, ...patch } : g));
   }
-  async function handleSave() { setSaving(true); try { await onSave(data); } finally { setSaving(false); } }
+
+  function addGroup() {
+    const id = `g${Date.now()}`;
+    setGroups(prev => [...prev, newGroup(id, [])]);
+  }
+
+  function removeGroup(id: string) {
+    if (groups.length <= 1) return;
+    setGroups(prev => prev.filter(g => g.id !== id));
+  }
+
+  // Toggle a member between groups — exclusive: adding to one removes from others
+  function toggleMember(groupId: string, idx: number) {
+    setGroups(prev => {
+      const inGroup = prev.find(g => g.id === groupId)?.memberIndices.includes(idx);
+      return prev.map(g => {
+        if (g.id === groupId) {
+          return {
+            ...g,
+            memberIndices: inGroup
+              ? g.memberIndices.filter(i => i !== idx)
+              : [...g.memberIndices, idx].sort((a, b) => a - b),
+          };
+        }
+        // Remove from other groups (exclusive)
+        return { ...g, memberIndices: g.memberIndices.filter(i => i !== idx) };
+      });
+    });
+  }
+
+  function memberName(idx: number) {
+    const m = crew[idx];
+    if (!m) return `Passenger ${idx + 1}`;
+    const name = [m.firstName, m.lastName].filter(Boolean).join(' ');
+    return name || `Passenger ${idx + 1}`;
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    try { await onSave(data); } finally { setSaving(false); }
+  }
+
+  const colCount = groups.length;
 
   return (
-    <div className="space-y-3">
-      <SectionCard title="Arrival" autoSave={autoStatus}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <FieldLabel>Arrival Date</FieldLabel>
-            <TextInput value={data.arrivalDate ?? ''} onChange={v => set('arrivalDate', v)} type="date" />
-          </div>
-          <div>
-            <FieldLabel>Arrival Time</FieldLabel>
-            <TextInput value={data.arrivalTime ?? ''} onChange={v => set('arrivalTime', v)} type="time" />
-          </div>
-          <div>
-            <FieldLabel>Flight Number</FieldLabel>
-            <TextInput value={data.arrivalFlight ?? ''} onChange={v => set('arrivalFlight', v)} placeholder="e.g. EasyJet EZY1234" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <FieldLabel>Staying at a hotel before boarding?</FieldLabel>
-          <PillToggle
-            options={[{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }]}
-            value={data.stayingAtHotel ? 'yes' : data.stayingAtHotel === false ? 'no' : ''}
-            onChange={v => set('stayingAtHotel', v === 'yes')}
-          />
-          {data.stayingAtHotel && (
-            <div className="mt-2">
-              <FieldLabel>Hotel Name & Contact</FieldLabel>
-              <TextInput value={data.hotelName ?? ''} onChange={v => set('hotelName', v)} placeholder="Hotel name and phone/address" />
-            </div>
-          )}
-        </div>
-        <div className="space-y-2">
-          <FieldLabel>Airport transfer to marina needed?</FieldLabel>
-          <PillToggle
-            options={[{ id: 'yes', label: 'Yes — arrange please' }, { id: 'no', label: 'No — I\'ll arrange my own' }]}
-            value={data.transferFromAirport ? 'yes' : data.transferFromAirport === false ? 'no' : ''}
-            onChange={v => set('transferFromAirport', v === 'yes')}
-          />
-        </div>
-      </SectionCard>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <AutoSaveIndicator status={autoStatus} />
+        <button
+          type="button"
+          onClick={addGroup}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add Travel Group
+        </button>
+      </div>
 
-      <SectionCard title="Departure">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <FieldLabel>Departure Date</FieldLabel>
-            <TextInput value={data.departureDate ?? ''} onChange={v => set('departureDate', v)} type="date" />
-          </div>
-          <div>
-            <FieldLabel>Departure Time</FieldLabel>
-            <TextInput value={data.departureTime ?? ''} onChange={v => set('departureTime', v)} type="time" />
-          </div>
-          <div>
-            <FieldLabel>Flight Number</FieldLabel>
-            <TextInput value={data.departureFlight ?? ''} onChange={v => set('departureFlight', v)} placeholder="e.g. BA456" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <FieldLabel>Airport transfer from marina needed?</FieldLabel>
-          <PillToggle
-            options={[{ id: 'yes', label: 'Yes — arrange please' }, { id: 'no', label: 'No — I\'ll arrange my own' }]}
-            value={data.transferToAirport ? 'yes' : data.transferToAirport === false ? 'no' : ''}
-            onChange={v => set('transferToAirport', v === 'yes')}
-          />
-        </div>
-      </SectionCard>
+      <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[480px]">
+          <thead>
+            <tr className="border-b border-blue-100">
+              <th className="py-3 pr-4 w-36" />
+              {groups.map((g, gi) => (
+                <th key={g.id} className="py-3 px-3 text-left">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-bold text-blue-900">Group {gi + 1}</span>
+                    {colCount > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeGroup(g.id)}
+                        className="w-5 h-5 rounded-full bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center text-[10px] transition-colors flex-shrink-0"
+                        title="Remove group"
+                      >✕</button>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-blue-400 mt-0.5">
+                    {g.memberIndices.length === 0
+                      ? 'No members assigned'
+                      : g.memberIndices.length === passengerCount
+                      ? 'All passengers'
+                      : `${g.memberIndices.length} passenger${g.memberIndices.length > 1 ? 's' : ''}`}
+                  </p>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="px-4">
+
+            {/* Members row */}
+            <TableRow label="Members">
+              {groups.map(g => (
+                <td key={g.id} className="py-3 px-3 align-top">
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.from({ length: passengerCount }, (_, idx) => {
+                      const selected = g.memberIndices.includes(idx);
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => toggleMember(g.id, idx)}
+                          className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-all ${
+                            selected
+                              ? 'bg-blue-600 border-blue-600 text-white'
+                              : 'bg-white border-blue-200 text-blue-500 hover:border-blue-400'
+                          }`}
+                        >
+                          {memberName(idx)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </td>
+              ))}
+            </TableRow>
+
+            {/* ── ARRIVAL ── */}
+            <tr className="border-t-2 border-blue-200">
+              <td colSpan={colCount + 1} className="py-2 px-0">
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Arrival</span>
+              </td>
+            </tr>
+
+            <TableRow label="Date">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <TextInput value={g.arrivalDate ?? ''} onChange={v => updateGroup(g.id, { arrivalDate: v })} type="date" />
+                </td>
+              ))}
+            </TableRow>
+
+            <TableRow label="Time">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <TextInput value={g.arrivalTime ?? ''} onChange={v => updateGroup(g.id, { arrivalTime: v })} type="time" />
+                </td>
+              ))}
+            </TableRow>
+
+            <TableRow label="Flight No.">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
+                </td>
+              ))}
+            </TableRow>
+
+            <TableRow label="Hotel before boarding?">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top space-y-2">
+                  <PillToggle
+                    options={[{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }]}
+                    value={g.stayingAtHotel ? 'yes' : g.stayingAtHotel === false ? 'no' : ''}
+                    onChange={v => updateGroup(g.id, { stayingAtHotel: v === 'yes' })}
+                  />
+                  {g.stayingAtHotel && (
+                    <TextInput value={g.hotelName ?? ''} onChange={v => updateGroup(g.id, { hotelName: v })} placeholder="Hotel name & contact" />
+                  )}
+                </td>
+              ))}
+            </TableRow>
+
+            <TableRow label="Transfer to marina?">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <PillToggle
+                    options={[{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }]}
+                    value={g.transferFromAirport ? 'yes' : g.transferFromAirport === false ? 'no' : ''}
+                    onChange={v => updateGroup(g.id, { transferFromAirport: v === 'yes' })}
+                  />
+                </td>
+              ))}
+            </TableRow>
+
+            {/* ── DEPARTURE ── */}
+            <tr className="border-t-2 border-blue-200">
+              <td colSpan={colCount + 1} className="py-2 px-0">
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Departure</span>
+              </td>
+            </tr>
+
+            <TableRow label="Date">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <TextInput value={g.departureDate ?? ''} onChange={v => updateGroup(g.id, { departureDate: v })} type="date" />
+                </td>
+              ))}
+            </TableRow>
+
+            <TableRow label="Time">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <TextInput value={g.departureTime ?? ''} onChange={v => updateGroup(g.id, { departureTime: v })} type="time" />
+                </td>
+              ))}
+            </TableRow>
+
+            <TableRow label="Flight No.">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
+                </td>
+              ))}
+            </TableRow>
+
+            <TableRow label="Transfer to airport?">
+              {groups.map(g => (
+                <td key={g.id} className="py-2 px-3 align-top">
+                  <PillToggle
+                    options={[{ id: 'yes', label: 'Yes' }, { id: 'no', label: 'No' }]}
+                    value={g.transferToAirport ? 'yes' : g.transferToAirport === false ? 'no' : ''}
+                    onChange={v => updateGroup(g.id, { transferToAirport: v === 'yes' })}
+                  />
+                </td>
+              ))}
+            </TableRow>
+
+          </tbody>
+        </table>
+      </div>
 
       <div className="flex justify-end">
         <SaveButton onClick={handleSave} saving={saving} label="Save Travel Details" />
@@ -1365,7 +1546,7 @@ export default function ClientSpaceClient({ token }: Props) {
         )}
 
         {currentStep === 2 && (
-          <TravelStep initial={prep.travel} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
+          <TravelStep initial={prep.travel} crew={prep.crew} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
         )}
 
         {currentStep === 3 && (

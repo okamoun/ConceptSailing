@@ -32,7 +32,24 @@ export interface CrewMember {
   medicalNotes?: string;
 }
 
+export interface TravelGroup {
+  id: string;
+  memberIndices: number[];
+  arrivalDate?: string;
+  arrivalTime?: string;
+  arrivalFlight?: string;
+  stayingAtHotel?: boolean;
+  hotelName?: string;
+  transferFromAirport?: boolean;
+  departureDate?: string;
+  departureTime?: string;
+  departureFlight?: string;
+  transferToAirport?: boolean;
+}
+
 export interface TravelLogistics {
+  groups?: TravelGroup[];
+  // Legacy flat fields (kept for backward compat)
   arrivalDate?: string;
   arrivalTime?: string;
   arrivalFlight?: string;
