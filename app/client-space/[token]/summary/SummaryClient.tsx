@@ -212,8 +212,73 @@ function CrewSection({ prep }: { prep: ClientPreparation }) {
   );
 }
 
+function TravelGroupBlock({ group, index, crew }: {
+  group: import('../../../../lib/clientSpace').TravelGroup;
+  index: number;
+  crew: import('../../../../lib/clientSpace').CrewMember[];
+}) {
+  const hasArrival = group.arrivalDate || group.arrivalFlight;
+  const hasDeparture = group.departureDate || group.departureFlight;
+  const memberNames = group.memberIndices
+    .map(i => {
+      const m = crew[i];
+      if (!m) return `Passenger ${i + 1}`;
+      return [m.firstName, m.lastName].filter(Boolean).join(' ') || `Passenger ${i + 1}`;
+    })
+    .join(', ');
+
+  return (
+    <div>
+      <SubsectionTitle>Group {index + 1}{memberNames ? ` — ${memberNames}` : ''}</SubsectionTitle>
+      {hasArrival && (
+        <div className="py-1">
+          <div className="px-5 py-1 text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">Arrival</div>
+          <Row label="Arrival Date" value={group.arrivalDate ? fmtDate(group.arrivalDate) : undefined} />
+          <Row label="Arrival Time" value={group.arrivalTime} />
+          <Row label="Flight Number" value={group.arrivalFlight} />
+          <BoolRow label="Staying at Hotel" value={group.stayingAtHotel} />
+          <Row label="Hotel Name" value={group.hotelName} />
+          <BoolRow label="Airport Transfer" value={group.transferFromAirport} />
+        </div>
+      )}
+      {hasDeparture && (
+        <div className="py-1">
+          <div className="px-5 py-1 text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">Departure</div>
+          <Row label="Departure Date" value={group.departureDate ? fmtDate(group.departureDate) : undefined} />
+          <Row label="Departure Time" value={group.departureTime} />
+          <Row label="Flight Number" value={group.departureFlight} />
+          <BoolRow label="Airport Transfer" value={group.transferToAirport} />
+        </div>
+      )}
+      {!hasArrival && !hasDeparture && (
+        <p className="px-5 py-2 text-xs text-slate-400 italic">No details entered for this group.</p>
+      )}
+    </div>
+  );
+}
+
 function TravelSection({ prep }: { prep: ClientPreparation }) {
   const t = prep.travel ?? {};
+  const groups = t.groups ?? [];
+
+  // Groups mode (new UI)
+  if (groups.length > 0) {
+    const hasAnyGroupData = groups.some(g => g.arrivalDate || g.arrivalFlight || g.departureDate || g.departureFlight);
+    return (
+      <div className="summary-section border border-slate-200 rounded-xl overflow-hidden mb-4">
+        <SectionTitle>Travel & Logistics</SectionTitle>
+        {!hasAnyGroupData ? (
+          <EmptySection message="No travel details submitted yet." />
+        ) : (
+          groups.map((g, i) => (
+            <TravelGroupBlock key={g.id} group={g} index={i} crew={prep.crew ?? []} />
+          ))
+        )}
+      </div>
+    );
+  }
+
+  // Legacy flat-field fallback
   const hasArrival = t.arrivalDate || t.arrivalFlight;
   const hasDeparture = t.departureDate || t.departureFlight;
   const hasAny = hasArrival || hasDeparture || t.stayingAtHotel != null || t.transferFromAirport != null;

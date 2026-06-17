@@ -406,27 +406,44 @@ describe('SummaryClient — Crew section with data', () => {
   });
 });
 
-describe('SummaryClient — Travel section with data', () => {
-  const prepWithTravel = {
+describe('SummaryClient — Travel section with groups (new UI)', () => {
+  const prepWithGroups = {
     ...mockPrep,
+    crew: [
+      { firstName: 'Alice', lastName: 'Smith' },
+      { firstName: 'Bob', lastName: 'Smith' },
+    ],
     travel: {
-      arrivalDate: '2026-06-30',
-      arrivalFlight: 'BA123',
-      arrivalTime: '14:30',
-      stayingAtHotel: true,
-      hotelName: 'Grand Hotel Athens',
-      transferFromAirport: true,
-      departureDate: '2026-07-09',
-      departureFlight: 'BA456',
+      groups: [
+        {
+          id: 'g1',
+          memberIndices: [0, 1],
+          arrivalDate: '2026-06-30',
+          arrivalFlight: 'BA123',
+          arrivalTime: '14:30',
+          stayingAtHotel: true,
+          hotelName: 'Grand Hotel Athens',
+          transferFromAirport: true,
+          departureDate: '2026-07-09',
+          departureFlight: 'BA456',
+        },
+      ],
     },
   };
 
   beforeEach(() => {
-    mockGetClientPreparation.mockResolvedValue(prepWithTravel);
+    mockGetClientPreparation.mockResolvedValue(prepWithGroups);
     mockGetCharterByToken.mockResolvedValue(mockCharter);
   });
 
-  it('renders Arrival subsection', async () => {
+  it('renders group subsection with member names', async () => {
+    renderSummary();
+    await waitFor(() => {
+      expect(screen.getByText(/group 1.*alice smith.*bob smith/i)).toBeInTheDocument();
+    });
+  });
+
+  it('renders Arrival sub-header', async () => {
     renderSummary();
     await waitFor(() => {
       expect(screen.getByText('Arrival')).toBeInTheDocument();
@@ -450,16 +467,45 @@ describe('SummaryClient — Travel section with data', () => {
   it('renders "Yes" for airport transfer', async () => {
     renderSummary();
     await waitFor(() => {
-      // BoolRow renders "Yes" for true
       const yesValues = screen.getAllByText('Yes');
       expect(yesValues.length).toBeGreaterThan(0);
     });
   });
 
-  it('renders Departure subsection', async () => {
+  it('renders Departure sub-header', async () => {
     renderSummary();
     await waitFor(() => {
       expect(screen.getByText('Departure')).toBeInTheDocument();
+    });
+  });
+
+  it('renders departure flight', async () => {
+    renderSummary();
+    await waitFor(() => {
+      expect(screen.getByText('BA456')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('SummaryClient — Travel section with legacy flat fields', () => {
+  const prepWithLegacyTravel = {
+    ...mockPrep,
+    travel: {
+      arrivalDate: '2026-06-30',
+      arrivalFlight: 'EZ999',
+      departureDate: '2026-07-09',
+    },
+  };
+
+  beforeEach(() => {
+    mockGetClientPreparation.mockResolvedValue(prepWithLegacyTravel);
+    mockGetCharterByToken.mockResolvedValue(mockCharter);
+  });
+
+  it('renders flight number from legacy data', async () => {
+    renderSummary();
+    await waitFor(() => {
+      expect(screen.getByText('EZ999')).toBeInTheDocument();
     });
   });
 });
