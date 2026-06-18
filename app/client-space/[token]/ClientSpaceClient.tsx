@@ -162,7 +162,7 @@ function Toast({ msg, onDone }: { msg: string; onDone: () => void }) {
 // Reusable field components
 // ---------------------------------------------------------------------------
 
-const inputBase = 'w-full appearance-none bg-transparent border-0 border-b border-blue-300/60 rounded-none px-0 py-1.5 text-xs text-blue-900 placeholder:text-blue-300/70 transition-all focus:outline-none focus:border-blue-600 focus:ring-0';
+const inputBase = 'w-full appearance-none !bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 placeholder:text-blue-300/70 transition-all focus:outline-none focus:!border-blue-600 focus:!shadow-none';
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">{children}</label>;
@@ -300,7 +300,7 @@ function PassengerNotes({ crew, notes, onChange }: {
                   value={notes[String(i)] ?? ''}
                   onChange={e => onChange({ ...notes, [String(i)]: e.target.value })}
                   placeholder="Specific note…"
-                  className="flex-1 bg-transparent border-0 border-b border-blue-300/60 rounded-none px-0 py-1.5 text-xs text-blue-900 placeholder:text-blue-300/70 focus:outline-none focus:border-blue-600 transition-all"
+                  className="flex-1 !bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 placeholder:text-blue-300/70 focus:outline-none focus:!border-blue-600 focus:!shadow-none transition-all"
                 />
               </div>
             );
