@@ -359,7 +359,8 @@ function FoodSection({ prep }: { prep: ClientPreparation }) {
         <>
           <SubsectionTitle>Food Categories</SubsectionTitle>
           <div className="py-1">
-            <div className="grid grid-cols-4 gap-0 px-5 py-1 border-b border-slate-100">
+            {/* Desktop: 4-column grid */}
+            <div className="hidden sm:grid grid-cols-4 gap-0 px-5 py-1 border-b border-slate-100">
               <span className="text-[10px] font-bold text-slate-400 uppercase">Category</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase">Likes</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase">Dislikes</span>
@@ -370,11 +371,21 @@ function FoodSection({ prep }: { prep: ClientPreparation }) {
               const catData = f[key] as { likes?: string; dislikes?: string; allergies?: string } | undefined;
               if (!catData?.likes && !catData?.dislikes && !catData?.allergies) return null;
               return (
-                <div key={cat} className="grid grid-cols-4 gap-0 px-5 py-1.5 border-b border-slate-100 last:border-0">
-                  <span className="text-xs font-semibold text-slate-700">{cat}</span>
-                  <span className="text-xs text-slate-600">{catData?.likes || '—'}</span>
-                  <span className="text-xs text-slate-600">{catData?.dislikes || '—'}</span>
-                  <span className="text-xs text-slate-600">{catData?.allergies || '—'}</span>
+                <div key={cat} className="border-b border-slate-100 last:border-0">
+                  {/* Desktop row */}
+                  <div className="hidden sm:grid grid-cols-4 gap-0 px-5 py-1.5">
+                    <span className="text-xs font-semibold text-slate-700">{cat}</span>
+                    <span className="text-xs text-slate-600">{catData?.likes || '—'}</span>
+                    <span className="text-xs text-slate-600">{catData?.dislikes || '—'}</span>
+                    <span className="text-xs text-slate-600">{catData?.allergies || '—'}</span>
+                  </div>
+                  {/* Mobile: stacked */}
+                  <div className="sm:hidden px-5 py-2 space-y-0.5">
+                    <p className="text-xs font-semibold text-slate-700">{cat}</p>
+                    {catData?.likes && <p className="text-xs text-slate-600"><span className="text-slate-400">Likes: </span>{catData.likes}</p>}
+                    {catData?.dislikes && <p className="text-xs text-slate-600"><span className="text-slate-400">Dislikes: </span>{catData.dislikes}</p>}
+                    {catData?.allergies && <p className="text-xs text-red-600 font-medium"><span className="text-slate-400">Allergies: </span>{catData.allergies}</p>}
+                  </div>
                 </div>
               );
             })}
@@ -456,18 +467,29 @@ function BeveragesSection({ prep }: { prep: ClientPreparation }) {
           <div key={group}>
             <SubsectionTitle>{label}</SubsectionTitle>
             <div className="py-1">
-              <div className="grid grid-cols-3 px-5 py-1 border-b border-slate-100">
+              {/* Desktop: 3-column grid */}
+              <div className="hidden sm:grid grid-cols-3 px-5 py-1 border-b border-slate-100">
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Item</span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Qty</span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Brand / Notes</span>
               </div>
               {rows.map(t => {
                 const item = (b[group] ?? {})[t] ?? {};
+                const brand = item.preferredBrand || item.remarks;
                 return (
-                  <div key={t} className="grid grid-cols-3 px-5 py-1.5 border-b border-slate-100 last:border-0">
-                    <span className="text-xs text-slate-700">{t}</span>
-                    <span className="text-xs text-slate-600">{item.qty ?? '—'}</span>
-                    <span className="text-xs text-slate-600">{item.preferredBrand || item.remarks || '—'}</span>
+                  <div key={t} className="border-b border-slate-100 last:border-0">
+                    {/* Desktop row */}
+                    <div className="hidden sm:grid grid-cols-3 px-5 py-1.5">
+                      <span className="text-xs text-slate-700">{t}</span>
+                      <span className="text-xs text-slate-600">{item.qty ?? '—'}</span>
+                      <span className="text-xs text-slate-600">{brand || '—'}</span>
+                    </div>
+                    {/* Mobile: compact inline */}
+                    <div className="sm:hidden flex items-baseline justify-between px-5 py-1.5 gap-3">
+                      <span className="text-xs text-slate-700 flex-1">{t}</span>
+                      <span className="text-xs text-slate-500 flex-shrink-0">×{item.qty ?? '—'}</span>
+                      {brand && <span className="text-xs text-slate-400 flex-shrink-0 truncate max-w-[100px]">{brand}</span>}
+                    </div>
                   </div>
                 );
               })}
@@ -600,36 +622,42 @@ export default function SummaryClient({ token }: Props) {
       <div className="min-h-screen bg-slate-50">
 
         {/* Screen header */}
-        <div className="summary-header no-print sticky top-0 z-30 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="summary-header no-print sticky top-0 z-30 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Image
               src="/images/boats/blueone/logo_blueone.png"
               alt="BlueOne"
-              width={100}
-              height={40}
-              className="object-contain"
+              width={72}
+              height={28}
+              className="object-contain flex-shrink-0 sm:w-[100px] sm:h-[40px]"
               unoptimized
             />
-            <div>
-              <p className="text-white font-bold text-base leading-tight">Preference Summary</p>
-              {charter.name && <p className="text-blue-200 text-xs">{charter.name} · {charter.startDate ? fmtDate(charter.startDate) : '—'}</p>}
+            <div className="min-w-0">
+              <p className="text-white font-bold text-sm sm:text-base leading-tight">Preference Summary</p>
+              {charter.name && <p className="text-blue-200 text-[10px] sm:text-xs truncate">{charter.name} · {charter.startDate ? fmtDate(charter.startDate) : '—'}</p>}
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Back link — icon-only on mobile, full text on sm+ */}
             <a
               href={`/client-space/${token}`}
-              className="no-print px-4 py-2 rounded-xl text-xs font-semibold border border-white/30 text-white hover:bg-white/10 transition-colors"
+              className="no-print flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold border border-white/30 text-white hover:bg-white/10 transition-colors"
+              aria-label="Edit Preferences"
             >
-              ← Edit Preferences
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="hidden sm:inline">Edit Preferences</span>
             </a>
             <button
               onClick={() => window.print()}
-              className="no-print px-5 py-2 rounded-xl text-xs font-bold bg-white text-blue-800 hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2"
+              className="no-print flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-xs font-bold bg-white text-blue-800 hover:bg-blue-50 transition-colors shadow-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
               </svg>
-              Print / Save PDF
+              <span className="hidden xs:inline sm:inline">Print / Save PDF</span>
+              <span className="sm:hidden">Print</span>
             </button>
           </div>
         </div>

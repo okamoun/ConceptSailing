@@ -1280,6 +1280,7 @@ export default function ClientSpaceClient({ token }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const checklistRef = useRef<Record<string, boolean>>({});
+  const stepNavRef = useRef<HTMLDivElement>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<PrepSnapshot[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -1300,6 +1301,13 @@ export default function ClientSpaceClient({ token }: Props) {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [token]);
+
+  // Scroll active step tab into view on mobile
+  useEffect(() => {
+    if (!stepNavRef.current) return;
+    const active = stepNavRef.current.children[currentStep] as HTMLElement | undefined;
+    active?.scrollIntoView?.({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }, [currentStep]);
 
   const showToast = useCallback((msg: string) => setToast(msg), []);
 
@@ -1496,7 +1504,9 @@ export default function ClientSpaceClient({ token }: Props) {
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         {/* Step nav buttons */}
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div ref={stepNavRef} className="flex gap-2 overflow-x-auto pb-1 scroll-smooth"
+          style={{ scrollbarWidth: 'none' }}
+        >
           {STEPS.map((label, i) => (
             <button
               key={i}

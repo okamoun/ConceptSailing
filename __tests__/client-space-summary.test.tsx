@@ -537,7 +537,7 @@ describe('SummaryClient — Food section with data', () => {
   it('renders seafood likes', async () => {
     renderSummary();
     await waitFor(() => {
-      expect(screen.getByText('Grilled fish')).toBeInTheDocument();
+      expect(screen.getAllByText('Grilled fish').length).toBeGreaterThan(0);
     });
   });
 
