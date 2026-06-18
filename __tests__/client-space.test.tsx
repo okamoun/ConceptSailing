@@ -326,21 +326,22 @@ describe('ClientSpaceClient — Step 2: Travel & Logistics', () => {
   });
 
   test('renders Group 1 by default', () => {
-    expect(screen.getByText('Group 1')).toBeInTheDocument();
+    // Both mobile card and desktop table render Group 1 in the DOM
+    expect(screen.getAllByText('Group 1').length).toBeGreaterThan(0);
   });
 
   test('shows all passengers in default group', () => {
-    expect(screen.getByText('All passengers')).toBeInTheDocument();
+    expect(screen.getAllByText('All passengers').length).toBeGreaterThan(0);
   });
 
   test('Add Travel Group button creates a second column', async () => {
     fireEvent.click(screen.getByRole('button', { name: /add travel group/i }));
-    await waitFor(() => expect(screen.getByText('Group 2')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('Group 2').length).toBeGreaterThan(0));
   });
 
   test('renders Arrival and Departure section labels', () => {
-    expect(screen.getByText('Arrival')).toBeInTheDocument();
-    expect(screen.getByText('Departure')).toBeInTheDocument();
+    expect(screen.getAllByText('Arrival').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Departure').length).toBeGreaterThan(0);
   });
 
   test('Save Travel Details calls saveTravel', async () => {
