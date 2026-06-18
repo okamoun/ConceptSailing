@@ -30,7 +30,7 @@ import {
 import type { Charter } from '../../../lib/availability';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../../lib/firebase';
-import { getMarinaById } from '../../marinas-data';
+import { getMarinaById, marinasByRegion } from '../../marinas-data';
 import { CONTACT } from '../../config/contact';
 
 // ---------------------------------------------------------------------------
@@ -604,7 +604,14 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
   const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount, charter));
   const [saving, setSaving] = useState(false);
 
-  const data: TravelLogistics = { groups };
+  const defaultEmbark = getMarinaById(charter.deliveryPoint ?? '')?.name ?? charter.embarkationPoint ?? '';
+  const defaultDisembark = getMarinaById(charter.redeliveryPoint ?? charter.deliveryPoint ?? '')?.name ?? charter.embarkationPoint ?? '';
+  const [embarkationPoint, setEmbarkationPoint] = useState(initial.embarkationPoint ?? defaultEmbark);
+  const [disembarkationPoint, setDisembarkationPoint] = useState(initial.disembarkationPoint ?? defaultDisembark);
+
+  const regionedMarinas = marinasByRegion();
+
+  const data: TravelLogistics = { groups, embarkationPoint, disembarkationPoint };
   const autoStatus = useAutoSave(data, onAutoSave);
 
   function updateGroup(id: string, patch: Partial<TravelGroup>) {
@@ -656,6 +663,40 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
 
   return (
     <div className="space-y-4">
+      {/* Embarkation / Disembarkation */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <FieldLabel>Embarkation Point</FieldLabel>
+          <select
+            value={embarkationPoint}
+            onChange={e => setEmbarkationPoint(e.target.value)}
+            className="!bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 transition-all focus:outline-none focus:!border-blue-600 w-full"
+          >
+            <option value="">Select marina…</option>
+            {Object.entries(regionedMarinas).map(([region, ms]) => (
+              <optgroup key={region} label={region}>
+                {ms.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+        <div>
+          <FieldLabel>Disembarkation Point</FieldLabel>
+          <select
+            value={disembarkationPoint}
+            onChange={e => setDisembarkationPoint(e.target.value)}
+            className="!bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 transition-all focus:outline-none focus:!border-blue-600 w-full"
+          >
+            <option value="">Select marina…</option>
+            {Object.entries(regionedMarinas).map(([region, ms]) => (
+              <optgroup key={region} label={region}>
+                {ms.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <AutoSaveIndicator status={autoStatus} />
         <button

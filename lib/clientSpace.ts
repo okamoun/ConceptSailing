@@ -50,6 +50,8 @@ export interface TravelGroup {
 
 export interface TravelLogistics {
   groups?: TravelGroup[];
+  embarkationPoint?: string;
+  disembarkationPoint?: string;
   // Legacy flat fields (kept for backward compat)
   arrivalDate?: string;
   arrivalTime?: string;
