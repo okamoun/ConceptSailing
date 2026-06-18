@@ -172,6 +172,27 @@ function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">{children}</label>;
 }
 
+function FlightTrackLinks({ flight }: { flight: string }) {
+  const code = flight.replace(/\s+/g, '').toUpperCase();
+  const fr24 = `https://www.flightradar24.com/data/flights/${code.toLowerCase()}`;
+  const fa   = `https://flightaware.com/live/flight/${code}`;
+  const extIcon = (
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
+  );
+  return (
+    <div className="flex gap-3 mt-0.5">
+      <a href={fr24} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
+        {extIcon}FR24
+      </a>
+      <a href={fa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
+        {extIcon}FlightAware
+      </a>
+    </div>
+  );
+}
+
 function TextInput({ value, onChange, placeholder, type = 'text' }: {
   value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
 }) {
@@ -762,19 +783,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && (
-                    <a
-                      href={`https://flightaware.com/live/flight/${g.arrivalFlight.replace(/\s+/g, '').toUpperCase()}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Track flight live
-                    </a>
-                  )}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} />}
                 </div>
                 <div className="mb-2">
                   <FieldLabel>Hotel before boarding?</FieldLabel>
@@ -811,19 +820,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && (
-                    <a
-                      href={`https://flightaware.com/live/flight/${g.departureFlight.replace(/\s+/g, '').toUpperCase()}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Track flight live
-                    </a>
-                  )}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} />}
                 </div>
                 <div>
                   <FieldLabel>Transfer to airport?</FieldLabel>
@@ -905,19 +902,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && (
-                    <a
-                      href={`https://flightaware.com/live/flight/${g.arrivalFlight.replace(/\s+/g, '').toUpperCase()}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Track flight live
-                    </a>
-                  )}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} />}
                 </td>
               ))}
             </TableRow>
@@ -971,19 +956,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && (
-                    <a
-                      href={`https://flightaware.com/live/flight/${g.departureFlight.replace(/\s+/g, '').toUpperCase()}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      Track flight live
-                    </a>
-                  )}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} />}
                 </td>
               ))}
             </TableRow>
