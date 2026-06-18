@@ -172,23 +172,71 @@ function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">{children}</label>;
 }
 
+interface FlightInfo {
+  airline: string;
+  from: { iata: string; name: string };
+  to: { iata: string; name: string };
+  scheduledDep: string | null;
+  scheduledArr: string | null;
+  status: string;
+}
+
+function fmtFlightTime(iso: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+}
+
 function FlightTrackLinks({ flight }: { flight: string }) {
   const code = flight.replace(/\s+/g, '').toUpperCase();
   const fr24 = `https://www.flightradar24.com/data/flights/${code.toLowerCase()}`;
   const fa   = `https://flightaware.com/live/flight/${code}`;
+  const [info, setInfo] = useState<FlightInfo | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!code) return;
+    setInfo(null);
+    setLoading(true);
+    fetch(`/api/flight-info?flight=${encodeURIComponent(code)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((data: FlightInfo | null) => { setInfo(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [code]);
+
   const extIcon = (
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
     </svg>
   );
+
   return (
-    <div className="flex gap-3 mt-0.5">
-      <a href={fr24} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
-        {extIcon}FR24
-      </a>
-      <a href={fa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
-        {extIcon}FlightAware
-      </a>
+    <div className="mt-1 space-y-1">
+      {loading && (
+        <p className="text-[10px] text-blue-400 italic">Looking up flight…</p>
+      )}
+      {!loading && info && info.airline && (
+        <div className="text-[10px] text-blue-700 bg-blue-50/60 rounded px-2 py-1 space-y-0.5">
+          <p className="font-semibold">{info.airline}</p>
+          <p>{info.from.iata} {info.from.name && `· ${info.from.name}`} → {info.to.iata} {info.to.name && `· ${info.to.name}`}</p>
+          {(info.scheduledDep || info.scheduledArr) && (
+            <p>
+              {info.scheduledDep && <>Dep&nbsp;{fmtFlightTime(info.scheduledDep)}</>}
+              {info.scheduledDep && info.scheduledArr && <span className="mx-1">·</span>}
+              {info.scheduledArr && <>Arr&nbsp;{fmtFlightTime(info.scheduledArr)}</>}
+            </p>
+          )}
+        </div>
+      )}
+      <div className="flex gap-3">
+        <a href={fr24} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
+          {extIcon}FR24
+        </a>
+        <a href={fa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
+          {extIcon}FlightAware
+        </a>
+      </div>
     </div>
   );
 }
