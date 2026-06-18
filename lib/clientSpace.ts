@@ -36,12 +36,14 @@ export interface CrewMember {
 export interface TravelGroup {
   id: string;
   memberIndices: number[];
+  embarkationPoint?: string;
   arrivalDate?: string;
   arrivalTime?: string;
   arrivalFlight?: string;
   stayingAtHotel?: boolean;
   hotelName?: string;
   transferFromAirport?: boolean;
+  disembarkationPoint?: string;
   departureDate?: string;
   departureTime?: string;
   departureFlight?: string;
@@ -50,9 +52,9 @@ export interface TravelGroup {
 
 export interface TravelLogistics {
   groups?: TravelGroup[];
+  // Legacy flat fields (kept for backward compat)
   embarkationPoint?: string;
   disembarkationPoint?: string;
-  // Legacy flat fields (kept for backward compat)
   arrivalDate?: string;
   arrivalTime?: string;
   arrivalFlight?: string;

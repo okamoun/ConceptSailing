@@ -638,18 +638,20 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
 // Step 2: Travel & Logistics
 // ---------------------------------------------------------------------------
 
-function newGroup(id: string, memberIndices: number[], charter?: Charter): TravelGroup {
+function newGroup(id: string, memberIndices: number[], charter?: Charter, defaultEmbark?: string, defaultDisembark?: string): TravelGroup {
   return {
     id,
     memberIndices,
+    ...(defaultEmbark ? { embarkationPoint: defaultEmbark } : {}),
     ...(charter?.startDate ? { arrivalDate: charter.startDate } : {}),
+    ...(defaultDisembark ? { disembarkationPoint: defaultDisembark } : {}),
     ...(charter?.endDate ? { departureDate: charter.endDate } : {}),
   };
 }
 
-function initGroups(initial: TravelLogistics, passengerCount: number, charter?: Charter): TravelGroup[] {
+function initGroups(initial: TravelLogistics, passengerCount: number, charter?: Charter, defaultEmbark?: string, defaultDisembark?: string): TravelGroup[] {
   if (initial.groups && initial.groups.length > 0) return initial.groups;
-  const g = newGroup('g1', Array.from({ length: passengerCount }, (_, i) => i), charter);
+  const g = newGroup('g1', Array.from({ length: passengerCount }, (_, i) => i), charter, defaultEmbark, defaultDisembark);
   return [g];
 }
 
@@ -672,17 +674,14 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
   onAutoSave: (travel: TravelLogistics) => Promise<void>;
 }) {
   const passengerCount = Math.max(crew.length, 1);
-  const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount, charter));
-  const [saving, setSaving] = useState(false);
-
   const defaultEmbark = getMarinaById(charter.deliveryPoint ?? '')?.name ?? charter.embarkationPoint ?? '';
   const defaultDisembark = getMarinaById(charter.redeliveryPoint ?? charter.deliveryPoint ?? '')?.name ?? charter.embarkationPoint ?? '';
-  const [embarkationPoint, setEmbarkationPoint] = useState(initial.embarkationPoint ?? defaultEmbark);
-  const [disembarkationPoint, setDisembarkationPoint] = useState(initial.disembarkationPoint ?? defaultDisembark);
+  const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount, charter, defaultEmbark, defaultDisembark));
+  const [saving, setSaving] = useState(false);
 
   const regionedMarinas = marinasByRegion();
 
-  const data: TravelLogistics = { groups, embarkationPoint, disembarkationPoint };
+  const data: TravelLogistics = { groups };
   const autoStatus = useAutoSave(data, onAutoSave);
 
   function updateGroup(id: string, patch: Partial<TravelGroup>) {
@@ -691,7 +690,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
 
   function addGroup() {
     const id = `g${Date.now()}`;
-    setGroups(prev => [...prev, newGroup(id, [], charter)]);
+    setGroups(prev => [...prev, newGroup(id, [], charter, defaultEmbark, defaultDisembark)]);
   }
 
   function removeGroup(id: string) {
@@ -732,42 +731,23 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
 
   const colCount = groups.length;
 
+  const marinaSelect = (value: string, onChange: (v: string) => void) => (
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="!bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 transition-all focus:outline-none focus:!border-blue-600 w-full"
+    >
+      <option value="">Select marina…</option>
+      {Object.entries(regionedMarinas).map(([region, ms]) => (
+        <optgroup key={region} label={region}>
+          {ms.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+        </optgroup>
+      ))}
+    </select>
+  );
+
   return (
     <div className="space-y-4">
-      {/* Embarkation / Disembarkation */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <FieldLabel>Embarkation Point</FieldLabel>
-          <select
-            value={embarkationPoint}
-            onChange={e => setEmbarkationPoint(e.target.value)}
-            className="!bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 transition-all focus:outline-none focus:!border-blue-600 w-full"
-          >
-            <option value="">Select marina…</option>
-            {Object.entries(regionedMarinas).map(([region, ms]) => (
-              <optgroup key={region} label={region}>
-                {ms.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
-              </optgroup>
-            ))}
-          </select>
-        </div>
-        <div>
-          <FieldLabel>Disembarkation Point</FieldLabel>
-          <select
-            value={disembarkationPoint}
-            onChange={e => setDisembarkationPoint(e.target.value)}
-            className="!bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 transition-all focus:outline-none focus:!border-blue-600 w-full"
-          >
-            <option value="">Select marina…</option>
-            {Object.entries(regionedMarinas).map(([region, ms]) => (
-              <optgroup key={region} label={region}>
-                {ms.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
-              </optgroup>
-            ))}
-          </select>
-        </div>
-      </div>
-
       <div className="flex items-center justify-between">
         <AutoSaveIndicator status={autoStatus} />
         <button
@@ -818,6 +798,10 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {/* Arrival */}
               <div>
                 <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 border-t border-blue-100 pt-3">Arrival</p>
+                <div className="mb-2">
+                  <FieldLabel>Embarkation Point</FieldLabel>
+                  {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
+                </div>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <div>
                     <FieldLabel>Date</FieldLabel>
@@ -855,6 +839,10 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {/* Departure */}
               <div>
                 <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 border-t border-blue-100 pt-3">Departure</p>
+                <div className="mb-2">
+                  <FieldLabel>Disembarkation Point</FieldLabel>
+                  {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
+                </div>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <div>
                     <FieldLabel>Date</FieldLabel>
@@ -930,6 +918,14 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               </td>
             </tr>
 
+            <TableRow label="Embarkation Point">
+              {groups.map(g => (
+                <td key={g.id} className="py-1.5 px-2 align-top">
+                  {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
+                </td>
+              ))}
+            </TableRow>
+
             <TableRow label="Date">
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
@@ -983,6 +979,14 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Departure</span>
               </td>
             </tr>
+
+            <TableRow label="Disembarkation Point">
+              {groups.map(g => (
+                <td key={g.id} className="py-1.5 px-2 align-top">
+                  {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
+                </td>
+              ))}
+            </TableRow>
 
             <TableRow label="Date">
               {groups.map(g => (
