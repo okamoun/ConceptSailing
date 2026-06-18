@@ -162,7 +162,7 @@ function Toast({ msg, onDone }: { msg: string; onDone: () => void }) {
 // Reusable field components
 // ---------------------------------------------------------------------------
 
-const inputBase = 'w-full bg-transparent border-0 border-b border-blue-300/60 rounded-none px-0 py-1.5 text-xs text-blue-900 placeholder:text-blue-300/70 transition-all focus:outline-none focus:border-blue-600 focus:ring-0';
+const inputBase = 'w-full appearance-none bg-transparent border-0 border-b border-blue-300/60 rounded-none px-0 py-1.5 text-xs text-blue-900 placeholder:text-blue-300/70 transition-all focus:outline-none focus:border-blue-600 focus:ring-0';
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">{children}</label>;
@@ -623,9 +623,9 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
       {/* ── Mobile: stacked cards (< md) ── */}
       <div className="md:hidden space-y-4">
         {groups.map((g, gi) => (
-          <div key={g.id} className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-xl shadow-sm overflow-hidden">
+          <div key={g.id} className="border-b border-blue-100/60 pb-4">
             {/* Group header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-blue-50/60 border-b border-blue-100">
+            <div className="flex items-center justify-between py-2">
               <div>
                 <span className="text-sm font-bold text-blue-900">Group {gi + 1}</span>
                 <span className="ml-2 text-[11px] text-blue-400">
@@ -637,7 +637,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               )}
             </div>
 
-            <div className="px-4 py-3 space-y-4">
+            <div className="space-y-4">
               {/* Members */}
               <div>
                 <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-wide mb-1.5">Members</p>
