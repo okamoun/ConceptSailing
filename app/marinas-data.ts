@@ -68,6 +68,10 @@ function haversineNm(lat1: number, lng1: number, lat2: number, lng2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  return haversineNm(lat1, lng1, lat2, lng2) * 1.852;
+}
+
 const NEA_PERAMOS = marinas.find(m => m.id === 'nea-peramos')!;
 
 export function distanceFromNeaPeramos(marina: Marina): number {
@@ -81,4 +85,71 @@ export function formatNavTime(distanceNm: number, speedKn = 6): string {
   if (h === 0) return `${m} min`;
   if (m === 0) return `${h} h`;
   return `${h} h ${m} min`;
+}
+
+// ---------------------------------------------------------------------------
+// Airport data (IATA + coordinates) — used to estimate transfer distance
+// ---------------------------------------------------------------------------
+
+export interface Airport {
+  iata: string;
+  name: string;
+  city: string;
+  lat: number;
+  lng: number;
+}
+
+export const airports: Airport[] = [
+  // Greece
+  { iata: 'ATH', name: 'Athens International', city: 'Athens', lat: 37.9364, lng: 23.9445 },
+  { iata: 'SKG', name: 'Thessaloniki Makedonia', city: 'Thessaloniki', lat: 40.5197, lng: 22.9709 },
+  { iata: 'JMK', name: 'Mykonos Island National', city: 'Mykonos', lat: 37.4356, lng: 25.3481 },
+  { iata: 'JTR', name: 'Santorini Thira', city: 'Santorini', lat: 36.3992, lng: 25.4793 },
+  { iata: 'CFU', name: 'Corfu Ioannis Kapodistrias', city: 'Corfu', lat: 39.6019, lng: 19.9117 },
+  { iata: 'RHO', name: 'Rhodes Diagoras', city: 'Rhodes', lat: 36.4054, lng: 28.0862 },
+  { iata: 'HER', name: 'Heraklion Nikos Kazantzakis', city: 'Heraklion', lat: 35.3397, lng: 25.1803 },
+  { iata: 'CHQ', name: 'Chania Ioannis Daskalogiannis', city: 'Chania', lat: 35.5317, lng: 24.1497 },
+  { iata: 'ZTH', name: 'Zakynthos Dionysios Solomos', city: 'Zakynthos', lat: 37.7509, lng: 20.8843 },
+  { iata: 'KGS', name: 'Kos Hippocrates', city: 'Kos', lat: 36.7933, lng: 27.0917 },
+  { iata: 'PVK', name: 'Preveza / Aktio', city: 'Preveza', lat: 38.9255, lng: 20.7653 },
+  { iata: 'EFL', name: 'Cephalonia', city: 'Kefalonia', lat: 38.1206, lng: 20.5005 },
+  { iata: 'JSI', name: 'Skiathos Alexandros Papadiamantis', city: 'Skiathos', lat: 39.1772, lng: 23.5036 },
+  { iata: 'SMI', name: 'Samos', city: 'Samos', lat: 37.6900, lng: 26.9117 },
+  { iata: 'KVA', name: 'Kavala Alexander the Great', city: 'Kavala', lat: 40.9133, lng: 24.6192 },
+  { iata: 'JKH', name: 'Chios', city: 'Chios', lat: 38.3433, lng: 26.1406 },
+  { iata: 'MJT', name: 'Mytilene', city: 'Mytilene', lat: 39.0567, lng: 26.5983 },
+  { iata: 'PAS', name: 'Paros National', city: 'Paros', lat: 37.0100, lng: 25.1133 },
+  // Common European hubs for charter guests
+  { iata: 'LHR', name: 'London Heathrow', city: 'London', lat: 51.4700, lng: -0.4543 },
+  { iata: 'LGW', name: 'London Gatwick', city: 'London', lat: 51.1537, lng: -0.1821 },
+  { iata: 'CDG', name: 'Paris Charles de Gaulle', city: 'Paris', lat: 49.0097, lng: 2.5478 },
+  { iata: 'AMS', name: 'Amsterdam Schiphol', city: 'Amsterdam', lat: 52.3086, lng: 4.7639 },
+  { iata: 'FRA', name: 'Frankfurt', city: 'Frankfurt', lat: 50.0379, lng: 8.5622 },
+  { iata: 'MXP', name: 'Milan Malpensa', city: 'Milan', lat: 45.6306, lng: 8.7281 },
+  { iata: 'FCO', name: 'Rome Fiumicino', city: 'Rome', lat: 41.8003, lng: 12.2389 },
+  { iata: 'MAD', name: 'Madrid Barajas', city: 'Madrid', lat: 40.4936, lng: -3.5668 },
+  { iata: 'BRU', name: 'Brussels', city: 'Brussels', lat: 50.9010, lng: 4.4844 },
+  { iata: 'ZUR', name: 'Zurich', city: 'Zurich', lat: 47.4647, lng: 8.5492 },
+  { iata: 'TLV', name: 'Tel Aviv Ben Gurion', city: 'Tel Aviv', lat: 32.0055, lng: 34.8854 },
+  { iata: 'DXB', name: 'Dubai International', city: 'Dubai', lat: 25.2532, lng: 55.3657 },
+];
+
+const airportByIata = new Map(airports.map(a => [a.iata, a]));
+
+export function getAirportByIata(iata: string): Airport | undefined {
+  return airportByIata.get(iata.toUpperCase());
+}
+
+export function nearestAirportToMarina(marina: Marina): { airport: Airport; km: number } {
+  let best: Airport = airports[0];
+  let bestKm = Infinity;
+  for (const a of airports) {
+    const km = haversineKm(marina.lat, marina.lng, a.lat, a.lng);
+    if (km < bestKm) { bestKm = km; best = a; }
+  }
+  return { airport: best, km: bestKm };
+}
+
+export function getMarinaByName(name: string): Marina | undefined {
+  return marinas.find(m => m.name === name);
 }

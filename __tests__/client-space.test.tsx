@@ -28,7 +28,11 @@ jest.mock('../lib/firebase', () => ({ db: {}, storage: {} }));
 // ---------------------------------------------------------------------------
 jest.mock('../app/marinas-data', () => ({
   getMarinaById: jest.fn().mockReturnValue({ id: 'ATH', name: 'Alimos Marina' }),
+  getMarinaByName: jest.fn().mockReturnValue(undefined),
   marinasByRegion: jest.fn().mockReturnValue({ 'Attica': [{ id: 'alimos', name: 'Alimos Marina' }] }),
+  getAirportByIata: jest.fn().mockReturnValue(undefined),
+  nearestAirportToMarina: jest.fn().mockReturnValue({ airport: { iata: 'ATH', city: 'Athens' }, km: 10 }),
+  haversineKm: jest.fn().mockReturnValue(10),
   DEFAULT_MARINA_ID: 'ATH',
 }));
 

@@ -30,7 +30,7 @@ import {
 import type { Charter } from '../../../lib/availability';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../../lib/firebase';
-import { getMarinaById, marinasByRegion } from '../../marinas-data';
+import { getMarinaById, getMarinaByName, marinasByRegion, getAirportByIata, nearestAirportToMarina, haversineKm } from '../../marinas-data';
 import { CONTACT } from '../../config/contact';
 
 // ---------------------------------------------------------------------------
@@ -187,20 +187,23 @@ function fmtFlightTime(iso: string | null): string {
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 }
 
-function FlightTrackLinks({ flight }: { flight: string }) {
+function FlightTrackLinks({ flight, onInfo }: { flight: string; onInfo?: (info: FlightInfo | null) => void }) {
   const code = flight.replace(/\s+/g, '').toUpperCase();
   const fr24 = `https://www.flightradar24.com/data/flights/${code.toLowerCase()}`;
   const fa   = `https://flightaware.com/live/flight/${code}`;
   const [info, setInfo] = useState<FlightInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const onInfoRef = useRef(onInfo);
+  onInfoRef.current = onInfo;
 
   useEffect(() => {
     if (!code) return;
     setInfo(null);
+    onInfoRef.current?.(null);
     setLoading(true);
     fetch(`/api/flight-info?flight=${encodeURIComponent(code)}`)
       .then(r => r.ok ? r.json() : null)
-      .then((data: FlightInfo | null) => { setInfo(data); })
+      .then((data: FlightInfo | null) => { setInfo(data); onInfoRef.current?.(data); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [code]);
@@ -681,6 +684,30 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
 
   const regionedMarinas = marinasByRegion();
 
+  // Per-group resolved flight info: { [groupId]: { arrival?: FlightInfo; departure?: FlightInfo } }
+  const [groupFlightInfo, setGroupFlightInfo] = useState<Record<string, { arrival?: FlightInfo | null; departure?: FlightInfo | null }>>({});
+
+  function setArrivalInfo(groupId: string, info: FlightInfo | null) {
+    setGroupFlightInfo(prev => ({ ...prev, [groupId]: { ...prev[groupId], arrival: info } }));
+  }
+  function setDepartureInfo(groupId: string, info: FlightInfo | null) {
+    setGroupFlightInfo(prev => ({ ...prev, [groupId]: { ...prev[groupId], departure: info } }));
+  }
+
+  function distanceBadge(marinaName: string, airportIata?: string | null): string | null {
+    const marina = getMarinaByName(marinaName);
+    if (!marina) return null;
+    if (airportIata) {
+      const ap = getAirportByIata(airportIata);
+      if (ap) {
+        const km = Math.round(haversineKm(marina.lat, marina.lng, ap.lat, ap.lng));
+        return `~${km} km from ${ap.iata} · ${ap.city}`;
+      }
+    }
+    const { airport, km } = nearestAirportToMarina(marina);
+    return `~${Math.round(km)} km from ${airport.iata} · ${airport.city}`;
+  }
+
   const data: TravelLogistics = { groups };
   const autoStatus = useAutoSave(data, onAutoSave);
 
@@ -801,6 +828,10 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Embarkation Point</FieldLabel>
                   {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
+                  {g.embarkationPoint && (() => {
+                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.from?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <div>
@@ -815,7 +846,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} />}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} onInfo={info => setArrivalInfo(g.id, info)} />}
                 </div>
                 <div className="mb-2">
                   <FieldLabel>Hotel before boarding?</FieldLabel>
@@ -842,6 +873,10 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Disembarkation Point</FieldLabel>
                   {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
+                  {g.disembarkationPoint && (() => {
+                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.to?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <div>
@@ -856,7 +891,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} />}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} onInfo={info => setDepartureInfo(g.id, info)} />}
                 </div>
                 <div>
                   <FieldLabel>Transfer to airport?</FieldLabel>
@@ -922,6 +957,10 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
+                  {g.embarkationPoint && (() => {
+                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.from?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
                 </td>
               ))}
             </TableRow>
@@ -946,7 +985,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} />}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} onInfo={info => setArrivalInfo(g.id, info)} />}
                 </td>
               ))}
             </TableRow>
@@ -984,6 +1023,10 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
+                  {g.disembarkationPoint && (() => {
+                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.to?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
                 </td>
               ))}
             </TableRow>
@@ -1008,7 +1051,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} />}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} onInfo={info => setDepartureInfo(g.id, info)} />}
                 </td>
               ))}
             </TableRow>
