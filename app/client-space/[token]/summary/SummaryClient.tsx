@@ -26,7 +26,8 @@ function nightCount(start: string, end: string) {
 const SODA_TYPES = [
   'Coke 0.5 l', 'Diet Coke 0.5 l', 'Sprite 0.5 l', 'Pepsi 0.5 l',
   'Orange Juice 1.0 l', 'Apple Juice 1.0 l', 'Cranberry Juice 1.0 l',
-  'Tonic Water 1.5 l', 'Water Still 0.5 l', 'Water Sparkling 0.5 l',
+  'Tonic Water 1.5 l', 'Tomato Juice 1.0 l', 'Water Still 0.5 l', 'Water Sparkling 0.5 l',
+  'Others',
 ];
 const WINE_TYPES = ['White Wine', 'Red Wine', 'Rosé Wine', 'Champagne / Sparkling'];
 const SPIRIT_TYPES = [
