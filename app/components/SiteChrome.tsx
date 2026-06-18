@@ -7,7 +7,7 @@ import Footer from './Footer';
 
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const bare = pathname?.startsWith('/proposal/') ?? false;
+  const bare = (pathname?.startsWith('/proposal/') || pathname?.startsWith('/client-space/')) ?? false;
 
   return (
     <>
