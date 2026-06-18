@@ -829,7 +829,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                   <FieldLabel>Embarkation Point</FieldLabel>
                   {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
                   {g.embarkationPoint && (() => {
-                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.from?.iata);
+                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.to?.iata);
                     return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
                   })()}
                 </div>
@@ -874,7 +874,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                   <FieldLabel>Disembarkation Point</FieldLabel>
                   {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
                   {g.disembarkationPoint && (() => {
-                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.to?.iata);
+                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.from?.iata);
                     return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
                   })()}
                 </div>
@@ -958,7 +958,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
                   {g.embarkationPoint && (() => {
-                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.from?.iata);
+                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.to?.iata);
                     return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
                   })()}
                 </td>
@@ -1024,7 +1024,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
                   {g.disembarkationPoint && (() => {
-                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.to?.iata);
+                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.from?.iata);
                     return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
                   })()}
                 </td>
