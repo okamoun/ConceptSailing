@@ -33,7 +33,8 @@ const SPIRIT_TYPES = [
   'Vodka', 'Gin', 'Rum', 'Whisky / Scotch', 'Tequila',
   'Beer (local)', 'Beer (imported)', 'Liqueurs',
 ];
-const FOOD_CATEGORIES = ['Seafood', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const FOOD_CATEGORIES = ['Seafood', 'Fish', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const CUISINE_TYPES = ['Greek', 'Italian', 'French', 'Asian', 'Fusion', 'Mediterranean', 'Other'] as const;
 const BREAKFAST_STYLE_LABELS: Record<string, string> = {
   light: 'Light / Cold',
   american: 'American (pancakes, muffins)',
@@ -434,7 +435,29 @@ function FoodSection({ prep }: { prep: ClientPreparation }) {
         </>
       )}
 
-      {!hasFoodData && !hasBreakfast && !hasMeals && (
+      {f.cuisineRatings && Object.keys(f.cuisineRatings).length > 0 && (
+        <>
+          <SubsectionTitle>Cuisine Preferences</SubsectionTitle>
+          <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2">
+            {CUISINE_TYPES.map(c => {
+              const r = f.cuisineRatings?.[c];
+              if (!r) return null;
+              return (
+                <div key={c} className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-slate-600 flex-shrink-0">{c}</span>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <span key={n} className={`w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold ${n <= r ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-300'}`}>{n}</span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {!hasFoodData && !hasBreakfast && !hasMeals && !(f.cuisineRatings && Object.keys(f.cuisineRatings).length > 0) && (
         <EmptySection message="No food preferences submitted yet." />
       )}
     </div>

@@ -74,11 +74,13 @@ export interface FoodCategory {
 
 export interface FoodPreferences {
   seafood?: FoodCategory;
+  fish?: FoodCategory;
   meat?: FoodCategory;
   fruit?: FoodCategory;
   vegetables?: FoodCategory;
   dairy?: FoodCategory;
   other?: FoodCategory;
+  cuisineRatings?: Record<string, number>;
   breakfastStyle?: string[];
   breakfastItems?: string[];
   lunchStyle?: string;

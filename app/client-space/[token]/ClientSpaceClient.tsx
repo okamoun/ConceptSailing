@@ -142,7 +142,8 @@ const SPIRIT_TYPES = [
   'Beer (local)', 'Beer (imported)', 'Liqueurs',
 ];
 
-const FOOD_CATEGORIES = ['Seafood', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const FOOD_CATEGORIES = ['Seafood', 'Fish', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const CUISINE_TYPES = ['Greek', 'Italian', 'French', 'Asian', 'Fusion', 'Mediterranean', 'Other'] as const;
 
 // ---------------------------------------------------------------------------
 // Toast
@@ -1152,6 +1153,34 @@ function FoodStep({ initial, crew, onSave, onAutoSave }: {
                   notes={(catData as { passengerNotes?: Record<string, string> }).passengerNotes ?? {}}
                   onChange={notes => setCategory(key, 'passengerNotes', notes)}
                 />
+              </div>
+            );
+          })}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Cuisine Preferences">
+        <p className="text-xs text-blue-500 mb-2">Rate each cuisine from 1 (dislike) to 5 (love it)</p>
+        <div className="space-y-2">
+          {CUISINE_TYPES.map(cuisine => {
+            const rating = (data.cuisineRatings ?? {})[cuisine] ?? 0;
+            return (
+              <div key={cuisine} className="flex items-center justify-between gap-3">
+                <span className="text-xs text-blue-900 w-28 flex-shrink-0">{cuisine}</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => set('cuisineRatings', { ...(data.cuisineRatings ?? {}), [cuisine]: rating === n ? 0 : n })}
+                      className={`w-7 h-7 rounded-full text-xs font-bold border transition-all ${
+                        n <= rating
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'bg-white/60 border-blue-200 text-blue-400 hover:border-blue-400'
+                      }`}
+                    >{n}</button>
+                  ))}
+                </div>
               </div>
             );
           })}
