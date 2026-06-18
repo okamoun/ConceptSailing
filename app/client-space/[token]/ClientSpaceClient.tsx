@@ -28,6 +28,8 @@ import {
   type PrepSnapshot,
 } from '../../../lib/clientSpace';
 import type { Charter } from '../../../lib/availability';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../../lib/firebase';
 import { getMarinaById } from '../../marinas-data';
 import { CONTACT } from '../../config/contact';
 
@@ -414,9 +416,10 @@ function BookingOverview({ charter }: { charter: Charter }) {
 // Step 1: Crew
 // ---------------------------------------------------------------------------
 
-function CrewStep({ count, initial, onSave, onAutoSave }: {
+function CrewStep({ count, initial, token, onSave, onAutoSave }: {
   count: number;
   initial: CrewMember[];
+  token: string;
   onSave: (crew: CrewMember[]) => Promise<void>;
   onAutoSave: (crew: CrewMember[]) => Promise<void>;
 }) {
@@ -435,6 +438,20 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
 
   function update(i: number, field: keyof CrewMember, val: string) {
     setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
+  }
+
+  const [uploading, setUploading] = useState<Record<number, boolean>>({});
+
+  async function uploadPassport(i: number, file: File) {
+    setUploading(prev => ({ ...prev, [i]: true }));
+    try {
+      const storageRef = ref(storage, `clientPreparations/${token}/passport/${i}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, passportImageUrl: url } : m));
+    } finally {
+      setUploading(prev => ({ ...prev, [i]: false }));
+    }
   }
 
   async function handleSave() {
@@ -490,6 +507,32 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
                   <FieldLabel>Passport Number</FieldLabel>
                   <TextInput value={m.passportNumber ?? ''} onChange={v => update(i, 'passportNumber', v)} placeholder="Optional" />
                 </div>
+                <div className="col-span-1 sm:col-span-2">
+                  <FieldLabel>Passport Photo</FieldLabel>
+                  <div className="flex items-center gap-3">
+                    {m.passportImageUrl ? (
+                      <a href={m.passportImageUrl} target="_blank" rel="noopener noreferrer">
+                        <img src={m.passportImageUrl} alt="Passport" className="w-16 h-10 object-cover rounded border border-blue-200" />
+                      </a>
+                    ) : (
+                      <div className="w-16 h-10 rounded border border-blue-200/60 border-dashed flex items-center justify-center bg-blue-50/30">
+                        <svg className="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    <label className="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs text-blue-600 hover:bg-blue-50 transition-colors">
+                      {uploading[i] ? 'Uploading…' : m.passportImageUrl ? 'Replace' : 'Upload'}
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="hidden"
+                        disabled={uploading[i]}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPassport(i, f); }}
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
               <div>
                 <FieldLabel>Dietary Restrictions</FieldLabel>
@@ -524,13 +567,19 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
 // Step 2: Travel & Logistics
 // ---------------------------------------------------------------------------
 
-function newGroup(id: string, memberIndices: number[]): TravelGroup {
-  return { id, memberIndices };
+function newGroup(id: string, memberIndices: number[], charter?: Charter): TravelGroup {
+  return {
+    id,
+    memberIndices,
+    ...(charter?.startDate ? { arrivalDate: charter.startDate } : {}),
+    ...(charter?.endDate ? { departureDate: charter.endDate } : {}),
+  };
 }
 
-function initGroups(initial: TravelLogistics, passengerCount: number): TravelGroup[] {
+function initGroups(initial: TravelLogistics, passengerCount: number, charter?: Charter): TravelGroup[] {
   if (initial.groups && initial.groups.length > 0) return initial.groups;
-  return [newGroup('g1', Array.from({ length: passengerCount }, (_, i) => i))];
+  const g = newGroup('g1', Array.from({ length: passengerCount }, (_, i) => i), charter);
+  return [g];
 }
 
 function TableRow({ label, children }: { label: string; children: ReactNode }) {
@@ -544,14 +593,15 @@ function TableRow({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function TravelStep({ initial, crew, onSave, onAutoSave }: {
+function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
   initial: TravelLogistics;
   crew: CrewMember[];
+  charter: Charter;
   onSave: (travel: TravelLogistics) => Promise<void>;
   onAutoSave: (travel: TravelLogistics) => Promise<void>;
 }) {
   const passengerCount = Math.max(crew.length, 1);
-  const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount));
+  const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount, charter));
   const [saving, setSaving] = useState(false);
 
   const data: TravelLogistics = { groups };
@@ -563,7 +613,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
   function addGroup() {
     const id = `g${Date.now()}`;
-    setGroups(prev => [...prev, newGroup(id, [])]);
+    setGroups(prev => [...prev, newGroup(id, [], charter)]);
   }
 
   function removeGroup(id: string) {
@@ -669,6 +719,19 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
+                  {g.arrivalFlight && (
+                    <a
+                      href={`https://flightaware.com/live/flight/${g.arrivalFlight.replace(/\s+/g, '').toUpperCase()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Track flight live
+                    </a>
+                  )}
                 </div>
                 <div className="mb-2">
                   <FieldLabel>Hotel before boarding?</FieldLabel>
@@ -705,6 +768,19 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
+                  {g.departureFlight && (
+                    <a
+                      href={`https://flightaware.com/live/flight/${g.departureFlight.replace(/\s+/g, '').toUpperCase()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Track flight live
+                    </a>
+                  )}
                 </div>
                 <div>
                   <FieldLabel>Transfer to airport?</FieldLabel>
@@ -786,6 +862,19 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
+                  {g.arrivalFlight && (
+                    <a
+                      href={`https://flightaware.com/live/flight/${g.arrivalFlight.replace(/\s+/g, '').toUpperCase()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Track flight live
+                    </a>
+                  )}
                 </td>
               ))}
             </TableRow>
@@ -839,6 +928,19 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
+                  {g.departureFlight && (
+                    <a
+                      href={`https://flightaware.com/live/flight/${g.departureFlight.replace(/\s+/g, '').toUpperCase()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700 mt-0.5"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Track flight live
+                    </a>
+                  )}
                 </td>
               ))}
             </TableRow>
@@ -1626,11 +1728,11 @@ export default function ClientSpaceClient({ token }: Props) {
         )}
 
         {currentStep === 1 && (
-          <CrewStep count={passengerCount} initial={prep.crew} onSave={handleSaveCrew} onAutoSave={autoSaveCrew} />
+          <CrewStep count={passengerCount} initial={prep.crew} token={token} onSave={handleSaveCrew} onAutoSave={autoSaveCrew} />
         )}
 
         {currentStep === 2 && (
-          <TravelStep initial={prep.travel} crew={prep.crew} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
+          <TravelStep initial={prep.travel} crew={prep.crew} charter={charter} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
         )}
 
         {currentStep === 3 && (

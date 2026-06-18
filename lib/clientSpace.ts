@@ -28,6 +28,7 @@ export interface CrewMember {
   dateOfBirth?: string;
   nationality?: string;
   passportNumber?: string;
+  passportImageUrl?: string;
   dietaryRestrictions?: string;
   medicalNotes?: string;
 }
