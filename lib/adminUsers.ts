@@ -16,6 +16,7 @@ export const ALL_ADMIN_PAGES = [
   '/admin/photos',
   '/admin/users',
   '/admin/proposals',
+  '/admin/discussions',
   '/admin/financial',
   '/admin/themes',
   '/admin/reconcile',

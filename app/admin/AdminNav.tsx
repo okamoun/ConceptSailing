@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: '/admin/booking-summary',   label: 'Booking Summary' },
   { href: '/admin/availability',      label: 'Calendar' },
   { href: '/admin/proposals',         label: 'Proposals' },
+  { href: '/admin/discussions',       label: 'Discussions' },
   { href: '/admin/reviews',           label: 'Reviews' },
   { href: '/admin/photos',            label: 'Photos' },
   { href: '/admin/users',             label: 'Users' },
