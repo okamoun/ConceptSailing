@@ -23,6 +23,16 @@ jest.mock('next/image', () =>
 // ---------------------------------------------------------------------------
 jest.mock('../lib/firebase', () => ({ db: {}, storage: {} }));
 
+const mockRef = jest.fn().mockReturnValue({ name: 'mock-ref' });
+const mockUploadBytes = jest.fn().mockResolvedValue(undefined);
+const mockGetDownloadURL = jest.fn().mockResolvedValue('https://firebasestorage.example.com/passport-0.jpg');
+
+jest.mock('firebase/storage', () => ({
+  ref: (...args: unknown[]) => mockRef(...args),
+  uploadBytes: (...args: unknown[]) => mockUploadBytes(...args),
+  getDownloadURL: (...args: unknown[]) => mockGetDownloadURL(...args),
+}));
+
 // ---------------------------------------------------------------------------
 // Mock marinas-data
 // ---------------------------------------------------------------------------
@@ -600,6 +610,109 @@ describe('ClientSpaceClient — Step 6: Special Requests & Checklist', () => {
   test('Save creates snapshot with correct label', async () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save & Complete' }));
     await waitFor(() => expect(mockSaveSnapshot).toHaveBeenCalledWith(mockToken, expect.anything(), 'Special requests'));
+  });
+});
+
+describe('ClientSpaceClient — Step 1: Passport Upload', () => {
+  beforeEach(async () => {
+    mockUploadBytes.mockResolvedValue(undefined);
+    mockGetDownloadURL.mockResolvedValue('https://firebasestorage.example.com/passport-0.jpg');
+    await renderAndWait();
+    fireEvent.click(screen.getByRole('button', { name: /let's get started/i }));
+    await waitFor(() => expect(screen.getByText('Save Crew Details')).toBeInTheDocument());
+  });
+
+  test('renders Upload label for the first expanded crew member', () => {
+    expect(screen.getByText('Upload')).toBeInTheDocument();
+  });
+
+  test('uploading a file calls uploadBytes with the correct storage path', async () => {
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(mockUploadBytes).toHaveBeenCalledTimes(1));
+    expect(mockRef).toHaveBeenCalledWith(
+      expect.anything(),
+      `clientPreparations/${mockToken}/passport/0`,
+    );
+  });
+
+  test('uploading a file calls getDownloadURL after uploadBytes', async () => {
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(mockGetDownloadURL).toHaveBeenCalledTimes(1));
+  });
+
+  test('passport thumbnail appears after successful upload', async () => {
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() =>
+      expect(screen.getByAltText('Passport')).toBeInTheDocument()
+    );
+    expect(screen.getByAltText('Passport')).toHaveAttribute(
+      'src',
+      'https://firebasestorage.example.com/passport-0.jpg',
+    );
+  });
+
+  test('label changes to "Replace" after upload', async () => {
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() =>
+      expect(screen.getByText('Replace')).toBeInTheDocument()
+    );
+  });
+
+  test('upload button is disabled while uploading', async () => {
+    let resolveUpload!: () => void;
+    mockUploadBytes.mockReturnValueOnce(
+      new Promise<void>(res => { resolveUpload = res; })
+    );
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    expect(input).toBeDisabled();
+    resolveUpload();
+    await waitFor(() => expect(input).not.toBeDisabled());
+  });
+
+  test('label shows "Uploading…" text while upload is in progress', async () => {
+    let resolveUpload!: () => void;
+    mockUploadBytes.mockReturnValueOnce(
+      new Promise<void>(res => { resolveUpload = res; })
+    );
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    expect(screen.getByText('Uploading…')).toBeInTheDocument();
+    resolveUpload();
+    await waitFor(() => expect(screen.queryByText('Uploading…')).not.toBeInTheDocument());
+  });
+
+  test('accepts PDF files in addition to images', async () => {
+    const file = new File(['%PDF-1.4'], 'passport.pdf', { type: 'application/pdf' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(mockUploadBytes).toHaveBeenCalledTimes(1));
+  });
+
+  test('passportImageUrl is included when saving crew after upload', async () => {
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(mockGetDownloadURL).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Save Crew Details' }));
+    await waitFor(() =>
+      expect(mockSaveCrew).toHaveBeenCalledWith(
+        mockToken,
+        expect.arrayContaining([
+          expect.objectContaining({ passportImageUrl: 'https://firebasestorage.example.com/passport-0.jpg' }),
+        ]),
+      )
+    );
   });
 });
 
