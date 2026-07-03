@@ -33,6 +33,9 @@ jest.mock('firebase/storage', () => ({
   getDownloadURL: (...args: unknown[]) => mockGetDownloadURL(...args),
 }));
 
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
+
 // ---------------------------------------------------------------------------
 // Mock marinas-data
 // ---------------------------------------------------------------------------
@@ -160,6 +163,7 @@ beforeEach(() => {
   mockSaveStep.mockResolvedValue(undefined);
   mockSaveSnapshot.mockResolvedValue(undefined);
   mockGetHistory.mockResolvedValue([]);
+  mockFetch.mockResolvedValue({ ok: true, json: async () => ({ data: {} }) });
 });
 
 async function renderAndWait() {
@@ -617,6 +621,7 @@ describe('ClientSpaceClient — Step 1: Passport Upload', () => {
   beforeEach(async () => {
     mockUploadBytes.mockResolvedValue(undefined);
     mockGetDownloadURL.mockResolvedValue('https://firebasestorage.example.com/passport-0.jpg');
+    mockFetch.mockResolvedValue({ ok: true, json: async () => ({ data: {} }) });
     await renderAndWait();
     fireEvent.click(screen.getByRole('button', { name: /let's get started/i }));
     await waitFor(() => expect(screen.getByText('Save Crew Details')).toBeInTheDocument());
@@ -713,6 +718,105 @@ describe('ClientSpaceClient — Step 1: Passport Upload', () => {
         ]),
       )
     );
+  });
+
+  test('calls /api/extract-passport after uploading an image', async () => {
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/extract-passport',
+        expect.objectContaining({ method: 'POST' }),
+      )
+    );
+  });
+
+  test('sends imageBase64 and mimeType in the extract-passport request body', async () => {
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+    const call = mockFetch.mock.calls[0];
+    const body = JSON.parse(call[1].body);
+    expect(body).toHaveProperty('imageBase64');
+    expect(body.mimeType).toBe('image/jpeg');
+  });
+
+  test('auto-fills crew fields with data returned from extraction API', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        data: {
+          firstName: 'Jane',
+          lastName: 'Doe',
+          gender: 'Female',
+          dateOfBirth: '1990-05-15',
+          nationality: 'British',
+          passportNumber: 'AB123456',
+        },
+      }),
+    });
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect((screen.getByPlaceholderText('First name') as HTMLInputElement).value).toBe('Jane');
+      expect((screen.getByPlaceholderText('Last name') as HTMLInputElement).value).toBe('Doe');
+      expect((screen.getByPlaceholderText('Optional') as HTMLInputElement).value).toBe('AB123456');
+    });
+  });
+
+  test('shows "AI scanning…" indicator while extraction is in progress', async () => {
+    let resolveExtract!: (v: { ok: boolean; json: () => Promise<{ data: object }> }) => void;
+    mockFetch.mockReturnValueOnce(
+      new Promise(res => { resolveExtract = res; })
+    );
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(screen.getByText('AI scanning…')).toBeInTheDocument());
+    resolveExtract({ ok: true, json: async () => ({ data: {} }) });
+    await waitFor(() => expect(screen.queryByText('AI scanning…')).not.toBeInTheDocument());
+  });
+
+  test('input stays disabled during AI extraction', async () => {
+    let resolveExtract!: (v: { ok: boolean; json: () => Promise<{ data: object }> }) => void;
+    mockFetch.mockReturnValueOnce(
+      new Promise(res => { resolveExtract = res; })
+    );
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(screen.getByText('AI scanning…')).toBeInTheDocument());
+    expect(input).toBeDisabled();
+    resolveExtract({ ok: true, json: async () => ({ data: {} }) });
+    await waitFor(() => expect(input).not.toBeDisabled());
+  });
+
+  test('partial extraction: only fills fields that are present in API response', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ data: { firstName: 'Carlos' } }),
+    });
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect((screen.getByPlaceholderText('First name') as HTMLInputElement).value).toBe('Carlos')
+    );
+    expect((screen.getByPlaceholderText('Last name') as HTMLInputElement).value).toBe('');
+  });
+
+  test('silently continues when extraction API returns non-ok response', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, json: async () => ({ error: 'Failed' }) });
+    const file = new File(['passport-content'], 'passport.jpg', { type: 'image/jpeg' });
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, file);
+    await waitFor(() => expect(screen.getByText('Replace')).toBeInTheDocument());
+    expect(screen.queryByText('AI scanning…')).not.toBeInTheDocument();
   });
 });
 

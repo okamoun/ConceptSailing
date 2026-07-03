@@ -515,6 +515,7 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
   }
 
   const [uploading, setUploading] = useState<Record<number, boolean>>({});
+  const [extracting, setExtracting] = useState<Record<number, boolean>>({});
 
   async function uploadPassport(i: number, file: File) {
     setUploading(prev => ({ ...prev, [i]: true }));
@@ -523,6 +524,43 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, passportImageUrl: url } : m));
+
+      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+        setExtracting(prev => ({ ...prev, [i]: true }));
+        try {
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result as string;
+              resolve(result.split(',')[1]);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          const res = await fetch('/api/extract-passport', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64, mimeType: file.type }),
+          });
+          if (res.ok) {
+            const { data } = await res.json();
+            setCrew(prev => prev.map((m, idx) => {
+              if (idx !== i) return m;
+              return {
+                ...m,
+                ...(data.firstName    ? { firstName: data.firstName }       : {}),
+                ...(data.lastName     ? { lastName: data.lastName }         : {}),
+                ...(data.gender       ? { gender: data.gender }             : {}),
+                ...(data.dateOfBirth  ? { dateOfBirth: data.dateOfBirth }   : {}),
+                ...(data.nationality  ? { nationality: data.nationality }   : {}),
+                ...(data.passportNumber ? { passportNumber: data.passportNumber } : {}),
+              };
+            }));
+          }
+        } finally {
+          setExtracting(prev => ({ ...prev, [i]: false }));
+        }
+      }
     } finally {
       setUploading(prev => ({ ...prev, [i]: false }));
     }
@@ -595,16 +633,26 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
                         </svg>
                       </div>
                     )}
-                    <label className="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs text-blue-600 hover:bg-blue-50 transition-colors">
-                      {uploading[i] ? 'Uploading…' : m.passportImageUrl ? 'Replace' : 'Upload'}
-                      <input
-                        type="file"
-                        accept="image/*,application/pdf"
-                        className="hidden"
-                        disabled={uploading[i]}
-                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPassport(i, f); }}
-                      />
-                    </label>
+                    <div className="flex flex-col gap-1">
+                      <label className="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs text-blue-600 hover:bg-blue-50 transition-colors">
+                        {uploading[i] ? 'Uploading…' : m.passportImageUrl ? 'Replace' : 'Upload'}
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          className="hidden"
+                          disabled={uploading[i] || extracting[i]}
+                          onChange={e => { const f = e.target.files?.[0]; if (f) uploadPassport(i, f); }}
+                        />
+                      </label>
+                      {extracting[i] && (
+                        <span className="flex items-center gap-1 text-[10px] text-blue-500 animate-pulse">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.5 3.5 0 01-4.95 0l-.347-.347z" />
+                          </svg>
+                          AI scanning…
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
