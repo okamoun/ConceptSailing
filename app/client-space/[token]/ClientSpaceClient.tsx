@@ -516,9 +516,11 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
 
   const [uploading, setUploading] = useState<Record<number, boolean>>({});
   const [extracting, setExtracting] = useState<Record<number, boolean>>({});
+  const [uploadError, setUploadError] = useState<Record<number, string>>({});
 
   async function uploadPassport(i: number, file: File) {
     setUploading(prev => ({ ...prev, [i]: true }));
+    setUploadError(prev => ({ ...prev, [i]: '' }));
     try {
       const storageRef = ref(storage, `clientPreparations/${token}/passport/${i}`);
       await uploadBytes(storageRef, file);
@@ -556,11 +558,19 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
                 ...(data.passportNumber ? { passportNumber: data.passportNumber } : {}),
               };
             }));
+          } else {
+            console.warn('[passport] AI extraction failed — fill fields manually');
           }
+        } catch (extractErr) {
+          console.warn('[passport] AI extraction error:', extractErr);
         } finally {
           setExtracting(prev => ({ ...prev, [i]: false }));
         }
       }
+    } catch (err) {
+      console.error('[passport] Upload failed:', err);
+      const msg = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      setUploadError(prev => ({ ...prev, [i]: msg }));
     } finally {
       setUploading(prev => ({ ...prev, [i]: false }));
     }
@@ -651,6 +661,9 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
                           </svg>
                           AI scanning…
                         </span>
+                      )}
+                      {uploadError[i] && (
+                        <span className="text-[10px] text-red-500">{uploadError[i]}</span>
                       )}
                     </div>
                   </div>
