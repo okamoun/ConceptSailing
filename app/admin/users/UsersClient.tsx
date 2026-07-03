@@ -15,6 +15,7 @@ const PAGE_LABELS: Record<AdminPage, string> = {
   '/admin/booking-summary': 'Booking Summary',
   '/admin/availability': 'Calendar',
   '/admin/proposals': 'Proposals',
+  '/admin/discussions': 'Discussions',
   '/admin/reviews': 'Reviews',
   '/admin/photos': 'Photos',
   '/admin/users': 'Users',

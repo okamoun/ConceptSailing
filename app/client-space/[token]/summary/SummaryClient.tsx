@@ -26,14 +26,16 @@ function nightCount(start: string, end: string) {
 const SODA_TYPES = [
   'Coke 0.5 l', 'Diet Coke 0.5 l', 'Sprite 0.5 l', 'Pepsi 0.5 l',
   'Orange Juice 1.0 l', 'Apple Juice 1.0 l', 'Cranberry Juice 1.0 l',
-  'Tonic Water 1.5 l', 'Water Still 0.5 l', 'Water Sparkling 0.5 l',
+  'Tonic Water 1.5 l', 'Tomato Juice 1.0 l', 'Water Still 0.5 l', 'Water Sparkling 0.5 l',
+  'Others',
 ];
 const WINE_TYPES = ['White Wine', 'Red Wine', 'Rosé Wine', 'Champagne / Sparkling'];
 const SPIRIT_TYPES = [
   'Vodka', 'Gin', 'Rum', 'Whisky / Scotch', 'Tequila',
   'Beer (local)', 'Beer (imported)', 'Liqueurs',
 ];
-const FOOD_CATEGORIES = ['Seafood', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const FOOD_CATEGORIES = ['Seafood', 'Fish', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const CUISINE_TYPES = ['Greek', 'Italian', 'French', 'Asian', 'Fusion', 'Mediterranean', 'Other'] as const;
 const BREAKFAST_STYLE_LABELS: Record<string, string> = {
   light: 'Light / Cold',
   american: 'American (pancakes, muffins)',
@@ -217,8 +219,8 @@ function TravelGroupBlock({ group, index, crew }: {
   index: number;
   crew: import('../../../../lib/clientSpace').CrewMember[];
 }) {
-  const hasArrival = group.arrivalDate || group.arrivalFlight;
-  const hasDeparture = group.departureDate || group.departureFlight;
+  const hasArrival = group.embarkationPoint || group.arrivalDate || group.arrivalFlight;
+  const hasDeparture = group.disembarkationPoint || group.departureDate || group.departureFlight;
   const memberNames = group.memberIndices
     .map(i => {
       const m = crew[i];
@@ -233,6 +235,7 @@ function TravelGroupBlock({ group, index, crew }: {
       {hasArrival && (
         <div className="py-1">
           <div className="px-5 py-1 text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">Arrival</div>
+          <Row label="Embarkation Point" value={group.embarkationPoint} />
           <Row label="Arrival Date" value={group.arrivalDate ? fmtDate(group.arrivalDate) : undefined} />
           <Row label="Arrival Time" value={group.arrivalTime} />
           <Row label="Flight Number" value={group.arrivalFlight} />
@@ -244,6 +247,7 @@ function TravelGroupBlock({ group, index, crew }: {
       {hasDeparture && (
         <div className="py-1">
           <div className="px-5 py-1 text-[10px] font-bold text-slate-400 uppercase border-b border-slate-100">Departure</div>
+          <Row label="Disembarkation Point" value={group.disembarkationPoint} />
           <Row label="Departure Date" value={group.departureDate ? fmtDate(group.departureDate) : undefined} />
           <Row label="Departure Time" value={group.departureTime} />
           <Row label="Flight Number" value={group.departureFlight} />
@@ -263,7 +267,7 @@ function TravelSection({ prep }: { prep: ClientPreparation }) {
 
   // Groups mode (new UI)
   if (groups.length > 0) {
-    const hasAnyGroupData = groups.some(g => g.arrivalDate || g.arrivalFlight || g.departureDate || g.departureFlight);
+    const hasAnyGroupData = groups.some(g => g.embarkationPoint || g.arrivalDate || g.arrivalFlight || g.disembarkationPoint || g.departureDate || g.departureFlight);
     return (
       <div className="summary-section border border-slate-200 rounded-xl overflow-hidden mb-4">
         <SectionTitle>Travel & Logistics</SectionTitle>
@@ -418,7 +422,29 @@ function FoodSection({ prep }: { prep: ClientPreparation }) {
         </>
       )}
 
-      {!hasFoodData && !hasBreakfast && !hasMeals && (
+      {f.cuisineRatings && Object.keys(f.cuisineRatings).length > 0 && (
+        <>
+          <SubsectionTitle>Cuisine Preferences</SubsectionTitle>
+          <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2">
+            {CUISINE_TYPES.map(c => {
+              const r = f.cuisineRatings?.[c];
+              if (!r) return null;
+              return (
+                <div key={c} className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-slate-600 flex-shrink-0">{c}</span>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <span key={n} className={`w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold ${n <= r ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-300'}`}>{n}</span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {!hasFoodData && !hasBreakfast && !hasMeals && !(f.cuisineRatings && Object.keys(f.cuisineRatings).length > 0) && (
         <EmptySection message="No food preferences submitted yet." />
       )}
     </div>

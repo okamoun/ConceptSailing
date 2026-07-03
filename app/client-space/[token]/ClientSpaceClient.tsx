@@ -28,7 +28,9 @@ import {
   type PrepSnapshot,
 } from '../../../lib/clientSpace';
 import type { Charter } from '../../../lib/availability';
-import { getMarinaById } from '../../marinas-data';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../../lib/firebase';
+import { getMarinaById, getMarinaByName, marinasByRegion, getAirportByIata, nearestAirportToMarina, haversineKm } from '../../marinas-data';
 import { CONTACT } from '../../config/contact';
 
 // ---------------------------------------------------------------------------
@@ -130,7 +132,8 @@ const MEAL_STYLES = ['Light', 'Heavy', 'Hot'];
 const SODA_TYPES = [
   'Coke 0.5 l', 'Diet Coke 0.5 l', 'Sprite 0.5 l', 'Pepsi 0.5 l',
   'Orange Juice 1.0 l', 'Apple Juice 1.0 l', 'Cranberry Juice 1.0 l',
-  'Tonic Water 1.5 l', 'Water Still 0.5 l', 'Water Sparkling 0.5 l',
+  'Tonic Water 1.5 l', 'Tomato Juice 1.0 l', 'Water Still 0.5 l', 'Water Sparkling 0.5 l',
+  'Others',
 ];
 
 const WINE_TYPES = ['White Wine', 'Red Wine', 'Rosé Wine', 'Champagne / Sparkling'];
@@ -140,7 +143,8 @@ const SPIRIT_TYPES = [
   'Beer (local)', 'Beer (imported)', 'Liqueurs',
 ];
 
-const FOOD_CATEGORIES = ['Seafood', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const FOOD_CATEGORIES = ['Seafood', 'Fish', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+const CUISINE_TYPES = ['Greek', 'Italian', 'French', 'Asian', 'Fusion', 'Mediterranean', 'Other'] as const;
 
 // ---------------------------------------------------------------------------
 // Toast
@@ -166,6 +170,78 @@ const inputBase = 'w-full appearance-none !bg-transparent !border-0 !border-b !b
 
 function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">{children}</label>;
+}
+
+interface FlightInfo {
+  airline: string;
+  from: { iata: string; name: string };
+  to: { iata: string; name: string };
+  scheduledDep: string | null;
+  scheduledArr: string | null;
+  status: string;
+}
+
+function fmtFlightTime(iso: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+}
+
+function FlightTrackLinks({ flight, onInfo }: { flight: string; onInfo?: (info: FlightInfo | null) => void }) {
+  const code = flight.replace(/\s+/g, '').toUpperCase();
+  const fr24 = `https://www.flightradar24.com/data/flights/${code.toLowerCase()}`;
+  const fa   = `https://flightaware.com/live/flight/${code}`;
+  const [info, setInfo] = useState<FlightInfo | null>(null);
+  const [loading, setLoading] = useState(false);
+  const onInfoRef = useRef(onInfo);
+  onInfoRef.current = onInfo;
+
+  useEffect(() => {
+    if (!code) return;
+    setInfo(null);
+    onInfoRef.current?.(null);
+    setLoading(true);
+    fetch(`/api/flight-info?flight=${encodeURIComponent(code)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((data: FlightInfo | null) => { setInfo(data); onInfoRef.current?.(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [code]);
+
+  const extIcon = (
+    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+    </svg>
+  );
+
+  return (
+    <div className="mt-1 space-y-1">
+      {loading && (
+        <p className="text-[10px] text-blue-400 italic">Looking up flight…</p>
+      )}
+      {!loading && info && info.airline && (
+        <div className="text-[10px] text-blue-700 bg-blue-50/60 rounded px-2 py-1 space-y-0.5">
+          <p className="font-semibold">{info.airline}</p>
+          <p>{info.from.iata} {info.from.name && `· ${info.from.name}`} → {info.to.iata} {info.to.name && `· ${info.to.name}`}</p>
+          {(info.scheduledDep || info.scheduledArr) && (
+            <p>
+              {info.scheduledDep && <>Dep&nbsp;{fmtFlightTime(info.scheduledDep)}</>}
+              {info.scheduledDep && info.scheduledArr && <span className="mx-1">·</span>}
+              {info.scheduledArr && <>Arr&nbsp;{fmtFlightTime(info.scheduledArr)}</>}
+            </p>
+          )}
+        </div>
+      )}
+      <div className="flex gap-3">
+        <a href={fr24} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
+          {extIcon}FR24
+        </a>
+        <a href={fa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] text-teal-600 hover:text-teal-700">
+          {extIcon}FlightAware
+        </a>
+      </div>
+    </div>
+  );
 }
 
 function TextInput({ value, onChange, placeholder, type = 'text' }: {
@@ -414,9 +490,10 @@ function BookingOverview({ charter }: { charter: Charter }) {
 // Step 1: Crew
 // ---------------------------------------------------------------------------
 
-function CrewStep({ count, initial, onSave, onAutoSave }: {
+function CrewStep({ count, initial, token, onSave, onAutoSave }: {
   count: number;
   initial: CrewMember[];
+  token: string;
   onSave: (crew: CrewMember[]) => Promise<void>;
   onAutoSave: (crew: CrewMember[]) => Promise<void>;
 }) {
@@ -435,6 +512,20 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
 
   function update(i: number, field: keyof CrewMember, val: string) {
     setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: val } : m));
+  }
+
+  const [uploading, setUploading] = useState<Record<number, boolean>>({});
+
+  async function uploadPassport(i: number, file: File) {
+    setUploading(prev => ({ ...prev, [i]: true }));
+    try {
+      const storageRef = ref(storage, `clientPreparations/${token}/passport/${i}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, passportImageUrl: url } : m));
+    } finally {
+      setUploading(prev => ({ ...prev, [i]: false }));
+    }
   }
 
   async function handleSave() {
@@ -490,6 +581,32 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
                   <FieldLabel>Passport Number</FieldLabel>
                   <TextInput value={m.passportNumber ?? ''} onChange={v => update(i, 'passportNumber', v)} placeholder="Optional" />
                 </div>
+                <div className="col-span-1 sm:col-span-2">
+                  <FieldLabel>Passport Photo</FieldLabel>
+                  <div className="flex items-center gap-3">
+                    {m.passportImageUrl ? (
+                      <a href={m.passportImageUrl} target="_blank" rel="noopener noreferrer">
+                        <img src={m.passportImageUrl} alt="Passport" className="w-16 h-10 object-cover rounded border border-blue-200" />
+                      </a>
+                    ) : (
+                      <div className="w-16 h-10 rounded border border-blue-200/60 border-dashed flex items-center justify-center bg-blue-50/30">
+                        <svg className="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    <label className="flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-lg border border-blue-200/60 text-xs text-blue-600 hover:bg-blue-50 transition-colors">
+                      {uploading[i] ? 'Uploading…' : m.passportImageUrl ? 'Replace' : 'Upload'}
+                      <input
+                        type="file"
+                        accept="image/*,application/pdf"
+                        className="hidden"
+                        disabled={uploading[i]}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPassport(i, f); }}
+                      />
+                    </label>
+                  </div>
+                </div>
               </div>
               <div>
                 <FieldLabel>Dietary Restrictions</FieldLabel>
@@ -524,13 +641,21 @@ function CrewStep({ count, initial, onSave, onAutoSave }: {
 // Step 2: Travel & Logistics
 // ---------------------------------------------------------------------------
 
-function newGroup(id: string, memberIndices: number[]): TravelGroup {
-  return { id, memberIndices };
+function newGroup(id: string, memberIndices: number[], charter?: Charter, defaultEmbark?: string, defaultDisembark?: string): TravelGroup {
+  return {
+    id,
+    memberIndices,
+    ...(defaultEmbark ? { embarkationPoint: defaultEmbark } : {}),
+    ...(charter?.startDate ? { arrivalDate: charter.startDate } : {}),
+    ...(defaultDisembark ? { disembarkationPoint: defaultDisembark } : {}),
+    ...(charter?.endDate ? { departureDate: charter.endDate } : {}),
+  };
 }
 
-function initGroups(initial: TravelLogistics, passengerCount: number): TravelGroup[] {
+function initGroups(initial: TravelLogistics, passengerCount: number, charter?: Charter, defaultEmbark?: string, defaultDisembark?: string): TravelGroup[] {
   if (initial.groups && initial.groups.length > 0) return initial.groups;
-  return [newGroup('g1', Array.from({ length: passengerCount }, (_, i) => i))];
+  const g = newGroup('g1', Array.from({ length: passengerCount }, (_, i) => i), charter, defaultEmbark, defaultDisembark);
+  return [g];
 }
 
 function TableRow({ label, children }: { label: string; children: ReactNode }) {
@@ -544,15 +669,44 @@ function TableRow({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function TravelStep({ initial, crew, onSave, onAutoSave }: {
+function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
   initial: TravelLogistics;
   crew: CrewMember[];
+  charter: Charter;
   onSave: (travel: TravelLogistics) => Promise<void>;
   onAutoSave: (travel: TravelLogistics) => Promise<void>;
 }) {
   const passengerCount = Math.max(crew.length, 1);
-  const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount));
+  const defaultEmbark = getMarinaById(charter.deliveryPoint ?? '')?.name ?? charter.embarkationPoint ?? '';
+  const defaultDisembark = getMarinaById(charter.redeliveryPoint ?? charter.deliveryPoint ?? '')?.name ?? charter.embarkationPoint ?? '';
+  const [groups, setGroups] = useState<TravelGroup[]>(() => initGroups(initial, passengerCount, charter, defaultEmbark, defaultDisembark));
   const [saving, setSaving] = useState(false);
+
+  const regionedMarinas = marinasByRegion();
+
+  // Per-group resolved flight info: { [groupId]: { arrival?: FlightInfo; departure?: FlightInfo } }
+  const [groupFlightInfo, setGroupFlightInfo] = useState<Record<string, { arrival?: FlightInfo | null; departure?: FlightInfo | null }>>({});
+
+  function setArrivalInfo(groupId: string, info: FlightInfo | null) {
+    setGroupFlightInfo(prev => ({ ...prev, [groupId]: { ...prev[groupId], arrival: info } }));
+  }
+  function setDepartureInfo(groupId: string, info: FlightInfo | null) {
+    setGroupFlightInfo(prev => ({ ...prev, [groupId]: { ...prev[groupId], departure: info } }));
+  }
+
+  function distanceBadge(marinaName: string, airportIata?: string | null): string | null {
+    const marina = getMarinaByName(marinaName);
+    if (!marina) return null;
+    if (airportIata) {
+      const ap = getAirportByIata(airportIata);
+      if (ap) {
+        const km = Math.round(haversineKm(marina.lat, marina.lng, ap.lat, ap.lng));
+        return `~${km} km from ${ap.iata} · ${ap.city}`;
+      }
+    }
+    const { airport, km } = nearestAirportToMarina(marina);
+    return `~${Math.round(km)} km from ${airport.iata} · ${airport.city}`;
+  }
 
   const data: TravelLogistics = { groups };
   const autoStatus = useAutoSave(data, onAutoSave);
@@ -563,7 +717,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
 
   function addGroup() {
     const id = `g${Date.now()}`;
-    setGroups(prev => [...prev, newGroup(id, [])]);
+    setGroups(prev => [...prev, newGroup(id, [], charter, defaultEmbark, defaultDisembark)]);
   }
 
   function removeGroup(id: string) {
@@ -603,6 +757,21 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
   }
 
   const colCount = groups.length;
+
+  const marinaSelect = (value: string, onChange: (v: string) => void) => (
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="!bg-transparent !border-0 !border-b !border-blue-300/60 !rounded-none !px-0 !shadow-none py-1.5 text-xs text-blue-900 transition-all focus:outline-none focus:!border-blue-600 w-full"
+    >
+      <option value="">Select marina…</option>
+      {Object.entries(regionedMarinas).map(([region, ms]) => (
+        <optgroup key={region} label={region}>
+          {ms.map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+        </optgroup>
+      ))}
+    </select>
+  );
 
   return (
     <div className="space-y-4">
@@ -656,6 +825,14 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               {/* Arrival */}
               <div>
                 <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 border-t border-blue-100 pt-3">Arrival</p>
+                <div className="mb-2">
+                  <FieldLabel>Embarkation Point</FieldLabel>
+                  {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
+                  {g.embarkationPoint && (() => {
+                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.to?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
+                </div>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <div>
                     <FieldLabel>Date</FieldLabel>
@@ -669,6 +846,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} onInfo={info => setArrivalInfo(g.id, info)} />}
                 </div>
                 <div className="mb-2">
                   <FieldLabel>Hotel before boarding?</FieldLabel>
@@ -692,6 +870,14 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               {/* Departure */}
               <div>
                 <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2 border-t border-blue-100 pt-3">Departure</p>
+                <div className="mb-2">
+                  <FieldLabel>Disembarkation Point</FieldLabel>
+                  {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
+                  {g.disembarkationPoint && (() => {
+                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.from?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
+                </div>
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   <div>
                     <FieldLabel>Date</FieldLabel>
@@ -705,6 +891,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} onInfo={info => setDepartureInfo(g.id, info)} />}
                 </div>
                 <div>
                   <FieldLabel>Transfer to airport?</FieldLabel>
@@ -766,6 +953,18 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               </td>
             </tr>
 
+            <TableRow label="Embarkation Point">
+              {groups.map(g => (
+                <td key={g.id} className="py-1.5 px-2 align-top">
+                  {marinaSelect(g.embarkationPoint ?? '', v => updateGroup(g.id, { embarkationPoint: v }))}
+                  {g.embarkationPoint && (() => {
+                    const badge = distanceBadge(g.embarkationPoint, groupFlightInfo[g.id]?.arrival?.to?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
+                </td>
+              ))}
+            </TableRow>
+
             <TableRow label="Date">
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
@@ -786,6 +985,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} onInfo={info => setArrivalInfo(g.id, info)} />}
                 </td>
               ))}
             </TableRow>
@@ -819,6 +1019,18 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               </td>
             </tr>
 
+            <TableRow label="Disembarkation Point">
+              {groups.map(g => (
+                <td key={g.id} className="py-1.5 px-2 align-top">
+                  {marinaSelect(g.disembarkationPoint ?? '', v => updateGroup(g.id, { disembarkationPoint: v }))}
+                  {g.disembarkationPoint && (() => {
+                    const badge = distanceBadge(g.disembarkationPoint, groupFlightInfo[g.id]?.departure?.from?.iata);
+                    return badge ? <p className="text-[10px] text-blue-500 mt-0.5">{badge}</p> : null;
+                  })()}
+                </td>
+              ))}
+            </TableRow>
+
             <TableRow label="Date">
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
@@ -839,6 +1051,7 @@ function TravelStep({ initial, crew, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} onInfo={info => setDepartureInfo(g.id, info)} />}
                 </td>
               ))}
             </TableRow>
@@ -1009,6 +1222,34 @@ function FoodStep({ initial, crew, onSave, onAutoSave }: {
                   notes={(catData as { passengerNotes?: Record<string, string> }).passengerNotes ?? {}}
                   onChange={notes => setCategory(key, 'passengerNotes', notes)}
                 />
+              </div>
+            );
+          })}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Cuisine Preferences">
+        <p className="text-xs text-blue-500 mb-2">Rate each cuisine from 1 (dislike) to 5 (love it)</p>
+        <div className="space-y-2">
+          {CUISINE_TYPES.map(cuisine => {
+            const rating = (data.cuisineRatings ?? {})[cuisine] ?? 0;
+            return (
+              <div key={cuisine} className="flex items-center justify-between gap-3">
+                <span className="text-xs text-blue-900 w-28 flex-shrink-0">{cuisine}</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => set('cuisineRatings', { ...(data.cuisineRatings ?? {}), [cuisine]: rating === n ? 0 : n })}
+                      className={`w-7 h-7 rounded-full text-xs font-bold border transition-all ${
+                        n <= rating
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'bg-white/60 border-blue-200 text-blue-400 hover:border-blue-400'
+                      }`}
+                    >{n}</button>
+                  ))}
+                </div>
               </div>
             );
           })}
@@ -1626,11 +1867,11 @@ export default function ClientSpaceClient({ token }: Props) {
         )}
 
         {currentStep === 1 && (
-          <CrewStep count={passengerCount} initial={prep.crew} onSave={handleSaveCrew} onAutoSave={autoSaveCrew} />
+          <CrewStep count={passengerCount} initial={prep.crew} token={token} onSave={handleSaveCrew} onAutoSave={autoSaveCrew} />
         )}
 
         {currentStep === 2 && (
-          <TravelStep initial={prep.travel} crew={prep.crew} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
+          <TravelStep initial={prep.travel} crew={prep.crew} charter={charter} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
         )}
 
         {currentStep === 3 && (

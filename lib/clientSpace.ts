@@ -28,6 +28,7 @@ export interface CrewMember {
   dateOfBirth?: string;
   nationality?: string;
   passportNumber?: string;
+  passportImageUrl?: string;
   dietaryRestrictions?: string;
   medicalNotes?: string;
 }
@@ -35,12 +36,14 @@ export interface CrewMember {
 export interface TravelGroup {
   id: string;
   memberIndices: number[];
+  embarkationPoint?: string;
   arrivalDate?: string;
   arrivalTime?: string;
   arrivalFlight?: string;
   stayingAtHotel?: boolean;
   hotelName?: string;
   transferFromAirport?: boolean;
+  disembarkationPoint?: string;
   departureDate?: string;
   departureTime?: string;
   departureFlight?: string;
@@ -50,6 +53,8 @@ export interface TravelGroup {
 export interface TravelLogistics {
   groups?: TravelGroup[];
   // Legacy flat fields (kept for backward compat)
+  embarkationPoint?: string;
+  disembarkationPoint?: string;
   arrivalDate?: string;
   arrivalTime?: string;
   arrivalFlight?: string;
@@ -71,11 +76,13 @@ export interface FoodCategory {
 
 export interface FoodPreferences {
   seafood?: FoodCategory;
+  fish?: FoodCategory;
   meat?: FoodCategory;
   fruit?: FoodCategory;
   vegetables?: FoodCategory;
   dairy?: FoodCategory;
   other?: FoodCategory;
+  cuisineRatings?: Record<string, number>;
   breakfastStyle?: string[];
   breakfastItems?: string[];
   lunchStyle?: string;
