@@ -113,6 +113,17 @@ jest.mock('../lib/clientSpace', () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// Mock lib/preferences — keep pure helpers, stub the Firestore read
+// ---------------------------------------------------------------------------
+jest.mock('../lib/preferences', () => {
+  const actual = jest.requireActual('../lib/preferences');
+  return {
+    ...actual,
+    getPreferenceConfig: jest.fn().mockResolvedValue({ sections: actual.defaultSections(), updatedAt: null }),
+  };
+});
+
+// ---------------------------------------------------------------------------
 // Mock lib/availability (used indirectly)
 // ---------------------------------------------------------------------------
 jest.mock('../lib/availability', () => ({

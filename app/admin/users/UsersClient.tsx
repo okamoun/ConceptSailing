@@ -20,6 +20,7 @@ const PAGE_LABELS: Record<AdminPage, string> = {
   '/admin/users': 'Users',
   '/admin/financial': 'Financial',
   '/admin/themes': 'Themes',
+  '/admin/preferences': 'Preferences',
   '/admin/reconcile': 'Reconcile',
 };
 

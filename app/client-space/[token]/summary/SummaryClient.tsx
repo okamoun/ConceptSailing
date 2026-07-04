@@ -8,6 +8,10 @@ import {
   CHECKLIST_CATEGORIES,
   type ClientPreparation,
 } from '../../../../lib/clientSpace';
+import {
+  getPreferenceConfig,
+  type PreferenceSection,
+} from '../../../../lib/preferences';
 import type { Charter } from '../../../../lib/availability';
 import { getMarinaById } from '../../../marinas-data';
 import { CONTACT } from '../../../config/contact';
@@ -566,6 +570,43 @@ function ChecklistSection({ prep }: { prep: ClientPreparation }) {
   );
 }
 
+function CustomSectionsSummary({ prep, sections }: { prep: ClientPreparation; sections: PreferenceSection[] }) {
+  const custom = sections.filter(s => !s.builtIn);
+  if (custom.length === 0) return null;
+
+  function displayValue(value: unknown): string | null {
+    if (value == null) return null;
+    if (Array.isArray(value)) return value.length ? value.join(', ') : null;
+    const str = String(value).trim();
+    return str.length ? str : null;
+  }
+
+  return (
+    <>
+      {custom.map(section => {
+        const responses = (prep.custom ?? {})[section.id] ?? {};
+        const hasAny = section.fields.some(f => displayValue(responses[f.id]) !== null);
+        return (
+          <div key={section.id} className="summary-section border border-slate-200 rounded-xl overflow-hidden mb-4">
+            <SectionTitle>{section.title || 'Additional Details'}</SectionTitle>
+            {!hasAny ? (
+              <EmptySection message="No details submitted yet." />
+            ) : (
+              <div className="py-1">
+                {section.fields.map(f => {
+                  const v = displayValue(responses[f.id]);
+                  if (v === null) return null;
+                  return <Row key={f.id} label={f.label} value={v} />;
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -575,6 +616,7 @@ interface Props { token: string }
 export default function SummaryClient({ token }: Props) {
   const [charter, setCharter] = useState<Charter | null>(null);
   const [prep, setPrep] = useState<ClientPreparation | null>(null);
+  const [sections, setSections] = useState<PreferenceSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -590,6 +632,10 @@ export default function SummaryClient({ token }: Props) {
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
+
+    getPreferenceConfig()
+      .then(cfg => setSections(cfg.sections))
+      .catch(() => setSections([]));
   }, [token]);
 
   if (loading) {
@@ -690,6 +736,7 @@ export default function SummaryClient({ token }: Props) {
           <FoodSection prep={prep} />
           <BeveragesSection prep={prep} />
           <SpecialSection prep={prep} />
+          <CustomSectionsSummary prep={prep} sections={sections} />
           <ChecklistSection prep={prep} />
 
           {/* Footer */}

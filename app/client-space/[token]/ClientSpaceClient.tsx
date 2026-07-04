@@ -12,6 +12,7 @@ import {
   saveBeverages,
   saveSpecial,
   saveChecklist,
+  saveCustomSection,
   saveStep,
   saveSnapshot,
   getHistory,
@@ -27,9 +28,37 @@ import {
   type SpecialRequests,
   type PrepSnapshot,
 } from '../../../lib/clientSpace';
+import {
+  getPreferenceConfig,
+  defaultSections,
+  visibleSections,
+  type PreferenceSection,
+  type PreferenceField,
+} from '../../../lib/preferences';
 import type { Charter } from '../../../lib/availability';
 import { getMarinaById } from '../../marinas-data';
 import { CONTACT } from '../../config/contact';
+
+// Built-in section ids that map to code-defined wizard steps
+const BUILT_IN_STEP_IDS = ['crew', 'travel', 'activities', 'food', 'beverages', 'special'] as const;
+type BuiltInStepId = typeof BUILT_IN_STEP_IDS[number];
+
+type StepDef =
+  | { kind: 'charter'; title: string }
+  | { kind: 'builtin'; sectionId: BuiltInStepId; title: string }
+  | { kind: 'custom'; section: PreferenceSection; title: string };
+
+function buildSteps(sections: PreferenceSection[]): StepDef[] {
+  const steps: StepDef[] = [{ kind: 'charter', title: 'Your Charter' }];
+  for (const s of visibleSections(sections)) {
+    if ((BUILT_IN_STEP_IDS as readonly string[]).includes(s.id)) {
+      steps.push({ kind: 'builtin', sectionId: s.id as BuiltInStepId, title: s.title });
+    } else {
+      steps.push({ kind: 'custom', section: s, title: s.title || 'Additional Details' });
+    }
+  }
+  return steps;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -82,16 +111,6 @@ function useAutoSave<T>(
 
   return status;
 }
-
-const STEPS = [
-  'Your Charter',
-  'Crew Details',
-  'Travel & Logistics',
-  'Activities & Health',
-  'Food Preferences',
-  'Beverages & Bar',
-  'Special Requests',
-];
 
 const GENDERS = ['Male', 'Female', 'Other', 'Prefer not to say'];
 
@@ -351,10 +370,10 @@ function SaveButton({ onClick, saving, label = 'Save & Continue' }: {
 // Step indicator
 // ---------------------------------------------------------------------------
 
-function StepIndicator({ current }: { current: number }) {
+function StepIndicator({ steps, current }: { steps: string[]; current: number }) {
   return (
     <div className="flex items-center gap-0.5 overflow-x-auto">
-      {STEPS.map((label, i) => (
+      {steps.map((label, i) => (
         <div key={i} className="flex items-center flex-shrink-0">
           <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] transition-all ${
             i === current ? 'bg-white text-blue-700 font-semibold' : i < current ? 'bg-white/25 text-white' : 'bg-white/8 text-blue-300'
@@ -366,7 +385,7 @@ function StepIndicator({ current }: { current: number }) {
             </span>
             <span className="hidden md:inline">{label}</span>
           </div>
-          {i < STEPS.length - 1 && <div className={`w-3 h-px ${i < current ? 'bg-emerald-400/50' : 'bg-white/15'}`} />}
+          {i < steps.length - 1 && <div className={`w-3 h-px ${i < current ? 'bg-emerald-400/50' : 'bg-white/15'}`} />}
         </div>
       ))}
     </div>
@@ -1341,6 +1360,94 @@ function SpecialStep({ initial, checklistInit, onSave, onAutoSave, onChecklistCh
 }
 
 // ---------------------------------------------------------------------------
+// Custom section (admin-defined) step
+// ---------------------------------------------------------------------------
+
+function CustomField({ field, value, onChange }: {
+  field: PreferenceField;
+  value: unknown;
+  onChange: (v: unknown) => void;
+}) {
+  const label = <FieldLabel>{field.label}{field.required ? ' *' : ''}</FieldLabel>;
+
+  switch (field.type) {
+    case 'textarea':
+      return (
+        <div>
+          {label}
+          <TextArea value={typeof value === 'string' ? value : ''} onChange={onChange} placeholder={field.placeholder} rows={3} />
+        </div>
+      );
+    case 'number':
+      return (
+        <div>
+          {label}
+          <TextInput value={value == null ? '' : String(value)} onChange={onChange} placeholder={field.placeholder} type="number" />
+        </div>
+      );
+    case 'select':
+      return (
+        <div>
+          {label}
+          <SelectInput value={typeof value === 'string' ? value : ''} onChange={onChange} options={field.options ?? []} placeholder="Select…" />
+        </div>
+      );
+    case 'checkbox':
+      return (
+        <div>
+          {label}
+          <MultiChip options={field.options ?? []} values={Array.isArray(value) ? value as string[] : []} onChange={onChange} />
+        </div>
+      );
+    case 'text':
+    default:
+      return (
+        <div>
+          {label}
+          <TextInput value={typeof value === 'string' ? value : ''} onChange={onChange} placeholder={field.placeholder} />
+        </div>
+      );
+  }
+}
+
+function CustomSectionStep({ section, initial, onSave, onAutoSave }: {
+  section: PreferenceSection;
+  initial: Record<string, unknown>;
+  onSave: (responses: Record<string, unknown>) => Promise<void>;
+  onAutoSave: (responses: Record<string, unknown>) => Promise<void>;
+}) {
+  const [data, setData] = useState<Record<string, unknown>>(initial ?? {});
+  const [saving, setSaving] = useState(false);
+  const autoStatus = useAutoSave(data, onAutoSave);
+
+  function set(fieldId: string, v: unknown) {
+    setData(prev => ({ ...prev, [fieldId]: v }));
+  }
+
+  async function handleSave() { setSaving(true); try { await onSave(data); } finally { setSaving(false); } }
+
+  return (
+    <div className="space-y-3">
+      <SectionCard title={section.title || 'Additional Details'} autoSave={autoStatus}>
+        {section.description && <p className="text-xs text-blue-500">{section.description}</p>}
+        {section.fields.length === 0 ? (
+          <p className="text-xs text-blue-400 italic">This section has no questions yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {section.fields.map(f => (
+              <CustomField key={f.id} field={f} value={data[f.id]} onChange={v => set(f.id, v)} />
+            ))}
+          </div>
+        )}
+      </SectionCard>
+      <div className="flex justify-end">
+        <SaveButton onClick={handleSave} saving={saving} label={`Save ${section.title || 'Details'}`} />
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -1349,6 +1456,7 @@ interface Props { token: string }
 export default function ClientSpaceClient({ token }: Props) {
   const [charter, setCharter] = useState<Charter | null>(null);
   const [prep, setPrep] = useState<ClientPreparation | null>(null);
+  const [sections, setSections] = useState<PreferenceSection[]>(() => defaultSections());
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -1359,6 +1467,8 @@ export default function ClientSpaceClient({ token }: Props) {
   const [history, setHistory] = useState<PrepSnapshot[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [restoring, setRestoring] = useState<string | null>(null);
+
+  const steps = buildSteps(sections);
 
   useEffect(() => {
     Promise.all([
@@ -1374,7 +1484,18 @@ export default function ClientSpaceClient({ token }: Props) {
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
+
+    // Load admin preference configuration. Falls back to all built-in
+    // sections so the wizard behaves exactly as before if config is missing.
+    getPreferenceConfig()
+      .then(cfg => setSections(cfg.sections))
+      .catch(() => setSections(defaultSections()));
   }, [token]);
+
+  // Keep the active step within range if config trims the section list
+  useEffect(() => {
+    setCurrentStep(s => Math.min(s, Math.max(0, steps.length - 1)));
+  }, [steps.length]);
 
   // Scroll active step tab into view on mobile
   useEffect(() => {
@@ -1410,66 +1531,66 @@ export default function ClientSpaceClient({ token }: Props) {
     await saveSpecial(token, special);
     setPrep(prev => prev ? { ...prev, special } : prev);
   }
+  async function autoSaveCustom(sectionId: string, responses: Record<string, unknown>) {
+    await saveCustomSection(token, sectionId, responses);
+    setPrep(prev => prev ? { ...prev, custom: { ...(prev.custom ?? {}), [sectionId]: responses } } : prev);
+  }
 
-  // Manual save (snapshot + step advance + toast)
+  // Manual save (snapshot + progress unlock + toast). The current step index
+  // is unlocked so the next tab becomes reachable.
+  async function commitStep(updated: ClientPreparation | null, snapshotLabel: string, toastMsg: string) {
+    const unlock = Math.max(prep?.lastSavedStep ?? 0, currentStep);
+    const withStep = updated ? { ...updated, lastSavedStep: unlock } : null;
+    setPrep(withStep);
+    if (withStep) await saveSnapshot(token, withStep, snapshotLabel);
+    await saveStep(token, unlock);
+    showToast(toastMsg);
+  }
+
   async function handleSaveCrew(crew: CrewMember[]) {
     await saveCrew(token, crew);
-    const updated = prep ? { ...prep, crew } : null;
-    setPrep(updated);
-    if (updated) await saveSnapshot(token, updated, 'Crew details');
-    await saveStep(token, Math.max(currentStep, 1));
-    setCurrentStep(s => Math.max(s, 1));
-    showToast('Crew details saved ✓');
+    await commitStep(prep ? { ...prep, crew } : null, 'Crew details', 'Crew details saved ✓');
   }
 
   async function handleSaveTravel(travel: TravelLogistics) {
     await saveTravel(token, travel);
-    const updated = prep ? { ...prep, travel } : null;
-    setPrep(updated);
-    if (updated) await saveSnapshot(token, updated, 'Travel & logistics');
-    await saveStep(token, Math.max(currentStep, 2));
-    setCurrentStep(s => Math.max(s, 2));
-    showToast('Travel details saved ✓');
+    await commitStep(prep ? { ...prep, travel } : null, 'Travel & logistics', 'Travel details saved ✓');
   }
 
   async function handleSaveActivities(activities: ActivityPreferences) {
     await saveActivities(token, activities);
-    const updated = prep ? { ...prep, activities } : null;
-    setPrep(updated);
-    if (updated) await saveSnapshot(token, updated, 'Activities & health');
-    await saveStep(token, Math.max(currentStep, 3));
-    setCurrentStep(s => Math.max(s, 3));
-    showToast('Activities & health saved ✓');
+    await commitStep(prep ? { ...prep, activities } : null, 'Activities & health', 'Activities & health saved ✓');
   }
 
   async function handleSaveFood(food: FoodPreferences) {
     await saveFood(token, food);
-    const updated = prep ? { ...prep, food } : null;
-    setPrep(updated);
-    if (updated) await saveSnapshot(token, updated, 'Food preferences');
-    await saveStep(token, Math.max(currentStep, 4));
-    setCurrentStep(s => Math.max(s, 4));
-    showToast('Food preferences saved ✓');
+    await commitStep(prep ? { ...prep, food } : null, 'Food preferences', 'Food preferences saved ✓');
   }
 
   async function handleSaveBeverages(beverages: BeveragePreferences) {
     await saveBeverages(token, beverages);
-    const updated = prep ? { ...prep, beverages } : null;
-    setPrep(updated);
-    if (updated) await saveSnapshot(token, updated, 'Beverages & bar');
-    await saveStep(token, Math.max(currentStep, 5));
-    setCurrentStep(s => Math.max(s, 5));
-    showToast('Beverage preferences saved ✓');
+    await commitStep(prep ? { ...prep, beverages } : null, 'Beverages & bar', 'Beverage preferences saved ✓');
   }
 
   async function handleSaveSpecial(special: SpecialRequests) {
     await saveSpecial(token, special);
-    const updated = prep ? { ...prep, special } : null;
-    setPrep(updated);
-    if (updated) await saveSnapshot(token, updated, 'Special requests');
-    await saveStep(token, 6);
-    setCurrentStep(6);
-    showToast('All details saved — thank you! ✓');
+    const isLast = currentStep >= steps.length - 1;
+    await commitStep(
+      prep ? { ...prep, special } : null,
+      'Special requests',
+      isLast ? 'All details saved — thank you! ✓' : 'Special requests saved ✓',
+    );
+  }
+
+  async function handleSaveCustom(section: PreferenceSection, responses: Record<string, unknown>) {
+    await saveCustomSection(token, section.id, responses);
+    const updated = prep ? { ...prep, custom: { ...(prep.custom ?? {}), [section.id]: responses } } : null;
+    const isLast = currentStep >= steps.length - 1;
+    await commitStep(
+      updated,
+      section.title || 'Additional details',
+      isLast ? 'All details saved — thank you! ✓' : `${section.title || 'Details'} saved ✓`,
+    );
   }
 
   function handleChecklistChange(checklist: Record<string, boolean>) {
@@ -1572,7 +1693,7 @@ export default function ClientSpaceClient({ token }: Props) {
               </a>
             </div>
           </div>
-          <StepIndicator current={currentStep} />
+          <StepIndicator steps={steps.map(s => s.title)} current={currentStep} />
         </div>
       </div>
 
@@ -1581,7 +1702,7 @@ export default function ClientSpaceClient({ token }: Props) {
         <div ref={stepNavRef} className="flex gap-2 overflow-x-auto pb-1 scroll-smooth"
           style={{ scrollbarWidth: 'none' }}
         >
-          {STEPS.map((label, i) => (
+          {steps.map((step, i) => (
             <button
               key={i}
               type="button"
@@ -1594,14 +1715,14 @@ export default function ClientSpaceClient({ token }: Props) {
                   : 'bg-white/10 text-blue-300 border-white/10 hover:bg-white/15'
               }`}
             >
-              {label}
+              {step.title}
             </button>
           ))}
         </div>
 
         {/* Section title */}
         <div>
-          <h2 className="text-white text-2xl font-bold">{STEPS[currentStep]}</h2>
+          <h2 className="text-white text-2xl font-bold">{steps[currentStep]?.title ?? ''}</h2>
           {currentStep === 0 && charter.name && (
             <p className="text-blue-200 text-sm mt-1">
               Welcome aboard, {charter.name}. Let&apos;s prepare your perfect sailing holiday.
@@ -1610,50 +1731,62 @@ export default function ClientSpaceClient({ token }: Props) {
         </div>
 
         {/* Step content */}
-        {currentStep === 0 && (
+        {steps[currentStep]?.kind === 'charter' && (
           <div className="space-y-4">
             <BookingOverview charter={charter} />
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setCurrentStep(1)}
-                className="btn-primary px-8 py-3 text-sm font-semibold"
-              >
-                Let&apos;s Get Started →
-              </button>
-            </div>
+            {steps.length > 1 && (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className="btn-primary px-8 py-3 text-sm font-semibold"
+                >
+                  Let&apos;s Get Started →
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {currentStep === 1 && (
-          <CrewStep count={passengerCount} initial={prep.crew} onSave={handleSaveCrew} onAutoSave={autoSaveCrew} />
-        )}
-
-        {currentStep === 2 && (
-          <TravelStep initial={prep.travel} crew={prep.crew} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />
-        )}
-
-        {currentStep === 3 && (
-          <ActivitiesStep initial={prep.activities} onSave={handleSaveActivities} onAutoSave={autoSaveActivities} />
-        )}
-
-        {currentStep === 4 && (
-          <FoodStep initial={prep.food} crew={prep.crew} onSave={handleSaveFood} onAutoSave={autoSaveFood} />
-        )}
-
-        {currentStep === 5 && (
-          <BeveragesStep initial={prep.beverages} crew={prep.crew} onSave={handleSaveBeverages} onAutoSave={autoSaveBeverages} />
-        )}
-
-        {currentStep === 6 && (
-          <SpecialStep
-            initial={prep.special}
-            checklistInit={prep.checklist ?? {}}
-            onSave={handleSaveSpecial}
-            onAutoSave={autoSaveSpecial}
-            onChecklistChange={handleChecklistChange}
-          />
-        )}
+        {(() => {
+          const step = steps[currentStep];
+          if (!step || step.kind === 'charter') return null;
+          if (step.kind === 'custom') {
+            return (
+              <CustomSectionStep
+                key={step.section.id}
+                section={step.section}
+                initial={(prep.custom ?? {})[step.section.id] ?? {}}
+                onSave={r => handleSaveCustom(step.section, r)}
+                onAutoSave={r => autoSaveCustom(step.section.id, r)}
+              />
+            );
+          }
+          switch (step.sectionId) {
+            case 'crew':
+              return <CrewStep count={passengerCount} initial={prep.crew} onSave={handleSaveCrew} onAutoSave={autoSaveCrew} />;
+            case 'travel':
+              return <TravelStep initial={prep.travel} crew={prep.crew} onSave={handleSaveTravel} onAutoSave={autoSaveTravel} />;
+            case 'activities':
+              return <ActivitiesStep initial={prep.activities} onSave={handleSaveActivities} onAutoSave={autoSaveActivities} />;
+            case 'food':
+              return <FoodStep initial={prep.food} crew={prep.crew} onSave={handleSaveFood} onAutoSave={autoSaveFood} />;
+            case 'beverages':
+              return <BeveragesStep initial={prep.beverages} crew={prep.crew} onSave={handleSaveBeverages} onAutoSave={autoSaveBeverages} />;
+            case 'special':
+              return (
+                <SpecialStep
+                  initial={prep.special}
+                  checklistInit={prep.checklist ?? {}}
+                  onSave={handleSaveSpecial}
+                  onAutoSave={autoSaveSpecial}
+                  onChecklistChange={handleChecklistChange}
+                />
+              );
+            default:
+              return null;
+          }
+        })()}
 
         {/* Prev / Next navigation */}
         {currentStep > 0 && (
@@ -1665,7 +1798,7 @@ export default function ClientSpaceClient({ token }: Props) {
             >
               ← Previous
             </button>
-            {currentStep < STEPS.length - 1 && (
+            {currentStep < steps.length - 1 && (
               <button
                 type="button"
                 onClick={() => setCurrentStep(s => s + 1)}
@@ -1678,7 +1811,7 @@ export default function ClientSpaceClient({ token }: Props) {
         )}
 
         {/* Completion banner */}
-        {currentStep === 6 && (prep.lastSavedStep ?? 0) >= 6 && (
+        {steps.length > 1 && currentStep === steps.length - 1 && (prep.lastSavedStep ?? 0) >= steps.length - 1 && (
           <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl p-6 text-center">
             <p className="text-3xl mb-2">⛵</p>
             <h3 className="text-white text-lg font-bold mb-1">All Set!</h3>

@@ -118,6 +118,10 @@ export interface SpecialRequests {
   emergencyContactRelation?: string;
 }
 
+// Responses to admin-defined custom sections.
+// Shape: { [sectionId]: { [fieldId]: value } }
+export type CustomSectionResponses = Record<string, Record<string, unknown>>;
+
 export interface ClientPreparation {
   token: string;
   charterId: string;
@@ -129,6 +133,7 @@ export interface ClientPreparation {
   beverages: BeveragePreferences;
   special: SpecialRequests;
   checklist: Record<string, boolean>;
+  custom?: CustomSectionResponses;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
   completedAt?: Timestamp | null;
@@ -138,7 +143,7 @@ export type PrepSnapshot = {
   id: string;
   label: string;
   savedAt: Timestamp;
-  data: Pick<ClientPreparation, 'crew' | 'travel' | 'activities' | 'food' | 'beverages' | 'special' | 'checklist' | 'lastSavedStep'>;
+  data: Pick<ClientPreparation, 'crew' | 'travel' | 'activities' | 'food' | 'beverages' | 'special' | 'checklist' | 'custom' | 'lastSavedStep'>;
 };
 
 // ---------------------------------------------------------------------------
@@ -240,6 +245,7 @@ function emptyPrep(token: string, charterId: string): Omit<ClientPreparation, 'c
     beverages: {},
     special: {},
     checklist: {},
+    custom: {},
   };
 }
 
@@ -300,6 +306,14 @@ export async function saveSpecial(token: string, special: SpecialRequests): Prom
   await patchPrep(token, { special });
 }
 
+export async function saveCustomSection(
+  token: string,
+  sectionId: string,
+  responses: Record<string, unknown>
+): Promise<void> {
+  await patchPrep(token, { [`custom.${sectionId}`]: responses });
+}
+
 export async function saveChecklist(token: string, checklist: Record<string, boolean>): Promise<void> {
   await updateDoc(doc(db, COLLECTION, token), { checklist, updatedAt: serverTimestamp() });
 }
@@ -331,6 +345,7 @@ export async function saveSnapshot(
       beverages: prep.beverages,
       special: prep.special,
       checklist: prep.checklist,
+      custom: prep.custom ?? {},
       lastSavedStep: prep.lastSavedStep,
     },
   });
