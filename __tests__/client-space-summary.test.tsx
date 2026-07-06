@@ -519,6 +519,9 @@ describe('SummaryClient — Food section with data', () => {
       breakfastItems: ['Croissant', 'Yogurt'],
       lunchStyle: 'Light salads',
       dinnerStyle: 'Fine dining',
+      breakfastOnBoardPct: 100,
+      lunchOnBoardPct: 80,
+      dinnerOnBoardPct: 50,
     },
   };
 
@@ -555,10 +558,10 @@ describe('SummaryClient — Food section with data', () => {
     });
   });
 
-  it('renders Lunch & Dinner subsection', async () => {
+  it('renders Meals subsection', async () => {
     renderSummary();
     await waitFor(() => {
-      expect(screen.getByText('Lunch & Dinner')).toBeInTheDocument();
+      expect(screen.getByText('Meals')).toBeInTheDocument();
     });
   });
 
@@ -567,6 +570,18 @@ describe('SummaryClient — Food section with data', () => {
     await waitFor(() => {
       expect(screen.getByText('Light salads')).toBeInTheDocument();
     });
+  });
+
+  it('renders on-board percentage per meal', async () => {
+    renderSummary();
+    await waitFor(() => {
+      expect(screen.getByText('Breakfast on board')).toBeInTheDocument();
+    });
+    expect(screen.getByText('100%')).toBeInTheDocument();
+    expect(screen.getByText('Lunch on board')).toBeInTheDocument();
+    expect(screen.getByText('80%')).toBeInTheDocument();
+    expect(screen.getByText('Dinner on board')).toBeInTheDocument();
+    expect(screen.getByText('50%')).toBeInTheDocument();
   });
 });
 
