@@ -17,6 +17,7 @@ import {
   getHistory,
   restoreSnapshot,
   CHECKLIST_CATEGORIES,
+  DEFAULT_ON_BOARD_PCT,
   type ClientPreparation,
   type CrewMember,
   type TravelLogistics,
@@ -1218,13 +1219,64 @@ function ActivitiesStep({ initial, onSave, onAutoSave }: {
 // Step 4: Food preferences
 // ---------------------------------------------------------------------------
 
+function OnBoardPercentTable({ data, onChange }: {
+  data: Pick<FoodPreferences, 'breakfastOnBoardPct' | 'lunchOnBoardPct' | 'dinnerOnBoardPct'>;
+  onChange: (meal: 'breakfast' | 'lunch' | 'dinner', pct: number) => void;
+}) {
+  const rows: { key: 'breakfast' | 'lunch' | 'dinner'; label: string; value?: number }[] = [
+    { key: 'breakfast', label: 'Breakfast', value: data.breakfastOnBoardPct },
+    { key: 'lunch',     label: 'Lunch',     value: data.lunchOnBoardPct },
+    { key: 'dinner',    label: 'Dinner',    value: data.dinnerOnBoardPct },
+  ];
+  return (
+    <div className="border border-blue-100 rounded-lg p-2.5 bg-white/50">
+      <p className="text-[10px] font-bold text-blue-700 uppercase tracking-wide mb-1.5">Meals on board</p>
+      <p className="text-xs text-blue-500 mb-2">Roughly what share of each meal will be eaten on board? The rest we&apos;ll assume is ashore.</p>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-[10px] uppercase tracking-wide text-blue-500">
+            <th className="text-left font-bold pb-1">Meal</th>
+            <th className="text-left font-bold pb-1">% on board</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(r => (
+            <tr key={r.key} className="border-t border-blue-100">
+              <td className="py-1.5 text-blue-700 font-medium">{r.label}</td>
+              <td className="py-1.5">
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={r.value ?? ''}
+                  aria-label={`${r.label} percent on board`}
+                  onChange={e => onChange(r.key, Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
+                  placeholder="e.g. 70"
+                  className="w-20 bg-white border border-blue-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-blue-400"
+                />
+                <span className="text-blue-400 text-xs ml-1">%</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function FoodStep({ initial, crew, onSave, onAutoSave }: {
   initial: FoodPreferences;
   crew: CrewMember[];
   onSave: (food: FoodPreferences) => Promise<void>;
   onAutoSave: (food: FoodPreferences) => Promise<void>;
 }) {
-  const [data, setData] = useState<FoodPreferences>(initial);
+  const [data, setData] = useState<FoodPreferences>(() => ({
+    ...initial,
+    breakfastOnBoardPct: initial.breakfastOnBoardPct ?? DEFAULT_ON_BOARD_PCT.breakfast,
+    lunchOnBoardPct: initial.lunchOnBoardPct ?? DEFAULT_ON_BOARD_PCT.lunch,
+    dinnerOnBoardPct: initial.dinnerOnBoardPct ?? DEFAULT_ON_BOARD_PCT.dinner,
+  }));
   const [saving, setSaving] = useState(false);
   const autoStatus = useAutoSave(data, onAutoSave);
 
@@ -1257,6 +1309,10 @@ function FoodStep({ initial, crew, onSave, onAutoSave }: {
     <div className="space-y-3">
       <SectionCard title="Food Preferences by Category" autoSave={autoStatus}>
         <p className="text-xs text-blue-500">Help us plan menus tailored to your group</p>
+        <OnBoardPercentTable
+          data={data}
+          onChange={(meal, pct) => set(`${meal}OnBoardPct` as keyof FoodPreferences, pct as never)}
+        />
         <div className="space-y-2">
           {FOOD_CATEGORIES.map(cat => {
             const key = cat.toLowerCase() as CatKey;

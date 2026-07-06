@@ -353,7 +353,8 @@ function FoodSection({ prep }: { prep: ClientPreparation }) {
     return catData?.likes || catData?.dislikes || catData?.allergies;
   });
   const hasBreakfast = f.breakfastStyle?.length || f.breakfastItems?.length;
-  const hasMeals = f.lunchStyle || f.dinnerStyle;
+  const hasMeals = f.lunchStyle || f.dinnerStyle
+    || f.breakfastOnBoardPct != null || f.lunchOnBoardPct != null || f.dinnerOnBoardPct != null;
 
   return (
     <div className="summary-section border border-slate-200 rounded-xl overflow-hidden mb-4">
@@ -411,8 +412,11 @@ function FoodSection({ prep }: { prep: ClientPreparation }) {
 
       {hasMeals && (
         <>
-          <SubsectionTitle>Lunch & Dinner</SubsectionTitle>
+          <SubsectionTitle>Meals</SubsectionTitle>
           <div className="py-1">
+            <Row label="Breakfast on board" value={f.breakfastOnBoardPct != null ? `${f.breakfastOnBoardPct}%` : undefined} />
+            <Row label="Lunch on board" value={f.lunchOnBoardPct != null ? `${f.lunchOnBoardPct}%` : undefined} />
+            <Row label="Dinner on board" value={f.dinnerOnBoardPct != null ? `${f.dinnerOnBoardPct}%` : undefined} />
             <Row label="Lunch Style" value={f.lunchStyle} />
             <BoolRow label="Lunch Dessert" value={f.lunchDessert} />
             <Row label="Lunch Snacks" value={f.lunchSnacks} />

@@ -110,6 +110,7 @@ jest.mock('../lib/clientSpace', () => ({
   saveSnapshot: (...args: unknown[]) => mockSaveSnapshot(...args),
   getHistory: (...args: unknown[]) => mockGetHistory(...args),
   restoreSnapshot: (...args: unknown[]) => mockRestoreSnapshot(...args),
+  DEFAULT_ON_BOARD_PCT: { breakfast: 100, lunch: 80, dinner: 50 },
   CHECKLIST_CATEGORIES: [
     {
       id: 'documents',
@@ -446,14 +447,14 @@ describe('ClientSpaceClient — Step 4: Food Preferences', () => {
   });
 
   test('renders Breakfast section with style chips', () => {
-    expect(screen.getByText('Breakfast')).toBeInTheDocument();
+    expect(screen.getAllByText('Breakfast').length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: /light \/ cold/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /american/i })).toBeInTheDocument();
   });
 
   test('renders Lunch and Dinner sections', () => {
-    expect(screen.getByText('Lunch')).toBeInTheDocument();
-    expect(screen.getByText('Dinner')).toBeInTheDocument();
+    expect(screen.getAllByText('Lunch').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Dinner').length).toBeGreaterThan(0);
   });
 
   test('Save Food Preferences calls saveFood', async () => {
@@ -464,6 +465,34 @@ describe('ClientSpaceClient — Step 4: Food Preferences', () => {
   test('Save creates snapshot with correct label', async () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save Food Preferences' }));
     await waitFor(() => expect(mockSaveSnapshot).toHaveBeenCalledWith(mockToken, expect.anything(), 'Food preferences'));
+  });
+
+  test('renders on-board percentage table with a row per meal', () => {
+    expect(screen.getByText('Meals on board')).toBeInTheDocument();
+    expect(screen.getByLabelText('Breakfast percent on board')).toBeInTheDocument();
+    expect(screen.getByLabelText('Lunch percent on board')).toBeInTheDocument();
+    expect(screen.getByLabelText('Dinner percent on board')).toBeInTheDocument();
+  });
+
+  test('defaults to Breakfast 100 / Lunch 80 / Dinner 50', () => {
+    expect(screen.getByLabelText('Breakfast percent on board')).toHaveValue(100);
+    expect(screen.getByLabelText('Lunch percent on board')).toHaveValue(80);
+    expect(screen.getByLabelText('Dinner percent on board')).toHaveValue(50);
+  });
+
+  test('entering a breakfast percentage saves breakfastOnBoardPct', async () => {
+    fireEvent.change(screen.getByLabelText('Breakfast percent on board'), { target: { value: '70' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Food Preferences' }));
+    await waitFor(() => expect(mockSaveFood).toHaveBeenCalledWith(
+      mockToken,
+      expect.objectContaining({ breakfastOnBoardPct: 70 }),
+    ));
+  });
+
+  test('percentage is clamped to a maximum of 100', () => {
+    const lunch = screen.getByLabelText('Lunch percent on board') as HTMLInputElement;
+    fireEvent.change(lunch, { target: { value: '150' } });
+    expect(lunch).toHaveValue(100);
   });
 });
 

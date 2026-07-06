@@ -90,7 +90,17 @@ export interface FoodPreferences {
   lunchSnacks?: string;
   dinnerStyle?: string;
   dinnerDessert?: boolean;
+  breakfastOnBoardPct?: number; // 0–100, % of this meal taken on board
+  lunchOnBoardPct?: number;     // 0–100
+  dinnerOnBoardPct?: number;    // 0–100
 }
+
+// Default share of each meal taken on board (remainder is ashore)
+export const DEFAULT_ON_BOARD_PCT = {
+  breakfast: 100,
+  lunch: 80,
+  dinner: 50,
+} as const;
 
 export interface BeverageItem {
   preferredBrand?: string;
