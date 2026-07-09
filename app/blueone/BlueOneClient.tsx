@@ -11,7 +11,7 @@ import MiniCalendar from '../components/MiniCalendar';
 import { boats } from '../boats-data';
 import { getAllCharters, type Charter } from '../../lib/availability';
 import { getAllPhotoMeta, type PhotoMeta } from '../../lib/photos';
-import type { ImageCategory } from '../constants/boat-images';
+import { photoshootImages, type ImageCategory } from '../constants/boat-images';
 
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
 
@@ -143,48 +143,24 @@ const blueOneActivityImages = [
 const blueOneFloorplanImages = ["/images/boats/blueone/floorplan.jpg"];
 
 // ─── Professional photoshoot gallery, classified by category ─────────────────
+// Photos are registered once in app/constants/boat-images.ts (so they also
+// appear in the admin Photo Manager and public gallery); the display groups
+// below are derived from that single source of truth.
 
-const PHOTOSHOOT_BASE = "/images/boats/blueone/photos_shoot";
-const ps = (file: string) => `${PHOTOSHOOT_BASE}/${file}`;
-
-const photoshootGroups: { title: string; images: string[]; columns: 3 | 4 }[] = [
-  {
-    title: "Exterior & Sailing",
-    columns: 3,
-    images: [
-      "DSC_0357.jpg", "DSC_0367.jpg", "DSC_0341.jpg", "DSC_0353.jpg",
-      "DSC_0398.jpg", "DSC_0381.jpg", "DSC_0216.jpg", "DSC_0034.jpg",
-      "DSC_0180.jpg",
-    ].map(ps),
-  },
-  {
-    title: "Cockpit & Al Fresco Dining",
-    columns: 4,
-    images: [
-      "DSC_0165.jpg", "DSC_0151.jpg", "DSC_0170.jpg", "DSC_0176.jpg",
-      "DSC_0202.jpg", "DSC_0043.jpg", "DSC_0242.jpg", "DSC_0274.jpg",
-      "DSC_9796.jpg", "DSC_9801.jpg", "DSC_9813.jpg", "DSC_9846.jpg",
-      "DSC_9841.jpg", "DSC_9823.jpg", "DSC_9832.jpg", "DSC_9838.jpg",
-    ].map(ps),
-  },
-  {
-    title: "Interior & Cabins",
-    columns: 4,
-    images: [
-      "DSC_0008.jpg", "DSC_0026.jpg", "DSC_9980.jpg", "DSC_9990.jpg",
-      "DSC_0270.jpg", "DSC_9997.jpg", "DSC_0302.jpg", "DSC_9893.jpg",
-      "DSC_9927.jpg", "DSC_9659.jpg", "DSC_9740.jpg", "DSC_9858.jpg",
-      "DSC_9864.jpg", "DSC_9874.jpg", "DSC_9881.jpg", "DSC_9709.jpg",
-      "DSC_0320.jpg", "DSC_9662.jpg", "DSC_9746.jpg", "DSC_9681.jpg",
-      "DSC_9694.jpg", "DSC_9724.jpg", "DSC_9726.jpg", "DSC_9902.jpg",
-    ].map(ps),
-  },
-  {
-    title: "Water Toys & Activities",
-    columns: 3,
-    images: ["DSC_0077.jpg", "DSC_9848.jpg"].map(ps),
-  },
+const PHOTOSHOOT_GROUPS: { title: string; category: ImageCategory; columns: 3 | 4 }[] = [
+  { title: "Exterior & Sailing",          category: "exterior",   columns: 3 },
+  { title: "Cockpit & Al Fresco Dining",  category: "cockpit",    columns: 4 },
+  { title: "Interior & Cabins",           category: "interior",   columns: 4 },
+  { title: "Water Toys & Activities",     category: "activities", columns: 3 },
 ];
+
+const photoshootGroups = PHOTOSHOOT_GROUPS
+  .map((g) => ({
+    title: g.title,
+    columns: g.columns,
+    images: photoshootImages.filter((img) => img.category === g.category).map((img) => img.src),
+  }))
+  .filter((g) => g.images.length > 0);
 
 // ─── Reusable photo grid ─────────────────────────────────────────────────────
 
