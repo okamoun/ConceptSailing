@@ -32,6 +32,7 @@ export default function Navigation() {
     { href: '/blueone',     label: 'The Yacht',   bold: true },
     { href: '/destinations',label: 'Destinations',bold: false },
     { href: '/experiences', label: 'Experiences', bold: true },
+    { href: '/rates',       label: 'Rates',       bold: false },
     { href: '/about',       label: 'About',       bold: false },
     { href: '/availability',label: 'Availability',bold: false },
     { href: '/reviews',     label: 'Reviews',     bold: false },

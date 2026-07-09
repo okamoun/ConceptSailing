@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useBlueOneMode } from '../contexts/BlueOneContext';
 import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
+import VideoEmbed from '../components/VideoEmbed';
 import MiniCalendar from '../components/MiniCalendar';
 import { boats } from '../boats-data';
 import { getAllCharters, type Charter } from '../../lib/availability';
@@ -282,6 +283,13 @@ export default function BlueOneClient() {
             </div>
           </div>
         </div>
+
+        {/* Video Section */}
+        <section className="py-20 bg-black/20 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 text-white">
+            <VideoEmbed />
+          </div>
+        </section>
 
         {/* Exterior Gallery Section */}
         <section className="py-20 bg-black/30 backdrop-blur-sm">

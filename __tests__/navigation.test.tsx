@@ -61,6 +61,7 @@ describe('Navigation — Nav Links spelling and hrefs', () => {
     { label: 'Experiences', href: '/experiences' },
     { label: 'The Yacht', href: '/blueone' },
     { label: 'Destinations', href: '/destinations' },
+    { label: 'Rates', href: '/rates' },
     { label: 'About', href: '/about' },
     { label: 'Availability', href: '/availability' },
     { label: 'Reviews', href: '/reviews' },

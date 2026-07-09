@@ -8,6 +8,7 @@ import { LocalBusinessStructuredData, TouristTripStructuredData } from './compon
 import { getConfirmedReviews } from '../lib/reviews';
 import type { Review } from '../lib/reviews';
 import ReviewCard from './components/ReviewCard';
+import VideoEmbed from './components/VideoEmbed';
 import { CONTACT } from './config/contact';
 
 export default function HomeClient() {
@@ -156,6 +157,13 @@ export default function HomeClient() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Video Section */}
+      <section className="py-24 bg-gradient-to-b from-blue-50 to-white">
+        <div className="max-w-6xl mx-auto px-4 text-gray-900">
+          <VideoEmbed />
         </div>
       </section>
 
