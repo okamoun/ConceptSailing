@@ -174,6 +174,13 @@ export default function ThemesAdminClient() {
   const [categoryFilter, setCategoryFilter] = useState<ThemeCategory | 'all'>('all');
   const [isUninitialized, setIsUninitialized] = useState(false);
 
+  const sortRows = useCallback((list: ThemeRow[]) =>
+    [...list].sort((a, b) => {
+      const catDiff = (a.meta.category ?? '').localeCompare(b.meta.category ?? '');
+      if (catDiff !== 0) return catDiff;
+      return (a.meta.order ?? 0) - (b.meta.order ?? 0);
+    }), []);
+
   const load = useCallback(async () => {
     try {
       setLoading(true);
@@ -212,22 +219,14 @@ export default function ThemesAdminClient() {
         return { ...adv, meta };
       });
 
-      merged.sort((a, b) => {
-        const catA = a.meta.category ?? '';
-        const catB = b.meta.category ?? '';
-        const catDiff = catA.localeCompare(catB);
-        if (catDiff !== 0) return catDiff;
-        return (a.meta.order ?? 0) - (b.meta.order ?? 0);
-      });
-
-      setRows(merged);
+      setRows(sortRows(merged));
     } catch (e) {
       console.error('[ThemesAdmin] load failed:', e);
       setError('Failed to load theme metadata.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [sortRows]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -251,49 +250,41 @@ export default function ThemesAdminClient() {
     }
   }
 
-  async function handleMoveUp(row: ThemeRow) {
+  async function reorder(row: ThemeRow, direction: -1 | 1) {
     setError('');
     const sameCat = rows
       .filter(r => r.meta.category === row.meta.category)
       .sort((a, b) => a.meta.order - b.meta.order);
     const idx = sameCat.findIndex(r => r.id === row.id);
-    if (idx <= 0) return;
-    const prev = sameCat[idx - 1];
+    const swapIdx = idx + direction;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= sameCat.length) return;
+    const other = sameCat[swapIdx];
+
+    // Optimistic swap: exchange the two rows' order values and re-sort locally,
+    // so the move appears instantly without waiting on Firestore.
+    setRows(prev => sortRows(prev.map(r => {
+      if (r.id === row.id) return { ...r, meta: { ...r.meta, order: other.meta.order } };
+      if (r.id === other.id) return { ...r, meta: { ...r.meta, order: row.meta.order } };
+      return r;
+    })));
+
     setSaving(row.id);
     try {
       await Promise.all([
-        upsertThemeMetadata(row.id, { order: prev.meta.order }),
-        upsertThemeMetadata(prev.id, { order: row.meta.order }),
+        upsertThemeMetadata(row.id, { order: other.meta.order }),
+        upsertThemeMetadata(other.id, { order: row.meta.order }),
       ]);
-      await load();
+      flashSuccess(row.id);
     } catch {
       setError('Reorder failed.');
+      await load(); // resync from Firestore only if the write failed
     } finally {
       setSaving(null);
     }
   }
 
-  async function handleMoveDown(row: ThemeRow) {
-    setError('');
-    const sameCat = rows
-      .filter(r => r.meta.category === row.meta.category)
-      .sort((a, b) => a.meta.order - b.meta.order);
-    const idx = sameCat.findIndex(r => r.id === row.id);
-    if (idx >= sameCat.length - 1) return;
-    const next = sameCat[idx + 1];
-    setSaving(row.id);
-    try {
-      await Promise.all([
-        upsertThemeMetadata(row.id, { order: next.meta.order }),
-        upsertThemeMetadata(next.id, { order: row.meta.order }),
-      ]);
-      await load();
-    } catch {
-      setError('Reorder failed.');
-    } finally {
-      setSaving(null);
-    }
-  }
+  const handleMoveUp = (row: ThemeRow) => reorder(row, -1);
+  const handleMoveDown = (row: ThemeRow) => reorder(row, 1);
 
   async function handleInitialize() {
     if (!confirm('Seed Firestore with the default category assignments? This only runs if the collection is currently empty.')) return;
