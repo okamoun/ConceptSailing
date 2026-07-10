@@ -149,26 +149,86 @@ export const foodImages: BoatImage[] = [
   { id: 'food-005', src: '/images/boats/blueone/Actu-2-Aura51-Cockpit-Table.avif', alt: 'Cockpit dining table setup', category: 'food', title: 'Outdoor Dining' },
 ];
 
+// Photoshoot 2026 — professional session (51 photos), classified by category.
+// Registered here so they appear in the admin Photo Manager and the public
+// gallery, and can be flagged as key photos like any other image.
+export const photoshootImages: BoatImage[] = [
+  { id: 'ps-ext-001', src: '/images/boats/blueone/photos_shoot/DSC_0357.jpg', alt: 'BlueOne photoshoot — exterior 1', category: 'exterior' },
+  { id: 'ps-ext-002', src: '/images/boats/blueone/photos_shoot/DSC_0367.jpg', alt: 'BlueOne photoshoot — exterior 2', category: 'exterior' },
+  { id: 'ps-ext-003', src: '/images/boats/blueone/photos_shoot/DSC_0341.jpg', alt: 'BlueOne photoshoot — exterior 3', category: 'exterior' },
+  { id: 'ps-ext-004', src: '/images/boats/blueone/photos_shoot/DSC_0353.jpg', alt: 'BlueOne photoshoot — exterior 4', category: 'exterior' },
+  { id: 'ps-ext-005', src: '/images/boats/blueone/photos_shoot/DSC_0398.jpg', alt: 'BlueOne photoshoot — exterior 5', category: 'exterior' },
+  { id: 'ps-ext-006', src: '/images/boats/blueone/photos_shoot/DSC_0381.jpg', alt: 'BlueOne photoshoot — exterior 6', category: 'exterior' },
+  { id: 'ps-ext-007', src: '/images/boats/blueone/photos_shoot/DSC_0216.jpg', alt: 'BlueOne photoshoot — exterior 7', category: 'exterior' },
+  { id: 'ps-ext-008', src: '/images/boats/blueone/photos_shoot/DSC_0034.jpg', alt: 'BlueOne photoshoot — exterior 8', category: 'exterior' },
+  { id: 'ps-ext-009', src: '/images/boats/blueone/photos_shoot/DSC_0180.jpg', alt: 'BlueOne photoshoot — exterior 9', category: 'exterior' },
+  { id: 'ps-ckp-001', src: '/images/boats/blueone/photos_shoot/DSC_0165.jpg', alt: 'BlueOne photoshoot — cockpit & dining 1', category: 'cockpit' },
+  { id: 'ps-ckp-002', src: '/images/boats/blueone/photos_shoot/DSC_0151.jpg', alt: 'BlueOne photoshoot — cockpit & dining 2', category: 'cockpit' },
+  { id: 'ps-ckp-003', src: '/images/boats/blueone/photos_shoot/DSC_0170.jpg', alt: 'BlueOne photoshoot — cockpit & dining 3', category: 'cockpit' },
+  { id: 'ps-ckp-004', src: '/images/boats/blueone/photos_shoot/DSC_0176.jpg', alt: 'BlueOne photoshoot — cockpit & dining 4', category: 'cockpit' },
+  { id: 'ps-ckp-005', src: '/images/boats/blueone/photos_shoot/DSC_0202.jpg', alt: 'BlueOne photoshoot — cockpit & dining 5', category: 'cockpit' },
+  { id: 'ps-ckp-006', src: '/images/boats/blueone/photos_shoot/DSC_0043.jpg', alt: 'BlueOne photoshoot — cockpit & dining 6', category: 'cockpit' },
+  { id: 'ps-ckp-007', src: '/images/boats/blueone/photos_shoot/DSC_0242.jpg', alt: 'BlueOne photoshoot — cockpit & dining 7', category: 'cockpit' },
+  { id: 'ps-ckp-008', src: '/images/boats/blueone/photos_shoot/DSC_0274.jpg', alt: 'BlueOne photoshoot — cockpit & dining 8', category: 'cockpit' },
+  { id: 'ps-ckp-009', src: '/images/boats/blueone/photos_shoot/DSC_9796.jpg', alt: 'BlueOne photoshoot — cockpit & dining 9', category: 'cockpit' },
+  { id: 'ps-ckp-010', src: '/images/boats/blueone/photos_shoot/DSC_9801.jpg', alt: 'BlueOne photoshoot — cockpit & dining 10', category: 'cockpit' },
+  { id: 'ps-ckp-011', src: '/images/boats/blueone/photos_shoot/DSC_9813.jpg', alt: 'BlueOne photoshoot — cockpit & dining 11', category: 'cockpit' },
+  { id: 'ps-ckp-012', src: '/images/boats/blueone/photos_shoot/DSC_9846.jpg', alt: 'BlueOne photoshoot — cockpit & dining 12', category: 'cockpit' },
+  { id: 'ps-ckp-013', src: '/images/boats/blueone/photos_shoot/DSC_9841.jpg', alt: 'BlueOne photoshoot — cockpit & dining 13', category: 'cockpit' },
+  { id: 'ps-ckp-014', src: '/images/boats/blueone/photos_shoot/DSC_9823.jpg', alt: 'BlueOne photoshoot — cockpit & dining 14', category: 'cockpit' },
+  { id: 'ps-ckp-015', src: '/images/boats/blueone/photos_shoot/DSC_9832.jpg', alt: 'BlueOne photoshoot — cockpit & dining 15', category: 'cockpit' },
+  { id: 'ps-ckp-016', src: '/images/boats/blueone/photos_shoot/DSC_9838.jpg', alt: 'BlueOne photoshoot — cockpit & dining 16', category: 'cockpit' },
+  { id: 'ps-int-001', src: '/images/boats/blueone/photos_shoot/DSC_0008.jpg', alt: 'BlueOne photoshoot — interior 1', category: 'interior' },
+  { id: 'ps-int-002', src: '/images/boats/blueone/photos_shoot/DSC_0026.jpg', alt: 'BlueOne photoshoot — interior 2', category: 'interior' },
+  { id: 'ps-int-003', src: '/images/boats/blueone/photos_shoot/DSC_9980.jpg', alt: 'BlueOne photoshoot — interior 3', category: 'interior' },
+  { id: 'ps-int-004', src: '/images/boats/blueone/photos_shoot/DSC_9990.jpg', alt: 'BlueOne photoshoot — interior 4', category: 'interior' },
+  { id: 'ps-int-005', src: '/images/boats/blueone/photos_shoot/DSC_0270.jpg', alt: 'BlueOne photoshoot — interior 5', category: 'interior' },
+  { id: 'ps-int-006', src: '/images/boats/blueone/photos_shoot/DSC_9997.jpg', alt: 'BlueOne photoshoot — interior 6', category: 'interior' },
+  { id: 'ps-int-007', src: '/images/boats/blueone/photos_shoot/DSC_0302.jpg', alt: 'BlueOne photoshoot — interior 7', category: 'interior' },
+  { id: 'ps-int-008', src: '/images/boats/blueone/photos_shoot/DSC_9893.jpg', alt: 'BlueOne photoshoot — interior 8', category: 'interior' },
+  { id: 'ps-int-009', src: '/images/boats/blueone/photos_shoot/DSC_9927.jpg', alt: 'BlueOne photoshoot — interior 9', category: 'interior' },
+  { id: 'ps-int-010', src: '/images/boats/blueone/photos_shoot/DSC_9659.jpg', alt: 'BlueOne photoshoot — interior 10', category: 'interior' },
+  { id: 'ps-int-011', src: '/images/boats/blueone/photos_shoot/DSC_9740.jpg', alt: 'BlueOne photoshoot — interior 11', category: 'interior' },
+  { id: 'ps-int-012', src: '/images/boats/blueone/photos_shoot/DSC_9858.jpg', alt: 'BlueOne photoshoot — interior 12', category: 'interior' },
+  { id: 'ps-int-013', src: '/images/boats/blueone/photos_shoot/DSC_9864.jpg', alt: 'BlueOne photoshoot — interior 13', category: 'interior' },
+  { id: 'ps-int-014', src: '/images/boats/blueone/photos_shoot/DSC_9874.jpg', alt: 'BlueOne photoshoot — interior 14', category: 'interior' },
+  { id: 'ps-int-015', src: '/images/boats/blueone/photos_shoot/DSC_9881.jpg', alt: 'BlueOne photoshoot — interior 15', category: 'interior' },
+  { id: 'ps-int-016', src: '/images/boats/blueone/photos_shoot/DSC_9709.jpg', alt: 'BlueOne photoshoot — interior 16', category: 'interior' },
+  { id: 'ps-int-017', src: '/images/boats/blueone/photos_shoot/DSC_0320.jpg', alt: 'BlueOne photoshoot — interior 17', category: 'interior' },
+  { id: 'ps-int-018', src: '/images/boats/blueone/photos_shoot/DSC_9662.jpg', alt: 'BlueOne photoshoot — interior 18', category: 'interior' },
+  { id: 'ps-int-019', src: '/images/boats/blueone/photos_shoot/DSC_9746.jpg', alt: 'BlueOne photoshoot — interior 19', category: 'interior' },
+  { id: 'ps-int-020', src: '/images/boats/blueone/photos_shoot/DSC_9681.jpg', alt: 'BlueOne photoshoot — interior 20', category: 'interior' },
+  { id: 'ps-int-021', src: '/images/boats/blueone/photos_shoot/DSC_9694.jpg', alt: 'BlueOne photoshoot — interior 21', category: 'interior' },
+  { id: 'ps-int-022', src: '/images/boats/blueone/photos_shoot/DSC_9724.jpg', alt: 'BlueOne photoshoot — interior 22', category: 'interior' },
+  { id: 'ps-int-023', src: '/images/boats/blueone/photos_shoot/DSC_9726.jpg', alt: 'BlueOne photoshoot — interior 23', category: 'interior' },
+  { id: 'ps-int-024', src: '/images/boats/blueone/photos_shoot/DSC_9902.jpg', alt: 'BlueOne photoshoot — interior 24', category: 'interior' },
+  { id: 'ps-act-001', src: '/images/boats/blueone/photos_shoot/DSC_0077.jpg', alt: 'BlueOne photoshoot — water toys 1', category: 'activities' },
+  { id: 'ps-act-002', src: '/images/boats/blueone/photos_shoot/DSC_9848.jpg', alt: 'BlueOne photoshoot — water toys 2', category: 'activities' },
+];
+
 /**
  * Get all images by category
  */
 export function getImagesByCategory(category: ImageCategory): BoatImage[] {
-  switch (category) {
-    case 'exterior':
-      return exteriorImages;
-    case 'interior':
-      return interiorImages;
-    case 'cockpit':
-      return cockpitImages;
-    case 'drone':
-      return droneImages;
-    case 'activities':
-      return activityImages;
-    case 'food':
-      return foodImages;
-    default:
-      return [];
-  }
+  const base = (() => {
+    switch (category) {
+      case 'exterior':
+        return exteriorImages;
+      case 'interior':
+        return interiorImages;
+      case 'cockpit':
+        return cockpitImages;
+      case 'drone':
+        return droneImages;
+      case 'activities':
+        return activityImages;
+      case 'food':
+        return foodImages;
+      default:
+        return [];
+    }
+  })();
+  return [...base, ...photoshootImages.filter(img => img.category === category)];
 }
 
 /**
@@ -200,5 +260,6 @@ export function getAllImages(): BoatImage[] {
     ...droneImages,
     ...activityImages,
     ...foodImages,
+    ...photoshootImages,
   ];
 }
