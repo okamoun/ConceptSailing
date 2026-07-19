@@ -470,7 +470,7 @@ export default function ProposalEditorClient({ id }: Props) {
               <span className="text-blue-400">·</span>
               <span className="text-blue-200">
                 {nights} nights{nights >= 7 ? ` (${(nights / 7).toFixed(2)} wks)` : ''}
-                {nights % 7 !== 0 && (
+                {nights < 7 && (
                   <span className="text-blue-400 text-xs"> @ {fmt(Math.round(standardRate.weekly / 6))}/night</span>
                 )}
               </span>

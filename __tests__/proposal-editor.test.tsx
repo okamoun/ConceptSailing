@@ -34,9 +34,8 @@ jest.mock('../lib/financial', () => ({
   getSeasonTier: jest.fn().mockReturnValue('mid'),
   computeStandardCharterFee: jest.fn((weeklyRate: number, nights: number) => {
     if (nights <= 0) return 0;
-    const fullWeeks = Math.floor(nights / 7);
-    const remainderNights = nights % 7;
-    return Math.round(fullWeeks * weeklyRate + remainderNights * (weeklyRate / 6));
+    const perNight = nights < 7 ? weeklyRate / 6 : weeklyRate / 7;
+    return Math.round(perNight * nights);
   }),
 }));
 

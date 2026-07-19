@@ -72,8 +72,8 @@ describe('computeStandardCharterFee', () => {
     expect(computeStandardCharterFee(21000, 14)).toBe(42000)
   })
 
-  test('extra nights beyond a full week are charged at weekly / 6', () => {
-    expect(computeStandardCharterFee(21000, 10)).toBe(Math.round(21000 + 21000 / 6 * 3)) // 31500
+  test('a stay longer than a week is charged at weekly / 7 per night', () => {
+    expect(computeStandardCharterFee(21000, 10)).toBe(Math.round(21000 / 7 * 10)) // 30000
   })
 
   test('zero (or fewer) nights costs nothing', () => {

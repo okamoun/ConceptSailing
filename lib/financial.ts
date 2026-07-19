@@ -37,17 +37,15 @@ export function getSeasonTier(startDate: string): SeasonTier {
 
 /**
  * Standard charter fee for a stay of `nights` nights at a given weekly rate.
- * Full 7-night weeks are charged at the weekly rate; any remaining nights
- * (or the whole stay, when it is under a week) are charged at weekly / 6 per
- * night, since the weekly rate is calibrated for 6 full nights of use
- * (day 1 and day 7 being the turnover/embarkation days).
+ * Stays shorter than a full week are charged at weekly / 6 per night, since
+ * the weekly rate is calibrated for 6 full nights of use (day 1 and day 7
+ * being the turnover/embarkation days). A stay of a week or longer is charged
+ * at weekly / 7 per night, so a full week equals the weekly rate exactly.
  */
 export function computeStandardCharterFee(weeklyRate: number, nights: number): number {
   if (nights <= 0) return 0;
-  const fullWeeks = Math.floor(nights / 7);
-  const remainderNights = nights % 7;
-  const fee = fullWeeks * weeklyRate + remainderNights * (weeklyRate / 6);
-  return Math.round(fee);
+  const perNight = nights < 7 ? weeklyRate / 6 : weeklyRate / 7;
+  return Math.round(perNight * nights);
 }
 
 export interface CharterFinancials {
