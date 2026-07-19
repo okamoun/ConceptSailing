@@ -32,6 +32,12 @@ jest.mock('../lib/financial', () => ({
     apaPercent: 25, vatPercent: 13, relocationFee: 1000,
   }),
   getSeasonTier: jest.fn().mockReturnValue('mid'),
+  computeStandardCharterFee: jest.fn((weeklyRate: number, nights: number) => {
+    if (nights <= 0) return 0;
+    const fullWeeks = Math.floor(nights / 7);
+    const remainderNights = nights % 7;
+    return Math.round(fullWeeks * weeklyRate + remainderNights * (weeklyRate / 6));
+  }),
 }));
 
 jest.mock('../app/marinas-data', () => ({
@@ -247,6 +253,34 @@ describe('ProposalEditorClient — save flow', () => {
 
     expect(await screen.findByText('Please fill in client name, email, and charter dates.')).toBeInTheDocument();
     expect(mockInitProposal).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProposalEditorClient — standard rate reference', () => {
+  const CHARTER_SUB_WEEK = {
+    ...CHARTER_NO_PROPOSAL,
+    id: 'charter-sub-week',
+    startDate: '2026-07-01',
+    endDate: '2026-07-05', // 4 nights, under a week
+  };
+
+  it('prices a sub-week charter at weekly / 6 per night and auto-fills the base fee', async () => {
+    mockGetCharter.mockResolvedValue(CHARTER_SUB_WEEK as any);
+    render(<ProposalEditorClient id="charter-sub-week" />);
+    await screen.findAllByText('Create Proposal');
+
+    // 4 nights × (21000 / 6) = 14000, auto-filled into the base charter fee
+    expect(await screen.findByDisplayValue('14000')).toBeInTheDocument();
+  });
+
+  it('leaves a full-week charter priced at the weekly rate', async () => {
+    // CHARTER_NO_PROPOSAL spans 2026-07-01 → 2026-07-08 = 7 nights
+    mockGetCharter.mockResolvedValue(CHARTER_NO_PROPOSAL as any);
+    render(<ProposalEditorClient id="charter-new" />);
+    await screen.findAllByText('Create Proposal');
+
+    // 7 nights → exactly the weekly rate (21000)
+    expect(await screen.findByDisplayValue('21000')).toBeInTheDocument();
   });
 });
 

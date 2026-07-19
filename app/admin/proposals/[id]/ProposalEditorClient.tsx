@@ -21,7 +21,7 @@ import {
   type ProposalStatus,
   type ProposalComment,
 } from '../../../../lib/availability';
-import { getPricingConfig, getSeasonTier, type PricingConfig } from '../../../../lib/financial';
+import { getPricingConfig, getSeasonTier, computeStandardCharterFee, type PricingConfig } from '../../../../lib/financial';
 import { getMarinaById } from '../../../marinas-data';
 import { CONTACT } from '../../../config/contact';
 
@@ -114,7 +114,7 @@ export default function ProposalEditorClient({ id }: Props) {
     const tier = getSeasonTier(startDate);
     const weekly = { high: financialPricing.highSeasonRate, mid: financialPricing.midSeasonRate, low: financialPricing.lowSeasonRate }[tier];
     const tierLabel = { high: 'High Season (Jul–Aug)', mid: 'Mid Season (Jun & Sep)', low: 'Low Season' }[tier];
-    return { tier, tierLabel, weekly, total: Math.round(weekly * nights / 7) };
+    return { tier, tierLabel, weekly, total: computeStandardCharterFee(weekly, nights) };
   }, [startDate, nights, financialPricing]);
 
   const proposalUrl = proposalToken
@@ -467,8 +467,13 @@ export default function ProposalEditorClient({ id }: Props) {
             <div className="bg-blue-900/30 border border-blue-400/20 rounded-xl px-4 py-3 mb-5 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
               <span className="text-blue-300 font-medium">{standardRate.tierLabel}</span>
               <span className="text-blue-200">{fmt(standardRate.weekly)}<span className="text-blue-400 text-xs">/week</span></span>
-              <span className="text-blue-400">×</span>
-              <span className="text-blue-200">{nights} nights ({(nights / 7).toFixed(2)} wks)</span>
+              <span className="text-blue-400">·</span>
+              <span className="text-blue-200">
+                {nights} nights{nights >= 7 ? ` (${(nights / 7).toFixed(2)} wks)` : ''}
+                {nights % 7 !== 0 && (
+                  <span className="text-blue-400 text-xs"> @ {fmt(Math.round(standardRate.weekly / 6))}/night</span>
+                )}
+              </span>
               <span className="text-blue-400">=</span>
               <span className="text-white font-semibold">{fmt(standardRate.total)}</span>
               {pricing.basePrice !== standardRate.total && (
