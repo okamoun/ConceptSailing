@@ -1,5 +1,6 @@
 import {
   getSeasonTier,
+  computeStandardCharterFee,
   computeCharterFinancials,
   buildYearSummary,
   getPricingConfig,
@@ -55,6 +56,29 @@ describe('getSeasonTier', () => {
     ['2025-12-31', 'low'],
   ])('%s → low season', (date, expected) => {
     expect(getSeasonTier(date)).toBe(expected)
+  })
+})
+
+describe('computeStandardCharterFee', () => {
+  test('prices a sub-week charter at weekly / 6 per night', () => {
+    expect(computeStandardCharterFee(21000, 3)).toBe(Math.round(21000 / 6 * 3)) // 10500
+  })
+
+  test('a full week equals the weekly rate exactly', () => {
+    expect(computeStandardCharterFee(21000, 7)).toBe(21000)
+  })
+
+  test('exact multiples of a week scale linearly by the weekly rate', () => {
+    expect(computeStandardCharterFee(21000, 14)).toBe(42000)
+  })
+
+  test('a stay longer than a week is charged at weekly / 7 per night', () => {
+    expect(computeStandardCharterFee(21000, 10)).toBe(Math.round(21000 / 7 * 10)) // 30000
+  })
+
+  test('zero (or fewer) nights costs nothing', () => {
+    expect(computeStandardCharterFee(21000, 0)).toBe(0)
+    expect(computeStandardCharterFee(21000, -3)).toBe(0)
   })
 })
 
@@ -121,6 +145,15 @@ describe('computeCharterFinancials', () => {
       const charter = { ...BASE_CHARTER, startDate: '2025-07-01', endDate: '2025-07-15' }
       const f = computeCharterFinancials(charter, DEFAULT_PRICING)
       expect(f.charterFee).toBe(48000)
+    })
+
+    test('computed sub-week charter prices each night at weekly / 6', () => {
+      // 4 nights in high season (24000/week) → 24000 / 6 * 4
+      const charter = { ...BASE_CHARTER, startDate: '2025-07-05', endDate: '2025-07-09' }
+      const f = computeCharterFinancials(charter, DEFAULT_PRICING)
+      expect(f.nights).toBe(4)
+      expect(f.charterFee).toBe(Math.round(24000 / 6 * 4)) // 16000
+      expect(f.source).toBe('computed')
     })
   })
 
