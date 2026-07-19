@@ -100,35 +100,61 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
   }
 
   try {
-    const templateParams = {
-      // Recipients - both client and business will receive this email
-      to_email: BUSINESS_EMAIL, // Business email as primary recipient
-      cc_email: bookingData.email, // Client email as CC
+    const embarkation = bookingData.deliveryPoint || bookingData.embarkationPoint;
+    const redelivery = bookingData.redeliveryPoint || bookingData.deliveryPoint || bookingData.embarkationPoint;
+
+    // Human-readable summary of the request, used both to phrase the AI
+    // confirmation and as a fallback body.
+    const details = [
+      `Boat: ${bookingData.boat}`,
+      `Dates: ${bookingData.date}${bookingData.endDate ? ` to ${bookingData.endDate}` : ''}`,
+      `Guests: ${bookingData.passengerDetails || bookingData.passengers}`,
+      `Embarkation: ${embarkation}`,
+      redelivery && redelivery !== embarkation ? `Disembarkation: ${redelivery}` : '',
+      bookingData.selectedTheme ? `Theme: ${bookingData.selectedTheme}` : '',
+      bookingData.holidayDescription ? `Notes: ${bookingData.holidayDescription}` : '',
+    ].filter(Boolean).join('\n');
+
+    const confirmationMessage = await buildConfirmationMessage({
+      name: bookingData.name,
       email: bookingData.email,
+      phone: bookingData.phone,
+      details,
+    });
+
+    const templateParams = {
+      // Recipients — confirmation goes to the guest, with the business copied in
+      to_email: bookingData.email,
+      cc_email: BUSINESS_EMAIL,
+      email: bookingData.email,
+
+      // AI-phrased confirmation body rendered by the "simple" template
+      message: confirmationMessage,
+
       // Client information
+      from_name: bookingData.name,
       client_name: bookingData.name,
       client_email: bookingData.email,
       client_phone: bookingData.phone,
-      
-      // Booking details
+
+      // Booking details (structured — kept for the business copy / template use)
       boat_name: bookingData.boat,
       charter_date: bookingData.date,
       charter_end_date: bookingData.endDate || bookingData.date,
       passengers: bookingData.passengers,
-      embarkation_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
-      delivery_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
-      redelivery_point: bookingData.redeliveryPoint || bookingData.deliveryPoint || bookingData.embarkationPoint,
-      
-      // Additional details
+      embarkation_point: embarkation,
+      delivery_point: embarkation,
+      redelivery_point: redelivery,
       passenger_details: bookingData.passengerDetails || '',
       comment: bookingData.holidayDescription,
       theme: bookingData.selectedTheme,
+      request_details: details,
       submission_time: new Date(bookingData.timestamp).toLocaleString(),
-      
+
       // Business contact information
       business_email: BUSINESS_EMAIL,
       business_phone: CONTACT.phone.formatted,
-      
+
       // Reply to client for easy communication
       reply_to: bookingData.email,
     };
@@ -137,7 +163,7 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
-      EMAILJS_BOOKING_TEMPLATE_ID,
+      EMAILJS_SIMPLE_TEMPLATE_ID,
       templateParams
     );
 
@@ -166,17 +192,32 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
   }
 }
 
+interface ConfirmationInput {
+  name: string;
+  email: string;
+  phone?: string;
+  /** Free-text message the guest typed (contact form / holiday notes). */
+  message?: string;
+  /** Structured summary of a quote / information request (dates, boat, guests…). */
+  details?: string;
+}
+
 /**
  * Ask the server-side OpenAI route to phrase a warm, on-brand confirmation that
  * the information request was received. Falls back to a sensible static message
  * so the guest always gets an acknowledgment even if AI generation fails.
  */
-async function buildConfirmationMessage(contactData: ContactEmailData): Promise<string> {
-  const firstName = contactData.name.trim().split(/\s+/)[0] || contactData.name;
+async function buildConfirmationMessage(input: ConfirmationInput): Promise<string> {
+  const firstName = input.name.trim().split(/\s+/)[0] || input.name;
+  const reference = input.details
+    ? `For reference, here are the details of your request:\n${input.details}`
+    : input.message
+      ? `For reference, here is the message you sent us:\n"${input.message}"`
+      : '';
   const fallback =
     `Dear ${firstName},\n\n` +
-    `Thank you for reaching out to BlueOne. We have received your enquiry and a member of our team will get back to you shortly.\n\n` +
-    `For reference, here is the message you sent us:\n"${contactData.message}"\n\n` +
+    `Thank you for reaching out to BlueOne. We have received your request and a member of our team will get back to you shortly.\n\n` +
+    (reference ? `${reference}\n\n` : '') +
     `Warm regards,\nThe BlueOne Team\n${CONTACT.phone.formatted} · ${CONTACT.email}`;
 
   try {
@@ -184,10 +225,11 @@ async function buildConfirmationMessage(contactData: ContactEmailData): Promise<
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: contactData.name,
-        email: contactData.email,
-        phone: contactData.phone,
-        message: contactData.message,
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        message: input.message,
+        details: input.details,
       }),
     });
     if (!res.ok) return fallback;

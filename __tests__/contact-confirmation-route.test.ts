@@ -58,8 +58,33 @@ describe('POST /api/contact-confirmation', () => {
     expect(prompt).toContain('Cyclades in September');
   });
 
-  it('returns 400 when required fields are missing', async () => {
+  it('accepts a structured quote request via details (no free-text message)', async () => {
+    mockCreate.mockResolvedValue({
+      choices: [{ message: { content: 'Dear Marie, thank you for your quote request...' } }],
+    });
+
+    const res = await POST(
+      makeRequest({
+        name: 'Marie Martin',
+        email: 'marie@example.com',
+        details: 'Boat: BlueOne\nDates: 2026-07-01 to 2026-07-08\nGuests: 4 passengers',
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    const prompt = mockCreate.mock.calls[0][0].messages[0].content as string;
+    expect(prompt).toContain('2026-07-01 to 2026-07-08');
+    expect(prompt).toContain('4 passengers');
+  });
+
+  it('returns 400 when name, email and request content are all missing', async () => {
     const res = await POST(makeRequest({ name: 'Marie', email: '', message: '' }));
+    expect(res.status).toBe(400);
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when there is neither a message nor details', async () => {
+    const res = await POST(makeRequest({ name: 'Marie', email: 'marie@example.com' }));
     expect(res.status).toBe(400);
     expect(mockCreate).not.toHaveBeenCalled();
   });
