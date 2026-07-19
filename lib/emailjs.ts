@@ -7,7 +7,8 @@ import { saveContactSubmission } from './submissions';
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'demo_public_key';
 const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'demo_service';
 const EMAILJS_BOOKING_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_BUSINESS_TEMPLATE_ID || 'demo_booking_template';
-const EMAILJS_CONTACT_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CLIENT_TEMPLATE_ID || 'demo_contact_template';
+// "Simple" body-only template used for the AI-phrased information-request confirmation
+const EMAILJS_SIMPLE_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_SIMPLE_TEMPLATE_ID || 'template_simple';
 
 // Fallback business email for demo purposes
 const BUSINESS_EMAIL = 'contact@nj3cruises.com';
@@ -67,7 +68,7 @@ try {
   console.log('Public Key:', EMAILJS_PUBLIC_KEY);
   console.log('Service ID:', EMAILJS_SERVICE_ID);
   console.log('Booking Template ID:', EMAILJS_BOOKING_TEMPLATE_ID);
-  console.log('Contact Template ID:', EMAILJS_CONTACT_TEMPLATE_ID);
+  console.log('Simple Template ID:', EMAILJS_SIMPLE_TEMPLATE_ID);
   console.log('Is Configured:', isEmailJSConfigured());
   
   if (isEmailJSConfigured()) {
@@ -166,13 +167,46 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
 }
 
 /**
+ * Ask the server-side OpenAI route to phrase a warm, on-brand confirmation that
+ * the information request was received. Falls back to a sensible static message
+ * so the guest always gets an acknowledgment even if AI generation fails.
+ */
+async function buildConfirmationMessage(contactData: ContactEmailData): Promise<string> {
+  const firstName = contactData.name.trim().split(/\s+/)[0] || contactData.name;
+  const fallback =
+    `Dear ${firstName},\n\n` +
+    `Thank you for reaching out to BlueOne. We have received your enquiry and a member of our team will get back to you shortly.\n\n` +
+    `For reference, here is the message you sent us:\n"${contactData.message}"\n\n` +
+    `Warm regards,\nThe BlueOne Team\n${CONTACT.phone.formatted} · ${CONTACT.email}`;
+
+  try {
+    const res = await fetch('/api/contact-confirmation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: contactData.name,
+        email: contactData.email,
+        phone: contactData.phone,
+        message: contactData.message,
+      }),
+    });
+    if (!res.ok) return fallback;
+    const data = (await res.json()) as { message?: string };
+    return data.message?.trim() || fallback;
+  } catch (err) {
+    console.warn('AI confirmation generation failed, using fallback message:', err);
+    return fallback;
+  }
+}
+
+/**
  * Send contact form email
  */
 export async function sendContactEmail(contactData: ContactEmailData): Promise<EmailResponse> {
   console.log('Contact email request received');
   console.log('EmailJS configured:', isEmailJSConfigured());
   console.log('EmailJS initialized:', emailjsInitialized);
-  
+
   // Check if EmailJS is properly configured and initialized
   if (!isEmailJSConfigured() || !emailjsInitialized) {
     console.error('EmailJS not configured or initialized - cannot send contact email');
@@ -183,20 +217,31 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
   }
 
   try {
+    const confirmationMessage = await buildConfirmationMessage(contactData);
+
     const templateParams = {
-      // Contact information
+      // Recipients — confirmation goes to the guest, with the business copied in
+      to_email: contactData.email,
+      cc_email: BUSINESS_EMAIL,
+      email: contactData.email,
+
+      // AI-phrased confirmation body rendered by the "simple" template
+      message: confirmationMessage,
+
+      // Contact information (structured details for the business copy / template use)
       from_name: contactData.name,
       from_email: contactData.email,
       from_phone: contactData.phone || 'Not provided',
-      email : contactData.email,
-      // Message details
-      message: contactData.message,
+      client_name: contactData.name,
+      client_email: contactData.email,
+      client_phone: contactData.phone || 'Not provided',
+      client_message: contactData.message,
       submission_time: new Date(contactData.timestamp).toLocaleString(),
-      
+
       // Business contact information
       business_email: BUSINESS_EMAIL,
       business_phone: CONTACT.phone.formatted,
-      
+
       // Reply to client for easy communication
       reply_to: contactData.email,
     };
@@ -205,7 +250,7 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
-      EMAILJS_CONTACT_TEMPLATE_ID,
+      EMAILJS_SIMPLE_TEMPLATE_ID,
       templateParams
     );
 
