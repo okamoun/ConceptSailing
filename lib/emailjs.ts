@@ -10,8 +10,10 @@ const EMAILJS_BOOKING_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_BUSINESS_TEM
 // "Simple" body-only template used for the AI-phrased information-request confirmation
 const EMAILJS_SIMPLE_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_SIMPLE_TEMPLATE_ID || 'template_simple';
 
-// Fallback business email for demo purposes
+// Business "rep" address used as sender/reply-to on guest confirmations
 const BUSINESS_EMAIL = 'contact@nj3cruises.com';
+// Internal BCC copy of every guest confirmation
+const BUSINESS_BCC_EMAIL = 'kamouno@nj3cruises.com';
 
 export interface BookingEmailData {
   name: string;
@@ -122,41 +124,15 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
       details,
     });
 
+    // Fields consumed by the "simple" EmailJS template:
+    //   {{email}} → recipient (client), {{rep_email}} → reply-to,
+    //   {{bcc_email}} → internal copy, {{title}} → subject, {{message}} → body
     const templateParams = {
-      // Recipients — confirmation goes to the guest, with the business copied in
-      to_email: bookingData.email,
-      cc_email: BUSINESS_EMAIL,
       email: bookingData.email,
-
-      // AI-phrased confirmation body rendered by the "simple" template
+      rep_email: BUSINESS_EMAIL,
+      bcc_email: BUSINESS_BCC_EMAIL,
+      title: 'We’ve received your quote request — BlueOne',
       message: confirmationMessage,
-
-      // Client information
-      from_name: bookingData.name,
-      client_name: bookingData.name,
-      client_email: bookingData.email,
-      client_phone: bookingData.phone,
-
-      // Booking details (structured — kept for the business copy / template use)
-      boat_name: bookingData.boat,
-      charter_date: bookingData.date,
-      charter_end_date: bookingData.endDate || bookingData.date,
-      passengers: bookingData.passengers,
-      embarkation_point: embarkation,
-      delivery_point: embarkation,
-      redelivery_point: redelivery,
-      passenger_details: bookingData.passengerDetails || '',
-      comment: bookingData.holidayDescription,
-      theme: bookingData.selectedTheme,
-      request_details: details,
-      submission_time: new Date(bookingData.timestamp).toLocaleString(),
-
-      // Business contact information
-      business_email: BUSINESS_EMAIL,
-      business_phone: CONTACT.phone.formatted,
-
-      // Reply to client for easy communication
-      reply_to: bookingData.email,
     };
 
     console.log('Sending booking email with params :', templateParams);
@@ -261,31 +237,15 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
   try {
     const confirmationMessage = await buildConfirmationMessage(contactData);
 
+    // Fields consumed by the "simple" EmailJS template:
+    //   {{email}} → recipient (client), {{rep_email}} → reply-to,
+    //   {{bcc_email}} → internal copy, {{title}} → subject, {{message}} → body
     const templateParams = {
-      // Recipients — confirmation goes to the guest, with the business copied in
-      to_email: contactData.email,
-      cc_email: BUSINESS_EMAIL,
       email: contactData.email,
-
-      // AI-phrased confirmation body rendered by the "simple" template
+      rep_email: BUSINESS_EMAIL,
+      bcc_email: BUSINESS_BCC_EMAIL,
+      title: 'We’ve received your message — BlueOne',
       message: confirmationMessage,
-
-      // Contact information (structured details for the business copy / template use)
-      from_name: contactData.name,
-      from_email: contactData.email,
-      from_phone: contactData.phone || 'Not provided',
-      client_name: contactData.name,
-      client_email: contactData.email,
-      client_phone: contactData.phone || 'Not provided',
-      client_message: contactData.message,
-      submission_time: new Date(contactData.timestamp).toLocaleString(),
-
-      // Business contact information
-      business_email: BUSINESS_EMAIL,
-      business_phone: CONTACT.phone.formatted,
-
-      // Reply to client for easy communication
-      reply_to: contactData.email,
     };
 
     console.log('Sending contact email with params:', templateParams);
