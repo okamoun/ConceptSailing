@@ -23,10 +23,12 @@ import StarRating from '../components/StarRating';
 import MarinaMap from './MarinaMap';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
 import { initClientSpace } from '../../lib/clientSpace';
+import { useTableSort, SortHeader } from './useTableSort';
 
 type Tab = 'charters' | 'contacts' | 'reviews';
-type SortDir = 'asc' | 'desc';
 type CharterSortCol = 'status' | 'name' | 'startDate' | 'passengers' | 'createdAt';
+type ContactSortCol = 'name' | 'email' | 'phone' | 'createdAt';
+type ReviewSortCol = 'status' | 'rating' | 'name' | 'title' | 'order';
 
 const STATUS_BADGE: Record<CharterStatus, string> = {
   web_request:     'bg-sky-500/30 text-sky-200',
@@ -65,7 +67,6 @@ export default function AdminDashboardClient() {
   // Charter filter / sort
   const [charterSearch, setCharterSearch] = useState('');
   const [charterStatusFilter, setCharterStatusFilter] = useState<CharterStatus | 'all'>('all');
-  const [charterSort, setCharterSort] = useState<{ col: CharterSortCol; dir: SortDir }>({ col: 'startDate', dir: 'asc' });
 
   // Contact search
   const [contactSearch, setContactSearch] = useState('');
@@ -94,7 +95,7 @@ export default function AdminDashboardClient() {
   const currentContact = contacts.find(c => c.id === selectedContactId) ?? null;
   const currentReview  = reviews.find(r => r.id === selectedReviewId)   ?? null;
 
-  // Filtered + sorted charters
+  // Filtered charters (sorting handled by useTableSort below)
   const filteredCharters = useMemo(() => {
     let rows = [...charters];
     if (charterStatusFilter !== 'all') rows = rows.filter(c => c.status === charterStatusFilter);
@@ -106,21 +107,18 @@ export default function AdminDashboardClient() {
         c.phone?.toLowerCase().includes(q)
       );
     }
-    rows.sort((a, b) => {
-      let va: string | number = 0, vb: string | number = 0;
-      switch (charterSort.col) {
-        case 'status':     va = CHARTER_STATUS_PRIORITY[a.status]; vb = CHARTER_STATUS_PRIORITY[b.status]; break;
-        case 'name':       va = (a.name ?? '').toLowerCase();       vb = (b.name ?? '').toLowerCase();      break;
-        case 'passengers': va = a.passengers ?? 0;                  vb = b.passengers ?? 0;                 break;
-        case 'createdAt':  va = a.createdAt?.toMillis() ?? 0;       vb = b.createdAt?.toMillis() ?? 0;      break;
-        default:           va = a.startDate;                        vb = b.startDate;
-      }
-      if (va < vb) return charterSort.dir === 'asc' ? -1 : 1;
-      if (va > vb) return charterSort.dir === 'asc' ?  1 : -1;
-      return 0;
-    });
     return rows;
-  }, [charters, charterStatusFilter, charterSearch, charterSort]);
+  }, [charters, charterStatusFilter, charterSearch]);
+
+  const {
+    sorted: sortedCharters, sort: charterSort, toggle: toggleCharterSort,
+  } = useTableSort<Charter, CharterSortCol>(filteredCharters, {
+    status:     c => CHARTER_STATUS_PRIORITY[c.status],
+    name:       c => (c.name ?? '').toLowerCase(),
+    startDate:  c => c.startDate,
+    passengers: c => c.passengers ?? 0,
+    createdAt:  c => c.createdAt?.toMillis?.() ?? 0,
+  }, { col: 'startDate', dir: 'asc' });
 
   const filteredContacts = useMemo(() => {
     if (!contactSearch) return contacts;
@@ -132,14 +130,29 @@ export default function AdminDashboardClient() {
     );
   }, [contacts, contactSearch]);
 
+  const {
+    sorted: sortedContacts, sort: contactSort, toggle: toggleContactSort,
+  } = useTableSort<ContactSubmission, ContactSortCol>(filteredContacts, {
+    name:      c => c.name.toLowerCase(),
+    email:     c => c.email.toLowerCase(),
+    phone:     c => (c.phone ?? '').toLowerCase(),
+    createdAt: c => c.createdAt?.toMillis?.() ?? 0,
+  }, { col: 'createdAt', dir: 'desc' });
+
   const filteredReviews = useMemo(() =>
     reviews.filter(r => reviewFilter === 'all' || r.status === reviewFilter),
     [reviews, reviewFilter]
   );
 
-  function toggleCharterSort(col: CharterSortCol) {
-    setCharterSort(s => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' });
-  }
+  const {
+    sorted: sortedReviews, sort: reviewSort, toggle: toggleReviewSort,
+  } = useTableSort<Review, ReviewSortCol>(filteredReviews, {
+    status: r => r.status,
+    rating: r => r.rating ?? 0,
+    name:   r => (r.name ?? '').toLowerCase(),
+    title:  r => (r.title ?? '').toLowerCase(),
+    order:  r => r.order ?? 0,
+  }, { col: 'order', dir: 'desc' });
 
   function selectCharter(c: Charter) {
     if (selectedCharterId === c.id) { setSelectedCharterId(null); return; }
@@ -288,12 +301,12 @@ export default function AdminDashboardClient() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-white/10 text-blue-300 text-xs uppercase tracking-wide">
-                        <SortTh col="status"     current={charterSort} onSort={toggleCharterSort}>Status</SortTh>
-                        <SortTh col="name"       current={charterSort} onSort={toggleCharterSort}>Client</SortTh>
-                        <SortTh col="startDate"  current={charterSort} onSort={toggleCharterSort}>Dates</SortTh>
-                        <SortTh col="passengers" current={charterSort} onSort={toggleCharterSort}>Pax</SortTh>
+                        <SortHeader col="status"     current={charterSort} onToggle={toggleCharterSort}>Status</SortHeader>
+                        <SortHeader col="name"       current={charterSort} onToggle={toggleCharterSort}>Client</SortHeader>
+                        <SortHeader col="startDate"  current={charterSort} onToggle={toggleCharterSort}>Dates</SortHeader>
+                        <SortHeader col="passengers" current={charterSort} onToggle={toggleCharterSort}>Pax</SortHeader>
                         <th className="px-3 py-2.5 text-left">Proposal</th>
-                        <SortTh col="createdAt"  current={charterSort} onSort={toggleCharterSort}>Received</SortTh>
+                        <SortHeader col="createdAt"  current={charterSort} onToggle={toggleCharterSort}>Received</SortHeader>
                       </tr>
                     </thead>
                     <tbody>
@@ -302,7 +315,7 @@ export default function AdminDashboardClient() {
                           <td colSpan={6} className="text-center text-blue-300 text-sm py-10">No charters match the current filter.</td>
                         </tr>
                       )}
-                      {filteredCharters.map(c => (
+                      {sortedCharters.map(c => (
                         <tr
                           key={c.id}
                           onClick={() => selectCharter(c)}
@@ -503,19 +516,19 @@ export default function AdminDashboardClient() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-white/10 text-blue-300 text-xs uppercase tracking-wide">
-                      <th className="px-3 py-2.5 text-left">Name</th>
-                      <th className="px-3 py-2.5 text-left">Email</th>
-                      <th className="px-3 py-2.5 text-left hidden sm:table-cell">Phone</th>
-                      <th className="px-3 py-2.5 text-left hidden md:table-cell">Received</th>
+                      <SortHeader col="name"  current={contactSort} onToggle={toggleContactSort}>Name</SortHeader>
+                      <SortHeader col="email" current={contactSort} onToggle={toggleContactSort}>Email</SortHeader>
+                      <SortHeader col="phone" current={contactSort} onToggle={toggleContactSort} className="hidden sm:table-cell">Phone</SortHeader>
+                      <SortHeader col="createdAt" current={contactSort} onToggle={toggleContactSort} className="hidden md:table-cell">Received</SortHeader>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredContacts.length === 0 && (
+                    {sortedContacts.length === 0 && (
                       <tr>
                         <td colSpan={4} className="text-center text-blue-300 text-sm py-10">No contacts found.</td>
                       </tr>
                     )}
-                    {filteredContacts.map(c => (
+                    {sortedContacts.map(c => (
                       <tr
                         key={c.id}
                         onClick={() => setSelectedContactId(selectedContactId === c.id ? null : c.id)}
@@ -595,20 +608,20 @@ export default function AdminDashboardClient() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-white/10 text-blue-300 text-xs uppercase tracking-wide">
-                      <th className="px-3 py-2.5 text-left">Status</th>
-                      <th className="px-3 py-2.5 text-left">Rating</th>
-                      <th className="px-3 py-2.5 text-left">Name</th>
-                      <th className="px-3 py-2.5 text-left hidden md:table-cell">Title</th>
-                      <th className="px-3 py-2.5 text-center">Order</th>
+                      <SortHeader col="status" current={reviewSort} onToggle={toggleReviewSort}>Status</SortHeader>
+                      <SortHeader col="rating" current={reviewSort} onToggle={toggleReviewSort}>Rating</SortHeader>
+                      <SortHeader col="name"   current={reviewSort} onToggle={toggleReviewSort}>Name</SortHeader>
+                      <SortHeader col="title"  current={reviewSort} onToggle={toggleReviewSort} className="hidden md:table-cell">Title</SortHeader>
+                      <SortHeader col="order"  current={reviewSort} onToggle={toggleReviewSort} align="center">Order</SortHeader>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredReviews.length === 0 && (
+                    {sortedReviews.length === 0 && (
                       <tr>
                         <td colSpan={5} className="text-center text-blue-300 text-sm py-10">No reviews found.</td>
                       </tr>
                     )}
-                    {filteredReviews.map(r => (
+                    {sortedReviews.map(r => (
                       <tr
                         key={r.id}
                         onClick={() => setSelectedReviewId(selectedReviewId === r.id ? null : r.id)}
@@ -692,30 +705,6 @@ export default function AdminDashboardClient() {
 
       </div>
     </main>
-  );
-}
-
-function SortTh({
-  children, col, current, onSort,
-}: {
-  children: React.ReactNode;
-  col: CharterSortCol;
-  current: { col: CharterSortCol; dir: SortDir };
-  onSort: (col: CharterSortCol) => void;
-}) {
-  const active = current.col === col;
-  return (
-    <th
-      className="px-3 py-2.5 text-left cursor-pointer select-none hover:text-white transition-colors"
-      onClick={() => onSort(col)}
-    >
-      <span className="flex items-center gap-1">
-        {children}
-        <span className={active ? 'text-blue-300' : 'text-blue-600'}>
-          {active ? (current.dir === 'asc' ? '↑' : '↓') : '↕'}
-        </span>
-      </span>
-    </th>
   );
 }
 

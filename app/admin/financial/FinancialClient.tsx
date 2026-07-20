@@ -12,8 +12,41 @@ import {
   type CharterFinancials,
 } from '@/lib/financial';
 import { useAdminAuth } from '../AdminAuthContext';
+import { useTableSort, SortHeader } from '../useTableSort';
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+type FinancialSortCol =
+  | 'client' | 'dates' | 'nights' | 'season' | 'charterFee'
+  | 'broker' | 'netRevenue' | 'apa' | 'vat' | 'relocation' | 'invoice';
+
+const FINANCIAL_COLUMNS: { label: string; col: FinancialSortCol; align?: 'left' | 'right' }[] = [
+  { label: 'Client',         col: 'client' },
+  { label: 'Dates',          col: 'dates' },
+  { label: 'Nights',         col: 'nights' },
+  { label: 'Season',         col: 'season' },
+  { label: 'Charter Fee',    col: 'charterFee' },
+  { label: 'Broker',         col: 'broker' },
+  { label: 'Net Revenue',    col: 'netRevenue' },
+  { label: 'APA',            col: 'apa' },
+  { label: 'VAT',            col: 'vat' },
+  { label: 'Relocation',     col: 'relocation' },
+  { label: 'Client Invoice', col: 'invoice', align: 'right' },
+];
+
+const FINANCIAL_ACCESSORS: Record<FinancialSortCol, (cf: CharterFinancials) => string | number> = {
+  client:     cf => (cf.charter.name ?? '').toLowerCase(),
+  dates:      cf => cf.charter.startDate,
+  nights:     cf => cf.nights,
+  season:     cf => cf.tier,
+  charterFee: cf => cf.charterFee,
+  broker:     cf => cf.brokerAmount,
+  netRevenue: cf => cf.netRevenue,
+  apa:        cf => cf.apa,
+  vat:        cf => cf.vat,
+  relocation: cf => cf.relocation,
+  invoice:    cf => cf.totalInvoice,
+};
 
 const SEASON_COLORS: Record<string, string> = {
   high: 'bg-emerald-500',
@@ -86,12 +119,6 @@ function CharterRow({ cf }: { cf: CharterFinancials }) {
   );
 }
 
-const TABLE_HEADERS = [
-  'Client', 'Dates', 'Nights', 'Season',
-  'Charter Fee', 'Broker', 'Net Revenue',
-  'APA', 'VAT', 'Relocation', 'Client Invoice',
-];
-
 export default function FinancialClient() {
   const { allowedPages } = useAdminAuth();
   const [loading, setLoading]             = useState(true);
@@ -103,6 +130,11 @@ export default function FinancialClient() {
   const [draftPricing, setDraftPricing]   = useState<PricingConfig>(DEFAULT_PRICING);
   const [savingPricing, setSavingPricing] = useState(false);
   const [pricingMsg, setPricingMsg]       = useState('');
+
+  const confirmedSort = useTableSort<CharterFinancials, FinancialSortCol>(
+    summary?.confirmed ?? [], FINANCIAL_ACCESSORS, { col: 'dates', dir: 'asc' });
+  const pipelineSort = useTableSort<CharterFinancials, FinancialSortCol>(
+    summary?.pipeline ?? [], FINANCIAL_ACCESSORS, { col: 'dates', dir: 'asc' });
 
   if (!allowedPages.includes('/admin/financial')) {
     return (
@@ -295,15 +327,22 @@ export default function FinancialClient() {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="border-b border-white/20">
-                          {TABLE_HEADERS.map(h => (
-                            <th key={h} className="text-left text-blue-200 font-semibold px-3 py-2.5 whitespace-nowrap last:text-right">
-                              {h}
-                            </th>
+                          {FINANCIAL_COLUMNS.map(({ label, col, align }) => (
+                            <SortHeader
+                              key={col}
+                              col={col}
+                              current={confirmedSort.sort}
+                              onToggle={confirmedSort.toggle}
+                              align={align}
+                              className="text-blue-200 font-semibold whitespace-nowrap"
+                            >
+                              {label}
+                            </SortHeader>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {summary.confirmed.map((cf, i) => <CharterRow key={cf.charter.id ?? i} cf={cf} />)}
+                        {confirmedSort.sorted.map((cf, i) => <CharterRow key={cf.charter.id ?? i} cf={cf} />)}
                       </tbody>
                       <tfoot>
                         <tr className="border-t border-white/20 bg-white/5">
@@ -348,15 +387,22 @@ export default function FinancialClient() {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="border-b border-white/20">
-                          {TABLE_HEADERS.map(h => (
-                            <th key={h} className="text-left text-blue-200 font-semibold px-3 py-2.5 whitespace-nowrap last:text-right">
-                              {h}
-                            </th>
+                          {FINANCIAL_COLUMNS.map(({ label, col, align }) => (
+                            <SortHeader
+                              key={col}
+                              col={col}
+                              current={pipelineSort.sort}
+                              onToggle={pipelineSort.toggle}
+                              align={align}
+                              className="text-blue-200 font-semibold whitespace-nowrap"
+                            >
+                              {label}
+                            </SortHeader>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {summary.pipeline.map((cf, i) => <CharterRow key={cf.charter.id ?? i} cf={cf} />)}
+                        {pipelineSort.sorted.map((cf, i) => <CharterRow key={cf.charter.id ?? i} cf={cf} />)}
                       </tbody>
                       <tfoot>
                         <tr className="border-t border-white/20 bg-white/5">
