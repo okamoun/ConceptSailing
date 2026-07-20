@@ -36,6 +36,11 @@ jest.mock('../lib/availability', () => ({
   },
 }));
 
+// ── lib/clientSpace ─────────────────────────────────────────────────────────
+jest.mock('../lib/clientSpace', () => ({
+  initClientSpace: jest.fn().mockResolvedValue('generated-token'),
+}));
+
 // ── marinas-data ────────────────────────────────────────────────────────────
 jest.mock('../app/marinas-data', () => ({
   getMarinaById: (id: string) => (id ? { id, name: `Marina ${id}` } : undefined),
@@ -198,6 +203,19 @@ describe('BookingDetailClient', () => {
       { author: 'admin', text: 'Called the client to confirm.' }
     );
     expect(await screen.findByText('Called the client to confirm.')).toBeInTheDocument();
+  });
+
+  test('links to the client space when a token exists', async () => {
+    (getCharterById as jest.Mock).mockResolvedValue({
+      ...BASE_CHARTER,
+      clientSpaceToken: 'space-1',
+    });
+
+    render(<BookingDetailClient id="charter-1" />);
+    await screen.findByText('Jane Skipper');
+
+    const link = screen.getByRole('link', { name: /Open Client Space/ });
+    expect(link).toHaveAttribute('href', '/client-space/space-1');
   });
 });
 

@@ -17,6 +17,7 @@ import {
   type CharterStatus,
   type BookingDocument,
 } from '../../../../lib/availability';
+import { initClientSpace } from '../../../../lib/clientSpace';
 import { getMarinaById } from '../../../marinas-data';
 import { useAdminAuth } from '../../AdminAuthContext';
 
@@ -61,6 +62,9 @@ export default function BookingDetailClient({ id }: Props) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [generatingSpace, setGeneratingSpace] = useState(false);
+  const [copiedSpace, setCopiedSpace] = useState(false);
 
   useEffect(() => {
     getCharterById(id)
@@ -149,6 +153,24 @@ export default function BookingDetailClient({ id }: Props) {
     if (!confirm('Delete this booking? This cannot be undone.')) return;
     await deleteCharter(id);
     router.push('/admin');
+  }
+
+  async function handleGenerateClientSpace() {
+    setGeneratingSpace(true);
+    try {
+      const token = await initClientSpace(id);
+      setCharter(prev => (prev ? { ...prev, clientSpaceToken: token } : prev));
+    } finally {
+      setGeneratingSpace(false);
+    }
+  }
+
+  function copyClientSpaceLink(token: string) {
+    const url = `${window.location.origin}/client-space/${token}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedSpace(true);
+      setTimeout(() => setCopiedSpace(false), 2000);
+    });
   }
 
   if (loading) {
@@ -245,6 +267,46 @@ export default function BookingDetailClient({ id }: Props) {
           >
             {charter.proposal ? 'View / Edit Proposal' : 'Create Proposal'}
           </a>
+        </div>
+      </section>
+
+      {/* Client Space */}
+      <section className="bg-white/10 border border-white/20 rounded-xl p-5">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 className="text-white font-semibold text-base">Client Preparation Space</h2>
+            <p className="text-blue-300 text-sm mt-0.5">
+              {charter.clientSpaceToken
+                ? 'Share this private space with the client to collect crew and trip details.'
+                : 'No client space yet — generate one to share with the client.'}
+            </p>
+          </div>
+          {charter.clientSpaceToken ? (
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <a
+                href={`/client-space/${charter.clientSpaceToken}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-teal-500/20 text-teal-200 hover:bg-teal-500/30 transition-colors"
+              >
+                🧭 Open Client Space
+              </a>
+              <button
+                onClick={() => copyClientSpaceLink(charter.clientSpaceToken!)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-200 transition-colors"
+              >
+                {copiedSpace ? '✓ Copied' : 'Copy link'}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleGenerateClientSpace}
+              disabled={generatingSpace}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600/60 hover:bg-blue-600 text-white transition-colors disabled:opacity-50"
+            >
+              {generatingSpace ? 'Generating…' : 'Generate Client Space'}
+            </button>
+          )}
         </div>
       </section>
 
