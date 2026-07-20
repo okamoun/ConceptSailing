@@ -8,6 +8,7 @@ import {
   deleteDoc,
   serverTimestamp,
   arrayUnion,
+  arrayRemove,
   where,
   query,
   Timestamp,
@@ -210,6 +211,30 @@ export interface Charter {
   proposal?: ProposalData;
   // Client preparation space token (present once the admin generates the link)
   clientSpaceToken?: string;
+  // Documents attached to this booking (uploaded from the booking detail page)
+  documents?: BookingDocument[];
+  // Admin activity notes / comments (distinct from the single-line `note`)
+  activityNotes?: BookingNote[];
+}
+
+/** A file attached to a booking, stored in Firebase Storage. */
+export interface BookingDocument {
+  id: string;
+  name: string;         // original filename
+  url: string;          // Firebase Storage download URL
+  path: string;         // storage path, needed for deleteObject
+  size?: number;
+  contentType?: string;
+  uploadedAt: string;   // ISO string
+  uploadedBy: string;   // admin username
+}
+
+/** An admin note/comment on a booking. */
+export interface BookingNote {
+  id: string;
+  author: string;       // admin username
+  text: string;
+  createdAt: string;    // ISO string
 }
 
 // ---------------------------------------------------------------------------
@@ -365,6 +390,55 @@ export async function addCharterProposalComment(
 
 export async function approveCharterProposal(charterId: string): Promise<void> {
   await updateDoc(doc(db, COLLECTION, charterId), { 'proposal.status': 'approved' });
+}
+
+// ---------------------------------------------------------------------------
+// Booking detail — documents & activity notes
+// ---------------------------------------------------------------------------
+
+/** Append an admin note to a booking's activity timeline. Returns the note. */
+export async function addBookingNote(
+  charterId: string,
+  note: Omit<BookingNote, 'id' | 'createdAt'>
+): Promise<BookingNote> {
+  const newNote: BookingNote = {
+    ...note,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+  };
+  await updateDoc(doc(db, COLLECTION, charterId), {
+    activityNotes: arrayUnion(newNote),
+  });
+  return newNote;
+}
+
+/** Attach an uploaded document's metadata to a booking. Returns the document. */
+export async function addBookingDocument(
+  charterId: string,
+  docMeta: Omit<BookingDocument, 'id' | 'uploadedAt'>
+): Promise<BookingDocument> {
+  const newDoc: BookingDocument = {
+    ...docMeta,
+    id: Date.now().toString(),
+    uploadedAt: new Date().toISOString(),
+  };
+  await updateDoc(doc(db, COLLECTION, charterId), {
+    documents: arrayUnion(newDoc),
+  });
+  return newDoc;
+}
+
+/**
+ * Remove a document's metadata from a booking. The caller is responsible for
+ * deleting the underlying Storage file (deleteObject) before/after this call.
+ */
+export async function deleteBookingDocument(
+  charterId: string,
+  document: BookingDocument
+): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, charterId), {
+    documents: arrayRemove(document),
+  });
 }
 
 export async function rejectCharterProposal(charterId: string): Promise<void> {

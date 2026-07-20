@@ -131,6 +131,10 @@ export default function ProposalsClient() {
                       <div className="text-blue-400 text-xs">total incl. APA &amp; deposit</div>
                     </div>
                     <div className="flex gap-2">
+                      <Link href={`/admin/bookings/${charter.id}`}
+                        className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-blue-200 rounded-lg text-xs font-medium transition-colors">
+                        View Details
+                      </Link>
                       <Link href={`/admin/proposals/${charter.id}`}
                         className="px-3 py-1.5 bg-blue-600/60 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition-colors">
                         Edit

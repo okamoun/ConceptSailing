@@ -318,13 +318,21 @@ export default function ReconcileClient() {
                                   </div>
                                 )}
                               </div>
-                              <button
-                                disabled={busy}
-                                onClick={() => handleLinkCharter(idx, c.id, period)}
-                                className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-sky-600/50 hover:bg-sky-500/70 text-white rounded-lg transition-colors disabled:opacity-50"
-                              >
-                                {busy ? '…' : 'Link'}
-                              </button>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <a
+                                  href={`/admin/bookings/${c.id}`}
+                                  className="px-3 py-1.5 text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-200 rounded-lg transition-colors"
+                                >
+                                  Details
+                                </a>
+                                <button
+                                  disabled={busy}
+                                  onClick={() => handleLinkCharter(idx, c.id, period)}
+                                  className="px-3 py-1.5 text-xs font-medium bg-sky-600/50 hover:bg-sky-500/70 text-white rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                  {busy ? '…' : 'Link'}
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>

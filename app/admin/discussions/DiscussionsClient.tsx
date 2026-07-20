@@ -227,6 +227,13 @@ export default function DiscussionsClient() {
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <Link
+                        href={`/admin/bookings/${charter.id}`}
+                        onClick={e => e.stopPropagation()}
+                        className="text-[11px] text-blue-400 hover:text-blue-200 transition-colors whitespace-nowrap"
+                      >
+                        View Details →
+                      </Link>
+                      <Link
                         href={`/admin/proposals/${charter.id}`}
                         onClick={e => e.stopPropagation()}
                         className="text-[11px] text-blue-400 hover:text-blue-200 transition-colors whitespace-nowrap"
