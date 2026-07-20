@@ -369,13 +369,21 @@ export default function BookingSummaryClient() {
                   placeholder="Add internal comments…"
                   className="w-full bg-white/10 border border-white/25 text-white placeholder-blue-400 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-400 resize-none"
                 />
-                <button
-                  onClick={saveNote}
-                  disabled={savingNote}
-                  className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
-                >
-                  {savingNote ? 'Saving…' : 'Save Note'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={saveNote}
+                    disabled={savingNote}
+                    className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors"
+                  >
+                    {savingNote ? 'Saving…' : 'Save Note'}
+                  </button>
+                  <a
+                    href={`/admin/bookings/${selected.id}`}
+                    className="bg-white/10 hover:bg-white/20 text-blue-200 text-xs font-medium px-4 py-2 rounded-lg transition-colors"
+                  >
+                    View Full Details
+                  </a>
+                </div>
               </div>
             </div>
           </div>

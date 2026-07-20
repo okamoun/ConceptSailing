@@ -381,6 +381,13 @@ export default function AdminDashboardClient() {
                   <button onClick={() => setSelectedCharterId(null)} className="text-blue-400 hover:text-white transition-colors flex-shrink-0 text-lg leading-none">✕</button>
                 </div>
 
+                <a
+                  href={`/admin/bookings/${currentCharter.id}`}
+                  className="block w-full text-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600/60 hover:bg-blue-600 text-white transition-colors"
+                >
+                  View Full Details
+                </a>
+
                 {/* Info grid */}
                 <div className="space-y-1.5">
                   {currentCharter.email    && <DRow label="Email"      value={currentCharter.email} />}
