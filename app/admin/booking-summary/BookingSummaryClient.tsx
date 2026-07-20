@@ -8,8 +8,33 @@ import {
   type Charter,
   type CharterStatus,
   CHARTER_STATUS_LABEL,
+  CHARTER_STATUS_PRIORITY,
 } from '@/lib/availability';
 import BookingCalendar from './BookingCalendar';
+import { useTableSort, SortHeader } from '../useTableSort';
+
+type BookingSortCol =
+  | 'status' | 'name' | 'email' | 'phone' | 'startDate' | 'endDate'
+  | 'nights' | 'passengers' | 'theme' | 'delivery' | 'redelivery' | 'boat' | 'note';
+
+const nightsOf = (c: Charter) =>
+  Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000);
+
+const BOOKING_COLUMNS: { label: string; col: BookingSortCol; align?: 'left' | 'center' }[] = [
+  { label: 'Status',     col: 'status' },
+  { label: 'Name',       col: 'name' },
+  { label: 'Email',      col: 'email' },
+  { label: 'Phone',      col: 'phone' },
+  { label: 'Start',      col: 'startDate' },
+  { label: 'End',        col: 'endDate' },
+  { label: 'Nights',     col: 'nights',     align: 'center' },
+  { label: 'Pax',        col: 'passengers', align: 'center' },
+  { label: 'Theme',      col: 'theme' },
+  { label: 'Delivery',   col: 'delivery' },
+  { label: 'Redelivery', col: 'redelivery' },
+  { label: 'Boat',       col: 'boat' },
+  { label: 'Note',       col: 'note' },
+];
 
 const BookingMap  = dynamic(() => import('./BookingMapClient'), { ssr: false });
 const DetailMap   = dynamic(() => import('./DetailMapClient'),  { ssr: false });
@@ -56,11 +81,10 @@ export default function BookingSummaryClient() {
   const [savingNote, setSavingNote] = useState(false);
 
   function openDetail(c: Charter) {
-    const sorted = [...charters].sort((a, b) => a.startDate.localeCompare(b.startDate));
-    const idx = sorted.findIndex(x => x.id === c.id);
+    const idx = sortedCharters.findIndex(x => x.id === c.id);
     setSelected(c);
-    setSelectedPrev(idx > 0 ? sorted[idx - 1] : null);
-    setSelectedNext(idx < sorted.length - 1 ? sorted[idx + 1] : null);
+    setSelectedPrev(idx > 0 ? sortedCharters[idx - 1] : null);
+    setSelectedNext(idx < sortedCharters.length - 1 ? sortedCharters[idx + 1] : null);
     setEditNote(c.note ?? '');
   }
 
@@ -110,6 +134,24 @@ export default function BookingSummaryClient() {
   const confirmedDays   = confirmed.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
 
   const filteredCharters = charters.filter(c => activeStatuses.has(c.status));
+
+  const {
+    sorted: sortedCharters, sort: bookingSort, toggle: toggleBookingSort,
+  } = useTableSort<Charter, BookingSortCol>(filteredCharters, {
+    status:     c => CHARTER_STATUS_PRIORITY[c.status],
+    name:       c => (c.name ?? '').toLowerCase(),
+    email:      c => (c.email ?? '').toLowerCase(),
+    phone:      c => (c.phone ?? '').toLowerCase(),
+    startDate:  c => c.startDate,
+    endDate:    c => c.endDate,
+    nights:     c => nightsOf(c),
+    passengers: c => c.passengers ?? 0,
+    theme:      c => (c.selectedTheme ?? '').toLowerCase(),
+    delivery:   c => (c.deliveryPoint ?? '').toLowerCase(),
+    redelivery: c => (c.redeliveryPoint ?? '').toLowerCase(),
+    boat:       c => (c.boat ?? '').toLowerCase(),
+    note:       c => (c.note ?? '').toLowerCase(),
+  }, { col: 'startDate', dir: 'asc' });
 
   const statusStats = Object.fromEntries(
     ALL_STATUSES.map(s => {
@@ -221,17 +263,25 @@ export default function BookingSummaryClient() {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-white/20">
-                      {['Status','Name','Email','Phone','Start','End','Nights','Pax','Theme','Delivery','Redelivery','Boat','Note'].map(h => (
-                        <th key={h} className="text-left text-blue-200 font-semibold px-3 py-2.5 whitespace-nowrap">{h}</th>
+                    <tr className="border-b border-white/20 text-blue-200 font-semibold">
+                      {BOOKING_COLUMNS.map(({ label, col, align }) => (
+                        <SortHeader
+                          key={col}
+                          col={col}
+                          current={bookingSort}
+                          onToggle={toggleBookingSort}
+                          align={align}
+                          className="whitespace-nowrap"
+                        >
+                          {label}
+                        </SortHeader>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {[...filteredCharters]
-                      .sort((a, b) => a.startDate.localeCompare(b.startDate))
+                    {sortedCharters
                       .map((c, i) => {
-                        const nights = Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86400000);
+                        const nights = nightsOf(c);
                         return (
                           <tr
                             key={c.id ?? i}
