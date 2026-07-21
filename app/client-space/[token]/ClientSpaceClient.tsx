@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, type ReactNode } from 'react';
+import { useEffect, useState, useRef, useCallback, type ReactNode, type Ref } from 'react';
 import Image from 'next/image';
 import {
   getClientPreparation,
@@ -431,21 +431,35 @@ function SaveButton({ onClick, saving, label = 'Save & Continue' }: {
 // Step indicator
 // ---------------------------------------------------------------------------
 
-function StepIndicator({ current }: { current: number }) {
+function StepIndicator({ current, onSelect, navRef }: {
+  current: number;
+  onSelect: (i: number) => void;
+  navRef?: Ref<HTMLDivElement>;
+}) {
   return (
-    <div className="flex items-center gap-0.5 overflow-x-auto">
+    <div ref={navRef} className="flex items-center gap-0.5 overflow-x-auto scroll-smooth" style={{ scrollbarWidth: 'none' }}>
       {STEPS.map((label, i) => (
         <div key={i} className="flex items-center flex-shrink-0">
-          <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] transition-all ${
-            i === current ? 'bg-white text-blue-700 font-semibold' : i < current ? 'bg-white/25 text-white' : 'bg-white/8 text-blue-300'
-          }`}>
-            <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
+          <button
+            type="button"
+            onClick={() => onSelect(i)}
+            aria-label={label}
+            aria-current={i === current ? 'step' : undefined}
+            className={`flex items-center gap-1 px-2 py-1 rounded-full text-[11px] transition-all ${
+              i === current
+                ? 'bg-white text-blue-700 font-semibold'
+                : i < current
+                ? 'bg-white/25 text-white hover:bg-white/35'
+                : 'bg-white/8 text-blue-300 hover:bg-white/15'
+            }`}
+          >
+            <span aria-hidden="true" className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
               i < current ? 'bg-emerald-400 text-white' : i === current ? 'bg-blue-600 text-white' : 'bg-white/15 text-blue-400'
             }`}>
               {i < current ? '✓' : i + 1}
             </span>
             <span className="hidden md:inline">{label}</span>
-          </div>
+          </button>
           {i < STEPS.length - 1 && <div className={`w-3 h-px ${i < current ? 'bg-emerald-400/50' : 'bg-white/15'}`} />}
         </div>
       ))}
@@ -2089,33 +2103,11 @@ export default function ClientSpaceClient({ token }: Props) {
               </a>
             </div>
           </div>
-          <StepIndicator current={currentStep} />
+          <StepIndicator current={currentStep} onSelect={setCurrentStep} navRef={stepNavRef} />
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {/* Step nav buttons */}
-        <div ref={stepNavRef} className="flex gap-2 overflow-x-auto pb-1 scroll-smooth"
-          style={{ scrollbarWidth: 'none' }}
-        >
-          {STEPS.map((label, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setCurrentStep(i)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
-                i === currentStep
-                  ? 'bg-white text-blue-700 border-white font-semibold'
-                  : i <= (prep.lastSavedStep ?? 0)
-                  ? 'bg-white/20 text-white border-white/30 hover:bg-white/30'
-                  : 'bg-white/10 text-blue-300 border-white/10 hover:bg-white/15'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
         {/* Section title */}
         <div>
           <h2 className="text-white text-2xl font-bold">{STEPS[currentStep]}</h2>
