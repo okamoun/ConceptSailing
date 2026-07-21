@@ -381,6 +381,101 @@ export async function addClientSpaceMessage(
   return newMessage;
 }
 
+// ---------------------------------------------------------------------------
+// Crew manifest — the roster split into periods so a leg where guests join or
+// leave on different dates gets its own manifest page.
+// ---------------------------------------------------------------------------
+
+export interface ManifestGuest {
+  index: number;              // position in prep.crew
+  member: CrewMember;
+  arrivalDate?: string;       // 'YYYY-MM-DD'
+  departureDate?: string;     // 'YYYY-MM-DD'
+  embarkationPoint?: string;
+  disembarkationPoint?: string;
+}
+
+export interface ManifestPeriod {
+  startDate?: string;
+  endDate?: string;
+  guests: ManifestGuest[];
+}
+
+function sameManifestRoster(a: ManifestGuest[], b: ManifestGuest[]): boolean {
+  if (a.length !== b.length) return false;
+  const ai = a.map(g => g.index).sort((x, y) => x - y);
+  const bi = b.map(g => g.index).sort((x, y) => x - y);
+  return ai.every((v, i) => v === bi[i]);
+}
+
+// Splits the crew into consecutive periods. When every guest shares the same
+// dates a single period covering the whole charter is returned; when guests
+// arrive or depart on different dates each distinct roster becomes its own
+// period. Dates are ISO 'YYYY-MM-DD' strings, so lexical comparison orders them.
+export function buildCrewManifest(
+  charter: Pick<Charter, 'startDate' | 'endDate'>,
+  prep: Pick<ClientPreparation, 'crew' | 'travel'>,
+): ManifestPeriod[] {
+  const crew = prep.crew ?? [];
+  const groups = prep.travel?.groups ?? [];
+  const cStart = charter.startDate;
+  const cEnd = charter.endDate;
+
+  const guests: ManifestGuest[] = crew.map((member, index) => {
+    const g = groups.find(gr => gr.memberIndices?.includes(index));
+    return {
+      index,
+      member,
+      arrivalDate: g?.arrivalDate || cStart,
+      departureDate: g?.departureDate || cEnd,
+      embarkationPoint: g?.embarkationPoint,
+      disembarkationPoint: g?.disembarkationPoint,
+    };
+  });
+
+  const fallback: ManifestPeriod[] = [{ startDate: cStart, endDate: cEnd, guests }];
+  if (guests.length === 0) return fallback;
+
+  const boundarySet = new Set<string>();
+  for (const gt of guests) {
+    if (gt.arrivalDate) boundarySet.add(gt.arrivalDate);
+    if (gt.departureDate) boundarySet.add(gt.departureDate);
+  }
+  if (cStart) boundarySet.add(cStart);
+  if (cEnd) boundarySet.add(cEnd);
+
+  const boundaries = [...boundarySet].sort();
+  if (boundaries.length < 2) return fallback;
+
+  const segments: ManifestPeriod[] = [];
+  for (let k = 0; k < boundaries.length - 1; k++) {
+    const start = boundaries[k];
+    const end = boundaries[k + 1];
+    const aboard = guests.filter(gt => {
+      const a = gt.arrivalDate ?? cStart ?? start;
+      const d = gt.departureDate ?? cEnd ?? end;
+      return a <= start && d >= end;
+    });
+    if (aboard.length === 0) continue;
+    segments.push({ startDate: start, endDate: end, guests: aboard });
+  }
+
+  if (segments.length === 0) return fallback;
+
+  // Merge neighbouring segments that carry the same roster.
+  const merged: ManifestPeriod[] = [];
+  for (const seg of segments) {
+    const prev = merged[merged.length - 1];
+    if (prev && sameManifestRoster(prev.guests, seg.guests)) {
+      prev.endDate = seg.endDate;
+    } else {
+      merged.push({ startDate: seg.startDate, endDate: seg.endDate, guests: [...seg.guests] });
+    }
+  }
+
+  return merged;
+}
+
 // Reads all client preparations and returns those with at least one Q&A
 // message, for the admin discussions screen.
 export async function getAllClientSpaceThreads(): Promise<ClientSpaceThread[]> {
