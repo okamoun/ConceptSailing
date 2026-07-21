@@ -6,6 +6,7 @@ import {
   setDoc,
   addDoc,
   updateDoc,
+  arrayUnion,
   serverTimestamp,
   query,
   where,
@@ -135,6 +136,19 @@ export interface SpecialRequests {
   emergencyContactRelation?: string;
 }
 
+// A Q&A message left by the client (or an admin reply) on a specific
+// wizard step. Mirrors the shape of ProposalComment (lib/availability.ts) so
+// the admin discussions screen can treat both thread sources uniformly.
+export interface ClientSpaceMessage {
+  id: string;
+  step: number;        // 0-6, index into STEPS
+  stepLabel: string;   // snapshot of the step name at time of asking
+  author: string;      // client name, or admin username when isAdmin
+  text: string;
+  createdAt: string;
+  isAdmin: boolean;
+}
+
 export interface ClientPreparation {
   token: string;
   charterId: string;
@@ -146,9 +160,18 @@ export interface ClientPreparation {
   beverages: BeveragePreferences;
   special: SpecialRequests;
   checklist: Record<string, boolean>;
+  messages?: ClientSpaceMessage[];   // Q&A thread, arrayUnion-based like proposal.comments
+  notes?: Record<string, string>;    // per-step free text, keyed by step index as string, e.g. notes["2"]
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
   completedAt?: Timestamp | null;
+}
+
+// A client-space Q&A thread surfaced to the admin discussions screen.
+export interface ClientSpaceThread {
+  token: string;
+  charterId: string;
+  messages: ClientSpaceMessage[];
 }
 
 export type PrepSnapshot = {
@@ -323,6 +346,49 @@ export async function saveChecklist(token: string, checklist: Record<string, boo
 
 export async function saveStep(token: string, step: number): Promise<void> {
   await updateDoc(doc(db, COLLECTION, token), { lastSavedStep: step, updatedAt: serverTimestamp() });
+}
+
+// ---------------------------------------------------------------------------
+// Notes & Q&A (per-step free text + discussion thread)
+// ---------------------------------------------------------------------------
+
+// Save (or overwrite) the free-text "Notes for our team" for a single step.
+// Uses a dot-path update so only that step's note is touched — debounced from
+// the client like the other per-step auto-saves.
+export async function updateClientSpaceNote(token: string, step: number, text: string): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, token), {
+    [`notes.${step}`]: text,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+// Append a Q&A message (client question or admin reply) to the thread.
+// arrayUnion-based, mirroring addCharterProposalComment. Returns the created
+// message so callers can optimistically update local state.
+export async function addClientSpaceMessage(
+  token: string,
+  message: Omit<ClientSpaceMessage, 'id' | 'createdAt'>,
+): Promise<ClientSpaceMessage> {
+  const newMessage: ClientSpaceMessage = {
+    ...message,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+  };
+  await updateDoc(doc(db, COLLECTION, token), {
+    messages: arrayUnion(newMessage),
+    updatedAt: serverTimestamp(),
+  });
+  return newMessage;
+}
+
+// Reads all client preparations and returns those with at least one Q&A
+// message, for the admin discussions screen.
+export async function getAllClientSpaceThreads(): Promise<ClientSpaceThread[]> {
+  const snap = await getDocs(collection(db, COLLECTION));
+  return snap.docs
+    .map(d => ({ token: d.id, ...d.data() } as ClientPreparation))
+    .filter(p => Array.isArray(p.messages) && p.messages.length > 0)
+    .map(p => ({ token: p.token, charterId: p.charterId, messages: p.messages! }));
 }
 
 // ---------------------------------------------------------------------------
