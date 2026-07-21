@@ -780,3 +780,52 @@ describe('SummaryClient — footer', () => {
     });
   });
 });
+
+describe('SummaryClient — Notes for the Crew section', () => {
+  it('renders notes grouped by step label', async () => {
+    mockGetClientPreparation.mockResolvedValue({
+      ...mockPrep,
+      notes: { '2': 'Please arrange early check-in', '4': 'One guest is vegan' },
+    });
+    renderSummary();
+    await waitFor(() => expect(screen.getByText('Notes for the Crew')).toBeInTheDocument());
+    expect(screen.getByText('Please arrange early check-in')).toBeInTheDocument();
+    expect(screen.getByText('One guest is vegan')).toBeInTheDocument();
+    // Step labels appear as both a section title and the note's subsection tag
+    expect(screen.getAllByText('Travel & Logistics').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('Food Preferences').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('does not render the section when there are no notes', async () => {
+    mockGetClientPreparation.mockResolvedValue({ ...mockPrep, notes: { '1': '   ' } });
+    renderSummary();
+    await waitFor(() => expect(screen.getByText(/blueone luxury yacht charters/i)).toBeInTheDocument());
+    expect(screen.queryByText('Notes for the Crew')).not.toBeInTheDocument();
+  });
+});
+
+describe('SummaryClient — Questions & Discussion section', () => {
+  it('renders questions and admin replies grouped by step', async () => {
+    mockGetClientPreparation.mockResolvedValue({
+      ...mockPrep,
+      messages: [
+        { id: 'm1', step: 4, stepLabel: 'Food Preferences', author: 'Smith Family', text: 'Can you cater gluten-free?', createdAt: '2026-07-10T10:00:00Z', isAdmin: false },
+        { id: 'm2', step: 4, stepLabel: 'Food Preferences', author: 'BlueOne Team', text: 'Absolutely, we can.', createdAt: '2026-07-10T12:00:00Z', isAdmin: true },
+      ],
+    });
+    renderSummary();
+    await waitFor(() => expect(screen.getByText('Questions & Discussion')).toBeInTheDocument());
+    expect(screen.getByText('Can you cater gluten-free?')).toBeInTheDocument();
+    expect(screen.getByText('Absolutely, we can.')).toBeInTheDocument();
+    // Client name also appears in the charter section; admin author is unique here
+    expect(screen.getAllByText('Smith Family').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('BlueOne Team')).toBeInTheDocument();
+  });
+
+  it('does not render the section when there are no messages', async () => {
+    mockGetClientPreparation.mockResolvedValue({ ...mockPrep, messages: [] });
+    renderSummary();
+    await waitFor(() => expect(screen.getByText(/blueone luxury yacht charters/i)).toBeInTheDocument());
+    expect(screen.queryByText('Questions & Discussion')).not.toBeInTheDocument();
+  });
+});

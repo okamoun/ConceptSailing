@@ -6,15 +6,20 @@ import {
   getAllCharters,
   addCharterProposalComment,
   type Charter,
-  type ProposalComment,
   type ProposalStatus,
 } from '../../../lib/availability';
+import {
+  getAllClientSpaceThreads,
+  addClientSpaceMessage,
+  type ClientSpaceThread,
+} from '../../../lib/clientSpace';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 const SEEN_KEY = 'admin_discussions_last_seen';
+const ADMIN_NAME = 'BlueOne Team';
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - Date.parse(iso);
@@ -38,13 +43,29 @@ const STATUS_BADGE: Record<ProposalStatus, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Types
+// Types — normalized thread shared by both sources
 // ---------------------------------------------------------------------------
 
-interface ThreadEntry {
-  charter: Charter;
-  comments: ProposalComment[];
-  latestComment: ProposalComment;
+interface ThreadMessage {
+  id: string;
+  author: string;
+  text: string;
+  createdAt: string;
+  isAdmin: boolean;
+}
+
+interface UnifiedThread {
+  key: string;                          // `${source}:${id}` — unique per thread
+  source: 'proposal' | 'client-space';
+  clientName: string;
+  charterId: string;
+  charter?: Charter;                    // matched charter (proposal always; client-space when found)
+  token?: string;                       // client-space token
+  step?: number;                        // client-space step index (for replies)
+  stepLabel?: string;                   // client-space step name tag
+  status?: ProposalStatus;              // proposal only
+  messages: ThreadMessage[];
+  latestMessage: ThreadMessage;
   latestTs: number;
   hasUnread: boolean;
 }
@@ -55,10 +76,11 @@ interface ThreadEntry {
 
 export default function DiscussionsClient() {
   const [charters, setCharters] = useState<Charter[]>([]);
+  const [csThreads, setCsThreads] = useState<ClientSpaceThread[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
-  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [sendingKey, setSendingKey] = useState<string | null>(null);
 
   // Read last-seen timestamp before any state updates
   const lastSeenTs = useRef<number>(
@@ -74,72 +96,125 @@ export default function DiscussionsClient() {
   }, []);
 
   useEffect(() => {
-    getAllCharters()
-      .then(setCharters)
+    Promise.all([getAllCharters(), getAllClientSpaceThreads()])
+      .then(([c, t]) => { setCharters(c); setCsThreads(t); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const threads = useMemo<ThreadEntry[]>(() => {
-    return charters
+  const threads = useMemo<UnifiedThread[]>(() => {
+    const seen = lastSeenTs.current;
+
+    // Proposal threads
+    const proposalThreads: UnifiedThread[] = charters
       .filter(c => c.proposal?.comments && c.proposal.comments.length > 0)
       .map(c => {
         const comments = c.proposal!.comments!;
         const latest = comments[comments.length - 1];
         const latestTs = Date.parse(latest.createdAt);
         return {
+          key: `proposal:${c.id}`,
+          source: 'proposal' as const,
+          clientName: c.name ?? 'Unnamed client',
+          charterId: c.id,
           charter: c,
-          comments,
-          latestComment: latest,
+          status: c.proposal!.status,
+          messages: comments,
+          latestMessage: latest,
           latestTs,
-          hasUnread: latestTs > lastSeenTs.current,
+          hasUnread: latestTs > seen,
         };
-      })
-      .sort((a, b) => b.latestTs - a.latestTs);
-  }, [charters]);
+      });
+
+    // Client-space threads — one per (token, step) so each thread is single-step
+    const clientThreads: UnifiedThread[] = [];
+    for (const t of csThreads) {
+      const charter = charters.find(c => c.clientSpaceToken === t.token || c.id === t.charterId);
+      const byStep = new Map<number, ThreadMessage[]>();
+      for (const m of t.messages) {
+        const arr = byStep.get(m.step) ?? [];
+        arr.push(m);
+        byStep.set(m.step, arr);
+      }
+      for (const [step, msgs] of byStep) {
+        const sorted = [...msgs].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+        const latest = sorted[sorted.length - 1];
+        const latestTs = Date.parse(latest.createdAt);
+        const askerName = sorted.find(m => !m.isAdmin)?.author;
+        clientThreads.push({
+          key: `client-space:${t.token}:${step}`,
+          source: 'client-space' as const,
+          clientName: charter?.name ?? askerName ?? 'Client',
+          charterId: t.charterId,
+          charter,
+          token: t.token,
+          step,
+          stepLabel: t.messages.find(m => m.step === step)?.stepLabel ?? `Step ${step + 1}`,
+          messages: sorted,
+          latestMessage: latest,
+          latestTs,
+          hasUnread: latestTs > seen,
+        });
+      }
+    }
+
+    return [...proposalThreads, ...clientThreads].sort((a, b) => b.latestTs - a.latestTs);
+  }, [charters, csThreads]);
 
   const unreadCount = threads.filter(t => t.hasUnread).length;
 
-  function toggleExpand(charterId: string) {
-    setExpandedId(prev => (prev === charterId ? null : charterId));
+  function toggleExpand(key: string) {
+    setExpandedKey(prev => (prev === key ? null : key));
   }
 
-  function setReply(charterId: string, text: string) {
-    setReplyTexts(prev => ({ ...prev, [charterId]: text }));
+  function setReply(key: string, text: string) {
+    setReplyTexts(prev => ({ ...prev, [key]: text }));
   }
 
-  async function handleReply(charter: Charter) {
-    const text = replyTexts[charter.id]?.trim();
-    if (!text || !charter.proposal) return;
-    setSendingId(charter.id);
+  async function handleReply(thread: UnifiedThread) {
+    const text = replyTexts[thread.key]?.trim();
+    if (!text) return;
+    setSendingKey(thread.key);
     try {
-      await addCharterProposalComment(
-        charter.id,
-        { author: 'BlueOne Team', text, isAdmin: true },
-        charter.proposal.status
-      );
-      const newComment: ProposalComment = {
-        id: Date.now().toString(),
-        author: 'BlueOne Team',
-        text,
-        isAdmin: true,
-        createdAt: new Date().toISOString(),
-      };
-      setCharters(prev =>
-        prev.map(c => {
-          if (c.id !== charter.id || !c.proposal) return c;
-          return {
-            ...c,
-            proposal: {
-              ...c.proposal,
-              comments: [...(c.proposal.comments ?? []), newComment],
-            },
-          };
-        })
-      );
-      setReply(charter.id, '');
+      if (thread.source === 'proposal' && thread.charter?.proposal) {
+        await addCharterProposalComment(
+          thread.charterId,
+          { author: ADMIN_NAME, text, isAdmin: true },
+          thread.charter.proposal.status
+        );
+        const newComment: ThreadMessage = {
+          id: Date.now().toString(),
+          author: ADMIN_NAME,
+          text,
+          isAdmin: true,
+          createdAt: new Date().toISOString(),
+        };
+        setCharters(prev =>
+          prev.map(c => {
+            if (c.id !== thread.charterId || !c.proposal) return c;
+            return {
+              ...c,
+              proposal: { ...c.proposal, comments: [...(c.proposal.comments ?? []), newComment] },
+            };
+          })
+        );
+      } else if (thread.source === 'client-space' && thread.token != null && thread.step != null) {
+        const msg = await addClientSpaceMessage(thread.token, {
+          step: thread.step,
+          stepLabel: thread.stepLabel ?? '',
+          author: ADMIN_NAME,
+          text,
+          isAdmin: true,
+        });
+        setCsThreads(prev =>
+          prev.map(t =>
+            t.token === thread.token ? { ...t, messages: [...t.messages, msg] } : t
+          )
+        );
+      }
+      setReply(thread.key, '');
     } finally {
-      setSendingId(null);
+      setSendingKey(null);
     }
   }
 
@@ -159,7 +234,7 @@ export default function DiscussionsClient() {
         )}
       </div>
       <p className="text-sm text-blue-300 mb-6">
-        All proposal comment threads · {threads.length} active {threads.length === 1 ? 'thread' : 'threads'}
+        Proposal &amp; client-space threads · {threads.length} active {threads.length === 1 ? 'thread' : 'threads'}
       </p>
 
       {/* Loading */}
@@ -170,27 +245,27 @@ export default function DiscussionsClient() {
       {/* Empty */}
       {!loading && threads.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-blue-200 text-sm">No proposal comment threads yet.</p>
-          <p className="text-blue-400 text-xs mt-1">Comments left by clients on proposals will appear here.</p>
+          <p className="text-blue-200 text-sm">No discussion threads yet.</p>
+          <p className="text-blue-400 text-xs mt-1">Comments left by clients on proposals or in their client space will appear here.</p>
         </div>
       )}
 
       {/* Thread list */}
       {!loading && threads.length > 0 && (
         <div className="space-y-3 max-w-3xl">
-          {threads.map(({ charter, comments, latestComment, hasUnread }) => {
-            const isExpanded = expandedId === charter.id;
-            const status = charter.proposal!.status;
+          {threads.map(thread => {
+            const { key, source, clientName, charter, messages, latestMessage, hasUnread } = thread;
+            const isExpanded = expandedKey === key;
 
             return (
               <div
-                key={charter.id}
+                key={key}
                 className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl overflow-hidden"
               >
                 {/* Summary row */}
                 <button
                   type="button"
-                  onClick={() => toggleExpand(charter.id)}
+                  onClick={() => toggleExpand(key)}
                   className="w-full text-left px-5 py-4 hover:bg-white/5 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -200,46 +275,66 @@ export default function DiscussionsClient() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-semibold text-white truncate">
-                            {charter.name ?? 'Unnamed client'}
+                            {clientName}
                           </span>
-                          {charter.startDate && charter.endDate && (
+                          {charter?.startDate && charter?.endDate && (
                             <span className="text-xs text-blue-400">
                               {fmtDate(charter.startDate)} – {fmtDate(charter.endDate)}
                             </span>
                           )}
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_BADGE[status] ?? STATUS_BADGE.draft}`}>
-                            {status}
-                          </span>
+                          {source === 'proposal' && thread.status && (
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${STATUS_BADGE[thread.status] ?? STATUS_BADGE.draft}`}>
+                              {thread.status}
+                            </span>
+                          )}
+                          {source === 'client-space' && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-500/25 text-teal-200 border border-teal-400/20">
+                              {thread.stepLabel}
+                            </span>
+                          )}
                           <span className="text-[10px] text-blue-500">
-                            {comments.length} {comments.length === 1 ? 'message' : 'messages'}
+                            {messages.length} {messages.length === 1 ? 'message' : 'messages'}
                           </span>
                         </div>
                         <p className="text-xs text-blue-300 mt-1 truncate">
                           <span className="font-medium text-blue-200">
-                            {latestComment.isAdmin ? 'BlueOne Team' : latestComment.author}:
+                            {latestMessage.isAdmin ? ADMIN_NAME : latestMessage.author}:
                           </span>{' '}
-                          {latestComment.text.length > 80
-                            ? latestComment.text.slice(0, 80) + '…'
-                            : latestComment.text}
-                          <span className="text-blue-500 ml-2">· {timeAgo(latestComment.createdAt)}</span>
+                          {latestMessage.text.length > 80
+                            ? latestMessage.text.slice(0, 80) + '…'
+                            : latestMessage.text}
+                          <span className="text-blue-500 ml-2">· {timeAgo(latestMessage.createdAt)}</span>
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <Link
-                        href={`/admin/bookings/${charter.id}`}
-                        onClick={e => e.stopPropagation()}
-                        className="text-[11px] text-blue-400 hover:text-blue-200 transition-colors whitespace-nowrap"
-                      >
-                        View Details →
-                      </Link>
-                      <Link
-                        href={`/admin/proposals/${charter.id}`}
-                        onClick={e => e.stopPropagation()}
-                        className="text-[11px] text-blue-400 hover:text-blue-200 transition-colors whitespace-nowrap"
-                      >
-                        View Proposal →
-                      </Link>
+                      {charter && (
+                        <Link
+                          href={`/admin/bookings/${charter.id}`}
+                          onClick={e => e.stopPropagation()}
+                          className="text-[11px] text-blue-400 hover:text-blue-200 transition-colors whitespace-nowrap"
+                        >
+                          View Details →
+                        </Link>
+                      )}
+                      {source === 'proposal' && charter && (
+                        <Link
+                          href={`/admin/proposals/${charter.id}`}
+                          onClick={e => e.stopPropagation()}
+                          className="text-[11px] text-blue-400 hover:text-blue-200 transition-colors whitespace-nowrap"
+                        >
+                          View Proposal →
+                        </Link>
+                      )}
+                      {source === 'client-space' && thread.token && (
+                        <Link
+                          href={`/client-space/${thread.token}/summary`}
+                          onClick={e => e.stopPropagation()}
+                          className="text-[11px] text-blue-400 hover:text-blue-200 transition-colors whitespace-nowrap"
+                        >
+                          View Space →
+                        </Link>
+                      )}
                       <svg
                         className={`w-4 h-4 text-blue-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                         fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -255,7 +350,7 @@ export default function DiscussionsClient() {
                   <div className="border-t border-white/10 px-5 py-4">
                     {/* Bubbles */}
                     <div className="space-y-4 mb-4">
-                      {comments.map(c => (
+                      {messages.map(c => (
                         <div key={c.id} className={`flex gap-3 ${c.isAdmin ? 'flex-row-reverse' : ''}`}>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${c.isAdmin ? 'bg-blue-600/50 text-blue-200' : 'bg-white/20 text-white'}`}>
                             {c.author.charAt(0).toUpperCase()}
@@ -263,7 +358,7 @@ export default function DiscussionsClient() {
                           <div className={`max-w-[75%] ${c.isAdmin ? 'items-end flex flex-col' : ''}`}>
                             <div className={`rounded-2xl px-4 py-3 text-sm ${c.isAdmin ? 'bg-blue-600/30 text-blue-100 rounded-tr-sm' : 'bg-white/15 text-white rounded-tl-sm'}`}>
                               <div className="text-xs font-semibold mb-1 opacity-70">
-                                {c.isAdmin ? 'BlueOne Team' : c.author}
+                                {c.isAdmin ? ADMIN_NAME : c.author}
                               </div>
                               <p className="leading-relaxed whitespace-pre-wrap">{c.text}</p>
                             </div>
@@ -281,19 +376,19 @@ export default function DiscussionsClient() {
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        value={replyTexts[charter.id] ?? ''}
-                        onChange={e => setReply(charter.id, e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply(charter); } }}
+                        value={replyTexts[key] ?? ''}
+                        onChange={e => setReply(key, e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply(thread); } }}
                         placeholder="Reply to client…"
                         className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white placeholder:text-blue-400 focus:outline-none focus:border-blue-400"
                       />
                       <button
                         type="button"
-                        onClick={() => handleReply(charter)}
-                        disabled={sendingId === charter.id || !replyTexts[charter.id]?.trim()}
+                        onClick={() => handleReply(thread)}
+                        disabled={sendingKey === key || !replyTexts[key]?.trim()}
                         className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-colors"
                       >
-                        {sendingId === charter.id ? '…' : 'Reply'}
+                        {sendingKey === key ? '…' : 'Reply'}
                       </button>
                     </div>
                   </div>

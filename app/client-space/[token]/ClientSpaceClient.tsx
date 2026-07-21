@@ -16,9 +16,12 @@ import {
   saveSnapshot,
   getHistory,
   restoreSnapshot,
+  updateClientSpaceNote,
+  addClientSpaceMessage,
   CHECKLIST_CATEGORIES,
   DEFAULT_ON_BOARD_PCT,
   type ClientPreparation,
+  type ClientSpaceMessage,
   type CrewMember,
   type TravelLogistics,
   type TravelGroup,
@@ -1699,6 +1702,154 @@ function SpecialStep({ initial, checklistInit, onSave, onAutoSave, onChecklistCh
 }
 
 // ---------------------------------------------------------------------------
+// Step footer — per-step "Notes for our team" + "Ask a question" Q&A
+// ---------------------------------------------------------------------------
+
+function fmtMsgTime(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+interface StepFooterProps {
+  token: string;
+  step: number;
+  stepLabel: string;
+  clientName: string;
+  initialNote: string;
+  messages: ClientSpaceMessage[];
+  onNoteSaved: (step: number, text: string) => void;
+  onMessageAdded: (message: ClientSpaceMessage) => void;
+}
+
+function StepFooter({
+  token, step, stepLabel, clientName, initialNote, messages, onNoteSaved, onMessageAdded,
+}: StepFooterProps) {
+  const [note, setNote] = useState(initialNote);
+  const saveNote = useCallback(async (val: string) => {
+    await updateClientSpaceNote(token, step, val);
+    onNoteSaved(step, val);
+  }, [token, step, onNoteSaved]);
+  const noteStatus = useAutoSave(note, saveNote);
+
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const stepMessages = messages.filter(m => m.step === step);
+
+  async function submitQuestion() {
+    const text = question.trim();
+    if (!text || sending) return;
+    setSending(true);
+    try {
+      const msg = await addClientSpaceMessage(token, {
+        step, stepLabel, author: clientName, text, isAdmin: false,
+      });
+      onMessageAdded(msg);
+      setQuestion('');
+      setComposerOpen(false);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <div className="mt-6 pt-5 border-t border-white/10 space-y-4">
+      {/* Notes for our team */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <label htmlFor={`step-note-${step}`} className="text-white text-sm font-semibold">
+            Notes for our team
+          </label>
+          {noteStatus !== 'idle' && (
+            <span className="text-xs text-blue-300">
+              {noteStatus === 'saving' ? 'Saving…' : 'Saved ✓'}
+            </span>
+          )}
+        </div>
+        <textarea
+          id={`step-note-${step}`}
+          value={note}
+          onChange={e => setNote(e.target.value)}
+          rows={2}
+          placeholder="Anything you'd like the crew to know about this section…"
+          className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white placeholder:text-blue-400 focus:outline-none focus:border-blue-400 resize-y"
+        />
+      </div>
+
+      {/* Ask a question */}
+      <div>
+        {!composerOpen && (
+          <button
+            type="button"
+            onClick={() => setComposerOpen(true)}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-200 hover:text-white transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Ask a question
+          </button>
+        )}
+        {composerOpen && (
+          <div className="space-y-2">
+            <textarea
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              rows={2}
+              autoFocus
+              placeholder={`Ask the BlueOne team about ${stepLabel}…`}
+              className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white placeholder:text-blue-400 focus:outline-none focus:border-blue-400 resize-y"
+            />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={submitQuestion}
+                disabled={sending || !question.trim()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium disabled:opacity-50 transition-colors"
+              >
+                {sending ? 'Sending…' : 'Send question'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setComposerOpen(false); setQuestion(''); }}
+                className="px-3 py-2 text-sm text-blue-300 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Existing thread for this step */}
+      {stepMessages.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-blue-300 uppercase tracking-wide">Conversation</p>
+          {stepMessages.map(m => (
+            <div key={m.id} className={`flex gap-2.5 ${m.isAdmin ? 'flex-row-reverse' : ''}`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${m.isAdmin ? 'bg-blue-600/50 text-blue-100' : 'bg-white/20 text-white'}`}>
+                {(m.author || '?').charAt(0).toUpperCase()}
+              </div>
+              <div className={`max-w-[80%] ${m.isAdmin ? 'items-end flex flex-col' : ''}`}>
+                <div className={`rounded-2xl px-3.5 py-2.5 text-sm ${m.isAdmin ? 'bg-blue-600/30 text-blue-100 rounded-tr-sm' : 'bg-white/15 text-white rounded-tl-sm'}`}>
+                  <div className="text-xs font-semibold mb-0.5 opacity-70">
+                    {m.isAdmin ? 'BlueOne Team' : m.author}
+                  </div>
+                  <p className="leading-relaxed whitespace-pre-wrap">{m.text}</p>
+                </div>
+                <div className="text-xs text-blue-500 mt-0.5 px-1">{fmtMsgTime(m.createdAt)}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -1834,6 +1985,14 @@ export default function ClientSpaceClient({ token }: Props) {
     checklistRef.current = checklist;
     saveChecklist(token, checklist).catch(console.error);
   }
+
+  const handleNoteSaved = useCallback((step: number, text: string) => {
+    setPrep(prev => prev ? { ...prev, notes: { ...(prev.notes ?? {}), [step]: text } } : prev);
+  }, []);
+
+  const handleMessageAdded = useCallback((message: ClientSpaceMessage) => {
+    setPrep(prev => prev ? { ...prev, messages: [...(prev.messages ?? []), message] } : prev);
+  }, []);
 
   async function openHistory() {
     setHistoryOpen(true);
@@ -2012,6 +2171,19 @@ export default function ClientSpaceClient({ token }: Props) {
             onChecklistChange={handleChecklistChange}
           />
         )}
+
+        {/* Per-step notes & Q&A */}
+        <StepFooter
+          key={currentStep}
+          token={token}
+          step={currentStep}
+          stepLabel={STEPS[currentStep]}
+          clientName={charter.name ?? 'Client'}
+          initialNote={prep.notes?.[currentStep] ?? ''}
+          messages={prep.messages ?? []}
+          onNoteSaved={handleNoteSaved}
+          onMessageAdded={handleMessageAdded}
+        />
 
         {/* Prev / Next navigation */}
         {currentStep > 0 && (

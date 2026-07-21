@@ -7,6 +7,7 @@ import {
   getCharterByClientSpaceToken,
   CHECKLIST_CATEGORIES,
   type ClientPreparation,
+  type ClientSpaceMessage,
 } from '../../../../lib/clientSpace';
 import type { Charter } from '../../../../lib/availability';
 import { getMarinaById } from '../../../marinas-data';
@@ -34,7 +35,26 @@ const SPIRIT_TYPES = [
   'Vodka', 'Gin', 'Rum', 'Whisky / Scotch', 'Tequila',
   'Beer (local)', 'Beer (imported)', 'Liqueurs',
 ];
+const STEPS = [
+  'Your Charter',
+  'Crew Details',
+  'Travel & Logistics',
+  'Activities & Health',
+  'Food Preferences',
+  'Beverages & Bar',
+  'Special Requests',
+];
 const FOOD_CATEGORIES = ['Seafood', 'Fish', 'Meat', 'Fruit', 'Vegetables', 'Dairy', 'Other'] as const;
+
+function stepName(step: number): string {
+  return STEPS[step] ?? `Step ${step + 1}`;
+}
+
+function fmtMsgDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+}
 const CUISINE_TYPES = ['Greek', 'Italian', 'French', 'Asian', 'Fusion', 'Mediterranean', 'Other'] as const;
 const BREAKFAST_STYLE_LABELS: Record<string, string> = {
   light: 'Light / Cold',
@@ -596,6 +616,67 @@ function ChecklistSection({ prep }: { prep: ClientPreparation }) {
   );
 }
 
+function NotesSection({ prep }: { prep: ClientPreparation }) {
+  const notes = prep.notes ?? {};
+  const entries = Object.entries(notes)
+    .filter(([, text]) => text && text.trim())
+    .sort(([a], [b]) => Number(a) - Number(b));
+
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="summary-section border border-slate-200 rounded-xl overflow-hidden mb-4">
+      <SectionTitle>Notes for the Crew</SectionTitle>
+      {entries.map(([step, text]) => (
+        <div key={step}>
+          <SubsectionTitle>{stepName(Number(step))}</SubsectionTitle>
+          <p className="px-5 py-2.5 text-xs text-slate-700 whitespace-pre-wrap">{text}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DiscussionSection({ prep }: { prep: ClientPreparation }) {
+  const messages = prep.messages ?? [];
+  if (messages.length === 0) return null;
+
+  const byStep = new Map<number, ClientSpaceMessage[]>();
+  for (const m of messages) {
+    const arr = byStep.get(m.step) ?? [];
+    arr.push(m);
+    byStep.set(m.step, arr);
+  }
+  const steps = [...byStep.keys()].sort((a, b) => a - b);
+
+  return (
+    <div className="summary-section border border-slate-200 rounded-xl overflow-hidden mb-4">
+      <SectionTitle>Questions & Discussion</SectionTitle>
+      {steps.map(step => {
+        const msgs = [...byStep.get(step)!].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+        return (
+          <div key={step}>
+            <SubsectionTitle>{msgs[0].stepLabel || stepName(step)}</SubsectionTitle>
+            <div className="px-5 py-2.5 space-y-2.5">
+              {msgs.map(m => (
+                <div key={m.id} className="text-xs">
+                  <div className="flex items-baseline gap-2">
+                    <span className={`font-semibold ${m.isAdmin ? 'text-blue-700' : 'text-slate-700'}`}>
+                      {m.isAdmin ? 'BlueOne Team' : m.author}
+                    </span>
+                    <span className="text-[10px] text-slate-400">{fmtMsgDate(m.createdAt)}</span>
+                  </div>
+                  <p className="text-slate-600 whitespace-pre-wrap mt-0.5">{m.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -720,6 +801,8 @@ export default function SummaryClient({ token }: Props) {
           <FoodSection prep={prep} />
           <BeveragesSection prep={prep} />
           <SpecialSection prep={prep} />
+          <NotesSection prep={prep} />
+          <DiscussionSection prep={prep} />
           <ChecklistSection prep={prep} />
 
           {/* Footer */}
