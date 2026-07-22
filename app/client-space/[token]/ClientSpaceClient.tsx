@@ -543,7 +543,7 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
       const storageRef = ref(storage, `clientPreparations/${token}/passport/${i}`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
-      setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, passportImageUrl: url } : m));
+      setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, passportImageUrl: url, passportContentType: file.type || undefined } : m));
 
       if (file.type.startsWith('image/') || file.type === 'application/pdf') {
         setExtracting(prev => ({ ...prev, [i]: true }));
@@ -650,7 +650,15 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
                 <div className="col-span-1 sm:col-span-2">
                   <FieldLabel>Passport Photo</FieldLabel>
                   <div className="flex items-center gap-3">
-                    {m.passportImageUrl ? (
+                    {m.passportImageUrl && m.passportContentType === 'application/pdf' ? (
+                      <a href={m.passportImageUrl} target="_blank" rel="noopener noreferrer"
+                        className="w-16 h-10 rounded border border-blue-200 flex flex-col items-center justify-center bg-blue-50/50 text-[9px] font-bold text-blue-500 gap-0.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        PDF
+                      </a>
+                    ) : m.passportImageUrl ? (
                       <a href={m.passportImageUrl} target="_blank" rel="noopener noreferrer">
                         <img src={m.passportImageUrl} alt="Passport" className="w-16 h-10 object-cover rounded border border-blue-200" />
                       </a>

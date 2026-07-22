@@ -291,6 +291,14 @@ export default function BookingDetailClient({ id }: Props) {
               >
                 🧭 Open Client Space
               </a>
+              <a
+                href={`/client-space/${charter.clientSpaceToken}/manifest`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-200 transition-colors"
+              >
+                📋 Crew Manifest
+              </a>
               <button
                 onClick={() => copyClientSpaceLink(charter.clientSpaceToken!)}
                 className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 text-blue-200 transition-colors"
