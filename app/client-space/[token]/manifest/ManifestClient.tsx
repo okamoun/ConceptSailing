@@ -117,6 +117,46 @@ function GuestTable({ guests }: { guests: ManifestGuest[] }) {
   );
 }
 
+function isPdfPassport(url: string, type?: string): boolean {
+  return type === 'application/pdf' || /\.pdf(\?|$)/i.test(url);
+}
+
+function PassportView({ url, type, label }: { url: string; type?: string; label: string }) {
+  if (isPdfPassport(url, type)) {
+    return (
+      <div className="w-full">
+        <object data={url} type="application/pdf" className="w-full h-72 bg-slate-100" aria-label={`Passport PDF — ${label}`}>
+          <div className="p-6 text-center bg-slate-100">
+            <p className="text-xs text-slate-500">PDF passport — inline preview unavailable.</p>
+          </div>
+        </object>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-medium text-blue-600 hover:text-blue-800 border-t border-slate-200"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Open / print passport PDF
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt={`Passport — ${label}`}
+        className="w-full max-h-64 object-contain bg-slate-100"
+      />
+    </a>
+  );
+}
+
 function PassportCopies({ guests }: { guests: ManifestGuest[] }) {
   const withPassport = guests.filter(g => g.member.passportImageUrl);
 
@@ -135,14 +175,11 @@ function PassportCopies({ guests }: { guests: ManifestGuest[] }) {
                   <p className="text-[10px] text-slate-400">Passport {g.member.passportNumber}</p>
                 )}
               </div>
-              <a href={g.member.passportImageUrl} target="_blank" rel="noopener noreferrer" className="block">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={g.member.passportImageUrl}
-                  alt={`Passport — ${fullName(g)}`}
-                  className="w-full max-h-64 object-contain bg-slate-100"
-                />
-              </a>
+              <PassportView
+                url={g.member.passportImageUrl!}
+                type={g.member.passportContentType}
+                label={fullName(g)}
+              />
             </div>
           ))}
         </div>

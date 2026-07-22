@@ -155,6 +155,23 @@ describe('ManifestClient', () => {
     expect(img).toHaveAttribute('src', 'https://fb.example.com/passport-0.jpg');
   });
 
+  it('renders a PDF passport as an embed with an open/print link, not a broken image', async () => {
+    mockGetClientPreparation.mockResolvedValue({
+      token: mockToken,
+      crew: [
+        { firstName: 'Alice', lastName: 'Smith', passportNumber: 'P1', passportImageUrl: 'https://fb.example.com/passport-0', passportContentType: 'application/pdf' },
+      ],
+      travel: {},
+    });
+    await renderManifest();
+
+    // No <img> for the PDF passport
+    expect(screen.queryByAltText('Passport — Alice Smith')).not.toBeInTheDocument();
+    // Instead an open/print link is offered
+    const link = screen.getByRole('link', { name: /open \/ print passport pdf/i });
+    expect(link).toHaveAttribute('href', 'https://fb.example.com/passport-0');
+  });
+
   it('renders a separate leg page for each crew-change period', async () => {
     mockGetClientPreparation.mockResolvedValue({
       token: mockToken,

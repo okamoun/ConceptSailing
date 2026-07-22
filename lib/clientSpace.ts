@@ -30,6 +30,7 @@ export interface CrewMember {
   nationality?: string;
   passportNumber?: string;
   passportImageUrl?: string;
+  passportContentType?: string;   // MIME type of the uploaded passport file, e.g. 'image/jpeg' or 'application/pdf'
   dietaryRestrictions?: string;
   medicalNotes?: string;
 }
