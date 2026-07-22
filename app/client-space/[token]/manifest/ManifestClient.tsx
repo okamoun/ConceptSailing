@@ -38,6 +38,9 @@ function fullName(g: ManifestGuest): string {
 const PRINT_STYLES = `
   @media print {
     .no-print { display: none !important; }
+    /* Embedded plugin content (e.g. a cross-origin PDF <object>) can hijack the
+       print job and blank the page — never include it in the printed document. */
+    object, embed, iframe { display: none !important; }
     .manifest-page { page-break-before: always; }
     .manifest-page:first-of-type { page-break-before: avoid; }
     body { background: white !important; color: #1a1a2e !important; }
@@ -125,11 +128,18 @@ function PassportView({ url, type, label }: { url: string; type?: string; label:
   if (isPdfPassport(url, type)) {
     return (
       <div className="w-full">
-        <object data={url} type="application/pdf" className="w-full h-72 bg-slate-100" aria-label={`Passport PDF — ${label}`}>
+        {/* On screen: embedded PDF preview. Hidden in print — a cross-origin
+            PDF <object> hijacks the print job and blanks the page, so it must
+            not be part of the printed document. */}
+        <object data={url} type="application/pdf" className="no-print w-full h-72 bg-slate-100" aria-label={`Passport PDF — ${label}`}>
           <div className="p-6 text-center bg-slate-100">
             <p className="text-xs text-slate-500">PDF passport — inline preview unavailable.</p>
           </div>
         </object>
+        {/* In print: a placeholder note in place of the (unprintable) embed. */}
+        <div className="hidden print:flex items-center justify-center h-28 bg-slate-100 text-[11px] text-slate-500 px-4 text-center">
+          PDF passport for {label} — printed separately (see link below).
+        </div>
         <a
           href={url}
           target="_blank"
