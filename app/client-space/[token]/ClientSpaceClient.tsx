@@ -34,6 +34,7 @@ import {
 import type { Charter } from '../../../lib/availability';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../../lib/firebase';
+import { pdfFirstPageToJpeg } from '../../../lib/pdfToImage';
 import { getMarinaById, getMarinaByName, marinasByRegion, getAirportByIata, nearestAirportToMarina, haversineKm } from '../../marinas-data';
 import { CONTACT } from '../../config/contact';
 
@@ -540,12 +541,25 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
     setUploading(prev => ({ ...prev, [i]: true }));
     setUploadError(prev => ({ ...prev, [i]: '' }));
     try {
-      const storageRef = ref(storage, `clientPreparations/${token}/passport/${i}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, passportImageUrl: url, passportContentType: file.type || undefined } : m));
+      // Convert PDF passports to a JPEG so they display and print inline like
+      // any image. Fall back to storing the original PDF if conversion fails.
+      let uploadData: Blob = file;
+      let contentType = file.type;
+      if (file.type === 'application/pdf') {
+        try {
+          uploadData = await pdfFirstPageToJpeg(file);
+          contentType = 'image/jpeg';
+        } catch (convErr) {
+          console.warn('[passport] PDF→image conversion failed, storing original PDF:', convErr);
+        }
+      }
 
-      if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+      const storageRef = ref(storage, `clientPreparations/${token}/passport/${i}`);
+      await uploadBytes(storageRef, uploadData, { contentType });
+      const url = await getDownloadURL(storageRef);
+      setCrew(prev => prev.map((m, idx) => idx === i ? { ...m, passportImageUrl: url, passportContentType: contentType || undefined } : m));
+
+      if (contentType.startsWith('image/') || contentType === 'application/pdf') {
         setExtracting(prev => ({ ...prev, [i]: true }));
         try {
           const base64 = await new Promise<string>((resolve, reject) => {
@@ -555,12 +569,12 @@ function CrewStep({ count, initial, token, onSave, onAutoSave }: {
               resolve(result.split(',')[1]);
             };
             reader.onerror = reject;
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(uploadData);
           });
           const res = await fetch('/api/extract-passport', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageBase64: base64, mimeType: file.type }),
+            body: JSON.stringify({ imageBase64: base64, mimeType: contentType }),
           });
           if (res.ok) {
             const { data } = await res.json();
