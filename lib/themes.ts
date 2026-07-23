@@ -92,6 +92,27 @@ export async function initializeThemeDefaults(): Promise<void> {
   );
 }
 
+// Seeds metadata only for default assignments that don't yet exist in
+// Firestore, leaving existing docs (and any admin customizations) untouched.
+// Use this to register newly added themes without a destructive full reset.
+// Returns the number of themes seeded.
+export async function seedMissingThemeDefaults(): Promise<number> {
+  const snap = await getDocs(collection(db, COLLECTION));
+  const existing = new Set(snap.docs.map(d => d.id));
+  const missing = DEFAULT_ASSIGNMENTS.filter(entry => !existing.has(entry.id));
+  await Promise.all(
+    missing.map(entry =>
+      upsertThemeMetadata(entry.id, {
+        category: entry.category,
+        order: entry.order,
+        visible: true,
+        featured: false,
+      })
+    )
+  );
+  return missing.length;
+}
+
 // Overwrites all theme metadata with default assignments regardless of existing data.
 export async function resetThemeDefaults(): Promise<void> {
   await Promise.all(

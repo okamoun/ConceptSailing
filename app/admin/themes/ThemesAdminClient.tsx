@@ -9,6 +9,7 @@ import {
   upsertThemeMetadata,
   initializeThemeDefaults,
   resetThemeDefaults,
+  seedMissingThemeDefaults,
   THEME_CATEGORIES,
   type ThemeMetadata,
   type ThemeCategory,
@@ -177,7 +178,19 @@ export default function ThemesAdminClient() {
   const load = useCallback(async () => {
     try {
       setLoading(true);
-      const metaList = await getAllThemeMetadata();
+      let metaList = await getAllThemeMetadata();
+
+      // Register any newly added themes that don't yet have metadata, so they
+      // land in their intended category instead of the fallback. Non-destructive:
+      // existing docs and admin customizations are left untouched.
+      if (metaList.length > 0) {
+        const have = new Set(metaList.map(m => m.id));
+        const hasMissing = adventures.some(adv => !have.has(adv.id));
+        if (hasMissing) {
+          const seeded = await seedMissingThemeDefaults();
+          if (seeded > 0) metaList = await getAllThemeMetadata();
+        }
+      }
 
       if (metaList.length === 0) {
         setIsUninitialized(true);
