@@ -41,6 +41,8 @@ const DEFAULT_ASSIGNMENTS: Array<Pick<ThemeMetadata, 'id' | 'category' | 'order'
   { id: '4',  category: 'Wellness & Relaxation',     order: 1 },
   { id: '5',  category: 'Culture & History',         order: 0 },
   { id: '9',  category: 'Culture & History',         order: 1 },
+  { id: '19', category: 'Culture & History',         order: 2 },
+  { id: '20', category: 'Culture & History',         order: 3 },
   { id: '6',  category: 'Food',                      order: 0 },
   { id: '10', category: 'Food',                      order: 1 },
   { id: '11', category: 'Food',                      order: 2 },
