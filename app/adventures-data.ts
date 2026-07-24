@@ -1082,6 +1082,124 @@ const adventures: Adventure[] = [
     ],
     features: ["Cigar tasting", "Sommelier", "Gourmet dining", "Island hopping", "Meerapfel collaboration"],
   },
+  {
+    id: "19",
+    name: "Follow Ulysses",
+    description: "Retrace the legendary homeward voyage of Ulysses through the Ionian Sea — from mythical Phaeacia to his island kingdom of Ithaca. Inspired by the epic screen retelling of Homer's Odyssey.",
+    image: "/adventures/experience_your_odyssey.jpg",
+    experience: "Sail in the wake of the greatest voyage ever told. Over seven days in the Ionian Sea you follow the legendary route of Ulysses (Odysseus) on his ten-year journey home, brought vividly to life by the sweeping cinema retelling of Homer's Odyssey. A resident storyteller reads passages of the epic on deck each evening as you anchor beneath the very islands Homer sang of — the Phaeacian shores of Corfu, the sea caves said to be carved by Poseidon, and the nymph-haunted grottoes of Kefalonia. Every leg draws you closer to Ithaca, the hero's homeland, where the voyage ends as his did: with a triumphant homecoming.",
+    itinerary: [
+      {
+        title: "Corfu — Land of the Phaeacians",
+        description: "Embark in Corfu, ancient Scheria, where a shipwrecked Ulysses was welcomed by Princess Nausicaa and King Alcinous — his final refuge before Ithaca. Welcome dinner and the first reading of the Odyssey on deck.",
+        features: ["Welcome dinner", "Storytelling", "Homer's Odyssey"],
+        lat: 39.6243, // Corfu
+        lng: 19.9217
+      },
+      {
+        title: "Paxos & Antipaxos — Poseidon's Isles",
+        description: "Sail south to Paxos, said in legend to have been struck from Corfu by Poseidon's trident. Swim in the luminous blue sea caves and anchor off Antipaxos for an afternoon of turquoise water.",
+        features: ["Sea caves", "Swimming", "Greek mythology"],
+        lat: 39.1990, // Paxos
+        lng: 20.1850
+      },
+      {
+        title: "Lefkada — The Contested Ithaca",
+        description: "Cross to Lefkada, which some scholars argue was Homer's true Ithaca. Explore the old town and taverna dinner, with a reading on the theories of where the hero's kingdom truly lay.",
+        features: ["Island exploration", "Storytelling", "Local culture"],
+        lat: 38.7167, // Lefkada
+        lng: 20.6500
+      },
+      {
+        title: "Kefalonia — The Nymph's Cave",
+        description: "Anchor at Sami and descend into the Melissani Cave, a sunlit underground lake once dedicated to the nymphs — echoing the sacred grottoes of the Odyssey. Afternoon at Antisamos beach.",
+        features: ["Sea caves", "Ancient sites", "Swimming"],
+        lat: 38.2500, // Kefalonia (Sami)
+        lng: 20.6500
+      },
+      {
+        title: "Zakynthos — Realm of Ulysses",
+        description: "Sail to Zakynthos (Homer's Zacynthus), named among the islands of Ulysses' kingdom in the epic. Visit the Blue Caves and swim in secluded coves before the final leg north to Ithaca.",
+        features: ["Sea caves", "Homer's Odyssey", "Swimming"],
+        lat: 37.7870, // Zakynthos
+        lng: 20.8990
+      },
+      {
+        title: "Ithaca — The Cave of the Nymphs",
+        description: "Arrive at last in Ithaca, the hero's homeland. Anchor at Vathy and hike to the Cave of the Nymphs, where legend says Ulysses hid the treasures gifted by the Phaeacians on his return.",
+        features: ["Ancient sites", "Greek mythology", "Storytelling"],
+        lat: 38.3670, // Ithaca (Vathy)
+        lng: 20.7200
+      },
+      {
+        title: "Ithaca — The Homecoming",
+        description: "The voyage ends as the Odyssey does. Explore the archaeological site known as the School of Homer near Stavros, thought by many to be Ulysses' palace, then raise a farewell toast to the hero's homecoming.",
+        features: ["Ancient sites", "Farewell dinner", "Homer's Odyssey"],
+        lat: 38.4200, // Ithaca (Stavros)
+        lng: 20.6667
+      }
+    ],
+    features: ["Greek mythology", "Homer's Odyssey", "Ancient sites", "Storytelling", "Sea caves", "Island hopping"]
+  },
+  {
+    id: "20",
+    name: "Experience Your Odyssey",
+    description: "Live your own hero's journey across the Ionian Sea — a personal odyssey inspired by the film, where each day mirrors a trial of Ulysses and the voyage ends, like his, with a homecoming to Ithaca.",
+    image: "/adventures/experience_your_odyssey.jpg",
+    experience: "This is not a voyage you watch — it is one you live. Inspired by the cinematic retelling of Homer's Odyssey, Experience Your Odyssey reimagines the trials of Ulysses as seven days of adventure, wonder, and self-discovery in the Ionian Sea. Each anchorage stages a chapter of the myth: the forgetful ease of the Lotus-Eaters in a hidden cove, the wild goat-island of the Cyclops, the enchantment of Circe over a feast under the stars, and the perilous song of the Sirens on an open-sea crossing. You are the hero of your own epic — and every course you steer leads home to Ithaca.",
+    itinerary: [
+      {
+        title: "Lefkada — The Call to Adventure",
+        description: "Board in Lefkada and leave the harbour behind, as Ulysses once left the ruins of Troy. Safety briefing, first sail, and a sunset toast to the journey ahead.",
+        features: ["Welcome dinner", "Sailing", "Storytelling"],
+        lat: 38.7167, // Lefkada
+        lng: 20.6500
+      },
+      {
+        title: "Meganisi — The Lotus-Eaters",
+        description: "Slip into the hidden coves of Meganisi, where time dissolves like it did for the crew who tasted the lotus. A day of swimming, drifting, and blissful forgetting in secluded turquoise bays.",
+        features: ["Secluded coves", "Swimming", "Greek mythology"],
+        lat: 38.6500, // Meganisi
+        lng: 20.7833
+      },
+      {
+        title: "Kalamos — The Cyclops' Isle",
+        description: "Anchor off wild, pine-clad Kalamos, evoking the untamed goat-island of the Cyclops. Hike to a hilltop chapel, explore a shoreline cave, and gather for a hearty island feast.",
+        features: ["Hero's journey", "Sea caves", "Island exploration"],
+        lat: 38.6200, // Kalamos
+        lng: 20.9200
+      },
+      {
+        title: "Kefalonia — Circe's Enchantment",
+        description: "Sail to Kefalonia for a day of enchantment: the mirror-still waters of Melissani Cave, the stalactites of Drogarati, and a Circe-inspired feast with local wine under the stars.",
+        features: ["Sea caves", "Gourmet dining", "Greek mythology"],
+        lat: 38.2500, // Kefalonia (Sami)
+        lng: 20.6500
+      },
+      {
+        title: "Atokos — The Sirens' Passage",
+        description: "Cross the open sea toward the lonely island of Atokos, steering past its cliffs as Ulysses ran the gauntlet of the Sirens. Anchor in the dramatic bay of One House for a swim beneath sheer rock.",
+        features: ["Hero's journey", "Sailing", "Swimming"],
+        lat: 38.4700, // Atokos
+        lng: 20.8200
+      },
+      {
+        title: "Kioni, Ithaca — Calypso's Farewell",
+        description: "Reach the storybook harbour of Kioni on Ithaca — your Ogygia, the island of Calypso where the hero lingered before choosing home. A tranquil last night of reflection before the homecoming.",
+        features: ["Secluded coves", "Storytelling", "Local culture"],
+        lat: 38.4500, // Kioni, Ithaca
+        lng: 20.6870
+      },
+      {
+        title: "Vathy, Ithaca — Your Odyssey Complete",
+        description: "Arrive in Vathy, the heart of Ithaca, and complete your odyssey as Ulysses completed his — home at last. A celebratory farewell dinner and a reading of the epic's final homecoming.",
+        features: ["Farewell dinner", "Homer's Odyssey", "Ancient sites"],
+        lat: 38.3670, // Ithaca (Vathy)
+        lng: 20.7200
+      }
+    ],
+    features: ["Hero's journey", "Homer's Odyssey", "Sea caves", "Secluded coves", "Storytelling", "Island exploration"]
+  },
 ];
 
 // Chef data structure

@@ -90,5 +90,23 @@ export const featureIconMap: Record<string, ReactNode> = {
   ),
   "Island hopping": (
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/></svg>
+  ),
+  "Greek mythology": (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16M6 20V9m4 11V9m4 11V9m4 11V9M4 9h16L12 3 4 9z"/></svg>
+  ),
+  "Homer's Odyssey": (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 5c3-1 6-1 8 1v13c-2-2-5-2-8-1V5z"/><path d="M22 5c-3-1-6-1-8 1v13c2-2 5-2 8-1V5z"/></svg>
+  ),
+  "Storytelling": (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg>
+  ),
+  "Sea caves": (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21V11a9 9 0 0118 0v10"/><path d="M3 21c2-2 4-2 6 0s4-2 6 0 4-2 6 0"/><circle cx="12" cy="12" r="2"/></svg>
+  ),
+  "Hero's journey": (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M6 21V7l7-4 7 4v14"/><path d="M10 21v-5h4v5"/></svg>
+  ),
+  "Secluded coves": (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18c3 0 3-4 6-4s3 4 6 4 3-4 6-4"/><path d="M12 3v7"/><path d="M8 6l4-3 4 3"/></svg>
   )
 };

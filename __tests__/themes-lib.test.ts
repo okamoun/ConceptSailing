@@ -172,10 +172,10 @@ describe('initializeThemeDefaults', () => {
     expect(mockSetDoc).not.toHaveBeenCalled()
   })
 
-  test('writes 18 documents when collection is empty', async () => {
+  test('writes 20 documents when collection is empty', async () => {
     mockGetDocs.mockResolvedValue(makeSnapshot([]))
     await initializeThemeDefaults()
-    expect(mockSetDoc).toHaveBeenCalledTimes(18)
+    expect(mockSetDoc).toHaveBeenCalledTimes(20)
   })
 
   test('sets visible=true and featured=false for all seeded entries', async () => {
@@ -186,11 +186,11 @@ describe('initializeThemeDefaults', () => {
     }
   })
 
-  test('seeds each adventure id from 1 to 18', async () => {
+  test('seeds each adventure id from 1 to 20', async () => {
     mockGetDocs.mockResolvedValue(makeSnapshot([]))
     await initializeThemeDefaults()
     const seededIds = mockDoc.mock.calls.map(([, , id]: [unknown, unknown, string]) => id)
-    const expectedIds = Array.from({ length: 18 }, (_, i) => String(i + 1))
+    const expectedIds = Array.from({ length: 20 }, (_, i) => String(i + 1))
     expect(seededIds.sort()).toEqual(expect.arrayContaining(expectedIds.sort()))
   })
 

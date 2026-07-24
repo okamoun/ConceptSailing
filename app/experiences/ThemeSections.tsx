@@ -21,7 +21,7 @@ const HARDCODED_CATEGORIES: CategoryGroup[] = [
   },
   {
     category: 'Culture & History',
-    themes: ['5', '9'].map(id => adventures.find(a => a.id === id)!).filter(Boolean),
+    themes: ['5', '9', '19', '20'].map(id => adventures.find(a => a.id === id)!).filter(Boolean),
   },
   {
     category: 'Food',

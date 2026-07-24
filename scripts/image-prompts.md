@@ -27,6 +27,12 @@
 ## Romantic Aegean Cruise
 **Prompt:** "Couple enjoying romantic dinner on luxury yacht deck, sunset over Greek islands, candles, intimate setting, romantic travel photography"
 
+## Follow Ulysses
+**Prompt:** "Luxury sailing catamaran anchored beneath the dramatic cliffs of Ithaca in the Ionian Sea, ancient Greek mythology atmosphere, warm epic golden light evoking Homer's Odyssey, weathered sea caves and olive groves on shore, cinematic travel photography"
+
+## Experience Your Odyssey
+**Prompt:** "Lone luxury catamaran crossing a vast open Ionian Sea at golden hour, heroic epic mood inspired by Homer's Odyssey, distant Greek island of Ithaca on the horizon, dramatic clouds and glowing light, cinematic wide-angle travel photography"
+
 ## Image Specifications
 - **Style:** Professional travel/lifestyle photography
 - **Lighting:** Natural daylight or golden hour
