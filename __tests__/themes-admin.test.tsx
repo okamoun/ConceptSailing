@@ -15,6 +15,7 @@ jest.mock('../lib/themes', () => ({
   getAllThemeMetadata: jest.fn(),
   upsertThemeMetadata: jest.fn().mockResolvedValue(undefined),
   initializeThemeDefaults: jest.fn().mockResolvedValue(undefined),
+  seedMissingThemeDefaults: jest.fn().mockResolvedValue(0),
   THEME_CATEGORIES: [
     'Active & Sports',
     'Wellness & Relaxation',
