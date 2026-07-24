@@ -1086,7 +1086,7 @@ const adventures: Adventure[] = [
     id: "19",
     name: "Follow Ulysses",
     description: "Retrace the legendary homeward voyage of Ulysses through the Ionian Sea — from mythical Phaeacia to his island kingdom of Ithaca. Inspired by the epic screen retelling of Homer's Odyssey.",
-    image: "/adventures/greek-history.jpg",
+    image: "/adventures/experience-your-odyssey.jpg",
     experience: "Sail in the wake of the greatest voyage ever told. Over seven days in the Ionian Sea you follow the legendary route of Ulysses (Odysseus) on his ten-year journey home, brought vividly to life by the sweeping cinema retelling of Homer's Odyssey. A resident storyteller reads passages of the epic on deck each evening as you anchor beneath the very islands Homer sang of — the Phaeacian shores of Corfu, the sea caves said to be carved by Poseidon, and the nymph-haunted grottoes of Kefalonia. Every leg draws you closer to Ithaca, the hero's homeland, where the voyage ends as his did: with a triumphant homecoming.",
     itinerary: [
       {
@@ -1145,7 +1145,7 @@ const adventures: Adventure[] = [
     id: "20",
     name: "Experience Your Odyssey",
     description: "Live your own hero's journey across the Ionian Sea — a personal odyssey inspired by the film, where each day mirrors a trial of Ulysses and the voyage ends, like his, with a homecoming to Ithaca.",
-    image: "/adventures/Aura-51-Fountaine-Pajot-Sailing-Catamarans-Exterior-01.jpeg",
+    image: "/adventures/experience-your-odyssey.jpg",
     experience: "This is not a voyage you watch — it is one you live. Inspired by the cinematic retelling of Homer's Odyssey, Experience Your Odyssey reimagines the trials of Ulysses as seven days of adventure, wonder, and self-discovery in the Ionian Sea. Each anchorage stages a chapter of the myth: the forgetful ease of the Lotus-Eaters in a hidden cove, the wild goat-island of the Cyclops, the enchantment of Circe over a feast under the stars, and the perilous song of the Sirens on an open-sea crossing. You are the hero of your own epic — and every course you steer leads home to Ithaca.",
     itinerary: [
       {
