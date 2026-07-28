@@ -1,16 +1,19 @@
 import emailjs from '@emailjs/browser';
-import { CONTACT } from '../app/config/contact';
 import { trackEvent } from './analytics';
 import { saveContactSubmission } from './submissions';
+import { buildDetailsRecap, contactRecapFields, SIGNATURE, type RecapField } from './confirmationRecap';
 
 // EmailJS configuration with fallbacks
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'demo_public_key';
 const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || 'demo_service';
 const EMAILJS_BOOKING_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_BUSINESS_TEMPLATE_ID || 'demo_booking_template';
-const EMAILJS_CONTACT_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CLIENT_TEMPLATE_ID || 'demo_contact_template';
+// "Simple" body-only template used for the AI-phrased information-request confirmation
+const EMAILJS_SIMPLE_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_SIMPLE_TEMPLATE_ID || 'template_simple';
 
-// Fallback business email for demo purposes
+// Business "rep" address used as sender/reply-to on guest confirmations
 const BUSINESS_EMAIL = 'contact@nj3cruises.com';
+// Internal BCC copy of every guest confirmation
+const BUSINESS_BCC_EMAIL = 'kamouno@nj3cruises.com';
 
 export interface BookingEmailData {
   name: string;
@@ -67,7 +70,7 @@ try {
   console.log('Public Key:', EMAILJS_PUBLIC_KEY);
   console.log('Service ID:', EMAILJS_SERVICE_ID);
   console.log('Booking Template ID:', EMAILJS_BOOKING_TEMPLATE_ID);
-  console.log('Contact Template ID:', EMAILJS_CONTACT_TEMPLATE_ID);
+  console.log('Simple Template ID:', EMAILJS_SIMPLE_TEMPLATE_ID);
   console.log('Is Configured:', isEmailJSConfigured());
   
   if (isEmailJSConfigured()) {
@@ -99,44 +102,56 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
   }
 
   try {
-    const templateParams = {
-      // Recipients - both client and business will receive this email
-      to_email: BUSINESS_EMAIL, // Business email as primary recipient
-      cc_email: bookingData.email, // Client email as CC
+    const embarkation = bookingData.deliveryPoint || bookingData.embarkationPoint;
+    const redelivery = bookingData.redeliveryPoint || bookingData.deliveryPoint || bookingData.embarkationPoint;
+
+    // Structured summary of the request. The contact rows carry the guest's
+    // phone with its derived country / time zone; the request rows describe the
+    // charter. The same rows drive both the recap block in the email and the
+    // context handed to the AI intro.
+    const requestFields: RecapField[] = [
+      { label: 'Boat', value: bookingData.boat },
+      { label: 'Dates', value: `${bookingData.date}${bookingData.endDate ? ` to ${bookingData.endDate}` : ''}` },
+      { label: 'Guests', value: String(bookingData.passengerDetails || bookingData.passengers) },
+      { label: 'Embarkation', value: embarkation },
+      { label: 'Disembarkation', value: redelivery && redelivery !== embarkation ? redelivery : '' },
+      { label: 'Theme', value: bookingData.selectedTheme || '' },
+      { label: 'Notes', value: bookingData.holidayDescription || '' },
+    ];
+    const recapFields: RecapField[] = [
+      ...contactRecapFields(bookingData.name, bookingData.email, bookingData.phone),
+      ...requestFields,
+    ];
+    // Plain summary of just the request rows, used only as AI context.
+    const details = requestFields
+      .filter(f => f.value && f.value.trim())
+      .map(f => `${f.label}: ${f.value}`)
+      .join('\n');
+
+    const confirmationMessage = await buildConfirmationMessage({
+      name: bookingData.name,
       email: bookingData.email,
-      // Client information
-      client_name: bookingData.name,
-      client_email: bookingData.email,
-      client_phone: bookingData.phone,
-      
-      // Booking details
-      boat_name: bookingData.boat,
-      charter_date: bookingData.date,
-      charter_end_date: bookingData.endDate || bookingData.date,
-      passengers: bookingData.passengers,
-      embarkation_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
-      delivery_point: bookingData.deliveryPoint || bookingData.embarkationPoint,
-      redelivery_point: bookingData.redeliveryPoint || bookingData.deliveryPoint || bookingData.embarkationPoint,
-      
-      // Additional details
-      passenger_details: bookingData.passengerDetails || '',
-      comment: bookingData.holidayDescription,
-      theme: bookingData.selectedTheme,
-      submission_time: new Date(bookingData.timestamp).toLocaleString(),
-      
-      // Business contact information
-      business_email: BUSINESS_EMAIL,
-      business_phone: CONTACT.phone.formatted,
-      
-      // Reply to client for easy communication
-      reply_to: bookingData.email,
+      phone: bookingData.phone,
+      details,
+      recapFields,
+    });
+
+    // Fields consumed by the "simple" EmailJS template:
+    //   {{email}} → recipient (client), {{rep_email}} → reply-to,
+    //   {{bcc_email}} → internal copy, {{title}} → subject, {{message}} → body
+    const templateParams = {
+      email: bookingData.email,
+      rep_email: BUSINESS_EMAIL,
+      bcc_email: BUSINESS_BCC_EMAIL,
+      title: 'We’ve received your quote request — BlueOne',
+      message: confirmationMessage,
     };
 
     console.log('Sending booking email with params :', templateParams);
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
-      EMAILJS_BOOKING_TEMPLATE_ID,
+      EMAILJS_SIMPLE_TEMPLATE_ID,
       templateParams
     );
 
@@ -165,6 +180,63 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
   }
 }
 
+interface ConfirmationInput {
+  name: string;
+  email: string;
+  phone?: string;
+  /** Free-text message the guest typed (contact form / holiday notes). */
+  message?: string;
+  /** Structured summary of a quote / information request (dates, boat, guests…) — AI context only. */
+  details?: string;
+  /** Labeled rows echoed back to the guest as a deterministic recap block. */
+  recapFields: RecapField[];
+}
+
+/**
+ * Compose the confirmation email body: a warm AI-phrased intro, then a
+ * deterministic recap of exactly what the guest submitted, then a fixed
+ * signature. The recap and signature are always present — even when AI
+ * generation fails and we fall back to a static intro — so the guest always
+ * gets an accurate acknowledgment of their request.
+ */
+async function buildConfirmationMessage(input: ConfirmationInput): Promise<string> {
+  const firstName = input.name.trim().split(/\s+/)[0] || input.name;
+  const fallbackIntro =
+    `Dear ${firstName},\n\n` +
+    `Thank you for reaching out to BlueOne. We have received your request and a member of our team will get back to you shortly.`;
+
+  const recap = buildDetailsRecap(input.recapFields);
+  const intro = (await fetchConfirmationIntro(input)) || fallbackIntro;
+
+  return [intro, recap, SIGNATURE].filter(Boolean).join('\n\n');
+}
+
+/**
+ * Fetch the AI-phrased intro from the server route. Returns the trimmed intro,
+ * or null on any failure so the caller can fall back to a static greeting.
+ */
+async function fetchConfirmationIntro(input: ConfirmationInput): Promise<string | null> {
+  try {
+    const res = await fetch('/api/contact-confirmation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        message: input.message,
+        details: input.details,
+      }),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { message?: string };
+    return data.message?.trim() || null;
+  } catch (err) {
+    console.warn('AI confirmation generation failed, using fallback message:', err);
+    return null;
+  }
+}
+
 /**
  * Send contact form email
  */
@@ -172,7 +244,7 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
   console.log('Contact email request received');
   console.log('EmailJS configured:', isEmailJSConfigured());
   console.log('EmailJS initialized:', emailjsInitialized);
-  
+
   // Check if EmailJS is properly configured and initialized
   if (!isEmailJSConfigured() || !emailjsInitialized) {
     console.error('EmailJS not configured or initialized - cannot send contact email');
@@ -183,29 +255,35 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
   }
 
   try {
-    const templateParams = {
-      // Contact information
-      from_name: contactData.name,
-      from_email: contactData.email,
-      from_phone: contactData.phone || 'Not provided',
-      email : contactData.email,
-      // Message details
+    const recapFields: RecapField[] = [
+      ...contactRecapFields(contactData.name, contactData.email, contactData.phone),
+      { label: 'Message', value: contactData.message },
+    ];
+
+    const confirmationMessage = await buildConfirmationMessage({
+      name: contactData.name,
+      email: contactData.email,
+      phone: contactData.phone,
       message: contactData.message,
-      submission_time: new Date(contactData.timestamp).toLocaleString(),
-      
-      // Business contact information
-      business_email: BUSINESS_EMAIL,
-      business_phone: CONTACT.phone.formatted,
-      
-      // Reply to client for easy communication
-      reply_to: contactData.email,
+      recapFields,
+    });
+
+    // Fields consumed by the "simple" EmailJS template:
+    //   {{email}} → recipient (client), {{rep_email}} → reply-to,
+    //   {{bcc_email}} → internal copy, {{title}} → subject, {{message}} → body
+    const templateParams = {
+      email: contactData.email,
+      rep_email: BUSINESS_EMAIL,
+      bcc_email: BUSINESS_BCC_EMAIL,
+      title: 'We’ve received your message — BlueOne',
+      message: confirmationMessage,
     };
 
     console.log('Sending contact email with params:', templateParams);
 
     const response = await emailjs.send(
       EMAILJS_SERVICE_ID,
-      EMAILJS_CONTACT_TEMPLATE_ID,
+      EMAILJS_SIMPLE_TEMPLATE_ID,
       templateParams
     );
 
