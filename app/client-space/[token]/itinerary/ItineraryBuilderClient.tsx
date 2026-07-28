@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import {
   getClientPreparation,
@@ -19,8 +19,11 @@ import adventures from '../../../adventures-data';
 import { featureIconMap } from '../../../feature-icons';
 import { CONTACT } from '../../../config/contact';
 import { formatNavTime } from '../../../marinas-data';
-import { CRUISE_SPEED_KN, legNm } from './itinerary-utils';
+import { CRUISE_SPEED_KN, legNm, assignSequentialDates, daysBetween } from './itinerary-utils';
 import ItineraryMapLoader from './ItineraryMapLoader.client';
+
+const fmtDayLabel = (iso?: string) =>
+  iso ? new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
 
 // Re-sequence a stop list so `order` matches array position.
 function reindex(stops: ClientItineraryStop[]): ClientItineraryStop[] {
@@ -95,7 +98,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
     const seeded: ClientItinerary = {
       source: 'theme',
       sourceThemeId: themeAdventure.id,
-      stops: makeItineraryStops(themeAdventure.itinerary),
+      stops: assignSequentialDates(makeItineraryStops(themeAdventure.itinerary), charter?.startDate, charter?.endDate),
       generatedAt: new Date().toISOString(),
     };
     persist(seeded);
@@ -141,12 +144,16 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
   }
 
   function addStop() {
+    // Default the new stop to the last stop's date (or the charter start) so it
+    // slots onto a real day — the client can move it to another day after.
+    const defaultDate = stops[stops.length - 1]?.date || charter?.startDate;
     const next: ClientItineraryStop = {
       id: newStopId(),
       order: stops.length,
       title: 'New stop',
       description: '',
       features: [],
+      ...(defaultDate ? { date: defaultDate } : {}),
     };
     updateStops([...stops, next]);
   }
@@ -353,9 +360,18 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
               <ul className="space-y-3">
                 {stops.map((s, i) => {
                   const nm = i > 0 ? legNm(stops[i - 1], s) : null;
+                  const showDayHeader = i === 0 || s.date !== stops[i - 1].date;
+                  const dayNumber = charter.startDate && s.date ? daysBetween(charter.startDate, s.date) + 1 : i + 1;
                   return (
+                  <Fragment key={s.id}>
+                  {showDayHeader && (
+                    <li className="flex items-center gap-2 pt-1">
+                      <span className="text-white text-xs font-bold uppercase tracking-wide">Day {dayNumber}</span>
+                      {s.date && <span className="text-blue-300 text-xs">· {fmtDayLabel(s.date)}</span>}
+                      <span className="flex-1 h-px bg-white/15" />
+                    </li>
+                  )}
                   <li
-                    key={s.id}
                     data-testid="itinerary-stop"
                     onMouseEnter={() => setSelectedId(s.id)}
                     onMouseLeave={() => setSelectedId(undefined)}
@@ -366,6 +382,15 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
+                        <input
+                          type="date"
+                          aria-label={`Stop ${i + 1} date`}
+                          value={s.date ?? ''}
+                          min={charter.startDate}
+                          max={charter.endDate}
+                          onChange={e => editStop(s.id, { date: e.target.value })}
+                          className="mb-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-400 [color-scheme:dark]"
+                        />
                         {i === 0 ? (
                           <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1">
                             <AnchorIcon />
@@ -428,6 +453,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                     </div>
                     <FeatureAdder onAdd={f => addFeature(s.id, f)} />
                   </li>
+                  </Fragment>
                   );
                 })}
               </ul>

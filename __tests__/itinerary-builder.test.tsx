@@ -71,6 +71,7 @@ jest.mock('../app/client-space/[token]/itinerary/ItineraryMapLoader.client', () 
 // ---------------------------------------------------------------------------
 import { POST as generatePOST } from '../app/api/itinerary-generate/route';
 import { POST as chatPOST } from '../app/api/itinerary-chat/route';
+import { POST as weatherPOST } from '../app/api/itinerary-weather/route';
 import ItineraryBuilderClient from '../app/client-space/[token]/itinerary/ItineraryBuilderClient';
 import ItineraryReportClient from '../app/client-space/[token]/itinerary/report/ItineraryReportClient';
 import adventures from '../app/adventures-data';
@@ -193,6 +194,10 @@ describe('POST /api/itinerary-generate', () => {
     expect(data.itinerary.stops[0]).toHaveProperty('id');
     expect(data.itinerary.stops[0].order).toBe(0);
 
+    // Each stop is dated sequentially from the charter start.
+    expect(data.itinerary.stops[0].date).toBe('2026-07-01');
+    expect(data.itinerary.stops[7].date).toBe('2026-07-08');
+
     // Trip is 2026-07-01 → 2026-07-08 (8 days) and that reaches the prompt.
     const prompt = mockCreate.mock.calls[0][0].messages[0].content as string;
     expect(prompt).toContain('8 day');
@@ -242,6 +247,58 @@ describe('POST /api/itinerary-chat', () => {
 });
 
 // ===========================================================================
+// POST /api/itinerary-weather
+// ===========================================================================
+describe('POST /api/itinerary-weather', () => {
+  function isoInDays(days: number) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  test('returns a live forecast when the date is within range', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        daily: {
+          temperature_2m_max: [30],
+          temperature_2m_min: [22],
+          weather_code: [0],
+          wind_speed_10m_max: [18],
+        },
+      }),
+    });
+
+    const res = await weatherPOST(makeRequest({ lat: 37.4, lng: 25.3, date: isoInDays(3) }));
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.weather.source).toBe('forecast');
+    expect(data.weather.tempMaxC).toBe(30);
+    expect(data.weather.windKmh).toBe(18);
+    expect(data.weather.emoji).toBeTruthy();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  test('falls back to a seasonal average beyond the forecast window (no network call)', async () => {
+    const res = await weatherPOST(makeRequest({ lat: 37.4, lng: 25.3, date: isoInDays(120) }));
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.weather.source).toBe('seasonal');
+    expect(typeof data.weather.tempMaxC).toBe('number');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  test('falls back to seasonal when the forecast request fails', async () => {
+    (global.fetch as jest.Mock).mockRejectedValue(new Error('network'));
+
+    const res = await weatherPOST(makeRequest({ lat: 37.4, lng: 25.3, date: isoInDays(2) }));
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.weather.source).toBe('seasonal');
+  });
+});
+
+// ===========================================================================
 // 5. Manual edits — add / remove / reorder
 // ===========================================================================
 describe('Manual stop editing', () => {
@@ -266,6 +323,18 @@ describe('Manual stop editing', () => {
     expect(saved.stops).toHaveLength(1);
     expect(saved.stops[0].title).toBe('Poros');
     expect(saved.stops[0].order).toBe(0);
+  });
+
+  test('each stop has a date field that persists changes', async () => {
+    await renderBuilderWithItinerary(stops('Athens', 'Poros'));
+
+    const dateInput = screen.getByLabelText('Stop 1 date') as HTMLInputElement;
+    expect(dateInput).toBeInTheDocument();
+    fireEvent.change(dateInput, { target: { value: '2026-07-03' } });
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.stops[0].date).toBe('2026-07-03');
   });
 
   test('reordering updates order values and persists', async () => {
@@ -373,7 +442,13 @@ describe('Chat composer', () => {
 // Itinerary report
 // ===========================================================================
 describe('Itinerary report', () => {
-  test('renders an overview and a day-by-day breakdown of the itinerary', async () => {
+  test('renders an overview and a day-by-day breakdown with dates and weather', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        weather: { source: 'seasonal', emoji: '☀️', label: 'Hot and sunny', tempMaxC: 31, tempMinC: 23, windLabel: 'Meltemi' },
+      }),
+    });
     mockGetPrep.mockResolvedValue({
       ...emptyPrep,
       itinerary: { source: 'manual', stops: stops('Athens', 'Poros', 'Hydra') },
@@ -389,6 +464,28 @@ describe('Itinerary report', () => {
     expect(screen.getByText(/⚓ Embarkation/)).toBeInTheDocument();
     // Two hops between the three stops, each showing an inbound leg.
     expect(screen.getAllByText(/from previous stop/)).toHaveLength(2);
+
+    // Dates are shown (charter starts 2026-07-01) and weather loads per day.
+    expect(screen.getByText('1 July 2026')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getAllByTestId('weather')).toHaveLength(3));
+  });
+
+  test('groups several stops that share a date under a single day', async () => {
+    const dated = [
+      { id: 'a', order: 0, title: 'Piraeus', description: 'Board', features: [] as string[], date: '2026-07-01', lat: 37.98, lng: 23.72 },
+      { id: 'b', order: 1, title: 'Cape Sounion', description: 'Temple', features: [] as string[], date: '2026-07-01', lat: 37.65, lng: 24.02 },
+      { id: 'c', order: 2, title: 'Kea', description: 'Bay', features: [] as string[], date: '2026-07-02', lat: 37.61, lng: 24.33 },
+    ];
+    mockGetPrep.mockResolvedValue({ ...emptyPrep, itinerary: { source: 'manual', stops: dated } });
+    render(<ItineraryReportClient token={TOKEN} />);
+
+    await waitFor(() => expect(screen.getByText('Day-by-Day Itinerary')).toBeInTheDocument());
+
+    // Two dates → two day badges, but all three stops are listed (as headings).
+    expect(screen.getAllByText('Day')).toHaveLength(2);
+    expect(screen.getByRole('heading', { name: 'Piraeus' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Cape Sounion' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Kea' })).toBeInTheDocument();
   });
 
   test('shows an empty state with a link back to the builder when no itinerary exists', async () => {

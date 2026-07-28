@@ -15,6 +15,7 @@ function normaliseStops(rawStops: Array<Record<string, unknown>>): ClientItinera
       description: String(s.description ?? ''),
       features: Array.isArray(s.features) ? (s.features as unknown[]).map(String) : [],
     };
+    if (typeof s.date === 'string' && s.date) stop.date = s.date;
     if (typeof s.lat === 'number') stop.lat = s.lat;
     if (typeof s.lng === 'number') stop.lng = s.lng;
     return stop;
@@ -41,10 +42,11 @@ ${JSON.stringify(currentStops, null, 2)}
 The client asks: "${message.trim()}"
 
 Apply their request to the itinerary and return ONLY a JSON object of the form:
-{ "stops": [ { "id": string, "order": number, "title": string, "description": string, "features": string[], "lat": number, "lng": number } ], "reply": string }
+{ "stops": [ { "id": string, "order": number, "title": string, "description": string, "features": string[], "date": "YYYY-MM-DD", "lat": number, "lng": number } ], "reply": string }
 
 Rules:
-- Keep each unchanged stop's existing "id". Real Greek-island geography only, with accurate "lat"/"lng".
+- Keep each unchanged stop's existing "id" and "date". Real Greek-island geography only, with accurate "lat"/"lng".
+- Preserve each stop's "date"; several stops may share the same date (more than one stop on a day).
 - If the request does not call for any itinerary change, return the stops exactly as given and explain that in "reply".
 - "reply" is one or two short, friendly sentences confirming what you changed (or that nothing changed).
 - Prefer these activity labels for "features" when one fits: ${knownFeatures.join(', ')}.

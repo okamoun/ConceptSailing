@@ -24,3 +24,56 @@ export function totalNm(stops: ClientItineraryStop[]): number {
   }
   return sum;
 }
+
+// ---------------------------------------------------------------------------
+// Dates & day grouping
+// ---------------------------------------------------------------------------
+
+// Add `days` calendar days to an ISO date ('YYYY-MM-DD'), returning ISO.
+export function addDays(iso: string, days: number): string {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+// Whole days between two ISO dates (b - a).
+export function daysBetween(a: string, b: string): number {
+  return Math.round((new Date(b + 'T00:00:00').getTime() - new Date(a + 'T00:00:00').getTime()) / 86400000);
+}
+
+// Fill in a default date for any stop that doesn't have one: one stop per day
+// from the charter start, clamped so extra stops pile onto the final day.
+export function assignSequentialDates(
+  stops: ClientItineraryStop[],
+  startDate?: string,
+  endDate?: string,
+): ClientItineraryStop[] {
+  if (!startDate) return stops;
+  const maxOffset = endDate ? Math.max(0, daysBetween(startDate, endDate)) : stops.length - 1;
+  return stops.map((s, i) => (s.date ? s : { ...s, date: addDays(startDate, Math.min(i, maxOffset)) }));
+}
+
+export interface ItineraryDay {
+  date?: string;       // 'YYYY-MM-DD' when known
+  dayNumber: number;   // 1-based day of the trip
+  stops: ClientItineraryStop[];
+}
+
+// Group consecutive stops that share a date into day buckets. Stops without a
+// date fall back to one bucket each, sequenced from the charter start.
+export function groupStopsByDay(stops: ClientItineraryStop[], startDate?: string): ItineraryDay[] {
+  const groups: ItineraryDay[] = [];
+  for (const s of stops) {
+    const date = s.date || (startDate ? addDays(startDate, groups.length) : undefined);
+    const last = groups[groups.length - 1];
+    if (last && date && last.date === date) {
+      last.stops.push(s);
+    } else {
+      groups.push({ date, dayNumber: 0, stops: [s] });
+    }
+  }
+  groups.forEach((g, idx) => {
+    g.dayNumber = startDate && g.date ? daysBetween(startDate, g.date) + 1 : idx + 1;
+  });
+  return groups;
+}

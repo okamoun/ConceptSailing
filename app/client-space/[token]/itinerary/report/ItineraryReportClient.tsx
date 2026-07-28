@@ -12,7 +12,8 @@ import type { Charter } from '../../../../../lib/availability';
 import { formatNavTime } from '../../../../marinas-data';
 import { featureIconMap } from '../../../../feature-icons';
 import { CONTACT } from '../../../../config/contact';
-import { CRUISE_SPEED_KN, legNm, totalNm } from '../itinerary-utils';
+import { CRUISE_SPEED_KN, legNm, totalNm, groupStopsByDay } from '../itinerary-utils';
+import type { DayWeather } from '../../../../../lib/greekWeather';
 import ItineraryMapLoader from '../ItineraryMapLoader.client';
 
 // ---------------------------------------------------------------------------
@@ -21,12 +22,6 @@ import ItineraryMapLoader from '../ItineraryMapLoader.client';
 
 const fmtDate = (iso?: string) =>
   iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
-
-function addDays(iso: string, days: number): string {
-  const d = new Date(iso);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
 
 function nightCount(start?: string, end?: string): number | null {
   if (!start || !end) return null;
@@ -72,6 +67,7 @@ export default function ItineraryReportClient({ token }: Props) {
   const [prep, setPrep] = useState<ClientPreparation | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [weather, setWeather] = useState<Record<string, DayWeather>>({});
 
   useEffect(() => {
     Promise.all([getCharterByClientSpaceToken(token), getClientPreparation(token)])
@@ -83,6 +79,35 @@ export default function ItineraryReportClient({ token }: Props) {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [token]);
+
+  // Best-effort expected weather for each day: a live forecast when the date is
+  // within range, otherwise a seasonal average. Failures are silently ignored.
+  useEffect(() => {
+    if (!prep || !charter) return;
+    const dayStops = prep.itinerary?.stops ?? [];
+    if (dayStops.length === 0) return;
+    const days = groupStopsByDay(dayStops, charter.startDate);
+    let active = true;
+    (async () => {
+      const results: Record<string, DayWeather> = {};
+      await Promise.all(days.map(async d => {
+        if (!d.date) return;
+        const located = d.stops.find(s => typeof s.lat === 'number' && typeof s.lng === 'number');
+        try {
+          const res = await fetch('/api/itinerary-weather', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lat: located?.lat, lng: located?.lng, date: d.date }),
+          });
+          if (!res.ok) return;
+          const data = (await res.json()) as { weather?: DayWeather };
+          if (data.weather) results[d.date as string] = data.weather;
+        } catch { /* weather is optional — ignore */ }
+      }));
+      if (active) setWeather(results);
+    })();
+    return () => { active = false; };
+  }, [prep, charter]);
 
   if (loading) {
     return (
@@ -109,6 +134,7 @@ export default function ItineraryReportClient({ token }: Props) {
   const printedAt = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const total = totalNm(stops);
   const nights = nightCount(charter.startDate, charter.endDate);
+  const days = groupStopsByDay(stops, charter.startDate);
 
   return (
     <>
@@ -223,44 +249,55 @@ export default function ItineraryReportClient({ token }: Props) {
                   Day-by-Day Itinerary
                 </div>
                 <ol className="divide-y divide-slate-100">
-                  {stops.map((s, i) => {
-                    const nm = i > 0 ? legNm(stops[i - 1], s) : null;
-                    const dayDate = charter.startDate ? fmtDate(addDays(charter.startDate, i)) : null;
+                  {days.map(day => {
+                    const w = day.date ? weather[day.date] : undefined;
                     return (
-                      <li key={s.id} className="report-stop p-5">
+                      <li key={`${day.dayNumber}-${day.date ?? ''}`} className="report-stop p-5">
                         <div className="flex items-start gap-4">
                           <div
                             className="report-day-badge flex-shrink-0 w-14 rounded-xl text-white text-center py-2"
                             style={{ background: '#1F8FCA' }}
                           >
                             <div className="text-[10px] uppercase tracking-wide opacity-90">Day</div>
-                            <div className="text-lg font-bold leading-none">{i + 1}</div>
+                            <div className="text-lg font-bold leading-none">{day.dayNumber}</div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                              <h4 className="text-slate-800 font-bold text-sm">{s.title}</h4>
-                              {dayDate && <span className="text-slate-400 text-xs">{dayDate}</span>}
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              {day.date && <span className="text-slate-500 text-xs font-semibold">{fmtDate(day.date)}</span>}
+                              {w && <WeatherChip w={w} />}
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                              {i === 0 ? (
-                                <span>⚓ Embarkation</span>
-                              ) : nm != null ? (
-                                <span>⛵ ~{Math.round(nm)} nm · {formatNavTime(nm, CRUISE_SPEED_KN)} from previous stop</span>
-                              ) : null}
+
+                            <div className="mt-2 space-y-3">
+                              {day.stops.map(s => {
+                                const gi = stops.findIndex(x => x.id === s.id);
+                                const nm = gi > 0 ? legNm(stops[gi - 1], s) : null;
+                                return (
+                                  <div key={s.id}>
+                                    <h4 className="text-slate-800 font-bold text-sm">{s.title}</h4>
+                                    <div className="text-xs text-slate-500 mt-0.5">
+                                      {gi === 0 ? (
+                                        <span>⚓ Embarkation</span>
+                                      ) : nm != null ? (
+                                        <span>⛵ ~{Math.round(nm)} nm · {formatNavTime(nm, CRUISE_SPEED_KN)} from previous stop</span>
+                                      ) : null}
+                                    </div>
+                                    {s.description && (
+                                      <p className="text-slate-600 text-sm leading-relaxed mt-1.5">{s.description}</p>
+                                    )}
+                                    {s.features.length > 0 && (
+                                      <div className="flex flex-wrap gap-1.5 mt-2">
+                                        {s.features.map(f => (
+                                          <span key={f} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                                            {featureIconMap[f] ? <span>{featureIconMap[f]}</span> : null}
+                                            {f}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
-                            {s.description && (
-                              <p className="text-slate-600 text-sm leading-relaxed mt-2">{s.description}</p>
-                            )}
-                            {s.features.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 mt-2">
-                                {s.features.map(f => (
-                                  <span key={f} className="inline-flex items-center gap-1 bg-blue-50 border border-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                                    {featureIconMap[f] ? <span>{featureIconMap[f]}</span> : null}
-                                    {f}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </li>
@@ -283,6 +320,29 @@ export default function ItineraryReportClient({ token }: Props) {
         </div>
       </div>
     </>
+  );
+}
+
+function WeatherChip({ w }: { w: DayWeather }) {
+  return (
+    <span
+      data-testid="weather"
+      title={w.note}
+      className="inline-flex items-center gap-1.5 text-xs bg-sky-50 border border-sky-100 text-sky-800 px-2.5 py-1 rounded-full"
+    >
+      <span aria-hidden="true">{w.emoji}</span>
+      <span className="font-medium">{w.label}</span>
+      {typeof w.tempMaxC === 'number' && (
+        <span className="text-sky-600">
+          {w.tempMaxC}°{typeof w.tempMinC === 'number' ? `/${w.tempMinC}°` : ''}
+        </span>
+      )}
+      {typeof w.windKmh === 'number' && <span className="text-sky-600">· 💨 {w.windKmh} km/h</span>}
+      {w.windLabel && <span className="text-sky-600">· {w.windLabel}</span>}
+      <span className="text-[10px] uppercase tracking-wide text-sky-400 border-l border-sky-200 pl-1.5">
+        {w.source === 'forecast' ? 'forecast' : 'seasonal avg'}
+      </span>
+    </span>
   );
 }
 

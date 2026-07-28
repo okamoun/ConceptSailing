@@ -23,6 +23,24 @@ function tripDays(start?: string, end?: string): number {
   return days > 0 ? days + 1 : 7;
 }
 
+// Assign one stop per day from the charter start, clamped so any extra stops
+// land on the final day. No-op when the charter has no start date.
+function withDates(
+  stops: ReturnType<typeof makeItineraryStops>,
+  start?: string,
+  end?: string,
+): ReturnType<typeof makeItineraryStops> {
+  if (!start) return stops;
+  const maxOffset = end
+    ? Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86400000))
+    : stops.length - 1;
+  return stops.map((s, i) => {
+    const d = new Date(start + 'T00:00:00');
+    d.setDate(d.getDate() + Math.min(i, maxOffset));
+    return { ...s, date: d.toISOString().slice(0, 10) };
+  });
+}
+
 export async function POST(request: NextRequest) {
   const { charter } = (await request.json()) as { charter?: CharterInput };
 
@@ -38,7 +56,7 @@ export async function POST(request: NextRequest) {
       const itinerary: ClientItinerary = {
         source: 'theme',
         sourceThemeId: adventure.id,
-        stops: makeItineraryStops(adventure.itinerary),
+        stops: withDates(makeItineraryStops(adventure.itinerary), charter.startDate, charter.endDate),
         generatedAt: new Date().toISOString(),
       };
       return NextResponse.json({ itinerary });
@@ -88,14 +106,18 @@ Rules:
 
     const itinerary: ClientItinerary = {
       source: 'ai',
-      stops: makeItineraryStops(
-        rawStops.map(s => ({
-          title: String(s.title ?? ''),
-          description: String(s.description ?? ''),
-          features: Array.isArray(s.features) ? (s.features as unknown[]).map(String) : [],
-          lat: typeof s.lat === 'number' ? s.lat : undefined,
-          lng: typeof s.lng === 'number' ? s.lng : undefined,
-        })),
+      stops: withDates(
+        makeItineraryStops(
+          rawStops.map(s => ({
+            title: String(s.title ?? ''),
+            description: String(s.description ?? ''),
+            features: Array.isArray(s.features) ? (s.features as unknown[]).map(String) : [],
+            lat: typeof s.lat === 'number' ? s.lat : undefined,
+            lng: typeof s.lng === 'number' ? s.lng : undefined,
+          })),
+        ),
+        charter.startDate,
+        charter.endDate,
       ),
       generatedAt: new Date().toISOString(),
     };
