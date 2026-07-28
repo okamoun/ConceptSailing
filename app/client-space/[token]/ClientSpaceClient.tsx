@@ -2114,6 +2114,14 @@ export default function ClientSpaceClient({ token }: Props) {
                 History
               </button>
               <a
+                href={`/client-space/${token}/itinerary`}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors flex items-center gap-1.5"
+                title="Build your itinerary"
+              >
+                <span aria-hidden="true">🗺️</span>
+                Itinerary
+              </a>
+              <a
                 href={`/client-space/${token}/summary`}
                 className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors flex items-center gap-1.5"
                 title="View full summary"
