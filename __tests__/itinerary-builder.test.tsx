@@ -72,6 +72,7 @@ jest.mock('../app/client-space/[token]/itinerary/ItineraryMapLoader.client', () 
 import { POST as generatePOST } from '../app/api/itinerary-generate/route';
 import { POST as chatPOST } from '../app/api/itinerary-chat/route';
 import ItineraryBuilderClient from '../app/client-space/[token]/itinerary/ItineraryBuilderClient';
+import ItineraryReportClient from '../app/client-space/[token]/itinerary/report/ItineraryReportClient';
 import adventures from '../app/adventures-data';
 
 const TOKEN = 'tok-123';
@@ -365,6 +366,40 @@ describe('Chat composer', () => {
     const saved = mockSaveItinerary.mock.calls.at(-1)![1];
     expect(saved.stops).toHaveLength(4);
     expect(mockAddItineraryMessage).toHaveBeenCalledWith(TOKEN, expect.objectContaining({ isAi: true }));
+  });
+});
+
+// ===========================================================================
+// Itinerary report
+// ===========================================================================
+describe('Itinerary report', () => {
+  test('renders an overview and a day-by-day breakdown of the itinerary', async () => {
+    mockGetPrep.mockResolvedValue({
+      ...emptyPrep,
+      itinerary: { source: 'manual', stops: stops('Athens', 'Poros', 'Hydra') },
+    });
+    render(<ItineraryReportClient token={TOKEN} />);
+
+    await waitFor(() => expect(screen.getByText('Trip Overview')).toBeInTheDocument());
+    expect(screen.getByText('Day-by-Day Itinerary')).toBeInTheDocument();
+
+    // One day entry per stop, with a total distance and an embarkation flag.
+    expect(screen.getAllByText('Day')).toHaveLength(3);
+    expect(screen.getByText('Total distance')).toBeInTheDocument();
+    expect(screen.getByText(/⚓ Embarkation/)).toBeInTheDocument();
+    // Two hops between the three stops, each showing an inbound leg.
+    expect(screen.getAllByText(/from previous stop/)).toHaveLength(2);
+  });
+
+  test('shows an empty state with a link back to the builder when no itinerary exists', async () => {
+    mockGetPrep.mockResolvedValue({ ...emptyPrep, itinerary: undefined });
+    render(<ItineraryReportClient token={TOKEN} />);
+
+    await waitFor(() => expect(screen.getByText(/No itinerary has been built yet/i)).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: /Build your itinerary/i })).toHaveAttribute(
+      'href',
+      `/client-space/${TOKEN}/itinerary`,
+    );
   });
 });
 

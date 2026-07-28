@@ -18,26 +18,13 @@ import type { Charter } from '../../../../lib/availability';
 import adventures from '../../../adventures-data';
 import { featureIconMap } from '../../../feature-icons';
 import { CONTACT } from '../../../config/contact';
-import { haversineKm, formatNavTime } from '../../../marinas-data';
+import { formatNavTime } from '../../../marinas-data';
+import { CRUISE_SPEED_KN, legNm } from './itinerary-utils';
 import ItineraryMapLoader from './ItineraryMapLoader.client';
-
-// Average cruising speed used to estimate sailing time between stops. The
-// BlueOne Aura 51 comfortably averages this under sail or motor over a leg.
-const CRUISE_SPEED_KN = 7;
 
 // Re-sequence a stop list so `order` matches array position.
 function reindex(stops: ClientItineraryStop[]): ClientItineraryStop[] {
   return stops.map((s, i) => ({ ...s, order: i }));
-}
-
-// Great-circle distance (nautical miles) between two stops, or null when
-// either stop is missing coordinates. It's a straight-line estimate — real
-// sailing routes are a little longer — hence the "approx" labelling in the UI.
-function legNm(a?: ClientItineraryStop, b?: ClientItineraryStop): number | null {
-  if (!a || !b || typeof a.lat !== 'number' || typeof a.lng !== 'number' || typeof b.lat !== 'number' || typeof b.lng !== 'number') {
-    return null;
-  }
-  return haversineKm(a.lat, a.lng, b.lat, b.lng) / 1.852;
 }
 
 export default function ItineraryBuilderClient({ token }: { token: string }) {
@@ -332,14 +319,25 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
             <section className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-white font-bold">Day-by-Day Stops</h3>
-                <button
-                  type="button"
-                  onClick={generateWithAi}
-                  disabled={generating}
-                  className="text-blue-200 hover:text-white text-xs underline disabled:opacity-50"
-                >
-                  {generating ? 'Regenerating…' : 'Regenerate with AI'}
-                </button>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={`/client-space/${token}/itinerary/report`}
+                    className="inline-flex items-center gap-1 text-blue-200 hover:text-white text-xs font-semibold"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    View report
+                  </a>
+                  <button
+                    type="button"
+                    onClick={generateWithAi}
+                    disabled={generating}
+                    className="text-blue-200 hover:text-white text-xs underline disabled:opacity-50"
+                  >
+                    {generating ? 'Regenerating…' : 'Regenerate with AI'}
+                  </button>
+                </div>
               </div>
 
               {totalNm > 0 && (
