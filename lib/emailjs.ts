@@ -1,7 +1,7 @@
 import emailjs from '@emailjs/browser';
-import { CONTACT } from '../app/config/contact';
 import { trackEvent } from './analytics';
 import { saveContactSubmission } from './submissions';
+import { buildDetailsRecap, contactRecapFields, SIGNATURE, type RecapField } from './confirmationRecap';
 
 // EmailJS configuration with fallbacks
 const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || 'demo_public_key';
@@ -105,23 +105,35 @@ export async function sendBookingEmail(bookingData: BookingEmailData): Promise<E
     const embarkation = bookingData.deliveryPoint || bookingData.embarkationPoint;
     const redelivery = bookingData.redeliveryPoint || bookingData.deliveryPoint || bookingData.embarkationPoint;
 
-    // Human-readable summary of the request, used both to phrase the AI
-    // confirmation and as a fallback body.
-    const details = [
-      `Boat: ${bookingData.boat}`,
-      `Dates: ${bookingData.date}${bookingData.endDate ? ` to ${bookingData.endDate}` : ''}`,
-      `Guests: ${bookingData.passengerDetails || bookingData.passengers}`,
-      `Embarkation: ${embarkation}`,
-      redelivery && redelivery !== embarkation ? `Disembarkation: ${redelivery}` : '',
-      bookingData.selectedTheme ? `Theme: ${bookingData.selectedTheme}` : '',
-      bookingData.holidayDescription ? `Notes: ${bookingData.holidayDescription}` : '',
-    ].filter(Boolean).join('\n');
+    // Structured summary of the request. The contact rows carry the guest's
+    // phone with its derived country / time zone; the request rows describe the
+    // charter. The same rows drive both the recap block in the email and the
+    // context handed to the AI intro.
+    const requestFields: RecapField[] = [
+      { label: 'Boat', value: bookingData.boat },
+      { label: 'Dates', value: `${bookingData.date}${bookingData.endDate ? ` to ${bookingData.endDate}` : ''}` },
+      { label: 'Guests', value: String(bookingData.passengerDetails || bookingData.passengers) },
+      { label: 'Embarkation', value: embarkation },
+      { label: 'Disembarkation', value: redelivery && redelivery !== embarkation ? redelivery : '' },
+      { label: 'Theme', value: bookingData.selectedTheme || '' },
+      { label: 'Notes', value: bookingData.holidayDescription || '' },
+    ];
+    const recapFields: RecapField[] = [
+      ...contactRecapFields(bookingData.name, bookingData.email, bookingData.phone),
+      ...requestFields,
+    ];
+    // Plain summary of just the request rows, used only as AI context.
+    const details = requestFields
+      .filter(f => f.value && f.value.trim())
+      .map(f => `${f.label}: ${f.value}`)
+      .join('\n');
 
     const confirmationMessage = await buildConfirmationMessage({
       name: bookingData.name,
       email: bookingData.email,
       phone: bookingData.phone,
       details,
+      recapFields,
     });
 
     // Fields consumed by the "simple" EmailJS template:
@@ -174,28 +186,36 @@ interface ConfirmationInput {
   phone?: string;
   /** Free-text message the guest typed (contact form / holiday notes). */
   message?: string;
-  /** Structured summary of a quote / information request (dates, boat, guests…). */
+  /** Structured summary of a quote / information request (dates, boat, guests…) — AI context only. */
   details?: string;
+  /** Labeled rows echoed back to the guest as a deterministic recap block. */
+  recapFields: RecapField[];
 }
 
 /**
- * Ask the server-side OpenAI route to phrase a warm, on-brand confirmation that
- * the information request was received. Falls back to a sensible static message
- * so the guest always gets an acknowledgment even if AI generation fails.
+ * Compose the confirmation email body: a warm AI-phrased intro, then a
+ * deterministic recap of exactly what the guest submitted, then a fixed
+ * signature. The recap and signature are always present — even when AI
+ * generation fails and we fall back to a static intro — so the guest always
+ * gets an accurate acknowledgment of their request.
  */
 async function buildConfirmationMessage(input: ConfirmationInput): Promise<string> {
   const firstName = input.name.trim().split(/\s+/)[0] || input.name;
-  const reference = input.details
-    ? `For reference, here are the details of your request:\n${input.details}`
-    : input.message
-      ? `For reference, here is the message you sent us:\n"${input.message}"`
-      : '';
-  const fallback =
+  const fallbackIntro =
     `Dear ${firstName},\n\n` +
-    `Thank you for reaching out to BlueOne. We have received your request and a member of our team will get back to you shortly.\n\n` +
-    (reference ? `${reference}\n\n` : '') +
-    `Warm regards,\nThe BlueOne Team\n${CONTACT.phone.formatted} · ${CONTACT.email}`;
+    `Thank you for reaching out to BlueOne. We have received your request and a member of our team will get back to you shortly.`;
 
+  const recap = buildDetailsRecap(input.recapFields);
+  const intro = (await fetchConfirmationIntro(input)) || fallbackIntro;
+
+  return [intro, recap, SIGNATURE].filter(Boolean).join('\n\n');
+}
+
+/**
+ * Fetch the AI-phrased intro from the server route. Returns the trimmed intro,
+ * or null on any failure so the caller can fall back to a static greeting.
+ */
+async function fetchConfirmationIntro(input: ConfirmationInput): Promise<string | null> {
   try {
     const res = await fetch('/api/contact-confirmation', {
       method: 'POST',
@@ -208,12 +228,12 @@ async function buildConfirmationMessage(input: ConfirmationInput): Promise<strin
         details: input.details,
       }),
     });
-    if (!res.ok) return fallback;
+    if (!res.ok) return null;
     const data = (await res.json()) as { message?: string };
-    return data.message?.trim() || fallback;
+    return data.message?.trim() || null;
   } catch (err) {
     console.warn('AI confirmation generation failed, using fallback message:', err);
-    return fallback;
+    return null;
   }
 }
 
@@ -235,7 +255,18 @@ export async function sendContactEmail(contactData: ContactEmailData): Promise<E
   }
 
   try {
-    const confirmationMessage = await buildConfirmationMessage(contactData);
+    const recapFields: RecapField[] = [
+      ...contactRecapFields(contactData.name, contactData.email, contactData.phone),
+      { label: 'Message', value: contactData.message },
+    ];
+
+    const confirmationMessage = await buildConfirmationMessage({
+      name: contactData.name,
+      email: contactData.email,
+      phone: contactData.phone,
+      message: contactData.message,
+      recapFields,
+    });
 
     // Fields consumed by the "simple" EmailJS template:
     //   {{email}} → recipient (client), {{rep_email}} → reply-to,

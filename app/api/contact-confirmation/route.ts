@@ -23,15 +23,16 @@ export async function POST(request: NextRequest) {
 
   const prompt = `You are the guest-relations assistant for BlueOne, a luxury yacht charter (Fountaine Pajot Aura 51 catamaran) sailing the Greek islands, operated by ${CONTACT.company.name} out of ${CONTACT.company.location}.
 
-A prospective guest has just submitted a request for information / a quote through the website. Write a warm, concise confirmation email body (plain text, no subject line) acknowledging that we have received their request and will respond shortly. Requirements:
+A prospective guest has just submitted a request for information / a quote through the website. Write ONLY a warm, brief opening for a confirmation email body (plain text, no subject line) acknowledging that we have received their request and will respond shortly. Requirements:
 - Address the guest by their first name.
-- Confirm we received their request and briefly, naturally restate the key details of what they asked about (dates, boat, number of guests, embarkation, theme, and any message) so they know we read it. Only mention details that are actually provided below.
+- Warmly confirm we received their request and reassure them a member of our team will be in touch soon.
 - Keep an elegant, welcoming, professional tone that fits a luxury sailing brand. No emojis, no marketing hype.
-- 2 short paragraphs maximum.
-- Sign off as "The BlueOne Team" and include the contact phone ${CONTACT.phone.formatted} and email ${CONTACT.email} in the closing.
-- Do not invent prices, dates, or availability beyond what is provided.
+- 1 to 2 short sentences only.
+- Do NOT list or restate the request details — a structured summary is appended separately below your text.
+- Do NOT add a sign-off, closing, or signature — those are added separately. End after the acknowledgment.
+- Do not invent prices, dates, or availability.
 
-Guest details:
+The guest's details below are context only, to personalise the greeting — do not enumerate them back:
 - Name: ${name}
 - Email: ${email}
 - Phone: ${phone || 'not provided'}${details ? `\n\nTheir request:\n${details}` : ''}${message ? `\n\nTheir message: "${message}"` : ''}`;
