@@ -8,7 +8,7 @@ import type { ClientItineraryStop } from '../../../../lib/clientSpace';
 const ItineraryMap = dynamic(() => import('./ItineraryMap.client'), {
   ssr: false,
   loading: () => (
-    <div className="flex justify-center items-center h-[420px] text-blue-200 bg-white/5 rounded-xl">Loading map…</div>
+    <div className="flex justify-center items-center w-full h-64 sm:h-80 lg:h-[420px] text-blue-200 bg-white/5 rounded-xl">Loading map…</div>
   ),
 });
 

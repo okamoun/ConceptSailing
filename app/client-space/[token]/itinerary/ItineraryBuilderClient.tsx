@@ -18,11 +18,26 @@ import type { Charter } from '../../../../lib/availability';
 import adventures from '../../../adventures-data';
 import { featureIconMap } from '../../../feature-icons';
 import { CONTACT } from '../../../config/contact';
+import { haversineKm, formatNavTime } from '../../../marinas-data';
 import ItineraryMapLoader from './ItineraryMapLoader.client';
+
+// Average cruising speed used to estimate sailing time between stops. The
+// BlueOne Aura 51 comfortably averages this under sail or motor over a leg.
+const CRUISE_SPEED_KN = 7;
 
 // Re-sequence a stop list so `order` matches array position.
 function reindex(stops: ClientItineraryStop[]): ClientItineraryStop[] {
   return stops.map((s, i) => ({ ...s, order: i }));
+}
+
+// Great-circle distance (nautical miles) between two stops, or null when
+// either stop is missing coordinates. It's a straight-line estimate — real
+// sailing routes are a little longer — hence the "approx" labelling in the UI.
+function legNm(a?: ClientItineraryStop, b?: ClientItineraryStop): number | null {
+  if (!a || !b || typeof a.lat !== 'number' || typeof a.lng !== 'number' || typeof b.lat !== 'number' || typeof b.lng !== 'number') {
+    return null;
+  }
+  return haversineKm(a.lat, a.lng, b.lat, b.lng) / 1.852;
 }
 
 export default function ItineraryBuilderClient({ token }: { token: string }) {
@@ -58,7 +73,17 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
     return () => { active = false; };
   }, [token]);
 
-  const stops = itinerary?.stops ?? [];
+  const stops = useMemo(() => itinerary?.stops ?? [], [itinerary]);
+
+  // Total sailing distance across every leg that has coordinates on both ends.
+  const totalNm = useMemo(() => {
+    let sum = 0;
+    for (let i = 1; i < stops.length; i++) {
+      const nm = legNm(stops[i - 1], stops[i]);
+      if (nm != null) sum += nm;
+    }
+    return sum;
+  }, [stops]);
 
   // Persist an itinerary update to Firestore, keeping local state in sync.
   // A failed save surfaces an error but never discards the client's edits.
@@ -305,7 +330,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
 
             {/* Day list */}
             <section className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-white font-bold">Day-by-Day Stops</h3>
                 <button
                   type="button"
@@ -317,20 +342,45 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                 </button>
               </div>
 
+              {totalNm > 0 && (
+                <div className="flex items-center gap-2 text-xs text-blue-100 bg-white/10 border border-white/20 rounded-xl px-3 py-2">
+                  <CompassIcon />
+                  <span>
+                    Approx. <strong className="text-white">{Math.round(totalNm)} nm</strong> total ·{' '}
+                    <strong className="text-white">{formatNavTime(totalNm, CRUISE_SPEED_KN)}</strong> under way
+                  </span>
+                </div>
+              )}
+
               <ul className="space-y-3">
-                {stops.map((s, i) => (
+                {stops.map((s, i) => {
+                  const nm = i > 0 ? legNm(stops[i - 1], s) : null;
+                  return (
                   <li
                     key={s.id}
                     data-testid="itinerary-stop"
                     onMouseEnter={() => setSelectedId(s.id)}
                     onMouseLeave={() => setSelectedId(undefined)}
-                    className={`rounded-xl border px-4 py-3 transition-colors ${selectedId === s.id ? 'border-blue-300 bg-white/20' : 'border-white/20 bg-white/10'}`}
+                    className={`rounded-xl border px-3 py-3 sm:px-4 transition-colors ${selectedId === s.id ? 'border-blue-300 bg-white/20' : 'border-white/20 bg-white/10'}`}
                   >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-2.5 sm:gap-3">
                       <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xs mt-1">
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
+                        {i === 0 ? (
+                          <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1">
+                            <AnchorIcon />
+                            <span>Embarkation</span>
+                          </div>
+                        ) : nm != null ? (
+                          <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1" data-testid="leg-info">
+                            <CompassIcon />
+                            <span>
+                              ~{Math.round(nm)} nm · {formatNavTime(nm, CRUISE_SPEED_KN)} from previous stop
+                            </span>
+                          </div>
+                        ) : null}
                         <input
                           aria-label={`Stop ${i + 1} title`}
                           value={s.title}
@@ -366,21 +416,22 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                       <div className="flex flex-col gap-1 flex-shrink-0">
                         <button
                           type="button" aria-label={`Move stop ${i + 1} up`} onClick={() => moveStop(s.id, -1)} disabled={i === 0}
-                          className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
+                          className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
                         >↑</button>
                         <button
                           type="button" aria-label={`Move stop ${i + 1} down`} onClick={() => moveStop(s.id, 1)} disabled={i === stops.length - 1}
-                          className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
+                          className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
                         >↓</button>
                         <button
                           type="button" aria-label={`Remove stop ${i + 1}`} onClick={() => removeStop(s.id)}
-                          className="w-6 h-6 rounded bg-red-500/30 hover:bg-red-500/50 text-white text-xs"
+                          className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-red-500/30 hover:bg-red-500/50 text-white text-xs"
                         >×</button>
                       </div>
                     </div>
                     <FeatureAdder onAdd={f => addFeature(s.id, f)} />
                   </li>
-                ))}
+                  );
+                })}
               </ul>
 
               <button
@@ -445,6 +496,25 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function CompassIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="flex-shrink-0">
+      <circle cx="12" cy="12" r="10" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+    </svg>
+  );
+}
+
+function AnchorIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="flex-shrink-0">
+      <circle cx="12" cy="5" r="3" />
+      <line x1="12" y1="22" x2="12" y2="8" />
+      <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
+    </svg>
   );
 }
 

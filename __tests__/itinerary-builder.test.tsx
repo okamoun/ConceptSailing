@@ -302,6 +302,32 @@ describe('Itinerary map', () => {
 });
 
 // ===========================================================================
+// Distance & navigation time per leg
+// ===========================================================================
+describe('Sailing distance & navigation time', () => {
+  test('shows a leg badge for every stop after the first, plus a total', async () => {
+    await renderBuilderWithItinerary(stops('Athens', 'Poros', 'Hydra'));
+
+    // One leg badge per hop between located stops (n - 1).
+    expect(screen.getAllByTestId('leg-info')).toHaveLength(2);
+    // Distance is expressed in nautical miles.
+    expect(screen.getAllByTestId('leg-info')[0].textContent).toMatch(/nm/);
+    // A total summary is shown.
+    expect(screen.getByText(/under way/i)).toBeInTheDocument();
+    // The first stop is flagged as the embarkation point (no inbound leg).
+    expect(screen.getByText('Embarkation')).toBeInTheDocument();
+  });
+
+  test('omits the leg badge when a stop has no coordinates', async () => {
+    const withGap = stops('Athens', 'Poros');
+    delete (withGap[1] as { lat?: number }).lat; // second stop loses its coordinates
+    await renderBuilderWithItinerary(withGap);
+
+    expect(screen.queryByTestId('leg-info')).not.toBeInTheDocument();
+  });
+});
+
+// ===========================================================================
 // 7. Chat composer
 // ===========================================================================
 describe('Chat composer', () => {

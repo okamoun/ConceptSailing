@@ -12,12 +12,9 @@ interface Props {
   onMarkerDragEnd?: (id: string, lat: number, lng: number) => void;
 }
 
-const containerStyle = {
-  width: '100%',
-  height: '420px',
-  borderRadius: '0.75rem',
-  boxShadow: '0 10px 30px rgba(0,0,0,0.17)',
-};
+// Responsive height via Tailwind classes so the map is compact on phones and
+// taller on desktop. GoogleMap needs an explicitly-sized container element.
+const MAP_HEIGHT_CLASSES = 'w-full h-64 sm:h-80 lg:h-[420px] rounded-xl shadow-lg';
 
 const DEFAULT_CENTER = { lat: 37.8, lng: 24.0 };
 
@@ -41,12 +38,12 @@ export default function ItineraryMap({ stops, selectedId, editable, onMarkerClic
   }, [located]);
 
   if (!isLoaded) {
-    return <div className="flex justify-center items-center h-[420px] text-blue-200 bg-white/5 rounded-xl">Loading map…</div>;
+    return <div className={`flex justify-center items-center text-blue-200 bg-white/5 ${MAP_HEIGHT_CLASSES}`}>Loading map…</div>;
   }
 
   return (
     <GoogleMap
-      mapContainerStyle={containerStyle}
+      mapContainerClassName={MAP_HEIGHT_CLASSES}
       center={center}
       zoom={7}
       options={{
