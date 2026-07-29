@@ -75,6 +75,7 @@ import { POST as weatherPOST } from '../app/api/itinerary-weather/route';
 import ItineraryBuilderClient from '../app/client-space/[token]/itinerary/ItineraryBuilderClient';
 import ItineraryReportClient from '../app/client-space/[token]/itinerary/report/ItineraryReportClient';
 import { searchGreekLocations } from '../app/greek-locations';
+import { buildItineraryPrompt } from '../app/itinerary-prompt';
 import adventures from '../app/adventures-data';
 
 const TOKEN = 'tok-123';
@@ -211,6 +212,35 @@ describe('POST /api/itinerary-generate', () => {
     expect(res.status).toBe(500);
     const data = await res.json();
     expect(data.error).toBeTruthy();
+  });
+
+  test('uses the client-supplied prompt verbatim and skips the theme fast-path', async () => {
+    mockCreate.mockResolvedValue({
+      choices: [{ message: { content: JSON.stringify({ stops: [{ title: 'Bay', description: 'Quiet', features: [], lat: 37, lng: 24 }] }) } }],
+    });
+
+    // baseCharter has selectedTheme '3', but an explicit prompt forces AI generation.
+    const res = await generatePOST(makeRequest({ charter: { ...baseCharter }, prompt: 'PLAN ONLY QUIET BAYS' }));
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.itinerary.source).toBe('ai');
+    expect(mockCreate.mock.calls[0][0].messages[0].content).toBe('PLAN ONLY QUIET BAYS');
+  });
+});
+
+describe('buildItineraryPrompt', () => {
+  test('reflects the trip length, embarkation and preferences', () => {
+    const prompt = buildItineraryPrompt({
+      startDate: '2026-07-01',
+      endDate: '2026-07-08',
+      embarkationPoint: 'Lavrio',
+      passengers: 6,
+      holidayDescription: 'lots of snorkelling',
+    });
+    expect(prompt).toContain('8 day');
+    expect(prompt).toContain('Lavrio');
+    expect(prompt).toContain('6');
+    expect(prompt).toContain('lots of snorkelling');
   });
 });
 
@@ -490,6 +520,64 @@ describe('searchGreekLocations', () => {
 });
 
 // ===========================================================================
+// Prompt editor before AI generation
+// ===========================================================================
+describe('AI prompt editor', () => {
+  test('shows the editable prompt and sends the edited version', async () => {
+    await renderBuilderNoItinerary();
+
+    // Clicking generate opens the prompt editor rather than firing immediately.
+    fireEvent.click(screen.getByRole('button', { name: /Generate with AI/i }));
+    const promptBox = (await screen.findByLabelText('AI prompt')) as HTMLTextAreaElement;
+    expect(promptBox.value).toMatch(/day-by-day sailing itinerary/i);
+    expect(global.fetch).not.toHaveBeenCalled();
+
+    fireEvent.change(promptBox, { target: { value: 'Custom prompt: quiet bays only' } });
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ itinerary: { source: 'ai', stops: stops('Kea', 'Serifos') } }),
+    });
+    fireEvent.click(screen.getByRole('button', { name: /Generate itinerary/i }));
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.prompt).toBe('Custom prompt: quiet bays only');
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+  });
+
+  test('cancel closes the editor without generating', async () => {
+    await renderBuilderNoItinerary();
+    fireEvent.click(screen.getByRole('button', { name: /Generate with AI/i }));
+    await screen.findByLabelText('AI prompt');
+    fireEvent.click(screen.getByRole('button', { name: /Cancel/i }));
+
+    await waitFor(() => expect(screen.queryByLabelText('AI prompt')).not.toBeInTheDocument());
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+});
+
+// ===========================================================================
+// Per-day navigation hours
+// ===========================================================================
+describe('Per-day navigation hours', () => {
+  test('the report shows sailing time per day (and "At anchor" for a stay-put day)', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({}) });
+    mockGetPrep.mockResolvedValue({
+      ...emptyPrep,
+      itinerary: { source: 'manual', stops: stops('Athens', 'Poros', 'Hydra') },
+    });
+    render(<ItineraryReportClient token={TOKEN} />);
+
+    await waitFor(() => expect(screen.getByText('Day-by-Day Itinerary')).toBeInTheDocument());
+    // One nav summary per day; Day 1 has no inbound leg → "At anchor".
+    expect(screen.getAllByTestId('day-nav')).toHaveLength(3);
+    expect(screen.getByText(/At anchor/)).toBeInTheDocument();
+    expect(screen.getAllByText(/sailing/).length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+// ===========================================================================
 // Itinerary report
 // ===========================================================================
 describe('Itinerary report', () => {
@@ -560,6 +648,7 @@ describe('AI failure handling', () => {
 
     await renderBuilderNoItinerary();
     fireEvent.click(screen.getByRole('button', { name: /Generate with AI/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /Generate itinerary/i }));
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     expect(screen.getByRole('alert').textContent).toMatch(/could not generate/i);
@@ -571,6 +660,7 @@ describe('AI failure handling', () => {
 
     await renderBuilderWithItinerary(stops('Athens', 'Poros'));
     fireEvent.click(screen.getByRole('button', { name: /Regenerate with AI/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /Generate itinerary/i }));
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     // The two original stops are still on screen; nothing was persisted.

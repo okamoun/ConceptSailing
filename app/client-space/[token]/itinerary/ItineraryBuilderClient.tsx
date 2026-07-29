@@ -19,8 +19,9 @@ import adventures from '../../../adventures-data';
 import { featureIconMap } from '../../../feature-icons';
 import { CONTACT } from '../../../config/contact';
 import { formatNavTime } from '../../../marinas-data';
-import { CRUISE_SPEED_KN, legNm, assignSequentialDates, addDays, groupStopsByDay, type ItineraryDay } from './itinerary-utils';
+import { CRUISE_SPEED_KN, legNm, assignSequentialDates, addDays, groupStopsByDay, dayNavNm, type ItineraryDay } from './itinerary-utils';
 import { searchGreekLocations, type GreekLocation } from '../../../greek-locations';
+import { buildItineraryPrompt } from '../../../itinerary-prompt';
 import ItineraryMapLoader from './ItineraryMapLoader.client';
 
 const fmtDayLabel = (iso?: string) =>
@@ -39,6 +40,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
 
   const [generating, setGenerating] = useState(false);
+  const [promptDraft, setPromptDraft] = useState<string | null>(null); // non-null ⇒ prompt editor open
   const [chatText, setChatText] = useState('');
   const [chatSending, setChatSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +107,21 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
     persist(seeded);
   }
 
-  async function generateWithAi() {
+  // Open the prompt editor prefilled with the exact prompt the AI will receive,
+  // so the client can review and tweak it before generating.
+  function openPromptEditor() {
+    if (!charter) return;
+    setError(null);
+    setPromptDraft(buildItineraryPrompt({
+      startDate: charter.startDate,
+      endDate: charter.endDate,
+      embarkationPoint: charter.embarkationPoint,
+      passengers: charter.passengers,
+      holidayDescription: charter.holidayDescription,
+    }));
+  }
+
+  async function generateWithAi(promptOverride?: string) {
     if (!charter) return;
     setError(null);
     setGenerating(true);
@@ -123,6 +139,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
             selectedTheme: charter.selectedTheme,
             holidayDescription: charter.holidayDescription,
           },
+          ...(promptOverride ? { prompt: promptOverride } : {}),
         }),
       });
       if (!res.ok) throw new Error('generation failed');
@@ -131,6 +148,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
         throw new Error('empty itinerary');
       }
       await persist(data.itinerary);
+      setPromptDraft(null);
     } catch {
       // Leave any previous itinerary untouched — only surface the error.
       setError('We could not generate an itinerary right now. Please try again in a moment.');
@@ -307,6 +325,43 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
           </div>
         )}
 
+        {/* Prompt editor — shown before generating so the client can tweak it */}
+        {promptDraft !== null && (
+          <div className="bg-white/10 border border-white/20 rounded-2xl p-5 space-y-3">
+            <div>
+              <h3 className="text-white font-bold">Review the AI prompt</h3>
+              <p className="text-blue-300 text-xs mt-0.5">
+                This is exactly what we&apos;ll send to the AI. Edit it to steer the itinerary, then generate.
+              </p>
+            </div>
+            <textarea
+              aria-label="AI prompt"
+              value={promptDraft}
+              onChange={e => setPromptDraft(e.target.value)}
+              rows={12}
+              className="w-full bg-[#00223f] border border-white/20 rounded-xl px-3 py-2 text-xs text-blue-50 font-mono leading-relaxed focus:outline-none focus:border-blue-400"
+            />
+            <div className="flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPromptDraft(null)}
+                disabled={generating}
+                className="px-4 py-2 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => generateWithAi(promptDraft)}
+                disabled={generating || !promptDraft.trim()}
+                className="btn-primary px-6 py-2 text-sm font-semibold disabled:opacity-50"
+              >
+                {generating ? 'Generating…' : '✨ Generate itinerary'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Entry / seeding */}
         {!hasItinerary && (
           <div className="bg-white/10 border border-white/20 rounded-2xl p-6 text-center space-y-4">
@@ -326,8 +381,8 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
               )}
               <button
                 type="button"
-                onClick={generateWithAi}
-                disabled={generating}
+                onClick={openPromptEditor}
+                disabled={generating || promptDraft !== null}
                 className="px-6 py-3 rounded-xl text-sm font-semibold bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors disabled:opacity-50"
               >
                 {generating ? 'Generating…' : '✨ Generate with AI'}
@@ -367,8 +422,8 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                   </a>
                   <button
                     type="button"
-                    onClick={generateWithAi}
-                    disabled={generating}
+                    onClick={openPromptEditor}
+                    disabled={generating || promptDraft !== null}
                     className="text-blue-200 hover:text-white text-xs underline disabled:opacity-50"
                   >
                     {generating ? 'Regenerating…' : 'Regenerate with AI'}
@@ -387,12 +442,19 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
               )}
 
               <div className="space-y-5">
-                {groupStopsByDay(stops, charter.startDate).map(day => (
+                {groupStopsByDay(stops, charter.startDate).map(day => {
+                  const navNm = dayNavNm(day, stops);
+                  return (
                   <div key={`${day.dayNumber}-${day.date ?? ''}`} className="space-y-3">
                     {/* Day header */}
                     <div className="flex items-center gap-2 pt-1">
                       <span className="text-white text-xs font-bold uppercase tracking-wide">Day {day.dayNumber}</span>
                       {day.date && <span className="text-blue-300 text-xs">· {fmtDayLabel(day.date)}</span>}
+                      {navNm > 0 && (
+                        <span className="text-blue-200 text-xs" data-testid="day-nav">
+                          · ⛵ {formatNavTime(navNm, CRUISE_SPEED_KN)} sailing
+                        </span>
+                      )}
                       <span className="flex-1 h-px bg-white/15" />
                     </div>
 
@@ -502,7 +564,8 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                       + Add stop to Day {day.dayNumber}
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               <button

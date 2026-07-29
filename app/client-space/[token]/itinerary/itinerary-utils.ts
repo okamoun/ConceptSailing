@@ -59,6 +59,20 @@ export interface ItineraryDay {
   stops: ClientItineraryStop[];
 }
 
+// Sailing distance (nm) covered on a given day: the sum of each of the day's
+// stops' inbound legs (including the leg arriving from the previous day).
+export function dayNavNm(day: ItineraryDay, allStops: ClientItineraryStop[]): number {
+  let sum = 0;
+  for (const s of day.stops) {
+    const gi = allStops.findIndex(x => x.id === s.id);
+    if (gi > 0) {
+      const nm = legNm(allStops[gi - 1], s);
+      if (nm != null) sum += nm;
+    }
+  }
+  return sum;
+}
+
 // Group consecutive stops that share a date into day buckets. Stops without a
 // date fall back to one bucket each, sequenced from the charter start.
 export function groupStopsByDay(stops: ClientItineraryStop[], startDate?: string): ItineraryDay[] {

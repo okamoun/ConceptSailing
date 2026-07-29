@@ -12,7 +12,7 @@ import type { Charter } from '../../../../../lib/availability';
 import { formatNavTime } from '../../../../marinas-data';
 import { featureIconMap } from '../../../../feature-icons';
 import { CONTACT } from '../../../../config/contact';
-import { CRUISE_SPEED_KN, legNm, totalNm, groupStopsByDay } from '../itinerary-utils';
+import { CRUISE_SPEED_KN, legNm, totalNm, groupStopsByDay, dayNavNm } from '../itinerary-utils';
 import type { DayWeather } from '../../../../../lib/greekWeather';
 import ItineraryMapLoader from '../ItineraryMapLoader.client';
 
@@ -251,6 +251,7 @@ export default function ItineraryReportClient({ token }: Props) {
                 <ol className="divide-y divide-slate-100">
                   {days.map(day => {
                     const w = day.date ? weather[day.date] : undefined;
+                    const navNm = dayNavNm(day, stops);
                     return (
                       <li key={`${day.dayNumber}-${day.date ?? ''}`} className="report-stop p-5">
                         <div className="flex items-start gap-4">
@@ -263,7 +264,12 @@ export default function ItineraryReportClient({ token }: Props) {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center justify-between gap-2">
-                              {day.date && <span className="text-slate-500 text-xs font-semibold">{fmtDate(day.date)}</span>}
+                              <div className="flex flex-wrap items-baseline gap-x-2">
+                                {day.date && <span className="text-slate-500 text-xs font-semibold">{fmtDate(day.date)}</span>}
+                                <span className="text-slate-400 text-xs" data-testid="day-nav">
+                                  ⛵ {navNm > 0 ? `~${formatNavTime(navNm, CRUISE_SPEED_KN)} sailing` : 'At anchor'}
+                                </span>
+                              </div>
                               {w && <WeatherChip w={w} />}
                             </div>
 
