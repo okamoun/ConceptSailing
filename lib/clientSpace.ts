@@ -149,7 +149,8 @@ export interface ClientItineraryStop {
   title: string;
   description: string;
   features: string[];
-  date?: string;   // 'YYYY-MM-DD' — the day this stop falls on; several stops may share a date
+  date?: string;          // 'YYYY-MM-DD' — the day this stop falls on; several stops may share a date
+  locationName?: string;  // resolved place name from the location search, when one was picked
   lat?: number;
   lng?: number;
 }
@@ -435,7 +436,7 @@ export function newStopId(): string {
 // a stable id and sequential order. Omits lat/lng when absent so Firestore is
 // never handed `undefined` values.
 export function makeItineraryStops(
-  days: Array<{ title: string; description: string; features?: string[]; date?: string; lat?: number; lng?: number }>,
+  days: Array<{ title: string; description: string; features?: string[]; date?: string; locationName?: string; lat?: number; lng?: number }>,
 ): ClientItineraryStop[] {
   return days.map((d, i) => {
     const stop: ClientItineraryStop = {
@@ -446,6 +447,7 @@ export function makeItineraryStops(
       features: Array.isArray(d.features) ? d.features : [],
     };
     if (d.date) stop.date = d.date;
+    if (d.locationName) stop.locationName = d.locationName;
     if (typeof d.lat === 'number') stop.lat = d.lat;
     if (typeof d.lng === 'number') stop.lng = d.lng;
     return stop;

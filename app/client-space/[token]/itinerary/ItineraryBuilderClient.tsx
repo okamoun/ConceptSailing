@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import {
   getClientPreparation,
@@ -19,7 +19,8 @@ import adventures from '../../../adventures-data';
 import { featureIconMap } from '../../../feature-icons';
 import { CONTACT } from '../../../config/contact';
 import { formatNavTime } from '../../../marinas-data';
-import { CRUISE_SPEED_KN, legNm, assignSequentialDates, daysBetween } from './itinerary-utils';
+import { CRUISE_SPEED_KN, legNm, assignSequentialDates, addDays, groupStopsByDay, type ItineraryDay } from './itinerary-utils';
+import { searchGreekLocations, type GreekLocation } from '../../../greek-locations';
 import ItineraryMapLoader from './ItineraryMapLoader.client';
 
 const fmtDayLabel = (iso?: string) =>
@@ -143,19 +144,47 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
     updateStops(stops.map(s => (s.id === id ? { ...s, ...patch } : s)));
   }
 
-  function addStop() {
-    // Default the new stop to the last stop's date (or the charter start) so it
-    // slots onto a real day — the client can move it to another day after.
-    const defaultDate = stops[stops.length - 1]?.date || charter?.startDate;
-    const next: ClientItineraryStop = {
+  function newStop(date?: string): ClientItineraryStop {
+    return {
       id: newStopId(),
-      order: stops.length,
+      order: 0,
       title: 'New stop',
       description: '',
       features: [],
-      ...(defaultDate ? { date: defaultDate } : {}),
+      ...(date ? { date } : {}),
     };
-    updateStops([...stops, next]);
+  }
+
+  // Append a stop on a brand-new day (the day after the last stop, clamped to
+  // the charter end).
+  function addStop() {
+    const lastDate = stops[stops.length - 1]?.date;
+    let date = charter?.startDate;
+    if (lastDate) {
+      const next = addDays(lastDate, 1);
+      date = charter?.endDate && next > charter.endDate ? lastDate : next;
+    }
+    updateStops([...stops, newStop(date)]);
+  }
+
+  // Insert a stop within an existing day, right after that day's last stop, so
+  // a single day can hold more than one stop.
+  function addStopInDay(day: ItineraryDay) {
+    const lastId = day.stops[day.stops.length - 1]?.id;
+    const idx = stops.findIndex(s => s.id === lastId);
+    const arr = [...stops];
+    arr.splice(idx < 0 ? arr.length : idx + 1, 0, newStop(day.date));
+    updateStops(arr);
+  }
+
+  // Apply a picked location: move the stop's point and record the place name,
+  // filling an empty/placeholder title with it for convenience.
+  function pickLocation(id: string, loc: GreekLocation) {
+    const s = stops.find(x => x.id === id);
+    const patch: Partial<ClientItineraryStop> = { locationName: loc.name, lat: loc.lat, lng: loc.lng };
+    if (!s?.title || s.title === 'New stop') patch.title = loc.name;
+    editStop(id, patch);
+    setSelectedId(id);
   }
 
   function removeStop(id: string) {
@@ -357,113 +386,131 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                 </div>
               )}
 
-              <ul className="space-y-3">
-                {stops.map((s, i) => {
-                  const nm = i > 0 ? legNm(stops[i - 1], s) : null;
-                  const showDayHeader = i === 0 || s.date !== stops[i - 1].date;
-                  const dayNumber = charter.startDate && s.date ? daysBetween(charter.startDate, s.date) + 1 : i + 1;
-                  return (
-                  <Fragment key={s.id}>
-                  {showDayHeader && (
-                    <li className="flex items-center gap-2 pt-1">
-                      <span className="text-white text-xs font-bold uppercase tracking-wide">Day {dayNumber}</span>
-                      {s.date && <span className="text-blue-300 text-xs">· {fmtDayLabel(s.date)}</span>}
+              <div className="space-y-5">
+                {groupStopsByDay(stops, charter.startDate).map(day => (
+                  <div key={`${day.dayNumber}-${day.date ?? ''}`} className="space-y-3">
+                    {/* Day header */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <span className="text-white text-xs font-bold uppercase tracking-wide">Day {day.dayNumber}</span>
+                      {day.date && <span className="text-blue-300 text-xs">· {fmtDayLabel(day.date)}</span>}
                       <span className="flex-1 h-px bg-white/15" />
-                    </li>
-                  )}
-                  <li
-                    data-testid="itinerary-stop"
-                    onMouseEnter={() => setSelectedId(s.id)}
-                    onMouseLeave={() => setSelectedId(undefined)}
-                    className={`rounded-xl border px-3 py-3 sm:px-4 transition-colors ${selectedId === s.id ? 'border-blue-300 bg-white/20' : 'border-white/20 bg-white/10'}`}
-                  >
-                    <div className="flex items-start gap-2.5 sm:gap-3">
-                      <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xs mt-1">
-                        {i + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <input
-                          type="date"
-                          aria-label={`Stop ${i + 1} date`}
-                          value={s.date ?? ''}
-                          min={charter.startDate}
-                          max={charter.endDate}
-                          onChange={e => editStop(s.id, { date: e.target.value })}
-                          className="mb-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-400 [color-scheme:dark]"
-                        />
-                        {i === 0 ? (
-                          <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1">
-                            <AnchorIcon />
-                            <span>Embarkation</span>
-                          </div>
-                        ) : nm != null ? (
-                          <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1" data-testid="leg-info">
-                            <CompassIcon />
-                            <span>
-                              ~{Math.round(nm)} nm · {formatNavTime(nm, CRUISE_SPEED_KN)} from previous stop
-                            </span>
-                          </div>
-                        ) : null}
-                        <input
-                          aria-label={`Stop ${i + 1} title`}
-                          value={s.title}
-                          onChange={e => editStop(s.id, { title: e.target.value })}
-                          className="w-full bg-transparent text-white font-semibold text-sm focus:outline-none focus:bg-white/10 rounded px-1 -mx-1"
-                        />
-                        <textarea
-                          aria-label={`Stop ${i + 1} description`}
-                          value={s.description}
-                          onChange={e => editStop(s.id, { description: e.target.value })}
-                          rows={2}
-                          className="w-full mt-1 bg-transparent text-blue-100 text-xs leading-relaxed focus:outline-none focus:bg-white/10 rounded px-1 -mx-1 resize-none"
-                        />
-                        {s.features.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1.5">
-                            {s.features.map(f => (
-                              <span key={f} className="inline-flex items-center gap-1 bg-white/20 border border-white/30 text-white text-xs font-medium px-2 py-0.5 rounded-full">
-                                {featureIconMap[f] ? <span>{featureIconMap[f]}</span> : null}
-                                {f}
-                                <button
-                                  type="button"
-                                  aria-label={`Remove ${f}`}
-                                  onClick={() => removeFeature(s.id, f)}
-                                  className="ml-0.5 text-white/70 hover:text-white"
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-1 flex-shrink-0">
-                        <button
-                          type="button" aria-label={`Move stop ${i + 1} up`} onClick={() => moveStop(s.id, -1)} disabled={i === 0}
-                          className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
-                        >↑</button>
-                        <button
-                          type="button" aria-label={`Move stop ${i + 1} down`} onClick={() => moveStop(s.id, 1)} disabled={i === stops.length - 1}
-                          className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
-                        >↓</button>
-                        <button
-                          type="button" aria-label={`Remove stop ${i + 1}`} onClick={() => removeStop(s.id)}
-                          className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-red-500/30 hover:bg-red-500/50 text-white text-xs"
-                        >×</button>
-                      </div>
                     </div>
-                    <FeatureAdder onAdd={f => addFeature(s.id, f)} />
-                  </li>
-                  </Fragment>
-                  );
-                })}
-              </ul>
+
+                    <ul className="space-y-3">
+                      {day.stops.map(s => {
+                        const i = stops.findIndex(x => x.id === s.id);
+                        const nm = i > 0 ? legNm(stops[i - 1], s) : null;
+                        return (
+                          <li
+                            key={s.id}
+                            data-testid="itinerary-stop"
+                            onMouseEnter={() => setSelectedId(s.id)}
+                            onMouseLeave={() => setSelectedId(undefined)}
+                            className={`rounded-xl border px-3 py-3 sm:px-4 transition-colors ${selectedId === s.id ? 'border-blue-300 bg-white/20' : 'border-white/20 bg-white/10'}`}
+                          >
+                            <div className="flex items-start gap-2.5 sm:gap-3">
+                              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xs mt-1">
+                                {i + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <input
+                                  type="date"
+                                  aria-label={`Stop ${i + 1} date`}
+                                  value={s.date ?? ''}
+                                  min={charter.startDate}
+                                  max={charter.endDate}
+                                  onChange={e => editStop(s.id, { date: e.target.value })}
+                                  className="mb-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-400 [color-scheme:dark]"
+                                />
+                                {i === 0 ? (
+                                  <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1">
+                                    <AnchorIcon />
+                                    <span>Embarkation</span>
+                                  </div>
+                                ) : nm != null ? (
+                                  <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1" data-testid="leg-info">
+                                    <CompassIcon />
+                                    <span>
+                                      ~{Math.round(nm)} nm · {formatNavTime(nm, CRUISE_SPEED_KN)} from previous stop
+                                    </span>
+                                  </div>
+                                ) : null}
+                                <input
+                                  aria-label={`Stop ${i + 1} title`}
+                                  value={s.title}
+                                  onChange={e => editStop(s.id, { title: e.target.value })}
+                                  className="w-full bg-transparent text-white font-semibold text-sm focus:outline-none focus:bg-white/10 rounded px-1 -mx-1"
+                                />
+                                <LocationSearch
+                                  stopNumber={i + 1}
+                                  value={s.locationName ?? ''}
+                                  hasCoords={typeof s.lat === 'number' && typeof s.lng === 'number'}
+                                  onPick={loc => pickLocation(s.id, loc)}
+                                />
+                                <textarea
+                                  aria-label={`Stop ${i + 1} description`}
+                                  value={s.description}
+                                  onChange={e => editStop(s.id, { description: e.target.value })}
+                                  rows={2}
+                                  className="w-full mt-1 bg-transparent text-blue-100 text-xs leading-relaxed focus:outline-none focus:bg-white/10 rounded px-1 -mx-1 resize-none"
+                                />
+                                {s.features.length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1.5">
+                                    {s.features.map(f => (
+                                      <span key={f} className="inline-flex items-center gap-1 bg-white/20 border border-white/30 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                                        {featureIconMap[f] ? <span>{featureIconMap[f]}</span> : null}
+                                        {f}
+                                        <button
+                                          type="button"
+                                          aria-label={`Remove ${f}`}
+                                          onClick={() => removeFeature(s.id, f)}
+                                          className="ml-0.5 text-white/70 hover:text-white"
+                                        >
+                                          ×
+                                        </button>
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex flex-col gap-1 flex-shrink-0">
+                                <button
+                                  type="button" aria-label={`Move stop ${i + 1} up`} onClick={() => moveStop(s.id, -1)} disabled={i === 0}
+                                  className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
+                                >↑</button>
+                                <button
+                                  type="button" aria-label={`Move stop ${i + 1} down`} onClick={() => moveStop(s.id, 1)} disabled={i === stops.length - 1}
+                                  className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-white/10 hover:bg-white/20 text-white text-xs disabled:opacity-30"
+                                >↓</button>
+                                <button
+                                  type="button" aria-label={`Remove stop ${i + 1}`} onClick={() => removeStop(s.id)}
+                                  className="w-7 h-7 sm:w-6 sm:h-6 rounded bg-red-500/30 hover:bg-red-500/50 text-white text-xs"
+                                >×</button>
+                              </div>
+                            </div>
+                            <FeatureAdder onAdd={f => addFeature(s.id, f)} />
+                          </li>
+                        );
+                      })}
+                    </ul>
+
+                    <button
+                      type="button"
+                      onClick={() => addStopInDay(day)}
+                      className="w-full py-2 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/15 text-blue-100 border border-dashed border-white/20 transition-colors"
+                    >
+                      + Add stop to Day {day.dayNumber}
+                    </button>
+                  </div>
+                ))}
+              </div>
 
               <button
                 type="button"
                 onClick={addStop}
                 className="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-dashed border-white/30 transition-colors"
               >
-                + Add a stop
+                + Add a new day
               </button>
             </section>
           </div>
@@ -539,6 +586,71 @@ function AnchorIcon() {
       <line x1="12" y1="22" x2="12" y2="8" />
       <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
     </svg>
+  );
+}
+
+// Autocomplete over known Greek marinas/islands/ports. Picking a suggestion
+// moves the stop's point on the map (via onPick setting lat/lng).
+function LocationSearch({
+  stopNumber,
+  value,
+  hasCoords,
+  onPick,
+}: {
+  stopNumber: number;
+  value: string;
+  hasCoords: boolean;
+  onPick: (loc: GreekLocation) => void;
+}) {
+  const [query, setQuery] = useState(value);
+  const [open, setOpen] = useState(false);
+
+  // Keep the field in sync when the stop's stored location changes elsewhere.
+  useEffect(() => { setQuery(value); }, [value]);
+
+  const results = useMemo(() => (open && query.trim() ? searchGreekLocations(query) : []), [open, query]);
+  const listId = `loc-list-${stopNumber}`;
+  const isOpen = open && results.length > 0;
+
+  return (
+    <div className="relative mt-1">
+      <div className="flex items-center gap-1.5">
+        <span className="text-blue-300 text-xs" aria-hidden="true">📍</span>
+        <input
+          type="text"
+          role="combobox"
+          aria-controls={listId}
+          aria-expanded={isOpen}
+          aria-label={`Stop ${stopNumber} location`}
+          value={query}
+          placeholder="Search marina or place in Greece…"
+          onChange={e => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          className="flex-1 bg-white/5 border border-white/15 rounded-lg px-2 py-1 text-xs text-white placeholder:text-blue-400 focus:outline-none focus:border-blue-400"
+        />
+        {hasCoords && <span className="text-emerald-300 text-xs" title="Location set on map" aria-hidden="true">✓</span>}
+      </div>
+      <ul
+        id={listId}
+        role="listbox"
+        className={`absolute z-20 left-0 right-0 mt-1 max-h-52 overflow-y-auto rounded-lg border border-white/20 bg-[#00306a] shadow-xl ${isOpen ? '' : 'hidden'}`}
+      >
+        {results.map(loc => (
+          <li key={`${loc.name}-${loc.lat}`} role="option" aria-selected={false}>
+            <button
+              type="button"
+              // onMouseDown (not onClick) so it fires before the input's blur closes the list.
+              onMouseDown={e => { e.preventDefault(); onPick(loc); setQuery(loc.name); setOpen(false); }}
+              className="w-full text-left px-3 py-1.5 text-xs text-white hover:bg-white/10 flex items-center justify-between gap-2"
+            >
+              <span>{loc.name}</span>
+              {loc.region && <span className="text-blue-300 text-[10px]">{loc.region}</span>}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

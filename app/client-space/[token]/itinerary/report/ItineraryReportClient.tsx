@@ -273,7 +273,12 @@ export default function ItineraryReportClient({ token }: Props) {
                                 const nm = gi > 0 ? legNm(stops[gi - 1], s) : null;
                                 return (
                                   <div key={s.id}>
-                                    <h4 className="text-slate-800 font-bold text-sm">{s.title}</h4>
+                                    <div className="flex flex-wrap items-baseline gap-x-2">
+                                      <h4 className="text-slate-800 font-bold text-sm">{s.title}</h4>
+                                      {s.locationName && s.locationName !== s.title && (
+                                        <span className="text-slate-400 text-xs">📍 {s.locationName}</span>
+                                      )}
+                                    </div>
                                     <div className="text-xs text-slate-500 mt-0.5">
                                       {gi === 0 ? (
                                         <span>⚓ Embarkation</span>

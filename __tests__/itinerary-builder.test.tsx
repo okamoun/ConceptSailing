@@ -74,6 +74,7 @@ import { POST as chatPOST } from '../app/api/itinerary-chat/route';
 import { POST as weatherPOST } from '../app/api/itinerary-weather/route';
 import ItineraryBuilderClient from '../app/client-space/[token]/itinerary/ItineraryBuilderClient';
 import ItineraryReportClient from '../app/client-space/[token]/itinerary/report/ItineraryReportClient';
+import { searchGreekLocations } from '../app/greek-locations';
 import adventures from '../app/adventures-data';
 
 const TOKEN = 'tok-123';
@@ -302,10 +303,10 @@ describe('POST /api/itinerary-weather', () => {
 // 5. Manual edits — add / remove / reorder
 // ===========================================================================
 describe('Manual stop editing', () => {
-  test('adding a stop appends it with the next order and persists', async () => {
+  test('adding a new day appends a stop with the next order and persists', async () => {
     await renderBuilderWithItinerary(stops('Athens', 'Poros'));
 
-    fireEvent.click(screen.getByRole('button', { name: /Add a stop/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Add a new day/i }));
 
     await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
     const saved = mockSaveItinerary.mock.calls.at(-1)![1];
@@ -335,6 +336,35 @@ describe('Manual stop editing', () => {
     await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
     const saved = mockSaveItinerary.mock.calls.at(-1)![1];
     expect(saved.stops[0].date).toBe('2026-07-03');
+  });
+
+  test('adding a stop within a day inserts it after that day and keeps the date', async () => {
+    // Undated stops fall into one day each (Day 1, Day 2) from 2026-07-01.
+    await renderBuilderWithItinerary(stops('Athens', 'Poros'));
+
+    fireEvent.click(screen.getByRole('button', { name: /Add stop to Day 1/i }));
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.stops).toHaveLength(3);
+    // Inserted right after Day 1's stop, sharing its date.
+    expect(saved.stops[1].title).toBe('New stop');
+    expect(saved.stops[1].date).toBe('2026-07-01');
+    expect(saved.stops[2].title).toBe('Poros');
+  });
+
+  test('picking a location moves the point and records the place', async () => {
+    await renderBuilderWithItinerary(stops('Athens', 'Poros'));
+
+    fireEvent.change(screen.getByLabelText('Stop 1 location'), { target: { value: 'Hydra' } });
+    const option = await screen.findByRole('button', { name: /Hydra/ });
+    fireEvent.mouseDown(option);
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.stops[0].locationName).toBe('Hydra');
+    expect(saved.stops[0].lat).toBeCloseTo(37.349, 2);
+    expect(saved.stops[0].lng).toBeCloseTo(23.467, 2);
   });
 
   test('reordering updates order values and persists', async () => {
@@ -435,6 +465,27 @@ describe('Chat composer', () => {
     const saved = mockSaveItinerary.mock.calls.at(-1)![1];
     expect(saved.stops).toHaveLength(4);
     expect(mockAddItineraryMessage).toHaveBeenCalledWith(TOKEN, expect.objectContaining({ isAi: true }));
+  });
+});
+
+// ===========================================================================
+// Greek location search
+// ===========================================================================
+describe('searchGreekLocations', () => {
+  test('finds a known island with coordinates and ranks prefix matches first', () => {
+    const results = searchGreekLocations('poros');
+    expect(results.length).toBeGreaterThan(0);
+    const poros = results.find(r => r.name === 'Poros');
+    expect(poros).toBeDefined();
+    expect(poros!.lat).toBeCloseTo(37.5, 1);
+    // A prefix match ('Poros') ranks ahead of a mere substring ('Porto Cheli').
+    expect(results[0].name.toLowerCase().startsWith('poros')).toBe(true);
+  });
+
+  test('matches marinas too and returns nothing for a blank query', () => {
+    expect(searchGreekLocations('  ')).toHaveLength(0);
+    const alimos = searchGreekLocations('alimos');
+    expect(alimos.some(r => /alimos/i.test(r.name))).toBe(true);
   });
 });
 
