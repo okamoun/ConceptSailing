@@ -116,7 +116,12 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
       startDate: charter.startDate,
       endDate: charter.endDate,
       embarkationPoint: charter.embarkationPoint,
+      disembarkationPort: charter.disembarkationPort,
+      deliveryPoint: charter.deliveryPoint,
+      redeliveryPoint: charter.redeliveryPoint,
       passengers: charter.passengers,
+      boat: charter.boat,
+      selectedTheme: charter.selectedTheme,
       holidayDescription: charter.holidayDescription,
     }));
   }
@@ -136,6 +141,9 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
             boat: charter.boat,
             passengers: charter.passengers,
             embarkationPoint: charter.embarkationPoint,
+            disembarkationPort: charter.disembarkationPort,
+            deliveryPoint: charter.deliveryPoint,
+            redeliveryPoint: charter.redeliveryPoint,
             selectedTheme: charter.selectedTheme,
             holidayDescription: charter.holidayDescription,
           },

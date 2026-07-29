@@ -12,7 +12,10 @@ interface CharterInput {
   boat?: string;
   passengers?: number;
   embarkationPoint?: string;
-  selectedTheme?: string;   // Adventure.id
+  disembarkationPort?: string;
+  deliveryPoint?: string;     // marina id
+  redeliveryPoint?: string;   // marina id
+  selectedTheme?: string;     // Adventure.id
   holidayDescription?: string;
 }
 

@@ -229,7 +229,7 @@ describe('POST /api/itinerary-generate', () => {
 });
 
 describe('buildItineraryPrompt', () => {
-  test('reflects the trip length, embarkation and preferences', () => {
+  test('reflects the trip length, dates, embarkation and preferences', () => {
     const prompt = buildItineraryPrompt({
       startDate: '2026-07-01',
       endDate: '2026-07-08',
@@ -241,6 +241,36 @@ describe('buildItineraryPrompt', () => {
     expect(prompt).toContain('Lavrio');
     expect(prompt).toContain('6');
     expect(prompt).toContain('lots of snorkelling');
+    // The actual dates and season reach the prompt.
+    expect(prompt).toContain('1 July 2026');
+    expect(prompt).toMatch(/July/);
+  });
+
+  test('includes the chosen theme and the disembarkation point from the booking', () => {
+    const prompt = buildItineraryPrompt({
+      startDate: '2026-07-01',
+      endDate: '2026-07-08',
+      embarkationPoint: 'Lavrio',
+      disembarkationPort: 'Mykonos',
+      selectedTheme: '3', // Yoga & Wellness Retreat
+      passengers: 4,
+      holidayDescription: 'calm and restorative',
+    });
+    expect(prompt).toContain('Yoga & Wellness Retreat');
+    expect(prompt).toContain('Mykonos');
+    expect(prompt).toContain('Lavrio');
+    expect(prompt).toMatch(/theme/i);
+  });
+
+  test('resolves marina ids to names for delivery / redelivery points', () => {
+    const prompt = buildItineraryPrompt({
+      startDate: '2026-05-01',
+      endDate: '2026-05-05',
+      deliveryPoint: 'alimos',
+      redeliveryPoint: 'lavrio',
+    });
+    expect(prompt).toContain('Alimos Marina');
+    expect(prompt).toContain('Lavrio Port');
   });
 });
 
@@ -530,6 +560,9 @@ describe('AI prompt editor', () => {
     fireEvent.click(screen.getByRole('button', { name: /Generate with AI/i }));
     const promptBox = (await screen.findByLabelText('AI prompt')) as HTMLTextAreaElement;
     expect(promptBox.value).toMatch(/day-by-day sailing itinerary/i);
+    // The booking context reaches the prompt: embarkation and the chosen theme.
+    expect(promptBox.value).toContain('Athens');
+    expect(promptBox.value).toContain('Yoga & Wellness Retreat'); // baseCharter.selectedTheme = '3'
     expect(global.fetch).not.toHaveBeenCalled();
 
     fireEvent.change(promptBox, { target: { value: 'Custom prompt: quiet bays only' } });
