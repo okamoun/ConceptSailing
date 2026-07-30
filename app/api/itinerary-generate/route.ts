@@ -4,6 +4,10 @@ import adventures from '../../adventures-data';
 import { makeItineraryStops, type ClientItinerary } from '../../../lib/clientSpace';
 import { buildItineraryPrompt } from '../../itinerary-prompt';
 
+// Generating a multi-day JSON itinerary with gpt-4o can take longer than the
+// platform's default serverless timeout — allow up to 60s.
+export const maxDuration = 60;
+
 // The charter fields this route needs to seed an itinerary. The client passes
 // its already-loaded Charter so the route never has to touch Firestore.
 interface CharterInput {
@@ -65,6 +69,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: 'Itinerary generation failed', details: 'The OpenAI API key is not configured on the server.' },
+      { status: 500 },
+    );
+  }
+
   // Use the client's edited prompt when provided, otherwise build the default.
   const prompt = hasOverride ? (promptOverride as string) : buildItineraryPrompt(charter);
 
@@ -73,7 +84,9 @@ export async function POST(request: NextRequest) {
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
-      max_tokens: 1800,
+      max_tokens: 4000,
+      // JSON mode guarantees parseable output (prompt already asks for a JSON object).
+      response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }],
     });
 

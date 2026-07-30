@@ -127,6 +127,7 @@ function stops(...titles: string[]) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  process.env.OPENAI_API_KEY = 'test-key';
   mockGetCharter.mockResolvedValue(baseCharter);
   mockGetPrep.mockResolvedValue(emptyPrep);
   mockSaveItinerary.mockResolvedValue(undefined);
@@ -212,6 +213,20 @@ describe('POST /api/itinerary-generate', () => {
     expect(res.status).toBe(500);
     const data = await res.json();
     expect(data.error).toBeTruthy();
+  });
+
+  test('returns a clear error when the OpenAI key is not configured', async () => {
+    const saved = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    try {
+      const res = await generatePOST(makeRequest({ charter: aiCharter }));
+      expect(res.status).toBe(500);
+      const data = await res.json();
+      expect(data.details).toMatch(/API key/i);
+      expect(mockCreate).not.toHaveBeenCalled();
+    } finally {
+      process.env.OPENAI_API_KEY = saved;
+    }
   });
 
   test('uses the client-supplied prompt verbatim and skips the theme fast-path', async () => {
@@ -685,6 +700,8 @@ describe('AI failure handling', () => {
 
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument());
     expect(screen.getByRole('alert').textContent).toMatch(/could not generate/i);
+    // The server's reason is surfaced to the client, not hidden behind a generic message.
+    expect(screen.getByRole('alert').textContent).toMatch(/boom/);
     expect(mockSaveItinerary).not.toHaveBeenCalled();
   });
 
