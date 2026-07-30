@@ -511,6 +511,16 @@ export default function ProposalEditorClient({ id }: Props) {
                 onChange={e => setPricing(p => ({ ...p, securityDeposit: Number(e.target.value) }))}
                 onFocus={e => e.target.select()} min={0} step={100} className={inputCls} />
             </Field>
+            <Field label="Delivery Fee (€)" hint={embarkLabel ? `To ${embarkLabel}` : 'Delivery to embarkation port'}>
+              <input type="number" value={pricing.deliveryFee ?? 0}
+                onChange={e => setPricing(p => ({ ...p, deliveryFee: Number(e.target.value) }))}
+                onFocus={e => e.target.select()} min={0} step={100} className={inputCls} />
+            </Field>
+            <Field label="Redelivery Fee (€)" hint={disembarkLabel ? `From ${disembarkLabel}` : 'Redelivery from disembarkation port'}>
+              <input type="number" value={pricing.redeliveryFee ?? 0}
+                onChange={e => setPricing(p => ({ ...p, redeliveryFee: Number(e.target.value) }))}
+                onFocus={e => e.target.select()} min={0} step={100} className={inputCls} />
+            </Field>
           </div>
 
           {/* Extras */}
@@ -559,6 +569,16 @@ export default function ProposalEditorClient({ id }: Props) {
             {totals.apa > 0 && (
               <div className="flex justify-between text-sm text-blue-200">
                 <span>APA ({pricing.apaPercentage}%)</span><span>{fmt(totals.apa)}</span>
+              </div>
+            )}
+            {(totals.delivery || 0) > 0 && (
+              <div className="flex justify-between text-sm text-blue-200">
+                <span>Delivery{embarkLabel ? ` to ${embarkLabel}` : ''}</span><span>{fmt(totals.delivery!)}</span>
+              </div>
+            )}
+            {(totals.redelivery || 0) > 0 && (
+              <div className="flex justify-between text-sm text-blue-200">
+                <span>Redelivery{disembarkLabel ? ` from ${disembarkLabel}` : ''}</span><span>{fmt(totals.redelivery!)}</span>
               </div>
             )}
             {pricing.securityDeposit > 0 && (

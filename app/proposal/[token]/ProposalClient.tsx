@@ -343,6 +343,18 @@ export default function ProposalClient({ token }: Props) {
                   <span className="text-gray-800">Charter Fee Total</span>
                   <span className="text-gray-900">{fmt(totals.charterFee, currency)}</span>
                 </div>
+                {(totals.delivery || 0) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Delivery{embarkLabel ? ` to ${embarkLabel}` : ''}</span>
+                    <span className="font-medium text-gray-900">{fmt(totals.delivery!, currency)}</span>
+                  </div>
+                )}
+                {(totals.redelivery || 0) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Redelivery{disembarkLabel ? ` from ${disembarkLabel}` : ''}</span>
+                    <span className="font-medium text-gray-900">{fmt(totals.redelivery!, currency)}</span>
+                  </div>
+                )}
                 {totals.vat > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">VAT ({proposal.pricing.vatPercentage ?? 13}%)</span>
@@ -402,7 +414,7 @@ export default function ProposalClient({ token }: Props) {
               {(proposal.paymentTerms || []).map((term, i) => {
                 const isLast = i === (proposal.paymentTerms || []).length - 1;
                 const termBase = Math.round(totals.charterFee * term.percentage / 100);
-                const amount = isLast ? termBase + totals.apa + totals.vat : termBase;
+                const amount = isLast ? termBase + totals.apa + totals.vat + (totals.relocation || 0) : termBase;
                 return (
                   <div key={i} className="pterm flex gap-4 p-4 bg-gray-50 rounded-xl">
                     <div className="pterm-num w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-sm font-bold text-blue-700">

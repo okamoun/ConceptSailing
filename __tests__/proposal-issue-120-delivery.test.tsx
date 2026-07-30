@@ -58,7 +58,7 @@ const mockGet = getCharterByProposalToken as jest.MockedFunction<typeof getChart
 // with its own cost.
 const CHARTER = {
   id: 'charter-123',
-  status: 'sent' as const,
+  status: 'confirmed' as const,
   startDate: '2026-07-01',
   endDate: '2026-07-08',
   name: 'Jean Dupont',
