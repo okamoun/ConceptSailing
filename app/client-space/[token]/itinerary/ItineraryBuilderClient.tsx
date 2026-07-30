@@ -150,16 +150,25 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
           ...(promptOverride ? { prompt: promptOverride } : {}),
         }),
       });
-      if (!res.ok) throw new Error('generation failed');
-      const data = (await res.json()) as { itinerary?: ClientItinerary };
-      if (!data.itinerary || !Array.isArray(data.itinerary.stops) || data.itinerary.stops.length === 0) {
-        throw new Error('empty itinerary');
+      const data = (await res.json().catch(() => ({}))) as {
+        itinerary?: ClientItinerary;
+        error?: string;
+        details?: string;
+      };
+      if (!res.ok || !data.itinerary || !Array.isArray(data.itinerary.stops) || data.itinerary.stops.length === 0) {
+        // Surface the server's reason (e.g. missing API key, timeout) so the
+        // problem is diagnosable rather than a generic "try again".
+        const detail = data.details || data.error;
+        throw new Error(detail || 'The AI did not return an itinerary.');
       }
       await persist(data.itinerary);
       setPromptDraft(null);
-    } catch {
+    } catch (e) {
       // Leave any previous itinerary untouched — only surface the error.
-      setError('We could not generate an itinerary right now. Please try again in a moment.');
+      const detail = e instanceof Error ? e.message : '';
+      setError(
+        `We could not generate an itinerary right now${detail ? `: ${detail}` : ''}. Please try again in a moment.`,
+      );
     } finally {
       setGenerating(false);
     }

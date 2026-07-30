@@ -78,6 +78,8 @@ export interface ProposalPricing {
   securityDeposit: number;
   discountPercentage: number;
   extras: PricingExtra[];
+  deliveryFee?: number;    // cost of delivering the yacht to the embarkation port
+  redeliveryFee?: number;  // cost of returning the yacht from the disembarkation port
 }
 
 export interface PaymentTerm {
@@ -117,7 +119,6 @@ export const DEFAULT_INCLUSIONS: string[] = [
   'Snorkelling & diving equipment',
   'Paddleboards & water sports equipment',
   'Satellite WiFi',
-  'Fuel for normal cruising (up to 4 h/day engine use)',
   'Daily boat cleaning & housekeeping',
 ];
 
@@ -152,10 +153,14 @@ export function calcTotals(pricing: ProposalPricing) {
   const extrasSum = (pricing.extras || []).reduce((s, e) => s + (e.amount || 0), 0);
   const discount = Math.round(base * (pricing.discountPercentage || 0) / 100);
   const charterFee = base - discount + extrasSum;
-  const apa = Math.round(charterFee * (pricing.apaPercentage || 0) / 100);
+  // APA is a percentage of the base charter fee BEFORE any discount is applied.
+  const apa = Math.round(base * (pricing.apaPercentage || 0) / 100);
   const vat = Math.round(charterFee * (pricing.vatPercentage || 0) / 100);
-  const grandTotal = charterFee + apa + vat + (pricing.securityDeposit || 0);
-  return { base, apa, vat, extrasSum, discount, charterFee, grandTotal };
+  const delivery = pricing.deliveryFee || 0;
+  const redelivery = pricing.redeliveryFee || 0;
+  const relocation = delivery + redelivery;
+  const grandTotal = charterFee + apa + vat + relocation + (pricing.securityDeposit || 0);
+  return { base, apa, vat, extrasSum, discount, charterFee, delivery, redelivery, relocation, grandTotal };
 }
 
 export function proposalRef(charterId: string): string {

@@ -3,6 +3,9 @@ import OpenAI from 'openai';
 import { featureIconMap } from '../../feature-icons';
 import { newStopId, type ClientItineraryStop } from '../../../lib/clientSpace';
 
+// Revising an itinerary with gpt-4o can exceed the default serverless timeout.
+export const maxDuration = 60;
+
 // Coerce whatever the AI hands back into well-formed stops. Keeps the original
 // id when the AI echoes it so React keys / map markers stay stable; otherwise
 // mints a new one. Omits lat/lng when absent so Firestore never sees undefined.
@@ -52,12 +55,20 @@ Rules:
 - Prefer these activity labels for "features" when one fits: ${knownFeatures.join(', ')}.
 - No markdown, no explanation outside the JSON.`;
 
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: 'Itinerary chat failed', details: 'The OpenAI API key is not configured on the server.' },
+      { status: 500 },
+    );
+  }
+
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
-      max_tokens: 1800,
+      max_tokens: 4000,
+      response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }],
     });
 
