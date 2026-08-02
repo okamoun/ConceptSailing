@@ -12,6 +12,7 @@ import {
 } from '@/lib/availability';
 import BookingCalendar from './BookingCalendar';
 import { useTableSort, SortHeader } from '../useTableSort';
+import { STATUS_BADGE, STATUS_BADGE_FALLBACK } from '@/lib/charterStatusStyles';
 
 type BookingSortCol =
   | 'status' | 'name' | 'email' | 'phone' | 'startDate' | 'endDate'
@@ -54,9 +55,9 @@ const ALL_STATUSES: CharterStatus[] = [
   'confirmed', 'signed', 'canceled', 'owner_use', 'maintenance',
 ];
 
-const DEFAULT_STATUSES = new Set<CharterStatus>([
-  'broker_request', 'serious_request', 'proposal_sent', 'confirmed', 'signed', 'owner_use', 'maintenance',
-]);
+// Show every status by default so switching to this screen can't silently hide
+// new web leads (web_request) or canceled bookings — matches the Dashboard default.
+const DEFAULT_STATUSES = new Set<CharterStatus>(ALL_STATUSES);
 
 const STATUS_TOGGLE_CLS: Record<CharterStatus, { on: string; off: string }> = {
   web_request:     { on: 'bg-sky-400/80 text-sky-900 border-sky-400/80',         off: 'bg-sky-400/10 text-sky-400 border-sky-400/30' },
@@ -176,7 +177,7 @@ export default function BookingSummaryClient() {
           <p className="text-blue-200 text-sm animate-pulse">Loading…</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard label="Total Charters"    value={charters.length}  sub={`${totalDaysBooked} days booked`} />
+            <StatCard label="Total Bookings"    value={charters.length}  sub={`${totalDaysBooked} days booked`} />
             <StatCard label="Upcoming"           value={upcoming.length}  sub={`${upcomingDays} days booked`} />
             <StatCard label="Web Requests"       value={webRequests.length} />
             <StatCard label="Confirmed / Signed" value={confirmed.length} sub={`${confirmedDays} days booked`} />
@@ -223,7 +224,7 @@ export default function BookingSummaryClient() {
             <p className="text-blue-300/60 text-xs">
               {(() => {
                 const filteredDays = filteredCharters.reduce((sum, c) => sum + Math.max(0, Math.round((new Date(c.endDate).getTime() - new Date(c.startDate).getTime()) / 86_400_000)), 0);
-                return `Showing ${filteredCharters.length} of ${charters.length} charter${charters.length !== 1 ? 's' : ''} · ${filteredDays} days`;
+                return `Showing ${filteredCharters.length} of ${charters.length} booking${charters.length !== 1 ? 's' : ''} · ${filteredDays} days`;
               })()}
             </p>
           </div>
@@ -256,7 +257,7 @@ export default function BookingSummaryClient() {
         {!loading && filteredCharters.length > 0 && (
           <section>
             <h2 className="text-white font-semibold text-base mb-3">
-              All Charters
+              All Bookings
               <span className="ml-2 text-blue-300 text-xs font-normal">Click a row to view details</span>
             </h2>
             <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl overflow-hidden">
@@ -402,21 +403,10 @@ export default function BookingSummaryClient() {
   );
 }
 
-const STATUS_BADGE_CLS: Record<string, string> = {
-  web_request:     'bg-sky-500/30 text-sky-200',
-  broker_request:  'bg-amber-500/30 text-amber-200',
-  serious_request: 'bg-orange-500/30 text-orange-200',
-  proposal_sent:   'bg-violet-500/30 text-violet-200',
-  confirmed:       'bg-emerald-500/30 text-emerald-200',
-  signed:          'bg-emerald-800/30 text-emerald-100',
-  canceled:        'bg-gray-500/30 text-gray-300',
-  owner_use:       'bg-purple-500/30 text-purple-200',
-  maintenance:     'bg-red-500/30 text-red-200',
-};
-
 function StatusBadge({ status }: { status: string }) {
+  const cls = STATUS_BADGE[status as CharterStatus] ?? STATUS_BADGE_FALLBACK;
   return (
-    <span className={`px-1.5 py-0.5 rounded-full font-semibold ${STATUS_BADGE_CLS[status] ?? 'bg-white/20 text-white'}`}>
+    <span className={`px-1.5 py-0.5 rounded-full font-semibold ${cls}`}>
       {CHARTER_STATUS_LABEL[status as keyof typeof CHARTER_STATUS_LABEL] ?? status}
     </span>
   );

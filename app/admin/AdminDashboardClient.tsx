@@ -24,23 +24,13 @@ import MarinaMap from './MarinaMap';
 import { marinasByRegion, getMarinaById, DEFAULT_MARINA_ID } from '../marinas-data';
 import { initClientSpace } from '../../lib/clientSpace';
 import { useTableSort, SortHeader } from './useTableSort';
+import { STATUS_BADGE } from '../../lib/charterStatusStyles';
+import { confirmDelete } from './confirmDelete';
 
 type Tab = 'charters' | 'contacts' | 'reviews';
 type CharterSortCol = 'status' | 'name' | 'startDate' | 'passengers' | 'createdAt';
 type ContactSortCol = 'name' | 'email' | 'phone' | 'createdAt';
 type ReviewSortCol = 'status' | 'rating' | 'name' | 'title' | 'order';
-
-const STATUS_BADGE: Record<CharterStatus, string> = {
-  web_request:     'bg-sky-500/30 text-sky-200',
-  broker_request:  'bg-amber-500/30 text-amber-200',
-  serious_request: 'bg-orange-500/30 text-orange-200',
-  proposal_sent:   'bg-violet-500/30 text-violet-200',
-  confirmed:       'bg-emerald-500/30 text-emerald-200',
-  signed:          'bg-emerald-800/40 text-emerald-100',
-  canceled:        'bg-gray-500/30 text-gray-300',
-  owner_use:       'bg-purple-500/30 text-purple-200',
-  maintenance:     'bg-red-500/30 text-red-200',
-};
 
 const PROPOSAL_BADGE: Record<ProposalStatus, string> = {
   draft:     'bg-gray-500/30 text-gray-300',
@@ -162,7 +152,7 @@ export default function AdminDashboardClient() {
   }
 
   async function handleDeleteCharter(id: string) {
-    if (!confirm('Delete this charter entry?')) return;
+    if (!confirmDelete('booking')) return;
     await deleteCharter(id);
     setCharters(prev => prev.filter(c => c.id !== id));
     if (selectedCharterId === id) setSelectedCharterId(null);
@@ -191,14 +181,14 @@ export default function AdminDashboardClient() {
   }
 
   async function handleDeleteContact(id: string) {
-    if (!confirm('Delete this contact submission?')) return;
+    if (!confirmDelete('contact submission')) return;
     await deleteContact(id);
     setContacts(prev => prev.filter(c => c.id !== id));
     if (selectedContactId === id) setSelectedContactId(null);
   }
 
   async function handleDeleteReview(id: string) {
-    if (!confirm('Delete this review permanently?')) return;
+    if (!confirmDelete('review')) return;
     await adminDeleteReview(id);
     setReviews(prev => prev.filter(r => r.id !== id));
     if (selectedReviewId === id) setSelectedReviewId(null);
@@ -234,7 +224,7 @@ export default function AdminDashboardClient() {
   }
 
   const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: 'charters', label: 'Charters', count: charters.length },
+    { id: 'charters', label: 'Bookings', count: charters.length },
     { id: 'contacts', label: 'Contacts', count: contacts.length },
     { id: 'reviews',  label: 'Reviews',  count: reviews.length  },
   ];
@@ -365,7 +355,7 @@ export default function AdminDashboardClient() {
                   </table>
                 </div>
               </div>
-              <p className="text-blue-400 text-xs">{filteredCharters.length} of {charters.length} charters</p>
+              <p className="text-blue-400 text-xs">{filteredCharters.length} of {charters.length} bookings</p>
             </div>
 
             {/* Charter detail panel */}

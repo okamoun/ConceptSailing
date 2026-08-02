@@ -21,18 +21,8 @@ import {
 } from '../../marinas-data';
 import MarinaMap from '../MarinaMap';
 import adventures from '../../adventures-data';
-
-const STATUS_BADGE: Record<CharterStatus, string> = {
-  web_request:     'bg-sky-400/30 text-sky-200',
-  broker_request:  'bg-amber-400/30 text-amber-200',
-  serious_request: 'bg-orange-500/30 text-orange-200',
-  proposal_sent:   'bg-violet-500/30 text-violet-200',
-  confirmed:       'bg-emerald-500/30 text-emerald-200',
-  signed:          'bg-emerald-800/30 text-emerald-100',
-  canceled:        'bg-gray-500/30 text-gray-300',
-  owner_use:       'bg-purple-500/30 text-purple-200',
-  maintenance:     'bg-red-500/30 text-red-200',
-};
+import { STATUS_BADGE } from '../../../lib/charterStatusStyles';
+import { confirmDelete } from '../confirmDelete';
 
 
 interface ModalState {
@@ -183,7 +173,7 @@ export default function AvailabilityAdminClient() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this entry?')) return;
+    if (!confirmDelete('booking')) return;
     try {
       await deleteCharter(id);
       setEntries(prev => prev.filter(e => e.id !== id));
@@ -200,8 +190,8 @@ export default function AvailabilityAdminClient() {
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-white font-bold text-2xl">Charter Calendar</h1>
-            <p className="text-blue-200 text-xs mt-0.5">Click any date on the calendar to add or edit a charter entry</p>
+            <h1 className="text-white font-bold text-2xl">Booking Calendar</h1>
+            <p className="text-blue-200 text-xs mt-0.5">Click any date on the calendar to add or edit a booking</p>
           </div>
           <button
             onClick={() => openAddModal(new Date().toISOString().slice(0, 10))}
@@ -210,7 +200,7 @@ export default function AvailabilityAdminClient() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            New Entry
+            New Booking
           </button>
         </div>
 
@@ -236,7 +226,7 @@ export default function AvailabilityAdminClient() {
 
         {!loading && entries.length > 0 && (
           <div className="space-y-2">
-            <h2 className="text-white font-semibold text-sm">All Entries</h2>
+            <h2 className="text-white font-semibold text-sm">All Bookings</h2>
             {entries.map(e => {
               const delMarina = getMarinaById(e.deliveryPoint ?? '');
               const relMarina = getMarinaById(e.redeliveryPoint ?? e.deliveryPoint ?? '');
@@ -296,7 +286,7 @@ export default function AvailabilityAdminClient() {
 
         {!loading && entries.length === 0 && (
           <p className="text-blue-200 text-sm text-center py-4">
-            No entries yet. Click a future date on the calendar to add one.
+            No bookings yet. Click a future date on the calendar to add one.
           </p>
         )}
 
@@ -307,7 +297,7 @@ export default function AvailabilityAdminClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-lg bg-blue-900/95 border border-white/20 rounded-2xl p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-white font-bold text-lg">
-              {modal.mode === 'add' ? 'Add Charter Entry' : 'Edit Entry'}
+              {modal.mode === 'add' ? 'Add Booking' : 'Edit Booking'}
             </h2>
 
             {/* Status */}
@@ -493,7 +483,7 @@ export default function AvailabilityAdminClient() {
                 <button
                   onClick={() => handleDelete(modal.entry!.id)}
                   className="w-10 h-10 rounded-xl bg-red-600/50 hover:bg-red-500 text-white flex items-center justify-center transition-colors"
-                  title="Delete entry"
+                  title="Delete booking"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0a1 1 0 01-1-1V5a1 1 0 011-1h8a1 1 0 011 1v1a1 1 0 01-1 1H9z" />

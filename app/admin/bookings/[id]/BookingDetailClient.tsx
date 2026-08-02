@@ -20,6 +20,7 @@ import {
 import { initClientSpace } from '../../../../lib/clientSpace';
 import { getMarinaById } from '../../../marinas-data';
 import { useAdminAuth } from '../../AdminAuthContext';
+import { confirmDelete } from '../../confirmDelete';
 
 interface Props {
   id: string;
@@ -150,7 +151,7 @@ export default function BookingDetailClient({ id }: Props) {
   }
 
   async function handleDeleteCharter() {
-    if (!confirm('Delete this booking? This cannot be undone.')) return;
+    if (!confirmDelete('booking')) return;
     await deleteCharter(id);
     router.push('/admin');
   }
