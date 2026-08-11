@@ -507,20 +507,19 @@ function sameManifestRoster(a: ManifestGuest[], b: ManifestGuest[]): boolean {
   return ai.every((v, i) => v === bi[i]);
 }
 
-// Splits the crew into consecutive periods. When every guest shares the same
-// dates a single period covering the whole charter is returned; when guests
-// arrive or depart on different dates each distinct roster becomes its own
-// period. Dates are ISO 'YYYY-MM-DD' strings, so lexical comparison orders them.
-export function buildCrewManifest(
+// Flattens the crew into one ManifestGuest per person, resolving each guest's
+// arrival/departure dates and embarkation points from their travel group (or
+// the charter's own dates as a fallback). Order matches `prep.crew`.
+export function manifestGuests(
   charter: Pick<Charter, 'startDate' | 'endDate'>,
   prep: Pick<ClientPreparation, 'crew' | 'travel'>,
-): ManifestPeriod[] {
+): ManifestGuest[] {
   const crew = prep.crew ?? [];
   const groups = prep.travel?.groups ?? [];
   const cStart = charter.startDate;
   const cEnd = charter.endDate;
 
-  const guests: ManifestGuest[] = crew.map((member, index) => {
+  return crew.map((member, index) => {
     const g = groups.find(gr => gr.memberIndices?.includes(index));
     return {
       index,
@@ -531,6 +530,20 @@ export function buildCrewManifest(
       disembarkationPoint: g?.disembarkationPoint,
     };
   });
+}
+
+// Splits the crew into consecutive periods. When every guest shares the same
+// dates a single period covering the whole charter is returned; when guests
+// arrive or depart on different dates each distinct roster becomes its own
+// period. Dates are ISO 'YYYY-MM-DD' strings, so lexical comparison orders them.
+export function buildCrewManifest(
+  charter: Pick<Charter, 'startDate' | 'endDate'>,
+  prep: Pick<ClientPreparation, 'crew' | 'travel'>,
+): ManifestPeriod[] {
+  const cStart = charter.startDate;
+  const cEnd = charter.endDate;
+
+  const guests: ManifestGuest[] = manifestGuests(charter, prep);
 
   const fallback: ManifestPeriod[] = [{ startDate: cStart, endDate: cEnd, guests }];
   if (guests.length === 0) return fallback;
