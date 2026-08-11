@@ -11,6 +11,7 @@ import {
   type ManifestGuest,
 } from '../../../../lib/clientSpace';
 import type { Charter } from '../../../../lib/availability';
+import { downloadCrewManifestXlsx } from '../../../../lib/crewManifestExport';
 import { getMarinaById } from '../../../marinas-data';
 import { CONTACT } from '../../../config/contact';
 
@@ -329,6 +330,19 @@ export default function ManifestClient({ token }: Props) {
               </svg>
               <span className="hidden sm:inline">Summary</span>
             </a>
+            {hasCrew && (
+              <button
+                onClick={() => downloadCrewManifestXlsx(charter, prep)}
+                className="no-print flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold border border-white/30 text-white hover:bg-white/10 transition-colors"
+                title="Download crew manifest as Excel for the Greek e-Charterparty upload"
+              >
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-2-2m2 2l2-2M4 6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" />
+                </svg>
+                <span className="hidden sm:inline">Excel (e-Charter)</span>
+                <span className="sm:hidden">Excel</span>
+              </button>
+            )}
             <button
               onClick={() => window.print()}
               className="no-print flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-xl text-xs font-bold bg-white text-blue-800 hover:bg-blue-50 transition-colors shadow-sm"
