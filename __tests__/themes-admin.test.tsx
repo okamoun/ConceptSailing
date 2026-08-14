@@ -287,6 +287,51 @@ describe('ThemesAdminClient — category selector', () => {
   })
 })
 
+// ── Reordering ────────────────────────────────────────────────────────────────
+
+describe('ThemesAdminClient — reordering', () => {
+  test('moving a theme down persists both swapped orders', async () => {
+    render(<ThemesAdminClient />)
+    await waitFor(() => expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument())
+
+    // Row '1' (order 0) is first in its category, so its "Move down" is the only enabled one.
+    const moveDown = screen.getAllByTitle('Move down').find(b => !(b as HTMLButtonElement).disabled)!
+    fireEvent.click(moveDown)
+
+    await waitFor(() => {
+      expect(upsertThemeMetadata).toHaveBeenCalledWith('1', { order: 1 })
+      expect(upsertThemeMetadata).toHaveBeenCalledWith('2', { order: 0 })
+    })
+  })
+
+  test('reordering updates optimistically without re-fetching the whole collection', async () => {
+    render(<ThemesAdminClient />)
+    await waitFor(() => expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument())
+    expect(getAllThemeMetadata).toHaveBeenCalledTimes(1) // initial load only
+
+    const moveDown = screen.getAllByTitle('Move down').find(b => !(b as HTMLButtonElement).disabled)!
+    fireEvent.click(moveDown)
+
+    await waitFor(() => expect(upsertThemeMetadata).toHaveBeenCalledWith('1', { order: 1 }))
+    // No reload triggered on the success path — still just the initial fetch.
+    expect(getAllThemeMetadata).toHaveBeenCalledTimes(1)
+  })
+
+  test('re-syncs from Firestore when a reorder write fails', async () => {
+    ;(upsertThemeMetadata as jest.Mock).mockRejectedValueOnce(new Error('write failed'))
+    render(<ThemesAdminClient />)
+    await waitFor(() => expect(screen.getByText('Wind Sports Adventure')).toBeInTheDocument())
+    expect(getAllThemeMetadata).toHaveBeenCalledTimes(1)
+
+    const moveDown = screen.getAllByTitle('Move down').find(b => !(b as HTMLButtonElement).disabled)!
+    fireEvent.click(moveDown)
+
+    // On failure it reloads to resync and surfaces an error.
+    await waitFor(() => expect(screen.getByText(/Reorder failed/)).toBeInTheDocument())
+    expect(getAllThemeMetadata).toHaveBeenCalledTimes(2)
+  })
+})
+
 // ── Error handling ────────────────────────────────────────────────────────────
 
 describe('ThemesAdminClient — error handling', () => {
