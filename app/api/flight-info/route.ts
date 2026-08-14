@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   const apiKey = process.env.AVIATIONSTACK_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: 'Flight lookup not configured' }, { status: 503 });
+    return NextResponse.json({ error: 'Flight lookup not configured', code: 'not_configured' }, { status: 503 });
   }
 
   try {
@@ -27,9 +27,19 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Upstream error' }, { status: 502 });
     }
     const json = await res.json();
+
+    // aviationstack signals problems (quota exhausted, invalid key, https
+    // restriction on the free plan, …) as HTTP 200 with an `error` object
+    // rather than a non-2xx status, so `res.ok` above never catches them.
+    if (json?.error) {
+      const code = json.error.code ?? json.error.type ?? 'unknown';
+      const message = json.error.message ?? json.error.info ?? 'Flight lookup failed';
+      return NextResponse.json({ error: message, code }, { status: 502 });
+    }
+
     const f = json?.data?.[0];
     if (!f) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      return NextResponse.json({ error: 'No flight details found', code: 'not_found' }, { status: 404 });
     }
     const info: FlightInfo = {
       airline: f.airline?.name ?? '',

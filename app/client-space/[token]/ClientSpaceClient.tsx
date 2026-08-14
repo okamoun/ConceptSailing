@@ -197,6 +197,7 @@ function FlightTrackLinks({ flight, onInfo }: { flight: string; onInfo?: (info: 
   const fr24 = `https://www.flightradar24.com/data/flights/${code.toLowerCase()}`;
   const fa   = `https://flightaware.com/live/flight/${code}`;
   const [info, setInfo] = useState<FlightInfo | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const onInfoRef = useRef(onInfo);
   onInfoRef.current = onInfo;
@@ -204,12 +205,19 @@ function FlightTrackLinks({ flight, onInfo }: { flight: string; onInfo?: (info: 
   useEffect(() => {
     if (!code) return;
     setInfo(null);
+    setError(null);
     onInfoRef.current?.(null);
     setLoading(true);
     fetch(`/api/flight-info?flight=${encodeURIComponent(code)}`)
-      .then(r => r.ok ? r.json() : null)
-      .then((data: FlightInfo | null) => { setInfo(data); onInfoRef.current?.(data); })
-      .catch(() => {})
+      .then(async r => {
+        const body = await r.json().catch(() => null);
+        if (r.ok && body && !body.error) {
+          return { info: body as FlightInfo, error: null };
+        }
+        return { info: null, error: (body?.error as string) || 'Flight details unavailable' };
+      })
+      .then(({ info, error }) => { setInfo(info); setError(error); onInfoRef.current?.(info); })
+      .catch(() => { setInfo(null); setError('Flight details unavailable'); onInfoRef.current?.(null); })
       .finally(() => setLoading(false));
   }, [code]);
 
@@ -223,6 +231,9 @@ function FlightTrackLinks({ flight, onInfo }: { flight: string; onInfo?: (info: 
     <div className="mt-1 space-y-1">
       {loading && (
         <p className="text-[10px] text-blue-400 italic">Looking up flight…</p>
+      )}
+      {!loading && (!info || !info.airline) && error && (
+        <p className="text-[10px] text-amber-600 italic">{error}</p>
       )}
       {!loading && info && info.airline && (
         <div className="text-[10px] text-blue-700 bg-blue-50/60 rounded px-2 py-1 space-y-0.5">
