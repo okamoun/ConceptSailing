@@ -68,6 +68,10 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
 
   const stops = useMemo(() => itinerary?.stops ?? [], [itinerary]);
 
+  // Cruising speed used for all sailing-time estimates, falling back to the
+  // 6kn default when the itinerary has no explicit speed saved.
+  const speedKn = itinerary?.cruiseSpeedKn ?? CRUISE_SPEED_KN;
+
   // Total sailing distance across every leg that has coordinates on both ends.
   const totalNm = useMemo(() => {
     let sum = 0;
@@ -92,6 +96,13 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
   function updateStops(nextStops: ClientItineraryStop[], source?: ClientItinerary['source']) {
     const base = itinerary ?? { source: 'manual' as const, stops: [] };
     persist({ ...base, source: source ?? base.source, stops: reindex(nextStops) });
+  }
+
+  // Persist a new cruising speed (knots). Ignored when the value isn't a
+  // positive number so an empty/invalid field never clobbers the saved speed.
+  function updateCruiseSpeed(value: number) {
+    if (!itinerary || !Number.isFinite(value) || value <= 0) return;
+    persist({ ...itinerary, cruiseSpeedKn: value });
   }
 
   // ---- Seeding ------------------------------------------------------------
@@ -449,12 +460,29 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
               </div>
 
               {totalNm > 0 && (
-                <div className="flex items-center gap-2 text-xs text-blue-100 bg-white/10 border border-white/20 rounded-xl px-3 py-2">
-                  <CompassIcon />
-                  <span>
-                    Approx. <strong className="text-white">{Math.round(totalNm)} nm</strong> total ·{' '}
-                    <strong className="text-white">{formatNavTime(totalNm, CRUISE_SPEED_KN)}</strong> under way
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-blue-100 bg-white/10 border border-white/20 rounded-xl px-3 py-2">
+                  <span className="flex items-center gap-2">
+                    <CompassIcon />
+                    <span>
+                      Approx. <strong className="text-white">{Math.round(totalNm)} nm</strong> total ·{' '}
+                      <strong className="text-white">{formatNavTime(totalNm, speedKn)}</strong> under way
+                    </span>
                   </span>
+                  <label className="flex items-center gap-1.5 ml-auto text-blue-200">
+                    <span>Cruising speed</span>
+                    <input
+                      type="number"
+                      aria-label="Cruising speed (knots)"
+                      value={speedKn}
+                      onChange={e => updateCruiseSpeed(Number(e.target.value))}
+                      onFocus={e => e.target.select()}
+                      min={1}
+                      max={30}
+                      step={0.5}
+                      className="w-16 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-blue-400"
+                    />
+                    <span>kn</span>
+                  </label>
                 </div>
               )}
 
@@ -469,7 +497,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                       {day.date && <span className="text-blue-300 text-xs">· {fmtDayLabel(day.date)}</span>}
                       {navNm > 0 && (
                         <span className="text-blue-200 text-xs" data-testid="day-nav">
-                          · ⛵ {formatNavTime(navNm, CRUISE_SPEED_KN)} sailing
+                          · ⛵ {formatNavTime(navNm, speedKn)} sailing
                         </span>
                       )}
                       <span className="flex-1 h-px bg-white/15" />
@@ -510,7 +538,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                                   <div className="inline-flex items-center gap-1.5 text-[11px] text-blue-200 mb-1" data-testid="leg-info">
                                     <CompassIcon />
                                     <span>
-                                      ~{Math.round(nm)} nm · {formatNavTime(nm, CRUISE_SPEED_KN)} from previous stop
+                                      ~{Math.round(nm)} nm · {formatNavTime(nm, speedKn)} from previous stop
                                     </span>
                                   </div>
                                 ) : null}
