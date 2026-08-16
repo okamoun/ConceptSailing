@@ -1,9 +1,11 @@
 import { haversineKm } from '../../../marinas-data';
 import type { ClientItineraryStop } from '../../../../lib/clientSpace';
 
-// Average cruising speed used to estimate sailing time between stops. The
-// BlueOne Aura 51 comfortably averages this under sail or motor over a leg.
-export const CRUISE_SPEED_KN = 7;
+// Fallback cruising speed (knots) used to estimate sailing time between stops
+// when the itinerary has no explicit `cruiseSpeedKn` set. The BlueOne Aura 51
+// comfortably averages this under sail or motor over a leg. Editable per
+// itinerary in the builder — this is only the default.
+export const CRUISE_SPEED_KN = 6;
 
 // Great-circle distance (nautical miles) between two stops, or null when
 // either stop is missing coordinates. It's a straight-line estimate — real

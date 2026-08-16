@@ -161,6 +161,7 @@ export interface ClientItinerary {
   source: 'theme' | 'ai' | 'manual';
   sourceThemeId?: string;   // Adventure.id, when source === 'theme'
   stops: ClientItineraryStop[];
+  cruiseSpeedKn?: number;   // average cruising speed (knots) for sailing-time estimates; defaults to 6
   generatedAt?: string;     // ISO
   updatedAt?: string;       // ISO
 }

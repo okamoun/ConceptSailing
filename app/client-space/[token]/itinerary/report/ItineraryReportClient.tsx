@@ -131,6 +131,7 @@ export default function ItineraryReportClient({ token }: Props) {
   }
 
   const stops: ClientItineraryStop[] = prep.itinerary?.stops ?? [];
+  const speedKn = prep.itinerary?.cruiseSpeedKn ?? CRUISE_SPEED_KN;
   const printedAt = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const total = totalNm(stops);
   const nights = nightCount(charter.startDate, charter.endDate);
@@ -233,7 +234,7 @@ export default function ItineraryReportClient({ token }: Props) {
                   {nights != null && <Fact label="Nights" value={String(nights)} />}
                   <Fact label="Stops" value={String(stops.length)} />
                   {total > 0 && <Fact label="Total distance" value={`~${Math.round(total)} nm`} />}
-                  {total > 0 && <Fact label="Time under way" value={`~${formatNavTime(total, CRUISE_SPEED_KN)}`} />}
+                  {total > 0 && <Fact label="Time under way" value={`~${formatNavTime(total, speedKn)}`} />}
                 </dl>
               </section>
 
@@ -267,7 +268,7 @@ export default function ItineraryReportClient({ token }: Props) {
                               <div className="flex flex-wrap items-baseline gap-x-2">
                                 {day.date && <span className="text-slate-500 text-xs font-semibold">{fmtDate(day.date)}</span>}
                                 <span className="text-slate-400 text-xs" data-testid="day-nav">
-                                  ⛵ {navNm > 0 ? `~${formatNavTime(navNm, CRUISE_SPEED_KN)} sailing` : 'At anchor'}
+                                  ⛵ {navNm > 0 ? `~${formatNavTime(navNm, speedKn)} sailing` : 'At anchor'}
                                 </span>
                               </div>
                               {w && <WeatherChip w={w} />}
@@ -289,7 +290,7 @@ export default function ItineraryReportClient({ token }: Props) {
                                       {gi === 0 ? (
                                         <span>⚓ Embarkation</span>
                                       ) : nm != null ? (
-                                        <span>⛵ ~{Math.round(nm)} nm · {formatNavTime(nm, CRUISE_SPEED_KN)} from previous stop</span>
+                                        <span>⛵ ~{Math.round(nm)} nm · {formatNavTime(nm, speedKn)} from previous stop</span>
                                       ) : null}
                                     </div>
                                     {s.description && (
