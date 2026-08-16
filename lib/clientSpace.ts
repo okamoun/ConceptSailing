@@ -35,6 +35,19 @@ export interface CrewMember {
   medicalNotes?: string;
 }
 
+// Resolved flight details from the /api/flight-info lookup. `flight` is the
+// normalized IATA code the details were resolved for, so we can tell whether
+// stored details still match the current flight number without re-querying.
+export interface FlightInfo {
+  flight: string;
+  airline: string;
+  from: { iata: string; name: string };
+  to: { iata: string; name: string };
+  scheduledDep: string | null;
+  scheduledArr: string | null;
+  status: string;
+}
+
 export interface TravelGroup {
   id: string;
   memberIndices: number[];
@@ -42,6 +55,7 @@ export interface TravelGroup {
   arrivalDate?: string;
   arrivalTime?: string;
   arrivalFlight?: string;
+  arrivalFlightInfo?: FlightInfo;
   stayingAtHotel?: boolean;
   hotelName?: string;
   transferFromAirport?: boolean;
@@ -49,6 +63,7 @@ export interface TravelGroup {
   departureDate?: string;
   departureTime?: string;
   departureFlight?: string;
+  departureFlightInfo?: FlightInfo;
   transferToAirport?: boolean;
 }
 

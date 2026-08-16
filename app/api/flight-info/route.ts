@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export interface FlightInfo {
+  flight: string;
   airline: string;
   from: { iata: string; name: string };
   to: { iata: string; name: string };
@@ -42,6 +43,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No flight details found', code: 'not_found' }, { status: 404 });
     }
     const info: FlightInfo = {
+      flight,
       airline: f.airline?.name ?? '',
       from: { iata: f.departure?.iata ?? '', name: f.departure?.airport ?? '' },
       to: { iata: f.arrival?.iata ?? '', name: f.arrival?.airport ?? '' },
