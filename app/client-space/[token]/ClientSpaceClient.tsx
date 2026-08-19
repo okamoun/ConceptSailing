@@ -231,7 +231,12 @@ function FlightTrackLinks({ flight, initialInfo, onInfo, onResolved }: {
           if (r.ok && body && !body.error) {
             return { info: body as FlightInfo, error: null };
           }
-          return { info: null, error: (body?.error as string) || 'Flight details unavailable' };
+          // Show clients a friendly line, not the raw upstream wording. The
+          // technical reason/code still rides in the network response for us.
+          const friendly = body?.code === 'not_found'
+            ? 'No live details found for this flight yet.'
+            : 'Live flight details are temporarily unavailable.';
+          return { info: null, error: friendly };
         })
         .then(({ info, error }) => {
           setInfo(info);
@@ -260,7 +265,7 @@ function FlightTrackLinks({ flight, initialInfo, onInfo, onResolved }: {
         <p className="text-[10px] text-blue-400 italic">Looking up flight…</p>
       )}
       {!loading && (!info || !info.airline) && error && (
-        <p className="text-[10px] text-amber-600 italic">{error}</p>
+        <p className="text-[10px] text-slate-500 italic">{error}</p>
       )}
       {!loading && info && info.airline && (
         <div className="text-[10px] text-blue-700 bg-blue-50/60 rounded px-2 py-1 space-y-0.5">

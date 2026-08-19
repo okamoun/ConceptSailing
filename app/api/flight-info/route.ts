@@ -24,18 +24,20 @@ export async function GET(req: NextRequest) {
   try {
     const url = `https://api.aviationstack.com/v1/flights?access_key=${apiKey}&flight_iata=${encodeURIComponent(flight)}&limit=1`;
     const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) {
-      return NextResponse.json({ error: 'Upstream error' }, { status: 502 });
-    }
-    const json = await res.json();
 
-    // aviationstack signals problems (quota exhausted, invalid key, https
-    // restriction on the free plan, …) as HTTP 200 with an `error` object
-    // rather than a non-2xx status, so `res.ok` above never catches them.
+    // aviationstack reports problems (quota exhausted, invalid key, https/plan
+    // restriction, rate limiting, …) either as HTTP 200 with an `error` object
+    // or as a non-2xx status carrying the same object. Parse the body in both
+    // cases so the real reason and code reach the caller instead of a generic
+    // "Upstream error".
+    const json = await res.json().catch(() => null);
     if (json?.error) {
       const code = json.error.code ?? json.error.type ?? 'unknown';
       const message = json.error.message ?? json.error.info ?? 'Flight lookup failed';
-      return NextResponse.json({ error: message, code }, { status: 502 });
+      return NextResponse.json({ error: message, code, upstreamStatus: res.status }, { status: 502 });
+    }
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Upstream error', code: 'upstream_error', upstreamStatus: res.status }, { status: 502 });
     }
 
     const f = json?.data?.[0];
