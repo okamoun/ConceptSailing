@@ -184,13 +184,15 @@ function fmtFlightTime(iso: string | null): string {
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 }
 
-function FlightTrackLinks({ flight, initialInfo, onInfo, onResolved }: {
+function FlightTrackLinks({ flight, date, initialInfo, onInfo, onResolved }: {
   flight: string;
+  date?: string;
   initialInfo?: FlightInfo | null;
   onInfo?: (info: FlightInfo | null) => void;
   onResolved?: (info: FlightInfo) => void;
 }) {
   const code = flight.replace(/\s+/g, '').toUpperCase();
+  const lookupDate = /^\d{4}-\d{2}-\d{2}$/.test(date ?? '') ? date : '';
   const fr24 = `https://www.flightradar24.com/data/flights/${code.toLowerCase()}`;
   const fa   = `https://flightaware.com/live/flight/${code}`;
   const storedForCode = initialInfo && initialInfo.flight === code ? initialInfo : null;
@@ -225,7 +227,10 @@ function FlightTrackLinks({ flight, initialInfo, onInfo, onResolved }: {
 
     // Debounce so editing the flight number char-by-char fires a single lookup.
     const handle = setTimeout(() => {
-      fetch(`/api/flight-info?flight=${encodeURIComponent(code)}`)
+      const query = lookupDate
+        ? `flight=${encodeURIComponent(code)}&date=${encodeURIComponent(lookupDate)}`
+        : `flight=${encodeURIComponent(code)}`;
+      fetch(`/api/flight-info?${query}`)
         .then(async r => {
           const body = await r.json().catch(() => null);
           if (r.ok && body && !body.error) {
@@ -251,7 +256,7 @@ function FlightTrackLinks({ flight, initialInfo, onInfo, onResolved }: {
     }, 600);
 
     return () => clearTimeout(handle);
-  }, [code]);
+  }, [code, lookupDate]);
 
   const extIcon = (
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -990,7 +995,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} initialInfo={g.arrivalFlightInfo} onInfo={info => setArrivalInfo(g.id, info)} onResolved={info => updateGroup(g.id, { arrivalFlightInfo: info })} />}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} date={g.arrivalDate} initialInfo={g.arrivalFlightInfo} onInfo={info => setArrivalInfo(g.id, info)} onResolved={info => updateGroup(g.id, { arrivalFlightInfo: info })} />}
                 </div>
                 <div className="mb-2">
                   <FieldLabel>Hotel before boarding?</FieldLabel>
@@ -1035,7 +1040,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} initialInfo={g.departureFlightInfo} onInfo={info => setDepartureInfo(g.id, info)} onResolved={info => updateGroup(g.id, { departureFlightInfo: info })} />}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} date={g.departureDate} initialInfo={g.departureFlightInfo} onInfo={info => setDepartureInfo(g.id, info)} onResolved={info => updateGroup(g.id, { departureFlightInfo: info })} />}
                 </div>
                 <div>
                   <FieldLabel>Transfer to airport?</FieldLabel>
@@ -1129,7 +1134,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} initialInfo={g.arrivalFlightInfo} onInfo={info => setArrivalInfo(g.id, info)} onResolved={info => updateGroup(g.id, { arrivalFlightInfo: info })} />}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} date={g.arrivalDate} initialInfo={g.arrivalFlightInfo} onInfo={info => setArrivalInfo(g.id, info)} onResolved={info => updateGroup(g.id, { arrivalFlightInfo: info })} />}
                 </td>
               ))}
             </TableRow>
@@ -1195,7 +1200,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} initialInfo={g.departureFlightInfo} onInfo={info => setDepartureInfo(g.id, info)} onResolved={info => updateGroup(g.id, { departureFlightInfo: info })} />}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} date={g.departureDate} initialInfo={g.departureFlightInfo} onInfo={info => setDepartureInfo(g.id, info)} onResolved={info => updateGroup(g.id, { departureFlightInfo: info })} />}
                 </td>
               ))}
             </TableRow>
