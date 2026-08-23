@@ -69,6 +69,11 @@ NEXT_PUBLIC_EMAILJS_SIMPLE_TEMPLATE_ID=   # body-only template for the AI-phrase
 # OpenAI (server-side only — no NEXT_PUBLIC_ prefix)
 OPENAI_API_KEY=
 
+# Flight lookup (server-side only — no NEXT_PUBLIC_ prefix)
+AERODATABOX_API_KEY=        # primary provider (RapidAPI key)
+AERODATABOX_API_HOST=       # optional, defaults to aerodatabox.p.rapidapi.com
+AVIATIONSTACK_API_KEY=      # fallback provider, used when AeroDataBox doesn't answer
+
 # Google Analytics (optional)
 NEXT_PUBLIC_GA_ID=
 ```
@@ -242,6 +247,7 @@ Managed by `lib/submissions.ts`. Fields: `id`, `type: 'contact'`, `name`, `email
 | Firebase Firestore | Availability, reviews, bookings, contacts persistence | `lib/firebase.ts` + env vars |
 | EmailJS | Transactional emails for bookings and contact | `lib/emailjs.ts` + env vars |
 | OpenAI API | Dynamic image generation for adventures | `app/api/adventure-image/route.ts` |
+| AeroDataBox / aviationstack | Flight details lookup for travel-step flight numbers (AeroDataBox primary, aviationstack fallback) | `app/api/flight-info/route.ts` |
 | Google Maps | Interactive destination map | `@react-google-maps/api` in destinations pages |
 | Google Analytics | Page view + event tracking | `NEXT_PUBLIC_GA_ID` + `lib/analytics.ts` |
 | Unsplash | Remote image source | Allowed in `next.config.mjs` remotePatterns |
