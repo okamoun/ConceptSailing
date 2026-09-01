@@ -19,7 +19,7 @@ import adventures from '../../../adventures-data';
 import { featureIconMap } from '../../../feature-icons';
 import { CONTACT } from '../../../config/contact';
 import { formatNavTime } from '../../../marinas-data';
-import { CRUISE_SPEED_KN, legNm, assignSequentialDates, addDays, groupStopsByDay, dayNavNm, type ItineraryDay } from './itinerary-utils';
+import { CRUISE_SPEED_KN, legNm, assignSequentialDates, addDays, groupStopsByDay, dayNavNm, coordSignature, applyRoutedNm, routedSignature, type ItineraryDay } from './itinerary-utils';
 import { searchGreekLocations, type GreekLocation } from '../../../greek-locations';
 import { buildItineraryPrompt } from '../../../itinerary-prompt';
 import ItineraryMapLoader from './ItineraryMapLoader.client';
@@ -93,6 +93,48 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
     const base = itinerary ?? { source: 'manual' as const, stops: [] };
     persist({ ...base, source: source ?? base.source, stops: reindex(nextStops) });
   }
+
+  // ---- Real sea routing ---------------------------------------------------
+  // Whenever the ordered coordinates change, ask the server to compute the real
+  // sea-routed distance of each leg (see /api/itinerary-route) and cache it onto
+  // the stops. Straight-line estimates show instantly; routed values replace
+  // them when they arrive. Debounced, and guarded so a result is discarded if
+  // the coordinates moved on while routing, and never re-persists unchanged data.
+  const itineraryRef = useRef<ClientItinerary | null>(null);
+  itineraryRef.current = itinerary;
+  const lastRoutedSig = useRef<string>('');
+  const coordSig = coordSignature(stops);
+  useEffect(() => {
+    const coordStops = stops.filter(s => typeof s.lat === 'number' && typeof s.lng === 'number');
+    if (coordStops.length < 2 || lastRoutedSig.current === coordSig) return;
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/itinerary-route', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stops: stops.map(s => ({ id: s.id, lat: s.lat, lng: s.lng })) }),
+        });
+        if (cancelled || !res.ok) return;
+        const data: { routed?: Record<string, number> } = await res.json();
+        if (cancelled) return;
+        const current = itineraryRef.current;
+        // Discard if the coordinates changed while we were routing.
+        if (!current || coordSignature(current.stops) !== coordSig) return;
+        lastRoutedSig.current = coordSig;
+        const nextStops = applyRoutedNm(current.stops, data.routed ?? {});
+        if (routedSignature(nextStops) !== routedSignature(current.stops)) {
+          persist({ ...current, stops: nextStops });
+        }
+      } catch {
+        // Routing is best-effort — the straight-line fallback already shows.
+      }
+    }, 500);
+
+    return () => { cancelled = true; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coordSig]);
 
   // ---- Seeding ------------------------------------------------------------
   function useThemeItinerary() {
