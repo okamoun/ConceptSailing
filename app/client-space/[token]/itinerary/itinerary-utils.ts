@@ -50,32 +50,35 @@ export function coordSignature(stops: ClientItineraryStop[]): string {
     .join('|');
 }
 
-// Merge a { stopId → routedNm } map (from /api/itinerary-route) back onto the
-// stops. A stop present in the map gets its `routedNm` set; any stop absent
-// from the map has a stale `routedNm` removed entirely (never left as
-// `undefined` — Firestore rejects undefined field values).
+// Merge the { stopId → routedNm } and { stopId → routedPath } maps (from
+// /api/itinerary-route) back onto the stops. A stop present in the maps gets
+// its `routedNm`/`routedPath` set; a stop absent from a map has the stale
+// value removed entirely (never left as `undefined` — Firestore rejects
+// undefined field values).
 export function applyRoutedNm(
   stops: ClientItineraryStop[],
   routed: Record<string, number>,
+  paths: Record<string, { lat: number; lng: number }[]> = {},
 ): ClientItineraryStop[] {
   return stops.map(s => {
-    const val = routed[s.id];
-    if (typeof val === 'number' && Number.isFinite(val)) {
-      return { ...s, routedNm: val };
-    }
-    if (s.routedNm !== undefined) {
-      const rest = { ...s };
-      delete rest.routedNm;
-      return rest;
-    }
-    return s;
+    const next = { ...s };
+
+    const nm = routed[s.id];
+    if (typeof nm === 'number' && Number.isFinite(nm)) next.routedNm = nm;
+    else delete next.routedNm;
+
+    const path = paths[s.id];
+    if (Array.isArray(path) && path.length >= 2) next.routedPath = path;
+    else delete next.routedPath;
+
+    return next;
   });
 }
 
-// Signature of just the routed distances, to detect whether a fresh routing
-// result actually changed anything before persisting it.
+// Signature of the routed data (distance + polyline length), to detect whether
+// a fresh routing result actually changed anything before persisting it.
 export function routedSignature(stops: ClientItineraryStop[]): string {
-  return stops.map(s => `${s.id}:${s.routedNm ?? ''}`).join('|');
+  return stops.map(s => `${s.id}:${s.routedNm ?? ''}:${s.routedPath?.length ?? ''}`).join('|');
 }
 
 // Total sailing distance (nm) across every leg with coordinates on both ends.

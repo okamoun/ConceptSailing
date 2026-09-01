@@ -72,21 +72,31 @@ describe('coordSignature', () => {
 });
 
 describe('applyRoutedNm', () => {
-  it('sets routedNm from the map on matching stops', () => {
-    const [, b] = applyRoutedNm([alimos, hydra], { b: 41.8 });
+  const leg = [{ lat: 37.9, lng: 23.7 }, { lat: 37.6, lng: 23.5 }, { lat: 37.3, lng: 23.4 }];
+
+  it('sets routedNm and routedPath from the maps on matching stops', () => {
+    const [, b] = applyRoutedNm([alimos, hydra], { b: 41.8 }, { b: leg });
     expect(b.routedNm).toBe(41.8);
+    expect(b.routedPath).toBe(leg);
   });
 
-  it('drops a stale routedNm (never leaves undefined) when a stop is absent from the map', () => {
-    const stale = { ...hydra, routedNm: 99 };
-    const [, b] = applyRoutedNm([alimos, stale], {});
+  it('drops stale routed data (never leaves undefined) when a stop is absent from the maps', () => {
+    const stale = { ...hydra, routedNm: 99, routedPath: leg };
+    const [, b] = applyRoutedNm([alimos, stale], {}, {});
     expect('routedNm' in b).toBe(false);
+    expect('routedPath' in b).toBe(false);
   });
 
-  it('leaves stops without routing untouched', () => {
-    const result = applyRoutedNm([alimos, hydra], {});
-    expect(result[0]).toBe(alimos);
-    expect(result[1]).toBe(hydra);
+  it('ignores a degenerate path of fewer than two points', () => {
+    const [, b] = applyRoutedNm([alimos, hydra], { b: 41.8 }, { b: [{ lat: 37.9, lng: 23.7 }] });
+    expect(b.routedNm).toBe(41.8);
+    expect('routedPath' in b).toBe(false);
+  });
+
+  it('leaves the routed fields unset when there is no routing data', () => {
+    const [a, b] = applyRoutedNm([alimos, hydra], {});
+    expect('routedNm' in a).toBe(false);
+    expect('routedPath' in b).toBe(false);
   });
 });
 
@@ -94,6 +104,12 @@ describe('routedSignature', () => {
   it('reflects a change in cached routed distances', () => {
     const before = routedSignature([alimos, hydra]);
     const after = routedSignature([alimos, { ...hydra, routedNm: 41.8 }]);
+    expect(after).not.toBe(before);
+  });
+
+  it('reflects a change in the cached routed polyline', () => {
+    const before = routedSignature([alimos, { ...hydra, routedNm: 41.8 }]);
+    const after = routedSignature([alimos, { ...hydra, routedNm: 41.8, routedPath: [{ lat: 1, lng: 1 }, { lat: 2, lng: 2 }] }]);
     expect(after).not.toBe(before);
   });
 });

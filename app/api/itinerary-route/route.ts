@@ -28,11 +28,16 @@ function isCoord(s: unknown): s is StopCoord {
   );
 }
 
+// Round a coordinate to ~1 m precision to keep the persisted polyline compact.
+const round6 = (n: number) => Math.round(n * 1e6) / 1e6;
+
 // POST { stops: [{ id, lat, lng }, ...] }  (in visiting order)
-// →    { routed: { [arrivingStopId]: nauticalMiles } }
-// Each key is the id of a stop whose inbound leg was successfully sea-routed;
-// legs that fail to route are simply omitted so the client keeps its
-// straight-line fallback for them.
+// →    { routed: { [arrivingStopId]: nauticalMiles },
+//        paths:  { [arrivingStopId]: [{ lat, lng }, ...] } }
+// Each key is the id of a stop whose inbound leg was successfully sea-routed:
+// `routed` carries the leg distance, `paths` the polyline to draw for it.
+// Legs that fail to route are simply omitted so the client keeps its
+// straight-line fallback for both distance and drawing.
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -45,35 +50,47 @@ export async function POST(req: NextRequest) {
   if (!Array.isArray(rawStops)) {
     return NextResponse.json({ error: 'Expected { stops: [...] }' }, { status: 400 });
   }
-  const stops = rawStops.filter(isCoord);
 
   const routed: Record<string, number> = {};
-  if (stops.length < 2) {
-    return NextResponse.json({ routed });
+  const paths: Record<string, { lat: number; lng: number }[]> = {};
+  // Route only legs between *adjacent* stops that both have coordinates, matching
+  // how the UI defines a leg (legNm(stops[i-1], stops[i])) — never bridging a
+  // coordinate-less stop.
+  if (rawStops.filter(isCoord).length < 2) {
+    return NextResponse.json({ routed, paths });
   }
 
   // Lazy-load the router + high-resolution network only when actually needed.
   const { seaRoute } = await import('searoute-ts');
   const { DEFAULT_MARNET } = await import('searoute-ts/marnet-20km');
 
-  for (let i = 1; i < stops.length; i++) {
-    const a = stops[i - 1];
-    const b = stops[i];
+  for (let i = 1; i < rawStops.length; i++) {
+    const a = rawStops[i - 1];
+    const b = rawStops[i];
+    if (!isCoord(a) || !isCoord(b)) continue;
     const straightNm = haversineKm(a.lat, a.lng, b.lat, b.lng) / 1.852;
     try {
-      // GeoJSON position order is [lng, lat].
+      // GeoJSON position order is [lng, lat]. appendOriginDestination anchors
+      // the drawn line to the real stop coordinates (not the snapped network
+      // vertex), so the polyline meets the map markers with no visible gap.
       const route = seaRoute([a.lng, a.lat], [b.lng, b.lat], {
         network: DEFAULT_MARNET,
         maxSnapDistanceKm: MAX_SNAP_KM,
+        appendOriginDestination: true,
       });
       const length = route.properties.length; // nautical miles (searoute default unit)
       if (Number.isFinite(length)) {
         routed[b.id] = Math.round(reconcileRoutedNm(length, straightNm) * 10) / 10;
+      }
+      // geometry.coordinates is [lng, lat][] — swap back to { lat, lng } for the map.
+      const coords = route.geometry?.coordinates;
+      if (Array.isArray(coords) && coords.length >= 2) {
+        paths[b.id] = coords.map(([lng, lat]) => ({ lat: round6(lat), lng: round6(lng) }));
       }
     } catch {
       // SnapFailedError / NoRouteError → leave this leg to the straight-line fallback.
     }
   }
 
-  return NextResponse.json({ routed });
+  return NextResponse.json({ routed, paths });
 }

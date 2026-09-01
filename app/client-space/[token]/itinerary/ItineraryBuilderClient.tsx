@@ -117,13 +117,13 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
           body: JSON.stringify({ stops: stops.map(s => ({ id: s.id, lat: s.lat, lng: s.lng })) }),
         });
         if (cancelled || !res.ok) return;
-        const data: { routed?: Record<string, number> } = await res.json();
+        const data: { routed?: Record<string, number>; paths?: Record<string, { lat: number; lng: number }[]> } = await res.json();
         if (cancelled) return;
         const current = itineraryRef.current;
         // Discard if the coordinates changed while we were routing.
         if (!current || coordSignature(current.stops) !== coordSig) return;
         lastRoutedSig.current = coordSig;
-        const nextStops = applyRoutedNm(current.stops, data.routed ?? {});
+        const nextStops = applyRoutedNm(current.stops, data.routed ?? {}, data.paths ?? {});
         if (routedSignature(nextStops) !== routedSignature(current.stops)) {
           persist({ ...current, stops: nextStops });
         }

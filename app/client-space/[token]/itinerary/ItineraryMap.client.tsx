@@ -53,12 +53,41 @@ export default function ItineraryMap({ stops, selectedId, editable, onMarkerClic
         clickableIcons: false,
       }}
     >
-      {located.length > 1 && (
-        <Polyline
-          path={located.map(p => ({ lat: p.lat as number, lng: p.lng as number }))}
-          options={{ strokeColor: '#00a8ff', strokeOpacity: 0.9, strokeWeight: 4, geodesic: true }}
-        />
-      )}
+      {/* One polyline per leg: follow the real sea route when we have it
+          (solid), otherwise fall back to a dashed straight line so it reads as
+          an estimate rather than a plotted course. */}
+      {located.map((pt, i) => {
+        if (i === 0) return null;
+        const prev = located[i - 1];
+        const routedPath = pt.routedPath;
+        const isRouted = Array.isArray(routedPath) && routedPath.length > 1;
+        const path = isRouted
+          ? routedPath!
+          : [
+              { lat: prev.lat as number, lng: prev.lng as number },
+              { lat: pt.lat as number, lng: pt.lng as number },
+            ];
+        return (
+          <Polyline
+            key={`leg-${prev.id}-${pt.id}`}
+            path={path}
+            options={
+              isRouted
+                ? { strokeColor: '#00a8ff', strokeOpacity: 0.9, strokeWeight: 4, geodesic: false }
+                : {
+                    strokeColor: '#00a8ff',
+                    strokeOpacity: 0, // hide the base line; render as dashes via icons
+                    geodesic: true,
+                    icons: [{
+                      icon: { path: 'M 0,-1 0,1', strokeOpacity: 0.6, strokeWeight: 3, scale: 3 },
+                      offset: '0',
+                      repeat: '12px',
+                    }],
+                  }
+            }
+          />
+        );
+      })}
       {located.map(pt => {
         const idx = stops.findIndex(s => s.id === pt.id);
         return (
