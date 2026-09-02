@@ -413,6 +413,36 @@ describe('Manual stop editing', () => {
     expect(saved.stops[0].date).toBe('2026-07-03');
   });
 
+  test('changing a stop date re-sorts the itinerary chronologically', async () => {
+    await renderBuilderWithItinerary([
+      { id: 'a', order: 0, title: 'A', description: '', features: [], date: '2026-07-01' },
+      { id: 'b', order: 1, title: 'B', description: '', features: [], date: '2026-07-02' },
+      { id: 'c', order: 2, title: 'C', description: '', features: [], date: '2026-07-03' },
+    ]);
+
+    // Move the last stop back onto day 1 — it should slot in after A, not create
+    // a second, out-of-order "Day 1" group.
+    fireEvent.change(screen.getByLabelText('Stop 3 date'), { target: { value: '2026-07-01' } });
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.stops.map((s: { id: string }) => s.id)).toEqual(['a', 'c', 'b']);
+    expect(saved.stops.map((s: { order: number }) => s.order)).toEqual([0, 1, 2]);
+  });
+
+  test('clamps a stop date to the charter window', async () => {
+    await renderBuilderWithItinerary([
+      { id: 'a', order: 0, title: 'A', description: '', features: [], date: '2026-07-02' },
+    ]);
+
+    // baseCharter runs 2026-07-01 … 2026-07-08; a date past the end is clamped.
+    fireEvent.change(screen.getByLabelText('Stop 1 date'), { target: { value: '2026-12-25' } });
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.stops[0].date).toBe('2026-07-08');
+  });
+
   test('adding a stop within a day inserts it after that day and keeps the date', async () => {
     // Undated stops fall into one day each (Day 1, Day 2) from 2026-07-01.
     await renderBuilderWithItinerary(stops('Athens', 'Poros'));

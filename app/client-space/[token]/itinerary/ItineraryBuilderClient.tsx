@@ -230,6 +230,34 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
     }));
   }
 
+  // Change a stop's date. Clamps to the charter window, then re-sorts the whole
+  // itinerary chronologically (stable, so same-day stops keep their order) so the
+  // day groups stay contiguous and legs are computed in travel order. Without the
+  // re-sort, moving a later stop onto an earlier day produced a second, duplicate
+  // day group (and a React key collision).
+  function setStopDate(id: string, date: string) {
+    let d = date;
+    if (d) {
+      if (charter?.startDate && d < charter.startDate) d = charter.startDate;
+      if (charter?.endDate && d > charter.endDate) d = charter.endDate;
+    }
+    const next = stops.map(s => {
+      if (s.id !== id) return s;
+      const copy = { ...s };
+      if (d) copy.date = d; else delete copy.date;
+      return copy;
+    });
+    next.sort((a, b) => {
+      const da = a.date ?? '';
+      const db = b.date ?? '';
+      if (da === db) return 0;
+      if (!da) return 1;   // undated stops sink to the end
+      if (!db) return -1;
+      return da < db ? -1 : 1;
+    });
+    updateStops(next);
+  }
+
   function newStop(date?: string): ClientItineraryStop {
     return {
       id: newStopId(),
@@ -500,10 +528,10 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
               )}
 
               <div className="space-y-5">
-                {groupStopsByDay(stops, charter.startDate).map(day => {
+                {groupStopsByDay(stops, charter.startDate).map((day, dayIdx) => {
                   const navNm = dayNavNm(day, stops);
                   return (
-                  <div key={`${day.dayNumber}-${day.date ?? ''}`} className="space-y-3">
+                  <div key={`day-${dayIdx}-${day.date ?? day.dayNumber}`} className="space-y-3">
                     {/* Day header */}
                     <div className="flex items-center gap-2 pt-1">
                       <span className="text-white text-xs font-bold uppercase tracking-wide">Day {day.dayNumber}</span>
@@ -539,7 +567,7 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                                   value={s.date ?? ''}
                                   min={charter.startDate}
                                   max={charter.endDate}
-                                  onChange={e => editStop(s.id, { date: e.target.value })}
+                                  onChange={e => setStopDate(s.id, e.target.value)}
                                   className="mb-1 bg-white/10 border border-white/20 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:border-blue-400 [color-scheme:dark]"
                                 />
                                 {i === 0 ? (
