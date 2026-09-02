@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['openai', 'firebase', 'firebase-admin'],
+  serverExternalPackages: ['openai', 'firebase', 'firebase-admin', 'searoute-ts'],
   outputFileTracingExcludes: {
     '*': [
       './public/**/*',

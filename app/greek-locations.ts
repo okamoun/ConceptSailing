@@ -105,6 +105,15 @@ export function allGreekLocations(): GreekLocation[] {
   return ALL_LOCATIONS;
 }
 
+// Exact (case-insensitive) name lookup — used to auto-resolve coordinates when a
+// user types a full known place name and leaves the field, without having to
+// click a suggestion.
+export function findGreekLocation(name: string): GreekLocation | undefined {
+  const q = name.trim().toLowerCase();
+  if (!q) return undefined;
+  return ALL_LOCATIONS.find(l => l.name.toLowerCase() === q);
+}
+
 // Case-insensitive search over the location index. Names that start with the
 // query rank above names that merely contain it; both are alphabetised.
 export function searchGreekLocations(query: string, limit = 8): GreekLocation[] {
