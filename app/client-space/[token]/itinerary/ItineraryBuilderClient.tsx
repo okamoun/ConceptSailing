@@ -20,7 +20,7 @@ import { featureIconMap } from '../../../feature-icons';
 import { CONTACT } from '../../../config/contact';
 import { formatNavTime } from '../../../marinas-data';
 import { CRUISE_SPEED_KN, legNm, assignSequentialDates, addDays, groupStopsByDay, dayNavNm, coordSignature, applyRoutedNm, routedSignature, type ItineraryDay } from './itinerary-utils';
-import { searchGreekLocations, type GreekLocation } from '../../../greek-locations';
+import { searchGreekLocations, findGreekLocation, type GreekLocation } from '../../../greek-locations';
 import { buildItineraryPrompt } from '../../../itinerary-prompt';
 import ItineraryMapLoader from './ItineraryMapLoader.client';
 
@@ -218,7 +218,16 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
 
   // ---- Manual stop editing ------------------------------------------------
   function editStop(id: string, patch: Partial<ClientItineraryStop>) {
-    updateStops(stops.map(s => (s.id === id ? { ...s, ...patch } : s)));
+    updateStops(stops.map(s => {
+      if (s.id !== id) return s;
+      const next: ClientItineraryStop = { ...s, ...patch };
+      // A patch value of `undefined` means "clear this field" — drop the key
+      // rather than persisting `undefined` (which Firestore rejects).
+      (Object.keys(patch) as (keyof ClientItineraryStop)[]).forEach(k => {
+        if (next[k] === undefined) delete next[k];
+      });
+      return next;
+    }));
   }
 
   function newStop(date?: string): ClientItineraryStop {
@@ -252,16 +261,6 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
     const arr = [...stops];
     arr.splice(idx < 0 ? arr.length : idx + 1, 0, newStop(day.date));
     updateStops(arr);
-  }
-
-  // Apply a picked location: move the stop's point and record the place name,
-  // filling an empty/placeholder title with it for convenience.
-  function pickLocation(id: string, loc: GreekLocation) {
-    const s = stops.find(x => x.id === id);
-    const patch: Partial<ClientItineraryStop> = { locationName: loc.name, lat: loc.lat, lng: loc.lng };
-    if (!s?.title || s.title === 'New stop') patch.title = loc.name;
-    editStop(id, patch);
-    setSelectedId(id);
   }
 
   function removeStop(id: string) {
@@ -556,17 +555,13 @@ export default function ItineraryBuilderClient({ token }: { token: string }) {
                                     </span>
                                   </div>
                                 ) : null}
-                                <input
-                                  aria-label={`Stop ${i + 1} title`}
-                                  value={s.title}
-                                  onChange={e => editStop(s.id, { title: e.target.value })}
-                                  className="w-full bg-transparent text-white font-semibold text-sm focus:outline-none focus:bg-white/10 rounded px-1 -mx-1"
-                                />
-                                <LocationSearch
+                                <StopLocationField
                                   stopNumber={i + 1}
-                                  value={s.locationName ?? ''}
+                                  title={s.title}
+                                  locationName={s.locationName}
                                   hasCoords={typeof s.lat === 'number' && typeof s.lng === 'number'}
-                                  onPick={loc => pickLocation(s.id, loc)}
+                                  onEdit={patch => editStop(s.id, patch)}
+                                  onFocusStop={() => setSelectedId(s.id)}
                                 />
                                 <textarea
                                   aria-label={`Stop ${i + 1} description`}
@@ -711,28 +706,67 @@ function AnchorIcon() {
   );
 }
 
-// Autocomplete over known Greek marinas/islands/ports. Picking a suggestion
-// moves the stop's point on the map (via onPick setting lat/lng).
-function LocationSearch({
+// A single field for a stop's name and location. Type freely to name the stop,
+// or pick a Greek marina/island/port from the live suggestions to also set its
+// point on the map. A fully-typed known place resolves its coordinates on blur;
+// any other text is kept as a manual, map-less "custom" stop. Replaces the old
+// pair of separate title + marina-search inputs.
+function StopLocationField({
   stopNumber,
-  value,
+  title,
+  locationName,
   hasCoords,
-  onPick,
+  onEdit,
+  onFocusStop,
 }: {
   stopNumber: number;
-  value: string;
+  title: string;
+  locationName?: string;
   hasCoords: boolean;
-  onPick: (loc: GreekLocation) => void;
+  onEdit: (patch: Partial<ClientItineraryStop>) => void;
+  onFocusStop?: () => void;
 }) {
-  const [query, setQuery] = useState(value);
+  const [query, setQuery] = useState(title);
   const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
 
-  // Keep the field in sync when the stop's stored location changes elsewhere.
-  useEffect(() => { setQuery(value); }, [value]);
+  // Keep the field in sync when the stop's title changes elsewhere (AI, reorder).
+  useEffect(() => { setQuery(title); }, [title]);
 
   const results = useMemo(() => (open && query.trim() ? searchGreekLocations(query) : []), [open, query]);
   const listId = `loc-list-${stopNumber}`;
   const isOpen = open && results.length > 0;
+
+  // Choose a suggestion: set the name and drop the point on the map.
+  function pick(loc: GreekLocation) {
+    setQuery(loc.name);
+    setOpen(false);
+    onEdit({ title: loc.name, locationName: loc.name, lat: loc.lat, lng: loc.lng });
+  }
+
+  // Free typing: keep the name; if it no longer matches the located place, the
+  // stored point is now stale, so clear it (the stop becomes a custom entry).
+  function type(text: string) {
+    setQuery(text);
+    setOpen(true);
+    setActive(0);
+    const patch: Partial<ClientItineraryStop> = { title: text };
+    if (hasCoords && text.trim().toLowerCase() !== (locationName ?? '').trim().toLowerCase()) {
+      patch.locationName = undefined;
+      patch.lat = undefined;
+      patch.lng = undefined;
+    }
+    onEdit(patch);
+  }
+
+  // On leaving the field, auto-resolve coordinates when the text is an exact
+  // match for a known place that isn't already located.
+  function commit() {
+    if (!hasCoords && query.trim()) {
+      const match = findGreekLocation(query);
+      if (match) pick(match);
+    }
+  }
 
   return (
     <div className="relative mt-1">
@@ -743,28 +777,41 @@ function LocationSearch({
           role="combobox"
           aria-controls={listId}
           aria-expanded={isOpen}
+          aria-autocomplete="list"
           aria-label={`Stop ${stopNumber} location`}
           value={query}
-          placeholder="Search marina or place in Greece…"
-          onChange={e => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 150)}
-          className="flex-1 bg-white/5 border border-white/15 rounded-lg px-2 py-1 text-xs text-white placeholder:text-blue-400 focus:outline-none focus:border-blue-400"
+          placeholder="Search a marina or place — or type your own"
+          onChange={e => type(e.target.value)}
+          onFocus={() => { setOpen(true); onFocusStop?.(); }}
+          onBlur={() => { commit(); setTimeout(() => setOpen(false), 150); }}
+          onKeyDown={e => {
+            if (isOpen && e.key === 'ArrowDown') { e.preventDefault(); setActive(a => Math.min(a + 1, results.length - 1)); }
+            else if (isOpen && e.key === 'ArrowUp') { e.preventDefault(); setActive(a => Math.max(a - 1, 0)); }
+            else if (isOpen && e.key === 'Enter') { e.preventDefault(); pick(results[active]); }
+            else if (e.key === 'Enter') { commit(); }
+            else if (e.key === 'Escape') { setOpen(false); }
+          }}
+          className="flex-1 bg-white/5 border border-white/15 rounded-lg px-2 py-1 text-sm font-semibold text-white placeholder:font-normal placeholder:text-blue-400 focus:outline-none focus:border-blue-400"
         />
-        {hasCoords && <span className="text-emerald-300 text-xs" title="Location set on map" aria-hidden="true">✓</span>}
+        {hasCoords ? (
+          <span className="text-emerald-300 text-xs" title="Location set on map" aria-hidden="true">✓</span>
+        ) : query.trim() ? (
+          <span className="text-blue-300/70 text-[10px] whitespace-nowrap" title="Custom stop — not linked to the map">custom</span>
+        ) : null}
       </div>
       <ul
         id={listId}
         role="listbox"
         className={`absolute z-20 left-0 right-0 mt-1 max-h-52 overflow-y-auto rounded-lg border border-white/20 bg-[#00306a] shadow-xl ${isOpen ? '' : 'hidden'}`}
       >
-        {results.map(loc => (
-          <li key={`${loc.name}-${loc.lat}`} role="option" aria-selected={false}>
+        {results.map((loc, idx) => (
+          <li key={`${loc.name}-${loc.lat}`} role="option" aria-selected={idx === active}>
             <button
               type="button"
               // onMouseDown (not onClick) so it fires before the input's blur closes the list.
-              onMouseDown={e => { e.preventDefault(); onPick(loc); setQuery(loc.name); setOpen(false); }}
-              className="w-full text-left px-3 py-1.5 text-xs text-white hover:bg-white/10 flex items-center justify-between gap-2"
+              onMouseDown={e => { e.preventDefault(); pick(loc); }}
+              onMouseEnter={() => setActive(idx)}
+              className={`w-full text-left px-3 py-1.5 text-xs text-white flex items-center justify-between gap-2 ${idx === active ? 'bg-white/15' : 'hover:bg-white/10'}`}
             >
               <span>{loc.name}</span>
               {loc.region && <span className="text-blue-300 text-[10px]">{loc.region}</span>}

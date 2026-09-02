@@ -442,6 +442,34 @@ describe('Manual stop editing', () => {
     expect(saved.stops[0].lng).toBeCloseTo(23.467, 2);
   });
 
+  test('the single field accepts manual entry, saving the typed name without a map point', async () => {
+    await renderBuilderWithItinerary(stops('Athens', 'Poros'));
+
+    fireEvent.change(screen.getByLabelText('Stop 1 location'), { target: { value: 'Secret cove' } });
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.stops[0].title).toBe('Secret cove');
+    expect(saved.stops[0].locationName).toBeUndefined();
+    expect(saved.stops[0].lat).toBeUndefined();
+  });
+
+  test('editing the name of a located stop clears its now-stale map point', async () => {
+    await renderBuilderWithItinerary([
+      { id: 'a', order: 0, title: 'Hydra', locationName: 'Hydra', description: '', features: [], lat: 37.349, lng: 23.467 },
+      { id: 'b', order: 1, title: 'Poros', description: '', features: [] },
+    ]);
+
+    fireEvent.change(screen.getByLabelText('Stop 1 location'), { target: { value: 'Hydra bay' } });
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.stops[0].title).toBe('Hydra bay');
+    expect(saved.stops[0].lat).toBeUndefined();
+    expect(saved.stops[0].lng).toBeUndefined();
+    expect(saved.stops[0].locationName).toBeUndefined();
+  });
+
   test('reordering updates order values and persists', async () => {
     await renderBuilderWithItinerary(stops('Athens', 'Poros'));
 
