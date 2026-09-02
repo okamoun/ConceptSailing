@@ -77,6 +77,8 @@ import ItineraryReportClient from '../app/client-space/[token]/itinerary/report/
 import { searchGreekLocations } from '../app/greek-locations';
 import { buildItineraryPrompt } from '../app/itinerary-prompt';
 import adventures from '../app/adventures-data';
+import { CRUISE_SPEED_KN, legNm, totalNm as computeTotalNm } from '../app/client-space/[token]/itinerary/itinerary-utils';
+import { formatNavTime } from '../app/marinas-data';
 
 const TOKEN = 'tok-123';
 
@@ -557,6 +559,66 @@ describe('Sailing distance & navigation time', () => {
     await renderBuilderWithItinerary(withGap);
 
     expect(screen.queryByTestId('leg-info')).not.toBeInTheDocument();
+  });
+});
+
+// ===========================================================================
+// Editable cruising speed (issue #130, part 1)
+// ===========================================================================
+describe('Cruising speed', () => {
+  test('the fallback CRUISE_SPEED_KN default is 6 knots', () => {
+    expect(CRUISE_SPEED_KN).toBe(6);
+  });
+
+  test('with no saved speed, the builder times legs at the 6kn default', async () => {
+    const s = stops('Athens', 'Poros');
+    await renderBuilderWithItinerary(s);
+
+    const speedInput = screen.getByLabelText('Cruising speed (knots)') as HTMLInputElement;
+    expect(speedInput.value).toBe(String(CRUISE_SPEED_KN));
+
+    // The single leg is timed at the 6kn default.
+    const nm = legNm(s[0], s[1])!;
+    expect(screen.getByTestId('leg-info').textContent).toContain(formatNavTime(nm, 6));
+  });
+
+  test('changing the cruising-speed input re-times the legs and persists the new speed', async () => {
+    await renderBuilderWithItinerary(stops('Athens', 'Poros', 'Hydra'));
+
+    const speedInput = screen.getByLabelText('Cruising speed (knots)') as HTMLInputElement;
+    expect(speedInput.value).toBe('6');
+    const before = screen.getAllByTestId('leg-info')[0].textContent;
+
+    fireEvent.change(speedInput, { target: { value: '12' } });
+
+    await waitFor(() => expect(mockSaveItinerary).toHaveBeenCalled());
+    const saved = mockSaveItinerary.mock.calls.at(-1)![1];
+    expect(saved.cruiseSpeedKn).toBe(12);
+
+    // The displayed leg time changes to reflect the faster speed.
+    await waitFor(() => {
+      expect(screen.getAllByTestId('leg-info')[0].textContent).not.toBe(before);
+    });
+    expect((screen.getByLabelText('Cruising speed (knots)') as HTMLInputElement).value).toBe('12');
+  });
+
+  test('the report times legs using a saved cruise speed, falling back to 6kn otherwise', async () => {
+    const s = stops('Athens', 'Poros', 'Hydra');
+    const total = computeTotalNm(s);
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({}) });
+
+    // Saved speed takes effect.
+    mockGetPrep.mockResolvedValue({ ...emptyPrep, itinerary: { source: 'manual', stops: s, cruiseSpeedKn: 10 } });
+    const { unmount } = render(<ItineraryReportClient token={TOKEN} />);
+    await waitFor(() => expect(screen.getByText('Trip Overview')).toBeInTheDocument());
+    expect(screen.getByText(`~${formatNavTime(total, 10)}`)).toBeInTheDocument();
+    unmount();
+
+    // No saved speed → 6kn default.
+    mockGetPrep.mockResolvedValue({ ...emptyPrep, itinerary: { source: 'manual', stops: s } });
+    render(<ItineraryReportClient token={TOKEN} />);
+    await waitFor(() => expect(screen.getByText('Trip Overview')).toBeInTheDocument());
+    expect(screen.getByText(`~${formatNavTime(total, CRUISE_SPEED_KN)}`)).toBeInTheDocument();
   });
 });
 

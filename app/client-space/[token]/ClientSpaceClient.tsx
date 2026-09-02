@@ -25,6 +25,7 @@ import {
   type CrewMember,
   type TravelLogistics,
   type TravelGroup,
+  type FlightInfo,
   type ActivityPreferences,
   type FoodPreferences,
   type BeveragePreferences,
@@ -177,41 +178,85 @@ function FieldLabel({ children }: { children: ReactNode }) {
   return <label className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">{children}</label>;
 }
 
-interface FlightInfo {
-  airline: string;
-  from: { iata: string; name: string };
-  to: { iata: string; name: string };
-  scheduledDep: string | null;
-  scheduledArr: string | null;
-  status: string;
-}
-
 function fmtFlightTime(iso: string | null): string {
   if (!iso) return '';
   const d = new Date(iso);
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 }
 
-function FlightTrackLinks({ flight, onInfo }: { flight: string; onInfo?: (info: FlightInfo | null) => void }) {
+function FlightTrackLinks({ flight, date, initialInfo, onInfo, onResolved }: {
+  flight: string;
+  date?: string;
+  initialInfo?: FlightInfo | null;
+  onInfo?: (info: FlightInfo | null) => void;
+  onResolved?: (info: FlightInfo) => void;
+}) {
   const code = flight.replace(/\s+/g, '').toUpperCase();
+  const lookupDate = /^\d{4}-\d{2}-\d{2}$/.test(date ?? '') ? date : '';
   const fr24 = `https://www.flightradar24.com/data/flights/${code.toLowerCase()}`;
   const fa   = `https://flightaware.com/live/flight/${code}`;
-  const [info, setInfo] = useState<FlightInfo | null>(null);
+  const storedForCode = initialInfo && initialInfo.flight === code ? initialInfo : null;
+  const [info, setInfo] = useState<FlightInfo | null>(storedForCode);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const onInfoRef = useRef(onInfo);
+  const onResolvedRef = useRef(onResolved);
+  const initialInfoRef = useRef(initialInfo);
   onInfoRef.current = onInfo;
+  onResolvedRef.current = onResolved;
+  initialInfoRef.current = initialInfo;
 
   useEffect(() => {
-    if (!code) return;
+    if (!code) { setInfo(null); setError(null); setLoading(false); onInfoRef.current?.(null); return; }
+
+    // Reuse persisted details when they already match this exact flight code,
+    // so reopening a saved space (or a re-render) never re-hits the upstream API.
+    const stored = initialInfoRef.current;
+    if (stored && stored.flight === code) {
+      setInfo(stored);
+      setError(null);
+      setLoading(false);
+      onInfoRef.current?.(stored);
+      return;
+    }
+
     setInfo(null);
+    setError(null);
     onInfoRef.current?.(null);
     setLoading(true);
-    fetch(`/api/flight-info?flight=${encodeURIComponent(code)}`)
-      .then(r => r.ok ? r.json() : null)
-      .then((data: FlightInfo | null) => { setInfo(data); onInfoRef.current?.(data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [code]);
+
+    // Debounce so editing the flight number char-by-char fires a single lookup.
+    const handle = setTimeout(() => {
+      const query = lookupDate
+        ? `flight=${encodeURIComponent(code)}&date=${encodeURIComponent(lookupDate)}`
+        : `flight=${encodeURIComponent(code)}`;
+      fetch(`/api/flight-info?${query}`)
+        .then(async r => {
+          const body = await r.json().catch(() => null);
+          if (r.ok && body && !body.error) {
+            return { info: body as FlightInfo, error: null };
+          }
+          // Show clients a friendly line, not the raw upstream wording. The
+          // technical reason/code still rides in the network response for us.
+          const friendly = body?.code === 'not_found'
+            ? 'No live details found for this flight yet.'
+            : 'Live flight details are temporarily unavailable.';
+          return { info: null, error: friendly };
+        })
+        .then(({ info, error }) => {
+          setInfo(info);
+          setError(error);
+          onInfoRef.current?.(info);
+          // Persist only successful lookups; keep any prior details on failure
+          // (e.g. a temporary quota/outage) rather than wiping good data.
+          if (info) onResolvedRef.current?.(info);
+        })
+        .catch(() => { setInfo(null); setError('Flight details unavailable'); onInfoRef.current?.(null); })
+        .finally(() => setLoading(false));
+    }, 600);
+
+    return () => clearTimeout(handle);
+  }, [code, lookupDate]);
 
   const extIcon = (
     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,6 +268,9 @@ function FlightTrackLinks({ flight, onInfo }: { flight: string; onInfo?: (info: 
     <div className="mt-1 space-y-1">
       {loading && (
         <p className="text-[10px] text-blue-400 italic">Looking up flight…</p>
+      )}
+      {!loading && (!info || !info.airline) && error && (
+        <p className="text-[10px] text-slate-500 italic">{error}</p>
       )}
       {!loading && info && info.airline && (
         <div className="text-[10px] text-blue-700 bg-blue-50/60 rounded px-2 py-1 space-y-0.5">
@@ -947,7 +995,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} onInfo={info => setArrivalInfo(g.id, info)} />}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} date={g.arrivalDate} initialInfo={g.arrivalFlightInfo} onInfo={info => setArrivalInfo(g.id, info)} onResolved={info => updateGroup(g.id, { arrivalFlightInfo: info })} />}
                 </div>
                 <div className="mb-2">
                   <FieldLabel>Hotel before boarding?</FieldLabel>
@@ -992,7 +1040,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
                 <div className="mb-2">
                   <FieldLabel>Flight No.</FieldLabel>
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} onInfo={info => setDepartureInfo(g.id, info)} />}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} date={g.departureDate} initialInfo={g.departureFlightInfo} onInfo={info => setDepartureInfo(g.id, info)} onResolved={info => updateGroup(g.id, { departureFlightInfo: info })} />}
                 </div>
                 <div>
                   <FieldLabel>Transfer to airport?</FieldLabel>
@@ -1086,7 +1134,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.arrivalFlight ?? ''} onChange={v => updateGroup(g.id, { arrivalFlight: v })} placeholder="e.g. EZY1234" />
-                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} onInfo={info => setArrivalInfo(g.id, info)} />}
+                  {g.arrivalFlight && <FlightTrackLinks flight={g.arrivalFlight} date={g.arrivalDate} initialInfo={g.arrivalFlightInfo} onInfo={info => setArrivalInfo(g.id, info)} onResolved={info => updateGroup(g.id, { arrivalFlightInfo: info })} />}
                 </td>
               ))}
             </TableRow>
@@ -1152,7 +1200,7 @@ function TravelStep({ initial, crew, charter, onSave, onAutoSave }: {
               {groups.map(g => (
                 <td key={g.id} className="py-1.5 px-2 align-top">
                   <TextInput value={g.departureFlight ?? ''} onChange={v => updateGroup(g.id, { departureFlight: v })} placeholder="e.g. BA456" />
-                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} onInfo={info => setDepartureInfo(g.id, info)} />}
+                  {g.departureFlight && <FlightTrackLinks flight={g.departureFlight} date={g.departureDate} initialInfo={g.departureFlightInfo} onInfo={info => setDepartureInfo(g.id, info)} onResolved={info => updateGroup(g.id, { departureFlightInfo: info })} />}
                 </td>
               ))}
             </TableRow>

@@ -380,7 +380,7 @@ export default function ProposalClient({ token }: Props) {
               </div>
               {totals.apa > 0 && (
                 <p className="papa-note mt-4 text-xs text-gray-400 leading-relaxed">
-                  APA covers fuel, port fees, provisions, crew gratuities, and running expenses.
+                  APA covers fuel, port fees, provisions, and running expenses.
                   Any unspent balance is returned at charter end.
                 </p>
               )}
