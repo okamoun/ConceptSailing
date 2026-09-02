@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { haversineKm } from '../../marinas-data';
-import { reconcileRoutedNm } from '../../client-space/[token]/itinerary/itinerary-utils';
+import { reconcileRoutedNm, shouldDrawRoutedPath } from '../../client-space/[token]/itinerary/itinerary-utils';
 
 // Real sea-routing runs server-side only: searoute-ts bundles a ~3.5 MB Eurostat
 // maritime network, so it must never reach the client. It's imported lazily
@@ -34,10 +34,11 @@ const round6 = (n: number) => Math.round(n * 1e6) / 1e6;
 // POST { stops: [{ id, lat, lng }, ...] }  (in visiting order)
 // →    { routed: { [arrivingStopId]: nauticalMiles },
 //        paths:  { [arrivingStopId]: [{ lat, lng }, ...] } }
-// Each key is the id of a stop whose inbound leg was successfully sea-routed:
-// `routed` carries the leg distance, `paths` the polyline to draw for it.
-// Legs that fail to route are simply omitted so the client keeps its
-// straight-line fallback for both distance and drawing.
+// `routed` carries each routable leg's distance (clamped to never fall below the
+// straight line). `paths` carries a polyline only for legs that are a genuine
+// detour (routed ≥ straight) — so the drawn course always agrees with the shown
+// distance. Legs that fail to route, or whose polyline is omitted, fall back to
+// the straight-line estimate for distance and to a dashed straight line on the map.
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -81,11 +82,16 @@ export async function POST(req: NextRequest) {
       const length = route.properties.length; // nautical miles (searoute default unit)
       if (Number.isFinite(length)) {
         routed[b.id] = Math.round(reconcileRoutedNm(length, straightNm) * 10) / 10;
-      }
-      // geometry.coordinates is [lng, lat][] — swap back to { lat, lng } for the map.
-      const coords = route.geometry?.coordinates;
-      if (Array.isArray(coords) && coords.length >= 2) {
-        paths[b.id] = coords.map(([lng, lat]) => ({ lat: round6(lat), lng: round6(lng) }));
+        // Only return the polyline for a genuine detour (routed ≥ straight). If
+        // the coarse network snapped to closer vertices and the routed path came
+        // out shorter than the rhumb line, its distance was clamped up — so
+        // drawing that short path would contradict the shown number. Omit it and
+        // let the map fall back to the dashed straight line for this leg.
+        const coords = route.geometry?.coordinates;
+        // geometry.coordinates is [lng, lat][] — swap back to { lat, lng } for the map.
+        if (shouldDrawRoutedPath(length, straightNm) && Array.isArray(coords) && coords.length >= 2) {
+          paths[b.id] = coords.map(([lng, lat]) => ({ lat: round6(lat), lng: round6(lng) }));
+        }
       }
     } catch {
       // SnapFailedError / NoRouteError → leave this leg to the straight-line fallback.

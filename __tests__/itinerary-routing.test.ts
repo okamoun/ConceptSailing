@@ -2,6 +2,7 @@ import {
   legNm,
   straightLegNm,
   reconcileRoutedNm,
+  shouldDrawRoutedPath,
   coordSignature,
   applyRoutedNm,
   routedSignature,
@@ -55,6 +56,22 @@ describe('reconcileRoutedNm', () => {
   it('clamps a snap-artefact result that is shorter than the straight line', () => {
     // Coarse-network snapping can return less than the rhumb line — never valid.
     expect(reconcileRoutedNm(13.5, 20.2)).toBe(20.2);
+  });
+});
+
+describe('shouldDrawRoutedPath', () => {
+  it('draws the routed polyline for a genuine detour (routed >= straight)', () => {
+    expect(shouldDrawRoutedPath(41.8, 35.6)).toBe(true);
+    expect(shouldDrawRoutedPath(20.2, 20.2)).toBe(true);
+  });
+
+  it('suppresses the polyline for a snap artefact (routed < straight), so the map falls back to the straight line', () => {
+    expect(shouldDrawRoutedPath(13.5, 20.2)).toBe(false);
+  });
+
+  it('suppresses the polyline for non-finite inputs', () => {
+    expect(shouldDrawRoutedPath(Number.NaN, 20.2)).toBe(false);
+    expect(shouldDrawRoutedPath(20.2, Number.NaN)).toBe(false);
   });
 });
 

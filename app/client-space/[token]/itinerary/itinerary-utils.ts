@@ -40,6 +40,15 @@ export function reconcileRoutedNm(routedNm: number, straightNm: number): number 
   return Math.max(routedNm, straightNm);
 }
 
+// Only draw a leg's routed polyline when the route is a genuine detour — its
+// length is at least the straight-line distance. A coarse-network snap can
+// produce a routed path *shorter* than the rhumb line; drawing that would
+// contradict the (clamped) distance shown for the leg, so such legs are left to
+// fall back to the dashed straight line on the map instead.
+export function shouldDrawRoutedPath(routedLengthNm: number, straightNm: number): boolean {
+  return Number.isFinite(routedLengthNm) && Number.isFinite(straightNm) && routedLengthNm >= straightNm;
+}
+
 // A compact signature of the ordered stop coordinates. Changes whenever a stop
 // is added, removed, reordered, or its coordinates change — but not when an
 // unrelated field (title, notes) is edited. Used to decide when sea routing
