@@ -214,6 +214,12 @@ export default function BookingDetailClient({ id }: Props) {
           <h1 className="text-white font-bold text-2xl mt-2">{charter.name || 'Unknown client'}</h1>
         </div>
         <div className="flex items-center gap-2">
+          <a
+            href={`/admin/bookings/${charter.id}/edit`}
+            className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            ✎ Edit details
+          </a>
           <label className="text-blue-400 text-xs">Status</label>
           <select
             value={charter.status}
@@ -230,7 +236,15 @@ export default function BookingDetailClient({ id }: Props) {
 
       {/* Overview */}
       <section className="bg-white/10 border border-white/20 rounded-xl p-5">
-        <h2 className="text-white font-semibold text-base mb-3">Overview</h2>
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <h2 className="text-white font-semibold text-base">Overview</h2>
+          <a
+            href={`/admin/bookings/${charter.id}/edit`}
+            className="text-blue-300 hover:text-white text-xs font-medium transition-colors"
+          >
+            Edit all fields →
+          </a>
+        </div>
         <div className="grid sm:grid-cols-2 gap-x-8 gap-y-1.5">
           {charter.email && <DRow label="Email" value={charter.email} />}
           {charter.phone && <DRow label="Phone" value={charter.phone} />}
@@ -238,9 +252,11 @@ export default function BookingDetailClient({ id }: Props) {
           {charter.passengers != null && <DRow label="Passengers" value={String(charter.passengers)} />}
           {charter.boat && <DRow label="Boat" value={charter.boat} />}
           {charter.embarkationPoint && <DRow label="Embarkation" value={charter.embarkationPoint} />}
+          {charter.disembarkationPort && <DRow label="Disembarkation" value={charter.disembarkationPort} />}
           {delivery && <DRow label="Delivery" value={delivery.name} />}
           {redelivery && <DRow label="Redelivery" value={redelivery.name} />}
           {charter.selectedTheme && <DRow label="Theme" value={charter.selectedTheme} />}
+          {charter.externalRef && <DRow label="External ref" value={charter.externalRef} />}
         </div>
         {charter.holidayDescription && (
           <p className="text-blue-100 text-sm italic leading-relaxed border-l-2 border-blue-500/40 pl-3 mt-4">
