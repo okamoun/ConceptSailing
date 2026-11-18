@@ -81,7 +81,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 to-blue-900/95" />
         <div className="relative max-w-5xl mx-auto px-4">
-          <Link href="/experiences" className="inline-flex items-center gap-1.5 text-blue-200 hover:text-white transition-colors mb-4 text-xs">
+          <Link href="/experiences" className="inline-flex items-center gap-1.5 py-2 text-blue-200 hover:text-white transition-colors mb-2 text-sm">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>

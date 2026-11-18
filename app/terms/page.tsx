@@ -13,7 +13,7 @@ export default function TermsPage() {
       <div className="max-w-3xl mx-auto space-y-8">
 
         <div className="space-y-2">
-          <Link href="/" className="text-blue-300 hover:text-white text-sm transition-colors">← Back to home</Link>
+          <Link href="/" className="inline-block py-2 text-blue-300 hover:text-white text-sm transition-colors">← Back to home</Link>
           <h1 className="text-white font-bold text-3xl mt-4">Terms of Service</h1>
           <p className="text-blue-300 text-sm">Last updated: January 2025</p>
         </div>

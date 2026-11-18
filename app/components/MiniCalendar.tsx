@@ -46,7 +46,7 @@ export default function MiniCalendar({
       </p>
       <div className="grid grid-cols-7">
         {DAY_ABBR.map(d => (
-          <div key={d} className={`text-[10px] text-center font-medium py-0.5 ${dark ? 'text-blue-300' : 'text-blue-500'}`}>
+          <div key={d} className={`text-xs text-center font-medium py-1 ${dark ? 'text-blue-300' : 'text-blue-500'}`}>
             {d}
           </div>
         ))}
@@ -66,7 +66,7 @@ export default function MiniCalendar({
           const tooEarly = !!(minDate && dateStr < minDate);
           const clickable = !isPast && !tooEarly && !!onDayClick;
 
-          let cls = 'text-[11px] rounded py-0.5 text-center transition-all min-h-[22px] ';
+          let cls = 'text-[13px] sm:text-xs rounded-md m-px flex items-center justify-center transition-all min-h-[38px] sm:min-h-[28px] ';
 
           if (isSelected || isRangeStart || isRangeEnd) {
             cls += dark
@@ -91,6 +91,8 @@ export default function MiniCalendar({
               type="button"
               disabled={!clickable}
               onClick={() => onDayClick?.(dateStr)}
+              aria-label={`${dateStr}${isPast ? ', past' : !available ? ', not available' : ', available'}`}
+              aria-pressed={isSelected || isRangeStart || isRangeEnd || undefined}
               className={cls}
             >
               {day}

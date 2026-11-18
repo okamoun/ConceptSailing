@@ -57,7 +57,7 @@ export default function ChefPage({ params }: ChefPageProps) {
         <div className="absolute inset-0 opacity-20" style={{backgroundImage: `url('${chef.image}')`, backgroundSize: 'cover', backgroundPosition: 'center top'}}></div>
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/80 to-blue-900/95"></div>
         <div className="relative max-w-6xl mx-auto px-4">
-          <Link href="/blueone" className="inline-flex items-center gap-2 text-blue-200 hover:text-white transition-colors mb-8 text-sm">
+          <Link href="/blueone" className="inline-flex items-center gap-2 py-2 text-blue-200 hover:text-white transition-colors mb-6 text-sm">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
