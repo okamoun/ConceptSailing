@@ -125,10 +125,10 @@ describe('Experiences Page — Luxury Yacht CTA Section', () => {
     ).toBeInTheDocument()
   })
 
-  test('Explore BlueOne Yacht link points to home page', () => {
+  test('Explore BlueOne Yacht link points to the yacht page', () => {
     render(<ExperiencesPage />)
     const link = screen.getByRole('link', { name: 'Explore BlueOne Yacht' })
-    expect(link).toHaveAttribute('href', '/')
+    expect(link).toHaveAttribute('href', '/blueone')
   })
 })
 

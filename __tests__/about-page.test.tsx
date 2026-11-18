@@ -3,9 +3,10 @@ import { render, screen } from '@testing-library/react'
 import AboutPage from '../app/about/page'
 
 describe('About Page — Branding & Headings', () => {
-  test('renders BlueOne logo', () => {
+  test('links onward to experiences and contact', () => {
     render(<AboutPage />)
-    expect(screen.getByAltText('BlueOne Logo')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Explore Experiences' })).toHaveAttribute('href', '/experiences')
+    expect(screen.getByRole('link', { name: 'Contact Us' })).toHaveAttribute('href', '/contact')
   })
 
   test('renders "Premium Yacht Experiences" tagline with correct spelling', () => {
@@ -96,9 +97,9 @@ describe('About Page — Values Section', () => {
 })
 
 describe('About Page — Structure', () => {
-  test('renders as main element', () => {
+  test('does not nest its own main landmark (SiteChrome provides <main>)', () => {
     render(<AboutPage />)
-    expect(screen.getByRole('main')).toBeInTheDocument()
+    expect(screen.queryByRole('main')).not.toBeInTheDocument()
   })
 
   test('all three value cards are present', () => {

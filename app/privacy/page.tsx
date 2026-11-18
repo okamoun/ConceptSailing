@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 px-4 py-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 px-4 py-20">
       <div className="max-w-3xl mx-auto space-y-8">
 
         <div className="space-y-2">
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
         </div>
 
       </div>
-    </main>
+    </div>
   );
 }
 

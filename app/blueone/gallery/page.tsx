@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function GalleryPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 py-16">
         <div className="absolute inset-0 opacity-20" style={{backgroundImage: `url('/images/boat/DJI_20260512133237_0013_D.JPG')`, backgroundSize: 'cover', backgroundPosition: 'center'}}></div>
@@ -57,19 +57,19 @@ export default function GalleryPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/booking?boat=BlueOne"
-              className="btn-primary bg-white text-blue-600 hover:bg-gray-50"
+              className="btn-primary bg-white text-blue-900 hover:bg-blue-50"
             >
-              Booking Request
+              Request a Quote
             </a>
             <Link
               href="/blueone"
-              className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600"
+              className="btn-ghost-light"
             >
               Back to BlueOne
             </Link>
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

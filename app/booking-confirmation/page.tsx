@@ -86,7 +86,7 @@ export default function BookingConfirmationPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
           <Link href="/blueone" className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-2">
@@ -239,6 +239,6 @@ export default function BookingConfirmationPage() {
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

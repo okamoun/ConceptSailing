@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from "next/font/google"
+import { Inter, Fraunces } from "next/font/google"
 import { BlueOneProvider } from "./contexts/BlueOneContext"
 import GoogleAnalytics from "./components/GoogleAnalytics"
 import { AdminAuthProvider } from "./admin/AdminAuthContext"
@@ -7,7 +7,8 @@ import SiteChrome from "./components/SiteChrome"
 import { CONTACT } from "./config/contact"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap", axes: ["opsz"] })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.blueoneyacht.com'),
@@ -115,7 +116,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.className}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
         <script
           type="application/ld+json"
@@ -127,7 +128,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
       </head>
-      <body className="min-h-screen bg-blue-900">
+      <body className="min-h-screen bg-white font-sans">
         <AdminAuthProvider>
           <GoogleAnalytics />
           <BlueOneProvider>

@@ -223,7 +223,7 @@ export default function DiscussionsClient() {
   // ---------------------------------------------------------------------------
 
   return (
-    <main className="px-4 py-6 min-h-screen">
+    <div className="px-4 py-6 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold text-white">Discussions</h1>
@@ -398,6 +398,6 @@ export default function DiscussionsClient() {
           })}
         </div>
       )}
-    </main>
+    </div>
   );
 }

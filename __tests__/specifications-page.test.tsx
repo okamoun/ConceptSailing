@@ -293,15 +293,15 @@ describe('Specifications Page — CTA Buttons', () => {
     ).toBeInTheDocument()
   })
 
-  test('renders Get a Quote link pointing to /contact', () => {
+  test('renders Request a Quote link pointing to /booking', () => {
     render(<SpecificationsPage />)
-    const link = screen.getByRole('link', { name: 'Get a Quote' })
-    expect(link).toHaveAttribute('href', '/contact')
+    const link = screen.getByRole('link', { name: 'Request a Quote' })
+    expect(link).toHaveAttribute('href', '/booking?boat=BlueOne')
   })
 
-  test('renders View More link pointing to /blueone', () => {
+  test('renders Discover The Yacht link pointing to /blueone', () => {
     render(<SpecificationsPage />)
-    const link = screen.getByRole('link', { name: 'View More' })
+    const link = screen.getByRole('link', { name: 'Discover The Yacht' })
     expect(link).toHaveAttribute('href', '/blueone')
   })
 })

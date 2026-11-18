@@ -100,14 +100,14 @@ export default function BlueOneClient() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-pulse">
             <h1 className="text-4xl font-bold text-blue-900 mb-4">Loading BlueOne...</h1>
             <p className="text-gray-600">Preparing your luxury sailing experience</p>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -147,7 +147,7 @@ export default function BlueOneClient() {
 
   return (
     <>
-      <main className="min-h-screen relative" style={{
+      <div className="min-h-screen relative" style={{
         backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boat/DJI_20260512133237_0013_D.JPG')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -192,14 +192,14 @@ export default function BlueOneClient() {
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                 className="btn-primary text-lg px-8 py-4 shadow-2xl"
               >
-                Get a Quote
+                Request a Quote
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>
               <Link 
                 href="/contact" 
-                className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4 shadow-2xl"
+                className="btn-ghost-light text-lg px-8 py-4 shadow-2xl"
               >
                 Contact Us
               </Link>
@@ -535,7 +535,7 @@ export default function BlueOneClient() {
         </section>
 
         {/* Accolades & Recognition Section */}
-        <section className="py-20 bg-gradient-to-r from-yellow-900/40 via-amber-900/40 to-yellow-900/40 backdrop-blur-sm border-t-2 border-b-2 border-yellow-600/50">
+        <section id="award" className="scroll-mt-24 py-20 bg-gradient-to-r from-yellow-900/40 via-amber-900/40 to-yellow-900/40 backdrop-blur-sm border-t-2 border-b-2 border-yellow-600/50">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-block bg-yellow-400/20 backdrop-blur-sm rounded-full px-6 py-2 border border-yellow-400/50 mb-6">
@@ -769,7 +769,7 @@ export default function BlueOneClient() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
-                <Link href="/booking?boat=BlueOne" className="btn-secondary border-white/40 text-white hover:bg-white/10 px-8 py-3 inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                <Link href="/booking?boat=BlueOne" className="btn-ghost-light px-8 py-3 inline-flex items-center justify-center gap-2 whitespace-nowrap">
                   Request a Quote
                 </Link>
               </div>
@@ -789,20 +789,20 @@ export default function BlueOneClient() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
-                className="btn-primary bg-white text-blue-600 hover:bg-gray-50"
+                className="btn-primary bg-white text-blue-900 hover:bg-blue-50"
               >
-                Booking Request
+                Request a Quote
               </a>
-              <Link href="/specifications" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+              <Link href="/specifications" className="btn-ghost-light">
                 View Specifications
               </Link>
-              <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+              <Link href="/contact" className="btn-ghost-light">
                 Contact Us
               </Link>
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* Modal for enlarged images */}
       {modalImage && (

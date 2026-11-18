@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { CONTACT } from '../config/contact';
 import { useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import Link from 'next/link';
@@ -179,7 +178,7 @@ export default function BookingPageContent() {
   const redeliveryMarina = getMarinaById(actualRedelivery);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
           <Link href="/blueone" className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-2">
@@ -246,7 +245,7 @@ export default function BookingPageContent() {
                   onChange={(e) => setPhone(e.target.value)}
                   required
                   className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
-                  placeholder={CONTACT.phone.formatted}
+                  placeholder="+44 7700 900000"
                 />
               </div>
             </div>
@@ -638,7 +637,7 @@ export default function BookingPageContent() {
           </form>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
