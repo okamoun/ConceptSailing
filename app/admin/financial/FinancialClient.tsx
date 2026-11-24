@@ -138,9 +138,9 @@ export default function FinancialClient() {
 
   if (!allowedPages.includes('/admin/financial')) {
     return (
-      <main className="px-4 py-10 text-center">
+      <div className="px-4 py-10 text-center">
         <p className="text-red-300 text-sm">Access denied.</p>
-      </main>
+      </div>
     );
   }
 
@@ -186,7 +186,7 @@ export default function FinancialClient() {
   }
 
   return (
-    <main className="px-4 py-6">
+    <div className="px-4 py-6">
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Header + year selector */}
@@ -509,6 +509,6 @@ export default function FinancialClient() {
           </>
         )}
       </div>
-    </main>
+    </div>
   );
 }

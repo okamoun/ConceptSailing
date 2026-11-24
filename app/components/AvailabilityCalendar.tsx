@@ -81,7 +81,7 @@ export default function AvailabilityCalendar({
       <div className="flex items-center justify-between">
         <button
           onClick={prevMonth}
-          className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-colors"
+          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-colors"
           aria-label="Previous month"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +91,7 @@ export default function AvailabilityCalendar({
         <h2 className="text-white font-bold text-lg">{monthLabel}</h2>
         <button
           onClick={nextMonth}
-          className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-colors"
+          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-colors"
           aria-label="Next month"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

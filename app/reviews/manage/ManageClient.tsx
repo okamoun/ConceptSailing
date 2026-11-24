@@ -100,7 +100,7 @@ export default function ManageClient({ token, action }: Props) {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-16" style={bg}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-16" style={bg}>
       <div className="w-full max-w-lg bg-white/15 backdrop-blur-sm border border-white/25 rounded-2xl p-8 space-y-5">
 
         {loading && (
@@ -227,6 +227,6 @@ export default function ManageClient({ token, action }: Props) {
           </>
         )}
       </div>
-    </main>
+    </div>
   );
 }

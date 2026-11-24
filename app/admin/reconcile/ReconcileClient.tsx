@@ -142,7 +142,7 @@ export default function ReconcileClient() {
   }
 
   return (
-    <main className="px-4 py-6 min-h-screen">
+    <div className="px-4 py-6 min-h-screen">
       <div className="max-w-3xl mx-auto space-y-6">
 
         <div>
@@ -367,6 +367,6 @@ export default function ReconcileClient() {
         )}
 
       </div>
-    </main>
+    </div>
   );
 }

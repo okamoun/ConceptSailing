@@ -195,7 +195,7 @@ export default function AvailabilityAdminClient() {
 
 
   return (
-    <main className="px-4 py-6">
+    <div className="px-4 py-6">
       <div className="max-w-3xl mx-auto space-y-6">
 
         <div className="flex items-start justify-between gap-4">
@@ -511,7 +511,7 @@ export default function AvailabilityAdminClient() {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
 

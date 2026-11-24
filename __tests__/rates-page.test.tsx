@@ -15,9 +15,9 @@ describe('Rates Page — Page Header', () => {
     ).toBeInTheDocument()
   })
 
-  test('renders Back to The Yacht link', () => {
+  test('renders Discover The Yacht link', () => {
     render(<RatesPage />)
-    const link = screen.getByRole('link', { name: /Back to The Yacht/ })
+    const link = screen.getByRole('link', { name: /Discover The Yacht/ })
     expect(link).toHaveAttribute('href', '/blueone')
   })
 })
@@ -207,10 +207,11 @@ describe('Rates Page — Experience Package Section', () => {
 })
 
 describe('Rates Page — CTA', () => {
-  test('renders Request a Booking CTA link', () => {
+  test('renders Request a Quote CTA link', () => {
     render(<RatesPage />)
-    const link = screen.getByRole('link', { name: /Request a Booking/ })
-    expect(link).toHaveAttribute('href', '/booking?boat=BlueOne')
+    const links = screen.getAllByRole('link', { name: /Request a Quote/ })
+    expect(links.length).toBeGreaterThan(0)
+    links.forEach(link => expect(link).toHaveAttribute('href', '/booking?boat=BlueOne'))
   })
 })
 

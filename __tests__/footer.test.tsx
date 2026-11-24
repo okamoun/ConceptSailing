@@ -41,7 +41,7 @@ describe('Footer — Quick Links section', () => {
     { label: 'Experiences', href: '/experiences' },
     { label: 'Destinations', href: '/destinations' },
     { label: 'The Yacht', href: '/blueone' },
-    { label: 'Get a Quote', href: '/booking' },
+    { label: 'Request a Quote', href: '/booking' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
   ]
@@ -95,7 +95,7 @@ describe('Footer — Legal section', () => {
   test('renders copyright notice', () => {
     render(<Footer />)
     expect(
-      screen.getByText('© 2026 BlueOne Luxury Yacht. All rights reserved.')
+      screen.getByText(`© ${new Date().getFullYear()} BlueOne Luxury Yacht. All rights reserved.`)
     ).toBeInTheDocument()
   })
 

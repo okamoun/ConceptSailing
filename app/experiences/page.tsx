@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import ThemeSections from './ThemeSections';
+import PageHero from '../components/PageHero';
 
 export const metadata: Metadata = {
   title: 'Greek Sailing Adventures | Themed Yacht Experiences',
@@ -25,78 +26,78 @@ export const metadata: Metadata = {
 
 export default function ExperiencesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center">
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/boats/blueone/External_sailing.jpg"
-            alt="Greek Sailing Adventures"
-            fill
-            className="object-cover"
-            priority
-            style={{ objectPosition: 'center' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-blue-900/50 to-blue-900/70"></div>
-        </div>
-
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <div className="glass p-8 md:p-16 max-w-4xl mx-auto animate-fade-in-up">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gradient mb-6">
-              Greek Sailing Adventures
-            </h1>
-            <p className="text-xl md:text-2xl lg:text-3xl text-gray-700 font-medium mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              Curated themed experiences across the Greek islands
-            </p>
-            <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              From culinary journeys to wellness retreats, discover the perfect sailing adventure tailored to your interests.
-              Each theme offers unique experiences crafted by local experts.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              <Link href="/destinations" className="btn-primary text-lg px-8 py-4">
-                View Destinations
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="bg-white">
+      <PageHero
+        size="lg"
+        eyebrow="Curated themed experiences across the Greek islands"
+        title="Greek Sailing Adventures"
+        imageAlt="BlueOne sailing past Greek islands"
+        subtitle={
+          <p className="mb-0">
+            From culinary journeys to wellness retreats, discover the perfect sailing adventure tailored to your interests.
+            Each theme offers unique experiences crafted by local experts.
+          </p>
+        }
+      >
+        <a href="#themes" className="btn-primary">
+          Browse Themes
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </a>
+        <Link href="/destinations" className="btn-ghost-light">
+          View Destinations
+        </Link>
+      </PageHero>
 
       {/* Adventure Categories — client component reads Firestore in the browser */}
       <ThemeSections />
 
       {/* Destinations Preview */}
-      <section className="py-20 bg-gradient-to-b from-white to-blue-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gradient mb-6">Discover Greek Destinations</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From hidden coves to vibrant harbors, each Greek island offers unique beauty and authentic experiences
-            </p>
-          </div>
-          <div className="text-center">
-            <Link href="/destinations" className="btn-primary text-lg px-8 py-4">
-              Explore All Destinations
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
+      <section className="section-pad bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 overflow-hidden rounded-3xl border border-slate-200 bg-[#f6f3ee]">
+            <div className="relative min-h-[260px]">
+              <Image
+                src="/images/boat/DJI_20260512133237_0013_D.JPG"
+                alt="Aerial view of BlueOne anchored in a Greek bay"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="p-8 md:p-12 flex flex-col justify-center">
+              <p className="eyebrow mb-3">Where we sail</p>
+              <h2 className="text-[#0a1f3c] mb-4">Discover Greek Destinations</h2>
+              <p className="text-lg text-slate-600 mb-8">
+                From hidden coves to vibrant harbors, each Greek island offers unique beauty and authentic experiences
+              </p>
+              <div>
+                <Link href="/destinations" className="btn-primary">
+                  Explore All Destinations
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Alternative Entry Point */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-700">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="glass p-8 md:p-16 max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Prefer a Luxury Yacht Experience?</h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Discover our flagship BlueOne catamaran - the ultimate in luxury sailing
-            </p>
-            <Link href="/" className="btn-primary bg-white text-blue-600 hover:bg-gray-50">
+      {/* Yacht CTA */}
+      <section className="bg-[#0a1f3c]">
+        <div className="section-pad max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-white mb-5">Prefer a Luxury Yacht Experience?</h2>
+          <p className="text-lg md:text-xl text-white/75 mb-10 max-w-2xl mx-auto">
+            Discover our flagship BlueOne catamaran - the ultimate in luxury sailing
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/blueone" className="btn-primary bg-white text-[#0a1f3c] hover:bg-sky-50">
               Explore BlueOne Yacht
+            </Link>
+            <Link href="/booking" className="btn-ghost-light">
+              Request a Quote
             </Link>
           </div>
         </div>

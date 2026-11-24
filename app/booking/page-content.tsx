@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { CONTACT } from '../config/contact';
 import { useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import Link from 'next/link';
@@ -179,32 +178,32 @@ export default function BookingPageContent() {
   const redeliveryMarina = getMarinaById(actualRedelivery);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-16">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-8">
-          <Link href="/blueone" className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-2">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white py-6 sm:py-16">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4">
+        <div className="mb-3 sm:mb-8">
+          <Link href="/blueone" className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-2 py-2">
             &larr; Back to BlueOne
           </Link>
         </div>
 
-        <div className="glass p-8 shadow-xl">
-          <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">Contact us to prepare your next dream experience</h1>
+        <div className="glass p-5 sm:p-8 shadow-xl">
+          <h1 className="text-3xl sm:text-4xl text-[#0a1f3c] mb-6 sm:mb-8 text-center">Contact us to prepare your next dream experience</h1>
 
           {/* Boat Summary */}
-          <div className="mb-8 p-6 bg-blue-100 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-6">
+          <div className="mb-8 p-4 sm:p-6 bg-blue-50 rounded-2xl border border-blue-200">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
               <Image
                 src={blueOneBoat.image}
                 alt={blueOneBoat.name}
                 width={120}
                 height={80}
-                className="w-32 h-20 object-cover rounded-lg border-2 border-blue-300"
+                className="w-full h-40 sm:w-32 sm:h-20 object-cover rounded-xl shrink-0"
                 draggable={false}
               />
               <div>
                 <h2 className="text-2xl font-bold text-blue-900">{blueOneBoat.name}</h2>
                 <p className="text-gray-700">{blueOneBoat.brand} - {blueOneBoat.length}</p>
-                <p className="text-gray-600 text-sm mt-1">{blueOneBoat.description}</p>
+                <p className="text-gray-600 text-sm mt-1 mb-0 line-clamp-3 sm:line-clamp-none">{blueOneBoat.description}</p>
               </div>
             </div>
           </div>
@@ -246,7 +245,7 @@ export default function BookingPageContent() {
                   onChange={(e) => setPhone(e.target.value)}
                   required
                   className="w-full p-3 rounded-lg bg-white border border-blue-300 text-gray-900 focus:border-blue-500 focus:outline-none"
-                  placeholder={CONTACT.phone.formatted}
+                  placeholder="+44 7700 900000"
                 />
               </div>
             </div>
@@ -278,7 +277,7 @@ export default function BookingPageContent() {
                       </svg>
                     </button>
                     {startCalOpen && (
-                      <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-4 w-72">
+                      <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-3 sm:p-4 w-full sm:w-80">
                         <CalNavRow onPrev={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))} onNext={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))} />
                         <MiniCalendar
                           entries={charters}
@@ -321,7 +320,7 @@ export default function BookingPageContent() {
                       </svg>
                     </button>
                     {endCalOpen && (
-                      <div className="absolute top-full left-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-4 w-72">
+                      <div className="absolute top-full left-0 sm:left-auto sm:right-0 z-50 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-3 sm:p-4 w-full sm:w-80">
                         <CalNavRow onPrev={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1))} onNext={() => setCalMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1))} />
                         <MiniCalendar
                           entries={charters}
@@ -364,13 +363,15 @@ export default function BookingPageContent() {
                         setPassengers(next);
                         if (childAges.length > next) setChildAges(a => a.slice(0, next));
                       }}
-                      className="w-9 h-9 rounded-lg border border-blue-300 text-blue-700 font-bold text-lg hover:bg-blue-50 transition-colors flex items-center justify-center"
+                      aria-label="Remove a guest"
+                      className="w-11 h-11 rounded-full border border-blue-300 text-blue-700 font-bold text-xl hover:bg-blue-50 transition-colors flex items-center justify-center"
                     >−</button>
-                    <span className="w-8 text-center text-xl font-semibold text-blue-900">{passengers}</span>
+                    <span className="w-8 text-center text-xl font-semibold text-blue-900" aria-live="polite">{passengers}</span>
                     <button
                       type="button"
                       onClick={() => setPassengers(p => Math.min(capacity.max, p + 1))}
-                      className="w-9 h-9 rounded-lg border border-blue-300 text-blue-700 font-bold text-lg hover:bg-blue-50 transition-colors flex items-center justify-center"
+                      aria-label="Add a guest"
+                      className="w-11 h-11 rounded-full border border-blue-300 text-blue-700 font-bold text-xl hover:bg-blue-50 transition-colors flex items-center justify-center"
                     >+</button>
                     <span className="text-gray-500 text-sm">guest{passengers !== 1 ? 's' : ''}</span>
                   </div>
@@ -387,13 +388,13 @@ export default function BookingPageContent() {
                       type="button"
                       onClick={() => setChildAges(a => [...a, 10])}
                       disabled={childAges.length >= passengers}
-                      className="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed px-3 py-1 rounded-lg border border-blue-200 hover:bg-blue-50 disabled:border-gray-200 transition-colors"
+                      className="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed px-4 py-2.5 rounded-full border border-blue-200 hover:bg-blue-50 disabled:border-gray-200 transition-colors"
                     >
                       + Add child
                     </button>
                   </div>
                   {childAges.length === 0 ? (
-                    <p className="text-gray-400 text-sm">No children — click &ldquo;Add child&rdquo; to specify ages</p>
+                    <p className="text-gray-400 text-sm">No children — use &ldquo;Add child&rdquo; to specify ages</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {childAges.map((age, i) => (
@@ -460,14 +461,14 @@ export default function BookingPageContent() {
 
               {/* Place of Redelivery — optional */}
               <div>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 mb-3">
                   <label className="block text-lg font-semibold text-blue-900">Place of Redelivery</label>
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <label className="flex items-center gap-2 cursor-pointer select-none py-2">
                     <input
                       type="checkbox"
                       checked={sameRedelivery}
                       onChange={(e) => setSameRedelivery(e.target.checked)}
-                      className="w-4 h-4 accent-blue-600"
+                      className="w-5 h-5 accent-blue-600"
                     />
                     <span className="text-sm text-gray-600">Same as delivery</span>
                   </label>
@@ -617,7 +618,7 @@ export default function BookingPageContent() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-accent text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-accent/90 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-accent"
+                className="w-full sm:w-auto bg-accent text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-accent/90 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-accent"
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-3">
@@ -638,7 +639,7 @@ export default function BookingPageContent() {
           </form>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -654,8 +655,8 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 function CalNavRow({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <button type="button" onClick={onPrev} className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium">←</button>
-      <button type="button" onClick={onNext} className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50 transition-colors text-sm font-medium">→</button>
+      <button type="button" onClick={onPrev} aria-label="Previous month" className="w-10 h-10 flex items-center justify-center text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50 transition-colors font-medium">←</button>
+      <button type="button" onClick={onNext} aria-label="Next month" className="w-10 h-10 flex items-center justify-center text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50 transition-colors font-medium">→</button>
     </div>
   );
 }

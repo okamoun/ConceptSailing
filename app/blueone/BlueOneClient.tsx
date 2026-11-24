@@ -3,7 +3,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBlueOneMode } from '../contexts/BlueOneContext';
 import BlueOneGallerySlideshow from '../components/BlueOneGallerySlideshow';
 import VideoEmbed from '../components/VideoEmbed';
@@ -77,6 +77,23 @@ export default function BlueOneClient() {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
+  // Facebook's post plugin renders at a fixed pixel width; match it to the box so it isn't clipped on phones.
+  const fbBoxRef = useRef<HTMLDivElement>(null);
+  const [fbWidth, setFbWidth] = useState(500);
+  useEffect(() => {
+    const el = fbBoxRef.current;
+    if (!el) return;
+    const measure = () => setFbWidth(Math.max(240, Math.min(500, Math.floor(el.clientWidth))));
+    measure();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measure);
+      return () => window.removeEventListener('resize', measure);
+    }
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isLoading]);
+
   const [keyPhotosByCat, setKeyPhotosByCat] = useState<Partial<Record<ImageCategory, string[]>>>({});
 
   useEffect(() => {
@@ -100,14 +117,14 @@ export default function BlueOneClient() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-pulse">
             <h1 className="text-4xl font-bold text-blue-900 mb-4">Loading BlueOne...</h1>
             <p className="text-gray-600">Preparing your luxury sailing experience</p>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -147,7 +164,7 @@ export default function BlueOneClient() {
 
   return (
     <>
-      <main className="min-h-screen relative" style={{
+      <div className="min-h-screen relative" style={{
         backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boat/DJI_20260512133237_0013_D.JPG')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -158,8 +175,8 @@ export default function BlueOneClient() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-900/20 to-blue-900/40"></div>
           
           <div className="relative z-20 text-center px-4 max-w-5xl mx-auto">
-            {/* BlueOne Logo */}
-            <div className="mb-12">
+            {/* BlueOne Logo (nav already shows it on phones) */}
+            <div className="mb-12 hidden sm:block">
               <div className="relative inline-block">
                 <div className="absolute inset-0 bg-blue-400/20 blur-3xl rounded-full"></div>
                 <Image 
@@ -174,32 +191,32 @@ export default function BlueOneClient() {
             </div>
 
             {/* Enhanced Typography Hierarchy */}
-            <div className="space-y-6 mb-16">
+            <div className="space-y-4 sm:space-y-6 mb-10 sm:mb-16">
               <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-fade-in-up">
                 {boat.name}
               </h1>
               <h2 className="text-2xl md:text-3xl text-blue-200 font-semibold mb-4 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
                 {boat.brand} {boat.length}
               </h2>
-              <p className="text-lg md:text-xl text-on-dark-gradient-muted max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+              <p className="text-base sm:text-lg md:text-xl text-on-dark-gradient-muted max-w-3xl mx-auto leading-relaxed animate-fade-in-up line-clamp-4 sm:line-clamp-none" style={{animationDelay: '0.3s'}}>
                 {boat.description}
               </p>
             </div>
 
             {/* Enhanced Call-to-Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up" style={{animationDelay: '0.5s'}}>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center animate-fade-in-up" style={{animationDelay: '0.5s'}}>
               <a 
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
                 className="btn-primary text-lg px-8 py-4 shadow-2xl"
               >
-                Get a Quote
+                Request a Quote
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>
               <Link 
                 href="/contact" 
-                className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4 shadow-2xl"
+                className="btn-ghost-light text-lg px-8 py-4 shadow-2xl"
               >
                 Contact Us
               </Link>
@@ -535,7 +552,7 @@ export default function BlueOneClient() {
         </section>
 
         {/* Accolades & Recognition Section */}
-        <section className="py-20 bg-gradient-to-r from-yellow-900/40 via-amber-900/40 to-yellow-900/40 backdrop-blur-sm border-t-2 border-b-2 border-yellow-600/50">
+        <section id="award" className="scroll-mt-24 py-20 bg-gradient-to-r from-yellow-900/40 via-amber-900/40 to-yellow-900/40 backdrop-blur-sm border-t-2 border-b-2 border-yellow-600/50">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <div className="inline-block bg-yellow-400/20 backdrop-blur-sm rounded-full px-6 py-2 border border-yellow-400/50 mb-6">
@@ -605,12 +622,14 @@ export default function BlueOneClient() {
 
                   {/* Facebook Post Embed */}
                   <div className="mt-10 pt-6 border-t border-white/10 flex justify-center">
-                    <div className="overflow-hidden rounded-lg">
+                    <div ref={fbBoxRef} className="overflow-hidden rounded-lg w-full max-w-[500px] bg-white">
                       <iframe
-                        src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fyachtchartershow%2Fposts%2Fpfbid0CFXzmXKNzPs8ZsQZwNhs58q6XfarHVx49P9zbCb79YQ5V2rbrcpQ1iJAD1e2VNRAl&show_text=true&width=500"
-                        width="500"
+                        src={`https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fyachtchartershow%2Fposts%2Fpfbid0CFXzmXKNzPs8ZsQZwNhs58q6XfarHVx49P9zbCb79YQ5V2rbrcpQ1iJAD1e2VNRAl&show_text=true&width=${fbWidth}`}
+                        width="100%"
                         height="669"
-                        style={{border: 'none', overflow: 'hidden'}}
+                        title="EMMY award announcement on Facebook"
+                        loading="lazy"
+                        style={{border: 'none', overflow: 'hidden', display: 'block'}}
                         scrolling="no"
                         frameBorder="0"
                         allowFullScreen={true}
@@ -702,13 +721,15 @@ export default function BlueOneClient() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => setAvailMonth(m => addMonths(m, -1))}
-                  className="text-white/70 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/10 text-sm"
+                  aria-label="Previous month"
+                  className="w-11 h-11 flex items-center justify-center text-white/80 hover:text-white transition-colors rounded-full hover:bg-white/10"
                 >
                   ←
                 </button>
                 <button
                   onClick={() => setAvailMonth(m => addMonths(m, 1))}
-                  className="text-white/70 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/10 text-sm"
+                  aria-label="Next month"
+                  className="w-11 h-11 flex items-center justify-center text-white/80 hover:text-white transition-colors rounded-full hover:bg-white/10"
                 >
                   →
                 </button>
@@ -769,7 +790,7 @@ export default function BlueOneClient() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </Link>
-                <Link href="/booking?boat=BlueOne" className="btn-secondary border-white/40 text-white hover:bg-white/10 px-8 py-3 inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                <Link href="/booking?boat=BlueOne" className="btn-ghost-light px-8 py-3 inline-flex items-center justify-center gap-2 whitespace-nowrap">
                   Request a Quote
                 </Link>
               </div>
@@ -789,20 +810,20 @@ export default function BlueOneClient() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href={`/booking?boat=${encodeURIComponent(boat.name)}&brand=${encodeURIComponent(boat.brand)}&length=${encodeURIComponent(boat.length)}&description=${encodeURIComponent(boat.description)}&image=${encodeURIComponent(boat.image)}`}
-                className="btn-primary bg-white text-blue-600 hover:bg-gray-50"
+                className="btn-primary bg-white text-blue-900 hover:bg-blue-50"
               >
-                Booking Request
+                Request a Quote
               </a>
-              <Link href="/specifications" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+              <Link href="/specifications" className="btn-ghost-light">
                 View Specifications
               </Link>
-              <Link href="/contact" className="btn-secondary border-white text-white hover:bg-white hover:text-blue-600">
+              <Link href="/contact" className="btn-ghost-light">
                 Contact Us
               </Link>
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* Modal for enlarged images */}
       {modalImage && (

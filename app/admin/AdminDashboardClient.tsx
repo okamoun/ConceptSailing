@@ -240,7 +240,7 @@ export default function AdminDashboardClient() {
   ];
 
   return (
-    <main className="px-4 py-6 min-h-screen">
+    <div className="px-4 py-6 min-h-screen">
       <div className="max-w-screen-xl mx-auto space-y-4">
 
         <div>
@@ -711,7 +711,7 @@ export default function AdminDashboardClient() {
 
 
       </div>
-    </main>
+    </div>
   );
 }
 

@@ -236,17 +236,11 @@ export default function SpecificationsPage() {
         <div className="text-center py-12">
           <h2 className="text-3xl font-bold text-blue-900 mb-6">Ready for Your BlueOne Adventure?</h2>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link 
-              href="/contact"
-              className="bg-blue-700 hover:bg-blue-900 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Get a Quote
+            <Link href="/booking?boat=BlueOne" className="btn-primary">
+              Request a Quote
             </Link>
-            <Link 
-              href="/blueone"
-              className="bg-white hover:bg-blue-700 text-blue-900 hover:text-white border-2 border-blue-700 px-8 py-3 rounded-lg font-semibold transition-colors"
-            >
-              View More
+            <Link href="/blueone" className="btn-secondary">
+              Discover The Yacht
             </Link>
           </div>
         </div>

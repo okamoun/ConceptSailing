@@ -127,9 +127,9 @@ describe('HomeClient — CTA Section', () => {
     ).toBeInTheDocument()
   })
 
-  test('Booking Request link points to /booking', () => {
+  test('Request a Quote link points to /booking', () => {
     render(<HomeClient />)
-    const link = screen.getByRole('link', { name: 'Booking Request' })
+    const link = screen.getByRole('link', { name: 'Request a Quote' })
     expect(link).toHaveAttribute('href', '/booking')
   })
 

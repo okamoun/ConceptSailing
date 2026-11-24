@@ -38,7 +38,7 @@ export default function AdminReviewsClient() {
   const visible = reviews.filter(r => filter === 'all' || r.status === filter);
 
   return (
-    <main className="px-4 py-6">
+    <div className="px-4 py-6">
       <div className="max-w-5xl mx-auto space-y-6">
 
         <div className="flex items-center justify-between">
@@ -113,6 +113,6 @@ export default function AdminReviewsClient() {
         </div>
 
       </div>
-    </main>
+    </div>
   );
 }

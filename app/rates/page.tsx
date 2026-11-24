@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import PageHero from '../components/PageHero';
 
 export const metadata: Metadata = {
   title: 'Charter Rates & Pricing | BlueOne Luxury Yacht',
@@ -8,28 +9,16 @@ export const metadata: Metadata = {
 
 export default function RatesPage() {
   return (
-    <main
-      className="min-h-screen relative py-16"
-      style={{
-        backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.5), rgba(59, 130, 246, 0.6)), url('/images/boats/blueone/External_sailing.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
-    >
-      <div className="max-w-5xl mx-auto px-4 space-y-12">
-
-        {/* Back link + Header */}
-        <div>
-          <Link href="/blueone" className="inline-flex items-center gap-1.5 text-blue-200 hover:text-white transition-colors mb-6 text-sm">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to The Yacht
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Charter Rates</h1>
-          <p className="text-blue-200 text-lg">Summer 2026 weekly rates — all-inclusive of professional crew</p>
-        </div>
+    <div className="bg-[#0a1f3c]">
+      <PageHero
+        eyebrow="Summer 2026"
+        title="Charter Rates"
+        subtitle="Summer 2026 weekly rates — all-inclusive of professional crew"
+      >
+        <Link href="/booking?boat=BlueOne" className="btn-primary">Request a Quote</Link>
+        <Link href="/blueone" className="btn-ghost-light">Discover The Yacht</Link>
+      </PageHero>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 md:py-16 space-y-12">
 
         {/* Season Rate Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -163,7 +152,7 @@ export default function RatesPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
-            <Link href="/booking?boat=BlueOne" className="btn-secondary border-white/40 text-white hover:bg-white/10 text-sm px-6 py-3 inline-flex items-center gap-2">
+            <Link href="/booking?boat=BlueOne" className="btn-ghost-light text-sm px-6 py-3 inline-flex items-center gap-2">
               Request a Custom Package
             </Link>
           </div>
@@ -175,7 +164,7 @@ export default function RatesPage() {
             href={`/booking?boat=BlueOne`}
             className="btn-primary text-lg px-10 py-4 inline-flex items-center gap-2"
           >
-            Request a Booking
+            Request a Quote
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -183,6 +172,6 @@ export default function RatesPage() {
         </div>
 
       </div>
-    </main>
+    </div>
   );
 }

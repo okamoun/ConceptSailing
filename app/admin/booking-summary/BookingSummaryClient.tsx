@@ -162,7 +162,7 @@ export default function BookingSummaryClient() {
   ) as Record<CharterStatus, { count: number; days: number }>;
 
   return (
-    <main className="px-4 py-6">
+    <div className="px-4 py-6">
       <div className="max-w-6xl mx-auto space-y-6">
 
         <div>
@@ -398,7 +398,7 @@ export default function BookingSummaryClient() {
         )}
 
       </div>
-    </main>
+    </div>
   );
 }
 

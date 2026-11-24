@@ -33,14 +33,14 @@ export default function ChefPage({ params }: ChefPageProps) {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
+      <div className="min-h-screen bg-gradient-to-br from-[#101824] to-[#1f2937] py-16">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <div className="animate-pulse">
             <h1 className="text-4xl font-bold text-accent mb-4">Loading...</h1>
             <p className="text-gray-300">Loading chef details...</p>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -50,14 +50,14 @@ export default function ChefPage({ params }: ChefPageProps) {
 
   return (
     <>
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
 
       {/* Hero Banner */}
       <div className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 py-20">
         <div className="absolute inset-0 opacity-20" style={{backgroundImage: `url('${chef.image}')`, backgroundSize: 'cover', backgroundPosition: 'center top'}}></div>
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/80 to-blue-900/95"></div>
         <div className="relative max-w-6xl mx-auto px-4">
-          <Link href="/blueone" className="inline-flex items-center gap-2 text-blue-200 hover:text-white transition-colors mb-8 text-sm">
+          <Link href="/blueone" className="inline-flex items-center gap-2 py-2 text-blue-200 hover:text-white transition-colors mb-6 text-sm">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -275,7 +275,7 @@ export default function ChefPage({ params }: ChefPageProps) {
         {/* CTA */}
         <div className="text-center pb-4">
           <a href="/booking" className="btn-primary text-lg px-10 py-4 inline-flex">
-            Get a Quote
+            Request a Quote
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -283,7 +283,7 @@ export default function ChefPage({ params }: ChefPageProps) {
         </div>
 
       </div>
-    </main>
+    </div>
 
     {/* Image Modal */}
     {modalImage && (

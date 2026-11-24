@@ -66,7 +66,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
     }));
 
   return (
-    <main className="min-h-screen relative" style={{
+    <div className="min-h-screen relative" style={{
       backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boats/blueone/External_sailing.jpg')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -81,7 +81,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 to-blue-900/95" />
         <div className="relative max-w-5xl mx-auto px-4">
-          <Link href="/experiences" className="inline-flex items-center gap-1.5 text-blue-200 hover:text-white transition-colors mb-4 text-xs">
+          <Link href="/experiences" className="inline-flex items-center gap-1.5 py-2 text-blue-200 hover:text-white transition-colors mb-2 text-sm">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -183,7 +183,7 @@ export default async function ThemePage({ params }: ThemePageProps) {
             href={`/booking?theme=${adventure.id}`}
             className="btn-primary inline-flex items-center gap-2 px-8 py-3"
           >
-            Get a Quote
+            Request a Quote
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -191,6 +191,6 @@ export default async function ThemePage({ params }: ThemePageProps) {
         </div>
 
       </div>
-    </main>
+    </div>
   );
 }

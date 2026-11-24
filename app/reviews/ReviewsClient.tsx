@@ -160,7 +160,7 @@ export default function ReviewsClient() {
   }
 
   return (
-    <main
+    <div
       className="min-h-screen relative"
       style={{
         backgroundImage: `linear-gradient(rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.5)), url('/images/boats/blueone/External_sailing.jpg')`,
@@ -362,6 +362,6 @@ export default function ReviewsClient() {
         )}
 
       </div>
-    </main>
+    </div>
   );
 }
