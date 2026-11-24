@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { type Charter, type CharterStatus, CHARTER_STATUS_PRIORITY, CHARTER_STATUS_LABEL, isPubliclyAvailable } from '../../lib/availability';
 
 interface AvailabilityCalendarProps {
@@ -189,14 +190,20 @@ export default function AvailabilityCalendar({
               );
             })
             .map(e => (
-              <div key={e.id} className="flex items-center gap-2">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ADMIN_BADGE[e.status]}`}>
+              <Link
+                key={e.id}
+                href={`/admin/bookings/${e.id}`}
+                title="Open booking details"
+                className="group flex items-center gap-2 -mx-2 px-2 py-1 rounded-lg hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 transition-colors"
+              >
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${ADMIN_BADGE[e.status]}`}>
                   {CHARTER_STATUS_LABEL[e.status]}
                 </span>
-                <span className="text-white text-xs">{e.startDate} → {e.endDate}</span>
-                {e.name && <span className="text-blue-200 text-xs truncate">{e.name}</span>}
+                <span className="text-white text-xs flex-shrink-0">{e.startDate} → {e.endDate}</span>
+                {e.name && <span className="text-blue-200 text-xs truncate group-hover:underline">{e.name}</span>}
                 {e.note && <span className="text-blue-300 text-xs italic truncate">{e.note}</span>}
-              </div>
+                <span aria-hidden className="ml-auto text-blue-400 text-xs flex-shrink-0 group-hover:text-white">→</span>
+              </Link>
             ))}
         </div>
       )}
